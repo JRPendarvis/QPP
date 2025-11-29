@@ -1,6 +1,8 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -25,8 +27,11 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// TODO: Routes will go here later
-// app.use('/api/auth', authRoutes);
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+
+// TODO: Add more routes here later
 // app.use('/api/designs', designRoutes);
 // app.use('/api/subscriptions', subscriptionRoutes);
 
