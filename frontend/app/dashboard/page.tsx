@@ -53,13 +53,22 @@ export default function DashboardPage() {
             <p><strong>Subscription:</strong> <span className="capitalize">{user.subscriptionTier}</span></p>
           </div>
 
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded">
-            <h3 className="font-semibold text-blue-900 mb-2">Next Steps:</h3>
-            <ul className="list-disc list-inside text-blue-800 space-y-1">
-              <li>Upload fabric images</li>
-              <li>Generate AI quilt patterns</li>
-              <li>Download PDF instructions</li>
-            </ul>
+          <div className="mt-6">
+            <button
+              onClick={() => router.push('/upload')}
+              className="w-full px-6 py-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition"
+            >
+              Start New Quilt Design
+            </button>
+            
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
+              <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
+              <ol className="list-decimal list-inside text-blue-800 space-y-1">
+                <li>Upload 2-8 fabric images</li>
+                <li>AI generates a custom quilt pattern</li>
+                <li>Download PDF with instructions</li>
+              </ol>
+            </div>
           </div>
         </div>
       </main>

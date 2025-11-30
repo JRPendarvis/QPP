@@ -1,46 +1,77 @@
-import Link from 'next/link';
+'use client';
 
-export default function Home() {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white">
-      <div className="text-center space-y-8 px-4">
-        <h1 className="text-6xl font-bold text-gray-900">
-          QuiltPlannerPro
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl">
-          AI-powered quilt pattern generator. Upload your fabric images and let AI create beautiful quilt designs with step-by-step instructions.
-        </p>
-        
-        <div className="flex gap-4 justify-center">
-          <Link
-            href="/register"
-            className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition"
-          >
-            Get Started
-          </Link>
-          <Link
-            href="/login"
-            className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg shadow-md border border-indigo-600 hover:bg-indigo-50 transition"
-          >
-            Sign In
-          </Link>
-        </div>
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl">
-          <div className="p-6 bg-white rounded-lg shadow">
-            <h3 className="font-semibold text-lg mb-2">Upload Fabrics</h3>
-            <p className="text-gray-600">Upload images of your fabric collection</p>
-          </div>
-          <div className="p-6 bg-white rounded-lg shadow">
-            <h3 className="font-semibold text-lg mb-2">AI Generation</h3>
-            <p className="text-gray-600">Let AI create unique quilt patterns</p>
-          </div>
-          <div className="p-6 bg-white rounded-lg shadow">
-            <h3 className="font-semibold text-lg mb-2">Get Instructions</h3>
-            <p className="text-gray-600">Download PDF with step-by-step guide</p>
-          </div>
-        </div>
+export default function DashboardPage() {
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
       </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">QuiltPlannerPro</h1>
+          <button
+            onClick={logout}
+            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Welcome back!</h2>
+          
+          <div className="space-y-2">
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Name:</strong> {user.name || 'Not set'}</p>
+            <p><strong>Subscription:</strong> <span className="capitalize">{user.subscriptionTier}</span></p>
+          </div>
+
+          <div className="mt-6">
+            <button
+              onClick={() => router.push('/upload')}
+              className="w-full px-6 py-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition"
+            >
+              Start New Quilt Design
+            </button>
+            
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
+              <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
+              <ol className="list-decimal list-inside text-blue-800 space-y-1">
+                <li>Upload 2-8 fabric images</li>
+                <li>AI generates a custom quilt pattern</li>
+                <li>Download PDF with instructions</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
