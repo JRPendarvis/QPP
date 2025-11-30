@@ -4,12 +4,6 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-interface FabricAnalysis {
-  colors: string[];
-  patterns: string[];
-  style: string;
-}
-
 interface QuiltPattern {
   patternName: string;
   description: string;
@@ -17,6 +11,7 @@ interface QuiltPattern {
   difficulty: string;
   estimatedSize: string;
   instructions: string[];
+  visualSvg: string; // NEW: SVG visualization
 }
 
 export class ClaudeService {
@@ -25,7 +20,7 @@ export class ClaudeService {
     try {
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
+        max_tokens: 3000,
         messages: [
           {
             role: 'user',
@@ -42,8 +37,15 @@ Please analyze these fabrics and create a custom quilt pattern design. Provide:
 4. Difficulty Level - Beginner, Intermediate, or Advanced
 5. Estimated Size - Approximate finished quilt dimensions (e.g., "60x80 inches throw quilt")
 6. Step-by-Step Instructions - 5-8 clear steps to construct this quilt
+7. Visual SVG - Create an SVG visualization of the quilt pattern showing how the fabrics are arranged
 
-Focus on creating a pattern that showcases these specific fabrics beautifully. Consider their colors, patterns, and how they complement each other.
+For the SVG visualization:
+- Create a viewBox of "0 0 400 500" (representing the quilt dimensions)
+- Use different colors to represent each fabric (fabric 1, fabric 2, etc.)
+- Show the geometric pattern layout (squares, strips, blocks, etc.)
+- Add subtle borders between pieces
+- Make it visually appealing and representative of the actual pattern
+- Keep it simple but informative
 
 Please format your response as JSON with this structure:
 {
@@ -52,7 +54,8 @@ Please format your response as JSON with this structure:
   "fabricLayout": "...",
   "difficulty": "...",
   "estimatedSize": "...",
-  "instructions": ["step 1", "step 2", ...]
+  "instructions": ["step 1", "step 2", ...],
+  "visualSvg": "<svg>...</svg>"
 }`,
               },
               // Add fabric images
