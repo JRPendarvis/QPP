@@ -1,0 +1,91 @@
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+interface FabricAnalysis {
+  colors: string[];
+  patterns: string[];
+  style: string;
+}
+
+interface QuiltPattern {
+  patternName: string;
+  description: string;
+  fabricLayout: string;
+  difficulty: string;
+  estimatedSize: string;
+  instructions: string[];
+}
+
+export class ClaudeService {
+  // Analyze fabric images and generate quilt pattern
+  async generateQuiltPattern(fabricImages: string[]): Promise<QuiltPattern> {
+    try {
+      const message = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: `You are an expert quilter and fabric designer. I'm providing you with ${fabricImages.length} fabric images. 
+
+Please analyze these fabrics and create a custom quilt pattern design. Provide:
+
+1. Pattern Name - A creative, descriptive name for this quilt pattern
+2. Description - A brief overview of the quilt design (2-3 sentences)
+3. Fabric Layout - Describe how the fabrics should be arranged (which fabrics go where)
+4. Difficulty Level - Beginner, Intermediate, or Advanced
+5. Estimated Size - Approximate finished quilt dimensions (e.g., "60x80 inches throw quilt")
+6. Step-by-Step Instructions - 5-8 clear steps to construct this quilt
+
+Focus on creating a pattern that showcases these specific fabrics beautifully. Consider their colors, patterns, and how they complement each other.
+
+Please format your response as JSON with this structure:
+{
+  "patternName": "...",
+  "description": "...",
+  "fabricLayout": "...",
+  "difficulty": "...",
+  "estimatedSize": "...",
+  "instructions": ["step 1", "step 2", ...]
+}`,
+              },
+              // Add fabric images
+              ...fabricImages.map((imageBase64) => ({
+                type: 'image' as const,
+                source: {
+                  type: 'base64' as const,
+                  media_type: 'image/jpeg' as const,
+                  data: imageBase64,
+                },
+              })),
+            ],
+          },
+        ],
+      });
+
+      // Parse Claude's response
+      const responseText = message.content[0].type === 'text' 
+        ? message.content[0].text 
+        : '';
+
+      // Extract JSON from response (Claude might wrap it in markdown)
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('Could not parse pattern from Claude response');
+      }
+
+      const pattern: QuiltPattern = JSON.parse(jsonMatch[0]);
+      return pattern;
+
+    } catch (error) {
+      console.error('Error generating quilt pattern:', error);
+      throw new Error('Failed to generate quilt pattern');
+    }
+  }
+}
