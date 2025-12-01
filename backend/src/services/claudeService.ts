@@ -91,19 +91,36 @@ Please format your response as JSON with this structure:
         ],
       });
 
-      // Parse Claude's response
+// Parse Claude's response
       const responseText = message.content[0].type === 'text' 
         ? message.content[0].text 
         : '';
 
-      // Extract JSON from response
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      console.log('===== CLAUDE RESPONSE START =====');
+      console.log(responseText);
+      console.log('===== CLAUDE RESPONSE END =====');
+
+      // Extract JSON from response (Claude might wrap it in markdown code blocks)
+      let jsonText = responseText;
+      
+      // Remove markdown code blocks if present
+      jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      
+      // Try to find JSON object
+      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
+        console.error('Could not find JSON in response');
         throw new Error('Could not parse pattern from Claude response');
       }
 
-      const pattern: QuiltPattern = JSON.parse(jsonMatch[0]);
-      return pattern;
+      try {
+        const pattern: QuiltPattern = JSON.parse(jsonMatch[0]);
+        return pattern;
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        console.error('Attempted to parse:', jsonMatch[0].substring(0, 500));
+        throw new Error('Failed to parse Claude response as JSON');
+      }
 
     } catch (error) {
       console.error('Error generating quilt pattern:', error);
