@@ -21,12 +21,15 @@ model User {
     // Stripe subscription fields
     stripeCustomerId     String? @unique
     stripeSubscriptionId String? @unique
-    subscriptionTier     String  @default("free") // free, basic, plus, premium, pro
+    subscriptionTier     String  @default("free")
     subscriptionStatus   String  @default("active")
 
     // Download tracking
     downloadsThisMonth Int      @default(0)
     lastResetDate      DateTime @default(now())
 
-    @@map("users") // Actual table name in database
+    // Quilter profile
+    skillLevel String @default("beginner") // beginner, advanced_beginner, intermediate, advanced, expert
+
+    @@map("users")
 }

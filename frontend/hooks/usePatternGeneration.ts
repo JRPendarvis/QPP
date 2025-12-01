@@ -60,40 +60,45 @@ export function usePatternGeneration() {
     });
   };
 
-  // Generate pattern
-  const generatePattern = async () => {
-    setGenerating(true);
-    setError('');
-    setPattern(null);
+ 
+    // Generate pattern
+    const generatePattern = async (userSkillLevel: string, challengeMe: boolean) => {
+      setGenerating(true);
+      setError('');
+      setPattern(null);
 
-    try {
-      const fabricsBase64 = await Promise.all(fabrics.map(file => fileToBase64(file)));
-      const response = await api.post('/api/patterns/generate', { fabrics: fabricsBase64 });
+      try {
+        const fabricsBase64 = await Promise.all(fabrics.map(file => fileToBase64(file)));
+        const response = await api.post('/api/patterns/generate', { 
+          fabrics: fabricsBase64,
+          skillLevel: userSkillLevel,
+          challengeMe: challengeMe,
+        });
 
-      if (response.data.success) {
-        setPattern(response.data.data);
-      } else {
-        setError(response.data.message || 'Failed to generate pattern');
+        if (response.data.success) {
+          setPattern(response.data.data);
+        } else {
+          setError(response.data.message || 'Failed to generate pattern');
+        }
+      } catch (err: any) {
+        console.error('Pattern generation error:', err);
+        setError(err.response?.data?.message || 'Failed to generate pattern. Please try again.');
+      } finally {
+        setGenerating(false);
       }
-    } catch (err: any) {
-      console.error('Pattern generation error:', err);
-      setError(err.response?.data?.message || 'Failed to generate pattern. Please try again.');
-    } finally {
-      setGenerating(false);
-    }
-  };
+    };
 
-  return {
-    fabrics,
-    previews,
-    generating,
-    pattern,
-    error,
-    MAX_FABRICS,
-    MIN_FABRICS,
-    handleFilesAdded,
-    removeFabric,
-    clearAll,
-    generatePattern,
-  };
+    return {
+      fabrics,
+      previews,
+      generating,
+      pattern,
+      error,
+      MAX_FABRICS,
+      MIN_FABRICS,
+      handleFilesAdded,
+      removeFabric,
+      clearAll,
+      generatePattern, // This now accepts skillLevel and challengeMe
+    };
 }
