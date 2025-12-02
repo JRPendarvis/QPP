@@ -1,0 +1,89 @@
+[33mcommit 1ccdbe51f9db72c7ee47d0d2ccfae6af3c1094e6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;33mtag: [m[1;33mAlpha-v0.0.1[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sun Nov 30 20:29:56 2025 -0500
+
+    Fixed the parsing issue
+
+[33mcommit 38667e56fd6d4086a3dc4bcebb0bed4f4b135968[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sun Nov 30 19:14:23 2025 -0500
+
+    Adding Challege Me
+
+[33mcommit f212b7a76d34400c3b39c4ccfea638fa2bf1f211[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sun Nov 30 18:18:50 2025 -0500
+
+    Refactoring
+
+[33mcommit c7bc71d8cab84b976b73c4234dea1ee1c60cd635[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sun Nov 30 16:16:31 2025 -0500
+
+    Added AI Service
+
+[33mcommit 0c9f979083e43b67cff06a267a19304a17af72fc[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sun Nov 30 15:56:51 2025 -0500
+
+    Fabric upload
+
+[33mcommit 89e8e4b63607261e175c5d10ae8254d922f9b83b[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sun Nov 30 15:42:18 2025 -0500
+
+    Authentication System: 100% Complete
+
+[33mcommit eec0da8e15cdd3a3cf4a03b50bf992f41516d01b[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sun Nov 30 07:36:30 2025 -0500
+
+    Added landing page
+
+[33mcommit e1b038971699fbac80cc5a3b0a12383c9191a5b6[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sat Nov 29 14:12:28 2025 -0500
+
+    Backend Auth Service completed
+
+[33mcommit 8a5e51a6516cd2aa71cea1551c4285efe102fa38[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sat Nov 29 10:25:44 2025 -0500
+
+    Remove Stripe for now
+
+[33mcommit 3bc0dc3fe4d621654106729c7dc3f608df747181[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sat Nov 29 10:24:26 2025 -0500
+
+    Adding stripe payment
+
+[33mcommit 86fc87de438007a25b38790ffcf82c4272b36e5c[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sat Nov 29 09:34:24 2025 -0500
+
+    Added correct frontend
+
+[33mcommit cf754d4863b4fa69cec7ac347e4822f4f8f9e013[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sat Nov 29 08:38:19 2025 -0500
+
+    Adding database
+
+[33mcommit e0874aac009ff159b07fd5fc5fa434a4cf4eed07[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Sat Nov 29 07:29:26 2025 -0500
+
+    Adding blank files
+
+[33mcommit 99d1f591769f44055ae870f832c54e0deab2c652[m
+Author: Jim Pendarvis <jim.pendarvis@gmail.com>
+Date:   Fri Nov 28 20:07:28 2025 -0500
+
+    Init Commit
+
+[33mcommit 2cfe46d0705f9cbf17b7252b4509300a05ca1d81[m
+Author: Jim <jim.pendarvis@gmail.com>
+Date:   Fri Nov 28 19:33:50 2025 -0500
+
+    Initial commit

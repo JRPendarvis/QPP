@@ -10,6 +10,7 @@ datasource db {
 }
 
 // User table - stores user accounts and subscription info
+// User table - stores user accounts and subscription info
 model User {
     id           String   @id @default(cuid())
     email        String   @unique
@@ -19,14 +20,17 @@ model User {
     updatedAt    DateTime @updatedAt
 
     // Stripe subscription fields
-    stripeCustomerId     String? @unique
-    stripeSubscriptionId String? @unique
-    subscriptionTier     String  @default("free")
-    subscriptionStatus   String  @default("active")
+    stripeCustomerId     String?   @unique
+    stripeSubscriptionId String?   @unique
+    subscriptionTier     String    @default("free")
+    subscriptionStatus   String    @default("active")
+    billingInterval      String? // 'monthly' | 'yearly'
+    currentPeriodEnd     DateTime?
 
-    // Download tracking
-    downloadsThisMonth Int      @default(0)
-    lastResetDate      DateTime @default(now())
+    // Usage tracking
+    downloadsThisMonth   Int      @default(0)
+    generationsThisMonth Int      @default(0) // ✅ ADD THIS LINE
+    lastResetDate        DateTime @default(now())
 
     // Quilter profile
     skillLevel String @default("beginner") // beginner, advanced_beginner, intermediate, advanced, expert

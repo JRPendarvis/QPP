@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import stripeRoutes from './routes/stripeRoutes';
 import patternRoutes from './routes/patternRoutes';
 
 // Load environment variables from .env file
@@ -28,10 +29,19 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+// Stripe webhook needs raw body
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeRoutes);
+
+
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/patterns', patternRoutes);
+
+// Regular routes use JSON parser
+app.use(express.json());
+app.use('/api/stripe', stripeRoutes);
 
 // Start the server
 app.listen(port, () => {
