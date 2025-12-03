@@ -1,4 +1,5 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
+import { loginLimiter, registerLimiter, patternLimiter, generalLimiter } from './middleware/rateLimiters';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
@@ -12,15 +13,27 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
-// Middleware - these run on every request
+// CORS Configuration
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json({ limit: '50mb' })); // Increase limit for base64 images
+
+// ⚠️ CRITICAL: Stripe webhook MUST come BEFORE express.json()
+// Webhook needs raw body for signature verification
+app.post(
+  '/api/stripe/webhook',
+  express.raw({ type: 'application/json' }),
+  stripeRoutes
+);
+
+// NOW apply JSON parser to all other routes
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Health check endpoint - test if server is running
+// Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
   res.json({ 
     status: 'ok', 
@@ -29,22 +42,36 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// Stripe webhook needs raw body
-app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeRoutes);
+// Apply general rate limiter to all API routes
+app.use('/api', generalLimiter);
 
-
-
-// Routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/patterns', patternRoutes);
+app.use('/api/stripe', stripeRoutes); // Other Stripe routes (not webhook)
 
-// Regular routes use JSON parser
-app.use(express.json());
-app.use('/api/stripe', stripeRoutes);
+// 404 handler - must come AFTER all routes
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.method} ${req.path} not found`
+  });
+});
+
+// Global error handler - must come LAST
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error('❌ Unhandled error:', err);
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { error: err.message })
+  });
+});
 
 // Start the server
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
   console.log(`⚡️[server]: Health check at http://localhost:${port}/health`);
+  console.log(`⚡️[server]: Environment: ${process.env.NODE_ENV || 'development'}`);
 });
