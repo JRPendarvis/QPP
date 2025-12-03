@@ -1,17 +1,19 @@
 import express, { Express, Request, Response, NextFunction } from 'express';
-import { loginLimiter, registerLimiter, patternLimiter, generalLimiter } from './middleware/rateLimiters';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import stripeRoutes from './routes/stripeRoutes';
 import patternRoutes from './routes/patternRoutes';
+import adminRoutes from './routes/adminRoutes'; // ✅ ADD THIS
+import { StripeController } from './controllers/stripeController';
+import { initializeCronJobs } from './jobs/cronJobs'; // ✅ ADD THIS
 
-// Load environment variables from .env file
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3001;
+const stripeController = new StripeController();
 
 // CORS Configuration
 app.use(cors({
@@ -21,15 +23,14 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// ⚠️ CRITICAL: Stripe webhook MUST come BEFORE express.json()
-// Webhook needs raw body for signature verification
+// Stripe webhook with raw body
 app.post(
   '/api/stripe/webhook',
   express.raw({ type: 'application/json' }),
-  stripeRoutes
+  (req, res) => stripeController.handleWebhook(req, res)
 );
 
-// NOW apply JSON parser to all other routes
+// JSON parser for other routes
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -42,16 +43,14 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// Apply general rate limiter to all API routes
-app.use('/api', generalLimiter);
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/patterns', patternRoutes);
-app.use('/api/stripe', stripeRoutes); // Other Stripe routes (not webhook)
+app.use('/api/admin', adminRoutes); // ✅ ADD THIS
+app.use('/api/stripe', stripeRoutes);
 
-// 404 handler - must come AFTER all routes
+// 404 handler
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
@@ -59,7 +58,7 @@ app.use((req: Request, res: Response) => {
   });
 });
 
-// Global error handler - must come LAST
+// Global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('❌ Unhandled error:', err);
   res.status(500).json({
@@ -69,9 +68,12 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-// Start the server
+// Start server and initialize cron jobs
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
   console.log(`⚡️[server]: Health check at http://localhost:${port}/health`);
   console.log(`⚡️[server]: Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // ✅ Initialize cron jobs
+  initializeCronJobs();
 });

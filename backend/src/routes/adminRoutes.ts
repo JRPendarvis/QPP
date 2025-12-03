@@ -5,7 +5,7 @@ import { authenticate } from '../middleware/authMiddleware';
 const router = Router();
 const usageResetService = new UsageResetService();
 
-// Manual usage reset trigger (for testing/admin)
+// POST /api/admin/reset-usage - Manual usage reset trigger
 router.post('/reset-usage', authenticate, async (req, res) => {
   try {
     await usageResetService.resetMonthlyUsage();
@@ -23,7 +23,7 @@ router.post('/reset-usage', authenticate, async (req, res) => {
   }
 });
 
-// Get reset stats
+// GET /api/admin/reset-stats - Get reset statistics
 router.get('/reset-stats', authenticate, async (req, res) => {
   try {
     const stats = await usageResetService.getResetStats();
