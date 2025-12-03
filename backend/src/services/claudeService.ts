@@ -23,7 +23,6 @@ const SKILL_LEVEL_DESCRIPTIONS: Record<string, string> = {
 };
 
 export class ClaudeService {
-  // Analyze fabric images and generate quilt pattern
   async generateQuiltPattern(
     fabricImages: string[], 
     skillLevel: string = 'beginner'
@@ -33,7 +32,7 @@ export class ClaudeService {
       
       const message = await anthropic.messages.create({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 3000,
+        max_tokens: 8000,  // ✅ INCREASED from 3000
         messages: [
           {
             role: 'user',
@@ -53,20 +52,21 @@ Please analyze these fabrics and create a custom quilt pattern design that match
 4. Difficulty Level - MUST be: ${skillLevel.replace('_', ' ')}
 5. Estimated Size - Approximate finished quilt dimensions (e.g., "60x80 inches throw quilt")
 6. Step-by-Step Instructions - Provide 5-8 clear steps appropriate for a ${skillLevel.replace('_', ' ')} quilter
-7. Visual SVG - Create an SVG visualization of the quilt pattern showing how the fabrics are arranged
+7. Visual SVG - Create a SIMPLE SVG visualization (keep the SVG concise - use basic shapes only)
 
 **Pattern Complexity Guidelines for ${skillLevel}:**
 ${this.getComplexityGuidelines(skillLevel)}
 
 For the SVG visualization:
 - Create a viewBox of "0 0 400 500" (representing the quilt dimensions)
-- Use different colors to represent each fabric (fabric 1, fabric 2, etc.)
-- Show the geometric pattern layout appropriate for ${skillLevel} level
-- Add subtle borders between pieces
-- Make it visually appealing and representative of the actual pattern
-- Keep it simple but informative
+- Use different colors to represent each fabric
+- Show the geometric pattern layout - KEEP IT SIMPLE (don't create hundreds of polygons)
+- Use rectangles and simple polygons only
+- Make it visually representative but not overly detailed
 
-Please format your response as JSON with this structure:
+**IMPORTANT: Return ONLY valid JSON, no additional text before or after.**
+
+JSON format:
 {
   "patternName": "...",
   "description": "...",
@@ -77,7 +77,6 @@ Please format your response as JSON with this structure:
   "visualSvg": "<svg>...</svg>"
 }`,
               },
-              // Add fabric images
               ...fabricImages.map((imageBase64) => ({
                 type: 'image' as const,
                 source: {
@@ -91,34 +90,50 @@ Please format your response as JSON with this structure:
         ],
       });
 
-// Parse Claude's response
+      // Parse Claude's response
       const responseText = message.content[0].type === 'text' 
         ? message.content[0].text 
         : '';
 
       console.log('===== CLAUDE RESPONSE START =====');
-      console.log(responseText);
+      console.log(responseText.substring(0, 1000)); // Only log first 1000 chars
       console.log('===== CLAUDE RESPONSE END =====');
 
-      // Extract JSON from response (Claude might wrap it in markdown code blocks)
-      let jsonText = responseText;
-      
+      // Extract JSON from response
+      let jsonText = responseText.trim();
+
       // Remove markdown code blocks if present
-      jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-      
-      // Try to find JSON object
-      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        console.error('Could not find JSON in response');
+      jsonText = jsonText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+
+      // Remove any debug markers
+      jsonText = jsonText.replace(/=+ CLAUDE RESPONSE (START|END) =+\s*/g, '');
+
+      // Try to find JSON object - match from first { to last }
+      const firstBrace = jsonText.indexOf('{');
+      const lastBrace = jsonText.lastIndexOf('}');
+
+      if (firstBrace === -1 || lastBrace === -1 || firstBrace >= lastBrace) {
+        console.error('Could not find valid JSON object in response');
+        console.error('Response preview:', responseText.substring(0, 500));
         throw new Error('Could not parse pattern from Claude response');
       }
 
+      jsonText = jsonText.substring(firstBrace, lastBrace + 1);
+
       try {
-        const pattern: QuiltPattern = JSON.parse(jsonMatch[0]);
+        const pattern: QuiltPattern = JSON.parse(jsonText);
+        
+        // Validate required fields
+        if (!pattern.patternName || !pattern.instructions || !pattern.visualSvg) {
+          throw new Error('Response missing required fields');
+        }
+        
+        console.log(`✅ Successfully generated pattern: ${pattern.patternName}`);
         return pattern;
+        
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
-        console.error('Attempted to parse:', jsonMatch[0].substring(0, 500));
+        console.error('Attempted to parse:', jsonText.substring(0, 500));
         throw new Error('Failed to parse Claude response as JSON');
       }
 

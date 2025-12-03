@@ -47,8 +47,15 @@ app.get('/health', (req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/patterns', patternRoutes);
-app.use('/api/admin', adminRoutes); // ✅ ADD THIS
+app.use('/api/admin', adminRoutes);
 app.use('/api/stripe', stripeRoutes);
+
+console.log('✅ Routes registered:');
+console.log('   /api/auth');
+console.log('   /api/user');
+console.log('   /api/patterns');
+console.log('   /api/admin');
+console.log('   /api/stripe');
 
 // 404 handler
 app.use((req: Request, res: Response) => {

@@ -1,44 +1,14 @@
 import { Router } from 'express';
-import { UsageResetService } from '../services/usageResetService';
-import { authenticate } from '../middleware/authMiddleware';
+import { AuthController } from '../controllers/authController';
+import { loginLimiter, registerLimiter } from '../middleware/rateLimiters';
 
 const router = Router();
-const usageResetService = new UsageResetService();
+const authController = new AuthController();
 
-// Manual usage reset trigger (for testing/admin)
-router.post('/reset-usage', authenticate, async (req, res) => {
-  try {
-    await usageResetService.resetMonthlyUsage();
-    
-    res.json({
-      success: true,
-      message: 'Usage reset completed successfully'
-    });
-  } catch (error) {
-    console.error('Admin reset error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to reset usage'
-    });
-  }
-});
+// POST /api/auth/register
+router.post('/register', registerLimiter, (req, res) => authController.register(req, res));
 
-// Get reset stats
-router.get('/reset-stats', authenticate, async (req, res) => {
-  try {
-    const stats = await usageResetService.getResetStats();
-    
-    res.json({
-      success: true,
-      data: stats
-    });
-  } catch (error) {
-    console.error('Stats error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get reset stats'
-    });
-  }
-});
+// POST /api/auth/login
+router.post('/login', loginLimiter, (req, res) => authController.login(req, res));
 
 export default router;
