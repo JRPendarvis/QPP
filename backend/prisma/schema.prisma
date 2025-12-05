@@ -28,12 +28,26 @@ model User {
     currentPeriodEnd     DateTime?
 
     // Usage tracking
-    downloadsThisMonth   Int      @default(0)
-    generationsThisMonth Int      @default(0) // ✅ ADD THIS LINE
-    lastResetDate        DateTime @default(now())
+    downloadsThisMonth   Int       @default(0)
+    generationsThisMonth Int       @default(0) // ✅ ADD THIS LINE
+    lastResetDate        DateTime  @default(now())
+    patterns             Pattern[] // ✅ Add this line if missing
 
     // Quilter profile
     skillLevel String @default("beginner") // beginner, advanced_beginner, intermediate, advanced, expert
 
     @@map("users")
+}
+
+model Pattern {
+    id           String    @id @default(cuid())
+    userId       String
+    patternData  Json // Stores the AI-generated pattern
+    downloaded   Boolean   @default(false)
+    downloadedAt DateTime?
+    createdAt    DateTime  @default(now())
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("patterns")
 }

@@ -30,9 +30,10 @@ export class ClaudeService {
     try {
       const skillDescription = SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
       
-      const message = await anthropic.messages.create({
+      // Use streaming for large token requests
+      const stream = await anthropic.messages.stream({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 8000,  // ✅ INCREASED from 3000
+        max_tokens: 16000,
         messages: [
           {
             role: 'user',
@@ -51,30 +52,39 @@ Please analyze these fabrics and create a custom quilt pattern design that match
 3. Fabric Layout - Describe how the fabrics should be arranged (which fabrics go where)
 4. Difficulty Level - MUST be: ${skillLevel.replace('_', ' ')}
 5. Estimated Size - Approximate finished quilt dimensions (e.g., "60x80 inches throw quilt")
-6. Step-by-Step Instructions - Provide 5-8 clear steps appropriate for a ${skillLevel.replace('_', ' ')} quilter
-7. Visual SVG - Create a SIMPLE SVG visualization (keep the SVG concise - use basic shapes only)
+6. Step-by-Step Instructions - Provide EXACTLY 5-6 clear, concise steps appropriate for a ${skillLevel.replace('_', ' ')} quilter
+7. Visual SVG - Create a SIMPLE grid visualization (see requirements below)
 
 **Pattern Complexity Guidelines for ${skillLevel}:**
 ${this.getComplexityGuidelines(skillLevel)}
 
-For the SVG visualization:
-- Create a viewBox of "0 0 400 500" (representing the quilt dimensions)
-- Use different colors to represent each fabric
-- Show the geometric pattern layout - KEEP IT SIMPLE (don't create hundreds of polygons)
-- Use rectangles and simple polygons only
-- Make it visually representative but not overly detailed
+**SVG REQUIREMENTS (STRICT - KEEP UNDER 500 CHARACTERS):**
+- Create a 3x4 grid of rectangles (12 total shapes)
+- Use ONLY <rect> elements - NO polygons, NO paths, NO complex shapes
+- Each rectangle represents a quilt block with appropriate fabric color
+- viewBox must be "0 0 300 400"
+- Each rect should be 100x100 pixels
+- Use hex colors from the fabric images
+- Total SVG must be under 500 characters
+- Example format: <svg viewBox="0 0 300 400"><rect x="0" y="0" width="100" height="100" fill="#abc123"/><rect x="100" y="0" width="100" height="100" fill="#def456"/>...</svg>
 
-**IMPORTANT: Return ONLY valid JSON, no additional text before or after.**
+**IMPORTANT: Return ONLY valid JSON, no additional text before or after. Keep instructions to 5-6 steps maximum.**
 
-JSON format:
+JSON format (copy this structure exactly):
 {
-  "patternName": "...",
-  "description": "...",
-  "fabricLayout": "...",
+  "patternName": "Creative Pattern Name",
+  "description": "Brief 2-3 sentence description of the quilt design.",
+  "fabricLayout": "Describe how fabrics are arranged in 1-2 sentences.",
   "difficulty": "${skillLevel.replace('_', ' ')}",
-  "estimatedSize": "...",
-  "instructions": ["step 1", "step 2", ...],
-  "visualSvg": "<svg>...</svg>"
+  "estimatedSize": "60x80 inches throw quilt",
+  "instructions": [
+    "Step 1 - concise instruction",
+    "Step 2 - concise instruction",
+    "Step 3 - concise instruction",
+    "Step 4 - concise instruction",
+    "Step 5 - concise instruction"
+  ],
+  "visualSvg": "<svg viewBox='0 0 300 400'><rect x='0' y='0' width='100' height='100' fill='#color1'/></svg>"
 }`,
               },
               ...fabricImages.map((imageBase64) => ({
@@ -90,10 +100,14 @@ JSON format:
         ],
       });
 
-      // Parse Claude's response
-      const responseText = message.content[0].type === 'text' 
-        ? message.content[0].text 
-        : '';
+      // Collect the full response from stream
+      let responseText = '';
+      
+      for await (const chunk of stream) {
+        if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+          responseText += chunk.delta.text;
+        }
+      }
 
       console.log('===== CLAUDE RESPONSE START =====');
       console.log(responseText.substring(0, 1000)); // Only log first 1000 chars
@@ -123,12 +137,36 @@ JSON format:
       try {
         const pattern: QuiltPattern = JSON.parse(jsonText);
         
+        // ✅ Patch incomplete instructions
+        if (pattern.instructions && Array.isArray(pattern.instructions)) {
+          // Fix any truncated last instruction (if it's suspiciously short)
+          const lastInstruction = pattern.instructions[pattern.instructions.length - 1];
+          if (lastInstruction && lastInstruction.length < 30) {
+            console.warn('⚠️ Last instruction seems truncated, removing it');
+            pattern.instructions = pattern.instructions.slice(0, -1);
+          }
+          
+          // Ensure we have at least 4 complete instructions
+          if (pattern.instructions.length < 4) {
+            throw new Error('Response missing sufficient instructions (need at least 4)');
+          }
+        }
+        
         // Validate required fields
-        if (!pattern.patternName || !pattern.instructions || !pattern.visualSvg) {
+        if (!pattern.patternName || !pattern.instructions) {
           throw new Error('Response missing required fields');
         }
         
+        // Make SVG optional - use placeholder if missing or truncated
+        if (!pattern.visualSvg || pattern.visualSvg.trim() === '' || !pattern.visualSvg.includes('</svg>')) {
+          console.warn('⚠️ SVG missing or incomplete, using placeholder');
+          pattern.visualSvg = '<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="400" fill="#f3f4f6"/><text x="150" y="200" text-anchor="middle" fill="#9ca3af" font-size="18">Pattern Visualization</text></svg>';
+        }
+        
         console.log(`✅ Successfully generated pattern: ${pattern.patternName}`);
+        console.log(`   Instructions: ${pattern.instructions.length} steps`);
+        console.log(`   SVG length: ${pattern.visualSvg.length} characters`);
+        
         return pattern;
         
       } catch (parseError) {

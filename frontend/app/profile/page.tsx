@@ -91,6 +91,23 @@ export default function ProfilePage() {
     return null;
   }
 
+  // Get usage data with safe defaults
+  const usage = profile.usage || {
+    generations: { used: 0, limit: 0, remaining: 0 },
+    downloads: { used: 0, limit: 0, remaining: 0 },
+    daysUntilReset: 0,
+  };
+
+  const tierInfo = profile.tierInfo || { name: 'Free', price: 0 };
+
+  // Calculate progress percentages
+  const generationsPercent = usage.generations.limit > 0 
+    ? (usage.generations.used / usage.generations.limit) * 100 
+    : 0;
+  const downloadsPercent = usage.downloads.limit > 0 
+    ? (usage.downloads.used / usage.downloads.limit) * 100 
+    : 0;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
@@ -105,7 +122,89 @@ export default function ProfilePage() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        
+        {/* ✅ USAGE STATS SECTION */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Usage This Month</h2>
+            <span className="text-sm text-gray-500">
+              Resets in {usage.daysUntilReset} {usage.daysUntilReset === 1 ? 'day' : 'days'}
+            </span>
+          </div>
+
+          <div className="space-y-6">
+            {/* Pattern Generations */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">Pattern Generations</span>
+                <span className="text-sm text-gray-600">
+                  {usage.generations.used} / {usage.generations.limit} used
+                  {usage.generations.remaining > 0 && (
+                    <span className="text-green-600 ml-2">
+                      ({usage.generations.remaining} remaining)
+                    </span>
+                  )}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className={`h-3 rounded-full transition-all ${
+                    generationsPercent >= 90 ? 'bg-red-500' :
+                    generationsPercent >= 70 ? 'bg-yellow-500' :
+                    'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min(generationsPercent, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* PDF Downloads */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">PDF Downloads</span>
+                <span className="text-sm text-gray-600">
+                  {usage.downloads.used} / {usage.downloads.limit} used
+                  {usage.downloads.remaining > 0 && (
+                    <span className="text-green-600 ml-2">
+                      ({usage.downloads.remaining} remaining)
+                    </span>
+                  )}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className={`h-3 rounded-full transition-all ${
+                    downloadsPercent >= 90 ? 'bg-red-500' :
+                    downloadsPercent >= 70 ? 'bg-yellow-500' :
+                    'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min(downloadsPercent, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Upgrade CTA if on free tier */}
+            {profile.subscriptionTier === 'free' && (
+              <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                <p className="text-sm text-indigo-900 font-semibold mb-2">
+                  ⭐ Want More Patterns?
+                </p>
+                <p className="text-sm text-indigo-700 mb-3">
+                  Upgrade to generate more patterns and download unlimited PDFs!
+                </p>
+                <button
+                  onClick={() => router.push('/pricing')}
+                  className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                >
+                  View Plans
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* PROFILE SETTINGS */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-6">Your Quilting Profile</h2>
 
@@ -148,7 +247,25 @@ export default function ProfilePage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Subscription Tier</label>
-                  <p className="mt-1 text-gray-900 capitalize">{profile.subscriptionTier}</p>
+                  <div className="mt-1 flex items-center justify-between">
+                    <p className="text-gray-900 capitalize font-medium">
+                      {tierInfo.name}
+                      {tierInfo.price > 0 && (
+                        <span className="text-sm text-gray-500 ml-2">
+                          (${tierInfo.price}/{profile.billingInterval || 'month'})
+                        </span>
+                      )}
+                    </p>
+                    {profile.subscriptionTier !== 'free' && (
+                      <button
+                        type="button"
+                        onClick={() => router.push('/pricing')}
+                        className="text-sm text-indigo-600 hover:text-indigo-700"
+                      >
+                        Manage Subscription
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

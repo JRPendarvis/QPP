@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import api from '@/lib/api';
 
 interface QuiltPattern {
+  id?: string; // ✅ Add ID field
   patternName: string;
   description: string;
   fabricLayout: string;
@@ -60,45 +61,49 @@ export function usePatternGeneration() {
     });
   };
 
- 
-    // Generate pattern
-    const generatePattern = async (userSkillLevel: string, challengeMe: boolean) => {
-      setGenerating(true);
-      setError('');
-      setPattern(null);
+  // Generate pattern
+  const generatePattern = async (userSkillLevel: string, challengeMe: boolean) => {
+    setGenerating(true);
+    setError('');
+    setPattern(null);
 
-      try {
-        const fabricsBase64 = await Promise.all(fabrics.map(file => fileToBase64(file)));
-        const response = await api.post('/api/patterns/generate', { 
-          fabrics: fabricsBase64,
-          skillLevel: userSkillLevel,
-          challengeMe: challengeMe,
-        });
+    try {
+      const fabricsBase64 = await Promise.all(fabrics.map(file => fileToBase64(file)));
+      const response = await api.post('/api/patterns/generate', { 
+        fabrics: fabricsBase64,
+        skillLevel: userSkillLevel,
+        challengeMe: challengeMe,
+      });
 
-        if (response.data.success) {
-          setPattern(response.data.data);
-        } else {
-          setError(response.data.message || 'Failed to generate pattern');
-        }
-      } catch (err: any) {
-        console.error('Pattern generation error:', err);
-        setError(err.response?.data?.message || 'Failed to generate pattern. Please try again.');
-      } finally {
-        setGenerating(false);
+      if (response.data.success) {
+        // ✅ FIX: Extract pattern from nested data structure
+        setPattern(response.data.data.pattern);
+        
+        // ✅ Log for debugging
+        console.log('✅ Pattern received:', response.data.data.pattern.patternName);
+        console.log('✅ Pattern ID:', response.data.data.pattern.id);
+      } else {
+        setError(response.data.message || 'Failed to generate pattern');
       }
-    };
+    } catch (err: any) {
+      console.error('Pattern generation error:', err);
+      setError(err.response?.data?.message || 'Failed to generate pattern. Please try again.');
+    } finally {
+      setGenerating(false);
+    }
+  };
 
-    return {
-      fabrics,
-      previews,
-      generating,
-      pattern,
-      error,
-      MAX_FABRICS,
-      MIN_FABRICS,
-      handleFilesAdded,
-      removeFabric,
-      clearAll,
-      generatePattern, // This now accepts skillLevel and challengeMe
-    };
+  return {
+    fabrics,
+    previews,
+    generating,
+    pattern,
+    error,
+    MAX_FABRICS,
+    MIN_FABRICS,
+    handleFilesAdded,
+    removeFabric,
+    clearAll,
+    generatePattern,
+  };
 }

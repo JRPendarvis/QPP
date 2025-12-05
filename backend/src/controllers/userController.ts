@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
 
 const prisma = new PrismaClient();
 
@@ -23,8 +24,12 @@ export class UserController {
           email: true,
           name: true,
           subscriptionTier: true,
+          billingInterval: true,
+          subscriptionStatus: true,
           skillLevel: true,
+          generationsThisMonth: true,
           downloadsThisMonth: true,
+          lastResetDate: true,
           createdAt: true,
         },
       });
@@ -36,9 +41,39 @@ export class UserController {
         });
       }
 
+      // Calculate usage limits based on tier
+      const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
+      
+      // Calculate days until reset (30 days from lastResetDate)
+      const nextResetDate = new Date(user.lastResetDate);
+      nextResetDate.setDate(nextResetDate.getDate() + 30);
+      const daysUntilReset = Math.max(0, Math.ceil((nextResetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+
       res.status(200).json({
         success: true,
-        data: user,
+        data: {
+          ...user,
+          usage: {
+            generations: {
+              used: user.generationsThisMonth,
+              limit: tierConfig.generationsPerMonth,
+              remaining: Math.max(0, tierConfig.generationsPerMonth - user.generationsThisMonth),
+            },
+            downloads: {
+              used: user.downloadsThisMonth,
+              limit: tierConfig.downloadsPerMonth,
+              remaining: Math.max(0, tierConfig.downloadsPerMonth - user.downloadsThisMonth),
+            },
+            resetDate: nextResetDate.toISOString(),
+            daysUntilReset,
+          },
+          tierInfo: {
+            name: tierConfig.name,
+            price: user.billingInterval 
+              ? tierConfig.price[user.billingInterval as 'monthly' | 'yearly']
+              : 0,
+          }
+        },
       });
     } catch (error) {
       console.error('Get profile error:', error);
@@ -84,15 +119,48 @@ export class UserController {
           email: true,
           name: true,
           subscriptionTier: true,
+          billingInterval: true,
+          subscriptionStatus: true,
           skillLevel: true,
+          generationsThisMonth: true,
           downloadsThisMonth: true,
+          lastResetDate: true,
+          createdAt: true,
         },
       });
+
+      // Calculate usage stats for response
+      const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
+      const nextResetDate = new Date(user.lastResetDate);
+      nextResetDate.setDate(nextResetDate.getDate() + 30);
+      const daysUntilReset = Math.max(0, Math.ceil((nextResetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
       res.status(200).json({
         success: true,
         message: 'Profile updated successfully',
-        data: user,
+        data: {
+          ...user,
+          usage: {
+            generations: {
+              used: user.generationsThisMonth,
+              limit: tierConfig.generationsPerMonth,
+              remaining: Math.max(0, tierConfig.generationsPerMonth - user.generationsThisMonth),
+            },
+            downloads: {
+              used: user.downloadsThisMonth,
+              limit: tierConfig.downloadsPerMonth,
+              remaining: Math.max(0, tierConfig.downloadsPerMonth - user.downloadsThisMonth),
+            },
+            resetDate: nextResetDate.toISOString(),
+            daysUntilReset,
+          },
+          tierInfo: {
+            name: tierConfig.name,
+            price: user.billingInterval 
+              ? tierConfig.price[user.billingInterval as 'monthly' | 'yearly']
+              : 0,
+          }
+        },
       });
     } catch (error) {
       console.error('Update profile error:', error);
