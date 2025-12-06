@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import api from '@/lib/api';
 
 interface QuiltPattern {
-  id?: string; // ✅ Add ID field
+  id?: string;
   patternName: string;
   description: string;
   fabricLayout: string;
@@ -61,8 +61,12 @@ export function usePatternGeneration() {
     });
   };
 
-  // Generate pattern
-  const generatePattern = async (userSkillLevel: string, challengeMe: boolean) => {
+  // Generate pattern - accepts selectedPattern as third parameter
+  const generatePattern = async (
+    userSkillLevel: string, 
+    challengeMe: boolean,
+    selectedPattern?: string
+  ) => {
     setGenerating(true);
     setError('');
     setPattern(null);
@@ -73,13 +77,11 @@ export function usePatternGeneration() {
         fabrics: fabricsBase64,
         skillLevel: userSkillLevel,
         challengeMe: challengeMe,
+        selectedPattern: selectedPattern || 'auto',
       });
 
       if (response.data.success) {
-        // ✅ FIX: Extract pattern from nested data structure
         setPattern(response.data.data.pattern);
-        
-        // ✅ Log for debugging
         console.log('✅ Pattern received:', response.data.data.pattern.patternName);
         console.log('✅ Pattern ID:', response.data.data.pattern.id);
       } else {

@@ -25,10 +25,16 @@ const SKILL_LEVEL_DESCRIPTIONS: Record<string, string> = {
 export class ClaudeService {
   async generateQuiltPattern(
     fabricImages: string[], 
-    skillLevel: string = 'beginner'
+    skillLevel: string = 'beginner',
+    selectedPattern?: string
   ): Promise<QuiltPattern> {
     try {
       const skillDescription = SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
+      
+      // Determine pattern instruction based on user selection
+      const patternInstruction = selectedPattern && selectedPattern !== 'auto'
+        ? `**REQUIRED PATTERN TYPE:** You MUST create a "${this.formatPatternName(selectedPattern)}" pattern. This is not a suggestion - the user specifically requested this pattern style. Design the quilt using this traditional pattern structure.`
+        : `**PATTERN SELECTION:** Choose an appropriate traditional quilt pattern for this skill level.`;
       
       const stream = await anthropic.messages.stream({
         model: 'claude-sonnet-4-20250514',
@@ -40,6 +46,8 @@ export class ClaudeService {
               {
                 type: 'text',
                 text: `You are an expert quilter and fabric designer. I'm providing you with ${fabricImages.length} fabric images. 
+
+${patternInstruction}
 
 **STEP 1: ANALYZE THE FABRICS**
 Carefully examine each fabric image and identify the dominant hex color (e.g., #FF5733) from each one.
@@ -249,5 +257,36 @@ JSON format:
     };
 
     return guidelines[skillLevel] || guidelines['beginner'];
+  }
+
+  private formatPatternName(patternId: string): string {
+    const patternNames: Record<string, string> = {
+      'simple-squares': 'Simple Squares',
+      'strip-quilt': 'Strip Quilt',
+      'checkerboard': 'Checkerboard',
+      'rail-fence': 'Rail Fence',
+      'four-patch': 'Four Patch',
+      'nine-patch': 'Nine Patch',
+      'half-square-triangles': 'Half-Square Triangles',
+      'hourglass': 'Hourglass',
+      'bow-tie': 'Bow Tie',
+      'flying-geese': 'Flying Geese',
+      'pinwheel': 'Pinwheel',
+      'log-cabin': 'Log Cabin',
+      'sawtooth-star': 'Sawtooth Star',
+      'ohio-star': 'Ohio Star',
+      'churn-dash': 'Churn Dash',
+      'lone-star': 'Lone Star',
+      'mariners-compass': "Mariner's Compass",
+      'new-york-beauty': 'New York Beauty',
+      'storm-at-sea': 'Storm at Sea',
+      'drunkards-path': "Drunkard's Path",
+      'feathered-star': 'Feathered Star',
+      'grandmothers-flower-garden': "Grandmother's Flower Garden",
+      'double-wedding-ring': 'Double Wedding Ring',
+      'pickle-dish': 'Pickle Dish',
+      'complex-medallion': 'Complex Medallion',
+    };
+    return patternNames[patternId] || patternId.replace(/-/g, ' ');
   }
 }

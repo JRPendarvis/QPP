@@ -25,8 +25,8 @@ export class PatternController {
         });
       }
 
-      // Accept both 'fabricImages' and 'fabrics' field names
-      const { fabricImages, fabrics, skillLevel, challengeMe } = req.body;
+      // Accept both 'fabricImages' and 'fabrics' field names, plus selectedPattern
+      const { fabricImages, fabrics, skillLevel, challengeMe, selectedPattern } = req.body;
       const images = fabricImages || fabrics;
 
       // Validation
@@ -101,10 +101,11 @@ export class PatternController {
         }
       }
 
-      // Generate pattern using Claude
+      // Generate pattern using Claude - now with selectedPattern
       const pattern = await this.claudeService.generateQuiltPattern(
         images,
-        targetSkillLevel
+        targetSkillLevel,
+        selectedPattern
       );
 
       // Save pattern to database
