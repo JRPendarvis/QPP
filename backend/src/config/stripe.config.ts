@@ -23,19 +23,19 @@ export const SUBSCRIPTION_TIERS = {
   basic: {
     name: 'Basic',
     generationsPerMonth: 10,
-    downloadsPerMonth: 5,
+    downloadsPerMonth: 2,
     price: { monthly: 5.99, yearly: 59.99 }
   },
   intermediate: {
     name: 'Intermediate',
     generationsPerMonth: 30,
-    downloadsPerMonth: 20,
+    downloadsPerMonth: 10,
     price: { monthly: 9.99, yearly: 94.99 }
   },
   advanced: {
     name: 'Advanced',
     generationsPerMonth: 100,
-    downloadsPerMonth: 50,
+    downloadsPerMonth: 25,
     price: { monthly: 19.99, yearly: 199.99 }
   }
 } as const;

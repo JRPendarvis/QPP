@@ -184,14 +184,15 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Upgrade CTA if on free tier */}
             {profile.subscriptionTier === 'free' && (
               <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
                 <p className="text-sm text-indigo-900 font-semibold mb-2">
-                  ⭐ Want More Patterns?
+                  ⭐ Free Tier Limits
                 </p>
                 <p className="text-sm text-indigo-700 mb-3">
-                  Upgrade to generate more patterns and download unlimited PDFs!
+                  • 3 pattern generations per month (resets monthly)<br />
+                  • 1 PDF download lifetime (never resets)<br />
+                  Upgrade for more!
                 </p>
                 <button
                   onClick={() => router.push('/pricing')}

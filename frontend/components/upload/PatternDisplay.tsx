@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface QuiltPattern {
-  id?: string; // Pattern ID from database
+  id?: string;
   patternName: string;
   description: string;
   fabricLayout: string;
@@ -14,20 +14,39 @@ interface QuiltPattern {
   visualSvg: string;
 }
 
+interface Usage {
+  generations: {
+    used: number;
+    limit: number;
+    remaining: number;
+  };
+  downloads: {
+    used: number;
+    limit: number;
+    remaining: number;
+  };
+  resetDate?: string;
+  daysUntilReset?: number;
+}
+
 interface PatternDisplayProps {
   pattern: QuiltPattern;
   userTier: string;
+  usage?: Usage;
   onStartOver: () => void;
 }
 
 export default function PatternDisplay({
   pattern,
   userTier,
+  usage,
   onStartOver,
 }: PatternDisplayProps) {
   const router = useRouter();
   const [downloading, setDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState('');
+
+  // Check if user has downloads remaining
+  const hasDownloadsRemaining = usage?.downloads?.remaining ? usage.downloads.remaining > 0 : false;
 
   // Validate pattern data
   const hasName = pattern && pattern.patternName;
@@ -70,12 +89,11 @@ export default function PatternDisplay({
 
   const handleDownload = async () => {
     if (!pattern.id) {
-      setDownloadError('Pattern ID not found. Please regenerate the pattern.');
+      alert('Pattern ID not found. Please regenerate the pattern.');
       return;
     }
 
     setDownloading(true);
-    setDownloadError('');
 
     try {
       const token = localStorage.getItem('token');
@@ -94,7 +112,7 @@ export default function PatternDisplay({
 
       if (!response.ok) {
         const error = await response.json();
-        setDownloadError(error.message || 'Failed to download PDF');
+        alert(error.message || 'Failed to download PDF');
         return;
       }
 
@@ -109,12 +127,13 @@ export default function PatternDisplay({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      // Show success message
-      alert('PDF downloaded successfully! ✅');
+      // Show success message and refresh page
+      alert('PDF downloaded successfully! ✅ Refreshing...');
+      window.location.reload();
 
     } catch (error) {
       console.error('Download error:', error);
-      setDownloadError('Failed to download PDF. Please try again.');
+      alert('Failed to download PDF. Please try again.');
     } finally {
       setDownloading(false);
     }
@@ -170,8 +189,8 @@ export default function PatternDisplay({
       )}
 
       {/* Preview of Instructions */}
-      <div className="bg-gradient-to-b from-white to-gray-100 border border-gray-200 rounded-lg p-6 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white pointer-events-none rounded-lg"></div>
+      <div className="bg-linear-to-b from-white to-gray-100 border border-gray-200 rounded-lg p-6 relative">
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-white pointer-events-none rounded-lg"></div>
         <h3 className="font-semibold text-gray-700 mb-2">Step-by-Step Instructions</h3>
         <ol className="list-decimal list-inside space-y-2 text-gray-600">
           {pattern.instructions.slice(0, Math.min(2, instructionsCount)).map((instruction, index) => (
@@ -187,7 +206,7 @@ export default function PatternDisplay({
             🔒 Unlock Full Instructions
           </p>
           <p className="text-sm text-indigo-700 mb-3">
-            Upgrade to see all {instructionsCount} detailed steps and download the PDF guide.
+            Upgrade to see all {instructionsCount} detailed steps in the PDF.
           </p>
           <button
             onClick={() => router.push('/pricing')}
@@ -198,43 +217,75 @@ export default function PatternDisplay({
         </div>
       </div>
 
-      {/* Download Error Message */}
-      {downloadError && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600 text-sm">{downloadError}</p>
-        </div>
-      )}
+      {/* Download Section */}
+      <div className="space-y-4">
+        {hasDownloadsRemaining ? (
+          <>
+            {/* Download Button */}
+            <div className="flex gap-4">
+              <button
+                onClick={handleDownload}
+                disabled={downloading || !pattern.id}
+                className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {downloading ? 'Downloading...' : 'Download PDF'}
+              </button>
+            </div>
 
-      {/* Download Button - Shows up-selling for free users */}
-      {userTier === 'free' ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <h3 className="font-semibold text-yellow-900 mb-2">
-            📄 PDF Download Available with Upgrade
-          </h3>
-          <p className="text-yellow-800 mb-4">
-            Get the complete pattern with measurements, cutting guides, and full step-by-step instructions in a beautifully formatted PDF.
-          </p>
-          <button
-            onClick={() => router.push('/pricing')}
-            className="px-6 py-3 bg-yellow-600 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-700"
-          >
-            Upgrade to Download
-          </button>
-        </div>
-      ) : (
-        <div className="flex gap-4">
-          <button
-            onClick={handleDownload}
-            disabled={downloading || !pattern.id}
-            className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {downloading ? 'Downloading...' : 'Download PDF'}
-          </button>
-        </div>
-      )}
+            {/* Show remaining downloads */}
+            {usage?.downloads && (
+              <div className="text-sm text-gray-600 text-center">
+                <span>
+                  {usage.downloads.remaining} download{usage.downloads.remaining !== 1 ? 's' : ''} remaining
+                  {userTier !== 'free' && usage.daysUntilReset && (
+                    <span> (resets in {usage.daysUntilReset} days)</span>
+                  )}
+                </span>
+              </div>
+            )}
+
+            {/* Info for free users with downloads remaining */}
+            {userTier === 'free' && (
+              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                <p className="text-sm text-indigo-900 font-semibold mb-2">
+                  ⭐ Free Tier: 1 Download Lifetime
+                </p>
+                <p className="text-sm text-indigo-700 mb-3">
+                  This is your only download. Upgrade to Basic for 2 downloads per month, or higher tiers for more!
+                </p>
+                <button
+                  onClick={() => router.push('/pricing')}
+                  className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                >
+                  View Plans
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          /* No downloads remaining */
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h3 className="font-semibold text-red-900 mb-2">
+              📄 No Downloads Remaining
+            </h3>
+            <p className="text-red-800 mb-4">
+              {userTier === 'free' 
+                ? "You've used your lifetime download. Upgrade to get more downloads!"
+                : `You've reached your monthly download limit. ${usage?.daysUntilReset ? `Resets in ${usage.daysUntilReset} days, or upgrade for more downloads!` : 'Upgrade for more downloads!'}`
+              }
+            </p>
+            <button
+              onClick={() => router.push('/pricing')}
+              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700"
+            >
+              View Plans
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* No pattern ID warning */}
-      {!pattern.id && userTier !== 'free' && (
+      {!pattern.id && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
           <p className="text-amber-800 text-sm">
             ⚠️ Pattern ID not found. Please regenerate the pattern to enable downloads.

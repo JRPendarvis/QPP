@@ -8,59 +8,56 @@ export class UsageResetService {
    * Reset usage counters for users whose reset date has passed
    * Runs daily to check if 30 days have elapsed since last reset
    */
-  async resetMonthlyUsage(): Promise<void> {
-    try {
-      const now = new Date();
-      
-      // Calculate date 30 days ago
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(now.getDate() - 30);
-      
-      // Find users whose last reset was more than 30 days ago
-      const usersToReset = await prisma.user.findMany({
-        where: {
-          lastResetDate: {
-            lte: thirtyDaysAgo
-          }
+async resetMonthlyUsage(): Promise<void> {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Find users who need reset
+    const usersToReset = await prisma.user.findMany({
+      where: {
+        lastResetDate: {
+          lte: thirtyDaysAgo,
         },
-        select: {
-          id: true,
-          email: true,
-          subscriptionTier: true,
-          generationsThisMonth: true,
-          downloadsThisMonth: true,
-          lastResetDate: true
-        }
+      },
+      select: {
+        id: true,
+        email: true,
+        subscriptionTier: true,
+        generationsThisMonth: true,
+        downloadsThisMonth: true,
+      },
+    });
+
+    console.log(`🔄 Found ${usersToReset.length} users needing usage reset`);
+
+    // Reset each user
+    for (const user of usersToReset) {
+      // ✅ FREE TIER: Downloads never reset (lifetime limit)
+      const shouldResetDownloads = user.subscriptionTier !== 'free';
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          generationsThisMonth: 0,
+          // Only reset downloads for paid tiers
+          ...(shouldResetDownloads && { downloadsThisMonth: 0 }),
+          lastResetDate: new Date(),
+        },
       });
 
-      if (usersToReset.length === 0) {
-        console.log('✅ [Usage Reset] No users need reset at this time');
-        return;
+      console.log(`✅ Reset usage for ${user.email} (${user.subscriptionTier})`);
+      if (!shouldResetDownloads) {
+        console.log(`   ⚠️ Downloads NOT reset (free tier - lifetime limit)`);
       }
-
-      console.log(`🔄 [Usage Reset] Resetting usage for ${usersToReset.length} users`);
-
-      // Reset each user's counters
-      for (const user of usersToReset) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            generationsThisMonth: 0,
-            downloadsThisMonth: 0,
-            lastResetDate: now
-          }
-        });
-
-        console.log(`✅ [Usage Reset] Reset user ${user.email} (${user.subscriptionTier})`);
-      }
-
-      console.log(`✅ [Usage Reset] Successfully reset ${usersToReset.length} users`);
-      
-    } catch (error) {
-      console.error('❌ [Usage Reset] Error during monthly usage reset:', error);
-      throw error;
     }
+
+    console.log('✅ Monthly usage reset completed');
+  } catch (error) {
+    console.error('❌ Error resetting monthly usage:', error);
+    throw error;
   }
+}
 
   /**
    * Reset a specific user's usage (for testing or manual intervention)

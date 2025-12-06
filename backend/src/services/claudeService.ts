@@ -30,10 +30,9 @@ export class ClaudeService {
     try {
       const skillDescription = SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
       
-      // Use streaming for large token requests
       const stream = await anthropic.messages.stream({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 16000,
+        max_tokens: 28000,
         messages: [
           {
             role: 'user',
@@ -42,49 +41,110 @@ export class ClaudeService {
                 type: 'text',
                 text: `You are an expert quilter and fabric designer. I'm providing you with ${fabricImages.length} fabric images. 
 
+**STEP 1: ANALYZE THE FABRICS**
+Carefully examine each fabric image and identify the dominant hex color (e.g., #FF5733) from each one.
+
+**STEP 2: CREATE THE PATTERN**
+Create a custom quilt pattern using the ACTUAL colors from the fabrics.
+
 **CRITICAL REQUIREMENT: The pattern MUST be appropriate for this skill level:**
 ${skillDescription}
 
-Please analyze these fabrics and create a custom quilt pattern design that matches the specified skill level. Provide:
+Please provide:
 
-1. Pattern Name - A creative, descriptive name for this quilt pattern
-2. Description - A brief overview of the quilt design (2-3 sentences)
-3. Fabric Layout - Describe how the fabrics should be arranged (which fabrics go where)
+1. Pattern Name - A creative name referencing the actual fabric colors
+2. Description - Brief overview (2-3 sentences) mentioning specific colors
+3. Fabric Layout - How the actual fabric colors should be arranged
 4. Difficulty Level - MUST be: ${skillLevel.replace('_', ' ')}
-5. Estimated Size - Approximate finished quilt dimensions (e.g., "60x80 inches throw quilt")
-6. Step-by-Step Instructions - Provide EXACTLY 5-6 clear, concise steps appropriate for a ${skillLevel.replace('_', ' ')} quilter
-7. Visual SVG - Create a SIMPLE grid visualization (see requirements below)
+5. Estimated Size - Approximate dimensions (e.g., "60x80 inches throw quilt")
+6. Step-by-Step Instructions - EXACTLY 5-6 clear steps
+7. Visual SVG - A quilt preview with proper grid alignment
 
 **Pattern Complexity Guidelines for ${skillLevel}:**
 ${this.getComplexityGuidelines(skillLevel)}
 
-**SVG REQUIREMENTS (STRICT - KEEP UNDER 500 CHARACTERS):**
-- Create a 3x4 grid of rectangles (12 total shapes)
-- Use ONLY <rect> elements - NO polygons, NO paths, NO complex shapes
-- Each rectangle represents a quilt block with appropriate fabric color
-- viewBox must be "0 0 300 400"
-- Each rect should be 100x100 pixels
-- Use hex colors from the fabric images
-- Total SVG must be under 500 characters
-- Example format: <svg viewBox="0 0 300 400"><rect x="0" y="0" width="100" height="100" fill="#abc123"/><rect x="100" y="0" width="100" height="100" fill="#def456"/>...</svg>
+**SVG REQUIREMENTS - STRICT GRID STRUCTURE:**
+- Create EXACTLY a 4x4 grid of quilt blocks (16 blocks total)
+- viewBox: "0 0 400 400" (perfect square)
+- Each block is 100x100 pixels
+- Position blocks using this EXACT formula:
+  * Block at row R, column C → x=(C*100), y=(R*100)
+  * Row 0, Col 0 → x=0, y=0
+  * Row 0, Col 1 → x=100, y=0
+  * Row 0, Col 2 → x=200, y=0
+  * Row 0, Col 3 → x=300, y=0
+  * Row 1, Col 0 → x=0, y=100
+  * Row 1, Col 1 → x=100, y=100
+  * And so on...
+- Use <g> groups with translate(x,y) for each block
+- Inside each <g>, create block pattern using coordinates from 0,0 to 100,100
+- Use ACTUAL hex colors from the fabric images
+- Add stroke="#ccc" stroke-width="0.5" to shapes for definition
 
-**IMPORTANT: Return ONLY valid JSON, no additional text before or after. Keep instructions to 5-6 steps maximum.**
+**BLOCK PATTERNS BY SKILL LEVEL:**
+- Beginner: Solid squares
+- Advanced Beginner: Four-patch (2x2 grid of 50x50 squares per block)
+- Intermediate: Nine-patch, simple pinwheel (4 triangles), or HSTs
+- Advanced/Expert: More complex arrangements
 
-JSON format (copy this structure exactly):
+**STRICT SVG STRUCTURE - COPY THIS PATTERN:**
+
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Row 0 -->
+  <g transform="translate(0,0)">
+    <rect x="0" y="0" width="100" height="100" fill="#actualcolor1" stroke="#ccc" stroke-width="0.5"/>
+  </g>
+  <g transform="translate(100,0)">
+    <rect x="0" y="0" width="100" height="100" fill="#actualcolor2" stroke="#ccc" stroke-width="0.5"/>
+  </g>
+  <g transform="translate(200,0)">
+    <rect x="0" y="0" width="100" height="100" fill="#actualcolor3" stroke="#ccc" stroke-width="0.5"/>
+  </g>
+  <g transform="translate(300,0)">
+    <rect x="0" y="0" width="100" height="100" fill="#actualcolor4" stroke="#ccc" stroke-width="0.5"/>
+  </g>
+  <!-- Row 1 -->
+  <g transform="translate(0,100)">
+    <rect x="0" y="0" width="100" height="100" fill="#actualcolor2" stroke="#ccc" stroke-width="0.5"/>
+  </g>
+  <!-- Continue for all 16 blocks... -->
+</svg>
+
+**For four-patch blocks, use this inside a <g>:**
+<rect x="0" y="0" width="50" height="50" fill="#color1" stroke="#ccc" stroke-width="0.5"/>
+<rect x="50" y="0" width="50" height="50" fill="#color2" stroke="#ccc" stroke-width="0.5"/>
+<rect x="0" y="50" width="50" height="50" fill="#color2" stroke="#ccc" stroke-width="0.5"/>
+<rect x="50" y="50" width="50" height="50" fill="#color1" stroke="#ccc" stroke-width="0.5"/>
+
+**For pinwheel blocks, use triangles like this:**
+<polygon points="0,0 50,50 0,100" fill="#color1" stroke="#ccc" stroke-width="0.5"/>
+<polygon points="0,0 100,0 50,50" fill="#color2" stroke="#ccc" stroke-width="0.5"/>
+<polygon points="100,0 100,100 50,50" fill="#color1" stroke="#ccc" stroke-width="0.5"/>
+<polygon points="0,100 100,100 50,50" fill="#color2" stroke="#ccc" stroke-width="0.5"/>
+
+**CRITICAL RULES:**
+1. ALWAYS use translate(x,y) for block positioning
+2. ALL shapes inside a <g> use coordinates relative to 0,0
+3. Use ACTUAL fabric colors (identify the hex codes)
+4. Keep under 3000 characters total
+
+**IMPORTANT: Return ONLY valid JSON, no extra text!**
+
+JSON format:
 {
-  "patternName": "Creative Pattern Name",
-  "description": "Brief 2-3 sentence description of the quilt design.",
-  "fabricLayout": "Describe how fabrics are arranged in 1-2 sentences.",
+  "patternName": "Name with actual colors (e.g., 'Golden Sunset Pinwheels')",
+  "description": "Description mentioning the specific colors you identified",
+  "fabricLayout": "Layout description using actual color names",
   "difficulty": "${skillLevel.replace('_', ' ')}",
   "estimatedSize": "60x80 inches throw quilt",
   "instructions": [
-    "Step 1 - concise instruction",
-    "Step 2 - concise instruction",
-    "Step 3 - concise instruction",
-    "Step 4 - concise instruction",
-    "Step 5 - concise instruction"
+    "Step 1 - mention actual fabric colors",
+    "Step 2 - clear instruction",
+    "Step 3 - clear instruction",
+    "Step 4 - clear instruction",
+    "Step 5 - clear instruction"
   ],
-  "visualSvg": "<svg viewBox='0 0 300 400'><rect x='0' y='0' width='100' height='100' fill='#color1'/></svg>"
+  "visualSvg": "<svg viewBox='0 0 400 400'><!-- 16 blocks in 4x4 grid using translate --></svg>"
 }`,
               },
               ...fabricImages.map((imageBase64) => ({
@@ -110,7 +170,7 @@ JSON format (copy this structure exactly):
       }
 
       console.log('===== CLAUDE RESPONSE START =====');
-      console.log(responseText.substring(0, 1000)); // Only log first 1000 chars
+      console.log(responseText.substring(0, 1000));
       console.log('===== CLAUDE RESPONSE END =====');
 
       // Extract JSON from response
@@ -137,16 +197,14 @@ JSON format (copy this structure exactly):
       try {
         const pattern: QuiltPattern = JSON.parse(jsonText);
         
-        // ✅ Patch incomplete instructions
+        // Patch incomplete instructions
         if (pattern.instructions && Array.isArray(pattern.instructions)) {
-          // Fix any truncated last instruction (if it's suspiciously short)
           const lastInstruction = pattern.instructions[pattern.instructions.length - 1];
           if (lastInstruction && lastInstruction.length < 30) {
             console.warn('⚠️ Last instruction seems truncated, removing it');
             pattern.instructions = pattern.instructions.slice(0, -1);
           }
           
-          // Ensure we have at least 4 complete instructions
           if (pattern.instructions.length < 4) {
             throw new Error('Response missing sufficient instructions (need at least 4)');
           }
@@ -160,7 +218,7 @@ JSON format (copy this structure exactly):
         // Make SVG optional - use placeholder if missing or truncated
         if (!pattern.visualSvg || pattern.visualSvg.trim() === '' || !pattern.visualSvg.includes('</svg>')) {
           console.warn('⚠️ SVG missing or incomplete, using placeholder');
-          pattern.visualSvg = '<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="400" fill="#f3f4f6"/><text x="150" y="200" text-anchor="middle" fill="#9ca3af" font-size="18">Pattern Visualization</text></svg>';
+          pattern.visualSvg = '<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="200" y="200" text-anchor="middle" fill="#9ca3af" font-size="18">Pattern Visualization</text></svg>';
         }
         
         console.log(`✅ Successfully generated pattern: ${pattern.patternName}`);
@@ -183,11 +241,11 @@ JSON format (copy this structure exactly):
 
   private getComplexityGuidelines(skillLevel: string): string {
     const guidelines: Record<string, string> = {
-      beginner: '- Use simple squares or rectangles\n- Straight seams only\n- No more than 2-3 fabrics in the main design\n- Simple grid or strip layouts',
-      advanced_beginner: '- Simple pieced blocks (4-patch, 9-patch)\n- Basic triangles (HSTs)\n- Up to 4 fabrics\n- Simple repetitive patterns',
-      intermediate: '- Multiple block types\n- Flying geese, pinwheels\n- Points that need matching\n- 4-6 fabrics with intentional color placement',
-      advanced: '- Complex piecing with many seams\n- Paper piecing acceptable\n- Curved piecing or Y-seams\n- Intricate color gradients or medallion centers',
-      expert: '- Any technique is acceptable\n- Complex curved piecing\n- Intricate appliqué if desired\n- Sophisticated color theory and design',
+      beginner: '- Use simple solid squares\n- Straight seams only\n- 2-3 fabrics\n- Simple grid layout',
+      advanced_beginner: '- Four-patch or nine-patch blocks\n- Basic half-square triangles\n- Up to 4 fabrics\n- Repetitive patterns',
+      intermediate: '- Multiple block types\n- Flying geese or pinwheels\n- Points matching required\n- 4-6 fabrics with intentional placement',
+      advanced: '- Complex piecing\n- Paper piecing acceptable\n- Y-seams or curves\n- Intricate color gradients',
+      expert: '- Any technique\n- Complex curves\n- Sophisticated design\n- Advanced color theory',
     };
 
     return guidelines[skillLevel] || guidelines['beginner'];

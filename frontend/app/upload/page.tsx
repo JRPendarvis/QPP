@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import UploadHeader from '@/components/upload/UploadHeader';
@@ -27,11 +27,51 @@ const NEXT_LEVEL: Record<string, string> = {
   expert: 'expert',
 };
 
+const PATTERN_OPTIONS: Record<string, { id: string; name: string }[]> = {
+  beginner: [
+    { id: 'simple-squares', name: 'Simple Squares' },
+    { id: 'strip-quilt', name: 'Strip Quilt' },
+    { id: 'checkerboard', name: 'Checkerboard' },
+    { id: 'rail-fence', name: 'Rail Fence' },
+  ],
+  advanced_beginner: [
+    { id: 'four-patch', name: 'Four Patch' },
+    { id: 'nine-patch', name: 'Nine Patch' },
+    { id: 'half-square-triangles', name: 'Half-Square Triangles' },
+    { id: 'hourglass', name: 'Hourglass' },
+    { id: 'bow-tie', name: 'Bow Tie' },
+  ],
+  intermediate: [
+    { id: 'flying-geese', name: 'Flying Geese' },
+    { id: 'pinwheel', name: 'Pinwheel' },
+    { id: 'log-cabin', name: 'Log Cabin' },
+    { id: 'sawtooth-star', name: 'Sawtooth Star' },
+    { id: 'ohio-star', name: 'Ohio Star' },
+    { id: 'churn-dash', name: 'Churn Dash' },
+  ],
+  advanced: [
+    { id: 'lone-star', name: 'Lone Star' },
+    { id: 'mariners-compass', name: "Mariner's Compass" },
+    { id: 'new-york-beauty', name: 'New York Beauty' },
+    { id: 'storm-at-sea', name: 'Storm at Sea' },
+    { id: 'drunkards-path', name: "Drunkard's Path" },
+  ],
+  expert: [
+    { id: 'feathered-star', name: 'Feathered Star' },
+    { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden" },
+    { id: 'double-wedding-ring', name: 'Double Wedding Ring' },
+    { id: 'pickle-dish', name: 'Pickle Dish' },
+    { id: 'complex-medallion', name: 'Complex Medallion' },
+  ],
+};
+
 export default function UploadPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<any>(null);
+  const [patternChoice, setPatternChoice] = useState<'auto' | 'manual'>('auto');
+  const [selectedPattern, setSelectedPattern] = useState<string>('');
+  const [challengeMe, setChallengeMe] = useState(false);
   
   const {
     fabrics,
@@ -47,17 +87,12 @@ export default function UploadPage() {
     generatePattern,
   } = usePatternGeneration();
 
-  // Get challenge preference from URL
-  const challengeMe = searchParams.get('challenge') === 'true';
-
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
 
-  // Fetch user profile
   useEffect(() => {
     if (user) {
       fetchProfile();
@@ -77,7 +112,8 @@ export default function UploadPage() {
 
   const handleGenerateClick = () => {
     if (profile) {
-      generatePattern(profile.skillLevel, challengeMe);
+      const patternId = patternChoice === 'manual' ? selectedPattern : undefined;
+      generatePattern(profile.skillLevel, challengeMe, patternId);
     }
   };
 
@@ -104,16 +140,6 @@ export default function UploadPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-2">Upload Your Fabric Images</h2>
           
-          {/* Show target difficulty */}
-          <div className="mb-6 bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-            <p className="text-sm text-indigo-900">
-              <strong>Target Pattern Difficulty:</strong> {SKILL_LEVELS[targetSkill]}
-              {challengeMe && currentSkill !== 'expert' && (
-                <span className="ml-2 text-indigo-600">🚀 (Challenge Mode!)</span>
-              )}
-            </p>
-          </div>
-
           <p className="text-gray-600 mb-6">
             Upload {MIN_FABRICS}-{MAX_FABRICS} fabric images to generate your quilt pattern. 
             Supported formats: JPG, PNG, WEBP
@@ -141,9 +167,98 @@ export default function UploadPage() {
                 onRemove={removeFabric}
                 onClearAll={clearAll}
               />
+
+              {/* Pattern Selection Section */}
+              <div className="mt-6 bg-white border border-gray-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Choose Your Pattern Style
+                </h3>
+
+                {/* Pattern Choice Radio Buttons */}
+                <div className="space-y-4 mb-6">
+                  <label className="flex items-start cursor-pointer">
+                    <input
+                      type="radio"
+                      name="patternChoice"
+                      value="auto"
+                      checked={patternChoice === 'auto'}
+                      onChange={() => {
+                        setPatternChoice('auto');
+                        setSelectedPattern('');
+                      }}
+                      className="mt-1 mr-3"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        Let QuiltPlannerPro Choose
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Our AI will pick the best pattern for your skill level and fabrics
+                      </div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start cursor-pointer">
+                    <input
+                      type="radio"
+                      name="patternChoice"
+                      value="manual"
+                      checked={patternChoice === 'manual'}
+                      onChange={() => setPatternChoice('manual')}
+                      className="mt-1 mr-3"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 mb-2">
+                        I'll Choose My Pattern
+                      </div>
+                      
+                      {patternChoice === 'manual' && (
+                        <select
+                          value={selectedPattern}
+                          onChange={(e) => setSelectedPattern(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                          <option value="">Select a pattern...</option>
+                          {PATTERN_OPTIONS[currentSkill]?.map((pattern) => (
+                            <option key={pattern.id} value={pattern.id}>
+                              {pattern.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  </label>
+                </div>
+
+                {/* Challenge Me Checkbox */}
+                <label className="flex items-center cursor-pointer p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                  <input
+                    type="checkbox"
+                    checked={challengeMe}
+                    onChange={(e) => setChallengeMe(e.target.checked)}
+                    className="mr-3 h-5 w-5 text-indigo-600"
+                  />
+                  <div>
+                    <div className="font-medium text-indigo-900">
+                      🚀 Challenge Me
+                    </div>
+                    <div className="text-sm text-indigo-700">
+                      Use {SKILL_LEVELS[targetSkill]} level complexity
+                      {challengeMe && currentSkill !== 'expert' && (
+                        <span className="ml-1 font-semibold">(one level up!)</span>
+                      )}
+                    </div>
+                  </div>
+                </label>
+              </div>
+
               <GenerateButton
                 onClick={handleGenerateClick}
-                disabled={fabrics.length < MIN_FABRICS || generating}
+                disabled={
+                  fabrics.length < MIN_FABRICS || 
+                  generating || 
+                  (patternChoice === 'manual' && !selectedPattern)
+                }
                 generating={generating}
                 fabricCount={fabrics.length}
               />
@@ -153,7 +268,8 @@ export default function UploadPage() {
           {pattern && (
             <PatternDisplay
               pattern={pattern}
-              userTier={user.subscriptionTier}
+              userTier={profile.subscriptionTier}
+              usage={profile.usage}
               onStartOver={clearAll}
             />
           )}
