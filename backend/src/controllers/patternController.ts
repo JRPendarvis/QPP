@@ -6,6 +6,16 @@ import { PDFService } from '../services/pdfService';
 
 const prisma = new PrismaClient();
 
+// Valid pattern IDs for validation
+const VALID_PATTERN_IDS = [
+  'auto',
+  'simple-squares', 'strip-quilt', 'checkerboard', 'rail-fence',
+  'four-patch', 'nine-patch', 'half-square-triangles', 'hourglass', 'bow-tie',
+  'flying-geese', 'pinwheel', 'log-cabin', 'sawtooth-star', 'ohio-star', 'churn-dash',
+  'lone-star', 'mariners-compass', 'new-york-beauty', 'storm-at-sea', 'drunkards-path',
+  'feathered-star', 'grandmothers-flower-garden', 'double-wedding-ring', 'pickle-dish', 'complex-medallion',
+];
+
 export class PatternController {
   private claudeService: ClaudeService;
 
@@ -44,6 +54,11 @@ export class PatternController {
           message: 'Invalid skill level',
         });
       }
+
+      // Validate selectedPattern if provided
+      const patternToUse = selectedPattern && VALID_PATTERN_IDS.includes(selectedPattern) 
+        ? selectedPattern 
+        : 'auto';
 
       // Get user with subscription info
       const user = await prisma.user.findUnique({
@@ -101,28 +116,33 @@ export class PatternController {
         }
       }
 
-      // Generate pattern using Claude - now with selectedPattern
+      // Generate pattern using Claude - with validated selectedPattern
       const pattern = await this.claudeService.generateQuiltPattern(
         images,
         targetSkillLevel,
-        selectedPattern
+        patternToUse
       );
 
-      // Save pattern to database
-      const savedPattern = await prisma.pattern.create({
-        data: {
-          userId: user.id,
-          patternData: pattern as any,
-          downloaded: false,
-        },
-      });
+      // Use transaction to ensure both operations succeed or fail together
+      const savedPattern = await prisma.$transaction(async (tx) => {
+        // Save pattern to database
+        const newPattern = await tx.pattern.create({
+          data: {
+            userId: user.id,
+            patternData: pattern as any,
+            downloaded: false,
+          },
+        });
 
-      // Increment generation counter
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          generationsThisMonth: { increment: 1 },
-        },
+        // Increment generation counter
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            generationsThisMonth: { increment: 1 },
+          },
+        });
+
+        return newPattern;
       });
 
       // Calculate remaining usage
@@ -150,9 +170,20 @@ export class PatternController {
       });
     } catch (error) {
       console.error('Pattern generation error:', error);
+      
+      // Provide more helpful error messages
+      let message = 'Failed to generate quilt pattern. Please try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+          message = 'Pattern generation timed out. Please try again with fewer images.';
+        } else if (error.message.includes('rate limit')) {
+          message = 'Service is busy. Please wait a moment and try again.';
+        }
+      }
+      
       res.status(500).json({
         success: false,
-        message: 'Failed to generate quilt pattern',
+        message,
       });
     }
   }
@@ -200,19 +231,6 @@ export class PatternController {
         });
       }
 
-      // Get tier configuration
-      const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
-
-      // Check download limits
-      if (user.downloadsThisMonth >= tierConfig.downloadsPerMonth) {
-        return res.status(403).json({
-          success: false,
-          message: `You've reached your monthly download limit of ${tierConfig.downloadsPerMonth}. Upgrade your plan for more downloads!`,
-          currentUsage: user.downloadsThisMonth,
-          limit: tierConfig.downloadsPerMonth,
-        });
-      }
-
       // Get the pattern
       const pattern = await prisma.pattern.findFirst({
         where: {
@@ -228,6 +246,24 @@ export class PatternController {
         });
       }
 
+      // ✅ FIX: Only count against limit if this is a FIRST download
+      const isFirstDownload = !pattern.downloaded;
+
+      if (isFirstDownload) {
+        // Get tier configuration
+        const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
+
+        // Check download limits only for first download
+        if (user.downloadsThisMonth >= tierConfig.downloadsPerMonth) {
+          return res.status(403).json({
+            success: false,
+            message: `You've reached your monthly download limit of ${tierConfig.downloadsPerMonth}. Upgrade your plan for more downloads!`,
+            currentUsage: user.downloadsThisMonth,
+            limit: tierConfig.downloadsPerMonth,
+          });
+        }
+      }
+
       // Generate PDF
       const pdfService = new PDFService();
       const pdfBuffer = await pdfService.generatePatternPDF(
@@ -235,22 +271,27 @@ export class PatternController {
         user.name || user.email
       );
 
-      // Increment download counter
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          downloadsThisMonth: { increment: 1 },
-        },
-      });
+      // ✅ FIX: Only increment counter and mark downloaded on FIRST download
+      if (isFirstDownload) {
+        await prisma.$transaction(async (tx) => {
+          // Increment download counter
+          await tx.user.update({
+            where: { id: userId },
+            data: {
+              downloadsThisMonth: { increment: 1 },
+            },
+          });
 
-      // Mark pattern as downloaded
-      await prisma.pattern.update({
-        where: { id: patternId },
-        data: {
-          downloaded: true,
-          downloadedAt: new Date(),
-        },
-      });
+          // Mark pattern as downloaded
+          await tx.pattern.update({
+            where: { id: patternId },
+            data: {
+              downloaded: true,
+              downloadedAt: new Date(),
+            },
+          });
+        });
+      }
 
       // Send PDF
       const fileName = `${(pattern.patternData as any).patternName.replace(/[^a-z0-9]/gi, '_')}.pdf`;
@@ -265,7 +306,7 @@ export class PatternController {
       console.error('Download pattern error:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to download pattern',
+        message: 'Failed to download pattern. Please try again.',
       });
     }
   }
