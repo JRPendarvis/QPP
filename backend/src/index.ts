@@ -1,79 +1,111 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express from 'express';
+import type { Express, Request, Response, NextFunction } from 'express';
+
 import cors from 'cors';
 import dotenv from 'dotenv';
+
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import stripeRoutes from './routes/stripeRoutes';
 import patternRoutes from './routes/patternRoutes';
 import adminRoutes from './routes/adminRoutes';
+
+import { StripeController } from './controllers/stripeController';
 import { initializeCronJobs } from './jobs/cronJobs';
 
 dotenv.config();
 
+// ---------------------------------------------
+// 🚀 Startup Logging
+// ---------------------------------------------
+console.log("🚀 Starting QuiltPlannerPro backend...");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("PORT:", process.env.PORT);
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+
+// ---------------------------------------------
+// Express App
+// ---------------------------------------------
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
-// ============================================
-// 1️⃣ CORS MUST BE FIRST
-// ============================================
+const stripeController = new StripeController();
 
+// ---------------------------------------------
+// Allowed Origins
+// ---------------------------------------------
 const allowedOrigins = [
   'https://www.quiltplannerpro.com',
   'https://qpp-frontend-production.up.railway.app',
-  'http://localhost:3000',
+  'http://localhost:3000'
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn(`🚫 CORS Blocked Origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
+// ---------------------------------------------
+// CORS Middleware
+// ---------------------------------------------
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+// ---------------------------------------------
+// Stripe Webhook (MUST use raw)
+// ---------------------------------------------
+app.post(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  (req, res) => stripeController.handleWebhook(req, res)
 );
 
-app.options('*', cors());
+// ---------------------------------------------
+// JSON Body Parsing
+// ---------------------------------------------
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-// ============================================
-// 2️⃣ JSON Body Parser (NO express.raw())
-// ============================================
-
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// ============================================
-// 3️⃣ Health Route
-// ============================================
-
-app.get('/health', (_req: Request, res: Response) => {
+// ---------------------------------------------
+// Health Check
+// ---------------------------------------------
+app.get("/health", (_req: Request, res: Response) => {
   res.json({
-    status: 'ok',
-    message: 'QuiltPlannerPro API is running',
+    status: "ok",
+    message: "QuiltPlannerPro API running",
     timestamp: new Date().toISOString(),
   });
 });
 
-// ============================================
-// 4️⃣ API Routes
-// ============================================
+// ---------------------------------------------
+// API Routes
+// ---------------------------------------------
+app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/patterns", patternRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/stripe", stripeRoutes);
 
-app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/patterns', patternRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/stripe', stripeRoutes);
+console.log("✅ Routes registered:");
+console.log("   → /api/auth");
+console.log("   → /api/user");
+console.log("   → /api/patterns");
+console.log("   → /api/admin");
+console.log("   → /api/stripe");
 
-// ============================================
-// 5️⃣ 404 Handler
-// ============================================
-
+// ---------------------------------------------
+// 404 Handler
+// ---------------------------------------------
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
@@ -81,25 +113,25 @@ app.use((req: Request, res: Response) => {
   });
 });
 
-// ============================================
-// 6️⃣ Error Handler
-// ============================================
-
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('❌ Unhandled error:', err);
+// ---------------------------------------------
+// Global Error Handler
+// ---------------------------------------------
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error("💥 Unhandled Error:", err);
 
   res.status(500).json({
     success: false,
-    message: 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { error: err.message }),
+    message: "Internal server error",
+    ...(process.env.NODE_ENV === "development" && { error: err.message }),
   });
 });
 
-// ============================================
-// 7️⃣ Start Server
-// ============================================
-
+// ---------------------------------------------
+// Start Server
+// ---------------------------------------------
 app.listen(port, () => {
-  console.log(`⚡ Server running on port ${port}`);
+  console.log(`⚡ API listening on port ${port}`);
+  console.log(`⚡ Health check → http://localhost:${port}/health`);
+
   initializeCronJobs();
 });
