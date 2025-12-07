@@ -47,6 +47,21 @@ app.use(
   })
 );
 
+/* -----------------------------------------------------
+   ❌ Allow CORS for all routes (temporary workaround)
+----------------------------------------------------- */
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // Allow OPTIONS for all routes (important for preflight)
 app.options('*', cors());
 
@@ -91,6 +106,7 @@ console.log('   /api/user');
 console.log('   /api/patterns');
 console.log('   /api/admin');
 console.log('   /api/stripe');
+
 
 /* -----------------------------------------------------
    ❌ 404 Not Found Handler
