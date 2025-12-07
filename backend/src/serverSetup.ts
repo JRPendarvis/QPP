@@ -45,7 +45,8 @@ app.use(
 );
 
 // Needed for preflight
-app.options("*", cors());
+app.options('/', cors());
+app.options('/api/*', cors());
 
 // -------------------------------------
 // Stripe webhook (must use raw body)
