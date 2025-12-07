@@ -64,7 +64,6 @@ export class PDFService {
              .text('Pattern Visualization')
              .moveDown(0.5);
 
-          // Parse SVG to extract rectangles and draw them
           try {
             this.drawSVGPattern(doc, pattern.visualSvg);
             doc.moveDown(1.5);
@@ -117,7 +116,6 @@ export class PDFService {
 
         pattern.instructions.forEach((instruction, index) => {
           const stepNumber = `${index + 1}.`;
-          const stepText = instruction;
           
           // Check if we need a new page
           if (doc.y > 700) {
@@ -127,7 +125,7 @@ export class PDFService {
           doc.font('Helvetica-Bold')
              .text(stepNumber, { continued: true })
              .font('Helvetica')
-             .text(` ${stepText}`, { align: 'justify' })
+             .text(` ${instruction}`, { align: 'justify' })
              .moveDown(0.5);
         });
 
@@ -154,18 +152,17 @@ export class PDFService {
     });
   }
 
-  private drawSVGPattern(doc: PDFDocument, svgString: string): void {
+  private drawSVGPattern(doc: InstanceType<typeof PDFDocument>, svgString: string): void {
     // Extract rect elements from SVG
     const rectMatches = svgString.matchAll(/<rect[^>]+>/g);
     
-    const startX = 200; // Center on page
+    const startX = 200; // Center offset
     const startY = doc.y;
-    const scale = 0.8; // Scale down to fit nicely
+    const scale = 0.8;
 
     for (const match of rectMatches) {
       const rect = match[0];
       
-      // Extract attributes
       const xMatch = rect.match(/x=['"]([^'"]+)['"]/);
       const yMatch = rect.match(/y=['"]([^'"]+)['"]/);
       const widthMatch = rect.match(/width=['"]([^'"]+)['"]/);
@@ -179,13 +176,12 @@ export class PDFService {
         const height = parseFloat(heightMatch[1]) * scale;
         const fill = fillMatch[1];
 
-        // Draw rectangle
         doc.rect(x, y, width, height)
            .fillAndStroke(fill, '#000000');
       }
     }
 
-    // Move cursor down past the visualization
-    doc.y = startY + 320; // Approximate height of pattern
+    // Move cursor past visualization
+    doc.y = startY + 320;
   }
 }
