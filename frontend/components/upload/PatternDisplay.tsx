@@ -1,7 +1,8 @@
-'use client';
+ 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 
 interface QuiltPattern {
   id?: string;
@@ -96,18 +97,10 @@ export default function PatternDisplay({
     setDownloading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
+      // Use cookie-based auth; server uses httpOnly cookie set at login
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/patterns/${pattern.id}/download`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -156,9 +149,10 @@ export default function PatternDisplay({
       {/* SVG Visualization */}
       {pattern.visualSvg && pattern.visualSvg.includes('svg') && (
         <div className="bg-gray-50 rounded-lg p-6 flex justify-center">
-          <div 
+          <div
             className="max-w-md w-full"
-            dangerouslySetInnerHTML={{ __html: pattern.visualSvg }}
+            // Sanitize incoming SVG to prevent XSS
+            dangerouslySetInnerHTML={{ __html: useMemo(() => DOMPurify.sanitize(pattern.visualSvg, { SAFE_FOR_TEMPLATES: true }), [pattern.visualSvg]) }}
           />
         </div>
       )}

@@ -71,7 +71,8 @@ export class FeedbackController {
       const { id } = req.params;
       const feedbackId = id;
 
-      const existing = await prisma.feedbackVote.findUnique({ where: { userId_feedbackId: { userId, feedbackId } as any } });
+      // Use findFirst to avoid relying on the generated composite unique name
+      const existing = await prisma.feedbackVote.findFirst({ where: { userId, feedbackId } });
 
       if (existing) {
         // remove vote

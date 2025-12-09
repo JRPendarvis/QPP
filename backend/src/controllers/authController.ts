@@ -36,10 +36,20 @@ export class AuthController {
 
       const result = await authService.register({ email, password, name });
 
+      // Set httpOnly cookie with JWT
+      const token = result.token;
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      // Return user info without token in body
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
-        data: result
+        data: { user: result.user }
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -71,10 +81,20 @@ export class AuthController {
 
       const result = await authService.login({ email, password });
 
+      // Set httpOnly cookie with JWT
+      const token = result.token;
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      // Return user info without token in body
       res.status(200).json({
         success: true,
         message: 'Login successful',
-        data: result
+        data: { user: result.user }
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -88,6 +108,21 @@ export class AuthController {
           message: 'Internal server error'
         });
       }
+    }
+  }
+
+  // POST /api/auth/logout
+  async logout(req: Request, res: Response) {
+    try {
+      res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+      res.json({ success: true, message: 'Logged out' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ success: false, message: 'Failed to logout' });
     }
   }
 }

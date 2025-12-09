@@ -24,15 +24,28 @@ export const authenticate = async (
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    let token: string | undefined;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    } else if (req.headers.cookie) {
+      // Parse cookie header for `token`
+      const cookies = req.headers.cookie.split(';').map((c) => c.trim());
+      for (const c of cookies) {
+        const [k, v] = c.split('=');
+        if (k === 'token') {
+          token = decodeURIComponent(v || '');
+          break;
+        }
+      }
+    }
+
+    if (!token) {
       return res.status(401).json({
         success: false,
         message: 'No token provided. Please login.'
       });
     }
-
-    // Extract token (remove "Bearer " prefix)
-    const token = authHeader.substring(7);
 
     // Verify token
     const decoded = authService.verifyToken(token);

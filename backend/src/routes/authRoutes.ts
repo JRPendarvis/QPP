@@ -11,4 +11,7 @@ router.post('/register', registerLimiter, (req, res) => authController.register(
 // POST /api/auth/login
 router.post('/login', loginLimiter, (req, res) => authController.login(req, res));
 
+// POST /api/auth/logout
+router.post('/logout', (req, res) => authController.logout?.(req, res));
+
 export default router;

@@ -28,26 +28,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check if user is logged in on mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    let isMounted = true;
 
-    if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get('/api/user/profile');
+        if (isMounted && res.data?.success) {
+          setUser(res.data.data);
+        }
+      } catch (err) {
+        // Not logged in or session expired
+        setUser(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchProfile();
+
+    return () => { isMounted = false; };
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       const response = await api.post('/api/auth/login', { email, password });
-      
-      if (response.data.success) {
-        const { user, token } = response.data.data;
-        
-        // Store token and user in localStorage
-        localStorage.setItem('token', token);
+      if (response.data?.success) {
+        const user = response.data.data.user;
+        // Server sets httpOnly cookie; store only user info client-side
         localStorage.setItem('user', JSON.stringify(user));
-        
         setUser(user);
         router.push('/dashboard');
       }
@@ -58,19 +66,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (email: string, password: string, name?: string) => {
     try {
-      const response = await api.post('/api/auth/register', {
-        email,
-        password,
-        name,
-      });
-
-      if (response.data.success) {
-        const { user, token } = response.data.data;
-        
-        // Store token and user in localStorage
-        localStorage.setItem('token', token);
+      const response = await api.post('/api/auth/register', { email, password, name });
+      if (response.data?.success) {
+        const user = response.data.data.user;
         localStorage.setItem('user', JSON.stringify(user));
-        
         setUser(user);
         router.push('/dashboard');
       }
@@ -80,10 +79,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    router.push('/login');
+    // Call server to clear httpOnly cookie
+    api.post('/api/auth/logout').finally(() => {
+      localStorage.removeItem('user');
+      setUser(null);
+      router.push('/login');
+    });
   };
 
   return (
