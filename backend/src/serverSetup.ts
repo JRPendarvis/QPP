@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import stripeRoutes from "./routes/stripeRoutes";
 import patternRoutes from "./routes/patternRoutes";
+import feedbackRoutes from "./routes/feedbackRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import { StripeController } from "./controllers/stripeController";
 import { initializeCronJobs } from "./jobs/cronJobs";
@@ -87,6 +88,7 @@ app.get("/health", (_req: Request, res: Response) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/patterns", patternRoutes);
+app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/stripe", stripeRoutes);
 

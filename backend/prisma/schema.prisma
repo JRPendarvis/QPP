@@ -34,7 +34,9 @@ model User {
     patterns             Pattern[] // ✅ Add this line if missing
 
     // Quilter profile
-    skillLevel String @default("beginner") // beginner, advanced_beginner, intermediate, advanced, expert
+    skillLevel    String         @default("beginner") // beginner, advanced_beginner, intermediate, advanced, expert
+    feedbacks     Feedback[]
+    feedbackVotes FeedbackVote[]
 
     @@map("users")
 }
@@ -50,4 +52,32 @@ model Pattern {
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@map("patterns")
+}
+
+// Feedback / roadmap suggestions
+model Feedback {
+    id          String   @id @default(cuid())
+    title       String
+    description String?
+    authorId    String? // Optional link to User
+    votesCount  Int      @default(0)
+    createdAt   DateTime @default(now())
+
+    author User?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
+    votes  FeedbackVote[]
+
+    @@map("feedback")
+}
+
+model FeedbackVote {
+    id         String   @id @default(cuid())
+    userId     String
+    feedbackId String
+    createdAt  DateTime @default(now())
+
+    user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    feedback Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, feedbackId])
+    @@map("feedback_votes")
 }
