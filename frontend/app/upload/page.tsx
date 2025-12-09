@@ -65,10 +65,30 @@ const PATTERN_OPTIONS: Record<string, { id: string; name: string }[]> = {
   ],
 };
 
+interface UserProfile {
+  skillLevel: string;
+  subscriptionTier: string;
+  usage?: {
+    used: number;
+    limit: number;
+    remaining: number;
+    generations: {
+      used: number;
+      limit: number;
+      remaining: number;
+    };
+    downloads: {
+      used: number;
+      limit: number;
+      remaining: number;
+    };
+  };
+}
+
 export default function UploadPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [patternChoice, setPatternChoice] = useState<'auto' | 'manual'>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
@@ -94,21 +114,27 @@ export default function UploadPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get('/api/user/profile');
+        if (isMounted && response.data.success) {
+          setProfile(response.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      }
+    };
+
     if (user) {
       fetchProfile();
     }
-  }, [user]);
 
-  const fetchProfile = async () => {
-    try {
-      const response = await api.get('/api/user/profile');
-      if (response.data.success) {
-        setProfile(response.data.data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch profile:', err);
-    }
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   const handleGenerateClick = () => {
     if (profile) {
@@ -138,13 +164,7 @@ export default function UploadPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-2">Upload Your Fabric Images</h2>
           
-          <p className="text-gray-600 mb-6">
-            Upload {MIN_FABRICS}-{MAX_FABRICS} fabric images to generate your quilt pattern. 
-            Supported formats: JPG, PNG, WEBP
-          </p>
-
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
               {error}
@@ -152,27 +172,12 @@ export default function UploadPage() {
           )}
 
           {!pattern && (
-            <FabricDropzone
-              onFilesAdded={handleFilesAdded}
-              currentCount={fabrics.length}
-              maxFiles={MAX_FABRICS}
-            />
-          )}
-
-          {fabrics.length > 0 && !pattern && (
             <>
-              <FabricPreviewGrid
-                previews={previews}
-                fabrics={fabrics}
-                onRemove={removeFabric}
-                onClearAll={clearAll}
-              />
-
-              {/* Pattern Selection Section */}
-              <div className="mt-6 bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Choose Your Pattern Style
-                </h3>
+              {/* STEP 1: Pattern Selection Section - NOW FIRST */}
+              <div className="mb-8 bg-white border border-gray-200 rounded-lg p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Step 1: Choose Your Pattern Style
+                </h2>
 
                 {/* Pattern Choice Radio Buttons */}
                 <div className="space-y-4 mb-6">
@@ -209,7 +214,7 @@ export default function UploadPage() {
                     />
                     <div className="flex-1">
                       <div className="font-medium text-gray-900 mb-2">
-                        I'll Choose My Pattern
+                        I&apos;ll Choose My Pattern
                       </div>
                       
                       {patternChoice === 'manual' && (
@@ -219,9 +224,9 @@ export default function UploadPage() {
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         >
                           <option value="">Select a pattern...</option>
-                          {PATTERN_OPTIONS[currentSkill]?.map((pattern) => (
-                            <option key={pattern.id} value={pattern.id}>
-                              {pattern.name}
+                          {PATTERN_OPTIONS[targetSkill]?.map((patternOption) => (
+                            <option key={patternOption.id} value={patternOption.id}>
+                              {patternOption.name}
                             </option>
                           ))}
                         </select>
@@ -252,16 +257,47 @@ export default function UploadPage() {
                 </label>
               </div>
 
-              <GenerateButton
-                onClick={handleGenerateClick}
-                disabled={
-                  fabrics.length < MIN_FABRICS || 
-                  generating || 
-                  (patternChoice === 'manual' && !selectedPattern)
-                }
-                generating={generating}
-                fabricCount={fabrics.length}
-              />
+              {/* STEP 2: Upload Section - NOW SECOND */}
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">
+                  Step 2: Upload Your Fabric Images
+                </h2>
+                
+                <p className="text-gray-600 mb-6">
+                  Upload {MIN_FABRICS}-{MAX_FABRICS} fabric images to generate your quilt pattern. 
+                  Supported formats: JPG, PNG, WEBP
+                </p>
+
+                <FabricDropzone
+                  onFilesAdded={handleFilesAdded}
+                  currentCount={fabrics.length}
+                  maxFiles={MAX_FABRICS}
+                />
+              </div>
+
+              {/* Fabric Preview Grid */}
+              {fabrics.length > 0 && (
+                <FabricPreviewGrid
+                  previews={previews}
+                  fabrics={fabrics}
+                  onRemove={removeFabric}
+                  onClearAll={clearAll}
+                />
+              )}
+
+              {/* Generate Button */}
+              {fabrics.length >= MIN_FABRICS && (
+                <GenerateButton
+                  onClick={handleGenerateClick}
+                  disabled={
+                    fabrics.length < MIN_FABRICS || 
+                    generating || 
+                    (patternChoice === 'manual' && !selectedPattern)
+                  }
+                  generating={generating}
+                  fabricCount={fabrics.length}
+                />
+              )}
             </>
           )}
 

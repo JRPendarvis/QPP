@@ -13,19 +13,17 @@ const SKILL_LEVELS: Record<string, string> = {
   expert: 'Expert',
 };
 
-const NEXT_LEVEL: Record<string, string> = {
-  beginner: 'advanced_beginner',
-  advanced_beginner: 'intermediate',
-  intermediate: 'advanced',
-  advanced: 'expert',
-  expert: 'expert',
-};
+interface UserProfile {
+  skillLevel: string;
+  subscriptionTier: string;
+  name?: string;
+  email: string;
+}
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
-  const [profile, setProfile] = useState<any>(null);
-  const [challengeMe, setChallengeMe] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -34,25 +32,30 @@ export default function DashboardPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get('/api/user/profile');
+        if (isMounted && response.data.success) {
+          setProfile(response.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      }
+    };
+
     if (user) {
       fetchProfile();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
-  const fetchProfile = async () => {
-    try {
-      const response = await api.get('/api/user/profile');
-      if (response.data.success) {
-        setProfile(response.data.data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch profile:', err);
-    }
-  };
-
   const handleStartDesign = () => {
-    // Pass challengeMe state to upload page via URL params
-    router.push(`/upload?challenge=${challengeMe ? 'true' : 'false'}`);
+    router.push('/upload');
   };
 
   if (loading || !profile) {
@@ -68,8 +71,6 @@ export default function DashboardPage() {
   }
 
   const currentSkill = profile.skillLevel || 'beginner';
-  const targetSkill = challengeMe ? NEXT_LEVEL[currentSkill] : currentSkill;
-  const isMaxLevel = currentSkill === 'expert';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -104,43 +105,6 @@ export default function DashboardPage() {
             <p><strong>Skill Level:</strong> {SKILL_LEVELS[currentSkill]}</p>
           </div>
 
-          {/* Challenge Me Option */}
-          <div className="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-6">
-            <div className="flex items-start">
-              <div className="flex items-center h-5 mt-1">
-                <input
-                  id="challengeMe"
-                  type="checkbox"
-                  checked={challengeMe}
-                  onChange={(e) => setChallengeMe(e.target.checked)}
-                  disabled={isMaxLevel}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded disabled:opacity-50"
-                />
-              </div>
-              <div className="ml-3">
-                <label htmlFor="challengeMe" className="font-semibold text-indigo-900 text-lg">
-                  Challenge Me! 🚀
-                </label>
-                <p className="text-sm text-indigo-700 mt-1">
-                  {isMaxLevel ? (
-                    <>You're at Expert level - you're ready for any pattern we can generate!</>
-                  ) : challengeMe ? (
-                    <>Generate a <strong>{SKILL_LEVELS[NEXT_LEVEL[currentSkill]]}</strong> level pattern to push your skills</>
-                  ) : (
-                    <>Check this to generate a pattern one level above your current skill ({SKILL_LEVELS[currentSkill]} → {SKILL_LEVELS[NEXT_LEVEL[currentSkill]]})</>
-                  )}
-                </p>
-                {challengeMe && !isMaxLevel && (
-                  <div className="mt-2 p-3 bg-white rounded border border-indigo-300">
-                    <p className="text-xs text-indigo-900">
-                      <strong>Pattern will be:</strong> {SKILL_LEVELS[targetSkill]} level
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
           <button
             onClick={handleStartDesign}
             className="w-full px-6 py-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition"
@@ -152,7 +116,7 @@ export default function DashboardPage() {
             <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
             <ol className="list-decimal list-inside text-blue-800 space-y-1">
               <li>Upload 2-8 fabric images</li>
-              <li>AI generates a {challengeMe && !isMaxLevel ? SKILL_LEVELS[targetSkill] : SKILL_LEVELS[currentSkill]} level quilt pattern</li>
+              <li>AI generates a {SKILL_LEVELS[currentSkill]} level quilt pattern</li>
               <li>Download PDF with instructions</li>
             </ol>
           </div>
