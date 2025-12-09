@@ -15,6 +15,9 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
+// Trust proxy for Railway (required for rate limiting behind proxy)
+app.set('trust proxy', 1);
+
 // Stripe controller
 const stripeController = new StripeController();
 
