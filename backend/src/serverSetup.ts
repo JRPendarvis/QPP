@@ -7,6 +7,7 @@ import stripeRoutes from "./routes/stripeRoutes";
 import patternRoutes from "./routes/patternRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
 import adminRoutes from "./routes/adminRoutes";
+import debugRoutes from "./routes/debugRoutes";
 import { StripeController } from "./controllers/stripeController";
 import { initializeCronJobs } from "./jobs/cronJobs";
 
@@ -96,6 +97,8 @@ app.use("/api/patterns", patternRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/stripe", stripeRoutes);
+// Debug routes (development only)
+app.use("/api/debug", debugRoutes);
 
 console.log("✅ Routes loaded");
 
