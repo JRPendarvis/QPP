@@ -42,6 +42,8 @@ export class AuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
@@ -87,6 +89,8 @@ export class AuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
@@ -115,6 +119,8 @@ export class AuthController {
   async logout(req: Request, res: Response) {
     try {
       res.clearCookie('token', {
+          path: '/',
+          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost',
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
