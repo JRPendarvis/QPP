@@ -27,6 +27,7 @@ const stripeController = new StripeController();
 const allowedOrigins = [
   "https://www.quiltplannerpro.com",
   "https://qpp-frontend-production.up.railway.app",
+  "https://qpp-production.up.railway.app",
   "http://localhost:3000",
 ];
 

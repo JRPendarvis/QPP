@@ -41,7 +41,7 @@ export class AuthController {
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         path: '/',
         domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -88,7 +88,7 @@ export class AuthController {
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         path: '/',
         domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -119,11 +119,11 @@ export class AuthController {
   async logout(req: Request, res: Response) {
     try {
       res.clearCookie('token', {
-          path: '/',
-          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost',
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost',
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       });
       res.json({ success: true, message: 'Logged out' });
     } catch (error) {
