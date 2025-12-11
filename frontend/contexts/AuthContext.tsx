@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import { AxiosError } from 'axios';
 
 interface User {
   id: string;
@@ -19,6 +20,10 @@ interface AuthContextType {
   logout: () => void;
 }
 
+interface ApiErrorResponse {
+  message?: string;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -30,20 +35,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const res = await api.get('/api/user/profile');
         if (isMounted && res.data?.success) {
           setUser(res.data.data);
         }
-      } catch (err) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+      } catch {
         setUser(null);
       } finally {
         if (isMounted) setLoading(false);
@@ -57,50 +54,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await api.post('/api/auth/login', { email, password });
-      if (response.data?.success && response.data?.token) {
-        localStorage.setItem('token', response.data.token);
-        
-        const profileRes = await api.get('/api/user/profile');
-        if (profileRes.data?.success) {
-          const userData = profileRes.data.data;
-          localStorage.setItem('user', JSON.stringify(userData));
-          setUser(userData);
-          router.push('/dashboard');
-        }
+      if (response.data?.success && response.data?.data?.user) {
+        const userData = response.data.data.user;
+        setUser(userData);
+        router.push('/dashboard');
       } else {
-        throw new Error('Login failed - no token received');
+        throw new Error('Login failed');
       }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Login failed');
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      throw new Error(axiosError.response?.data?.message || 'Login failed');
     }
   };
 
   const register = async (email: string, password: string, name?: string) => {
     try {
       const response = await api.post('/api/auth/register', { email, password, name });
-      if (response.data?.success && response.data?.token) {
-        localStorage.setItem('token', response.data.token);
-        
-        const profileRes = await api.get('/api/user/profile');
-        if (profileRes.data?.success) {
-          const userData = profileRes.data.data;
-          localStorage.setItem('user', JSON.stringify(userData));
-          setUser(userData);
-          router.push('/dashboard');
-        }
+      if (response.data?.success && response.data?.data?.user) {
+        const userData = response.data.data.user;
+        setUser(userData);
+        router.push('/dashboard');
       } else {
-        throw new Error('Registration failed - no token received');
+        throw new Error('Registration failed');
       }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      throw new Error(axiosError.response?.data?.message || 'Registration failed');
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    router.push('/login');
+    api.post('/api/auth/logout').finally(() => {
+      setUser(null);
+      router.push('/login');
+    });
   };
 
   return (
