@@ -85,12 +85,6 @@ export default function DashboardPage() {
               Profile
             </button>
             <button
-              onClick={() => router.push('/dashboard/feedback')}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Feedback
-            </button>
-            <button
               onClick={() => router.push('/pricing')}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
