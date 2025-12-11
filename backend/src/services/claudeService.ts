@@ -286,45 +286,46 @@ Provide this JSON response:
     }
   }
 
-  private generateSvgFromTemplate(patternType: string, colors: string[]): string {
-    // Get template or default to simple squares
-    let template = SVG_TEMPLATES[patternType] || SVG_TEMPLATES['Simple Squares'];
-    
-    // Ensure we have at least 3 colors
-    while (colors.length < 3) {
-      colors.push(colors[0] || '#888888');
+private generateSvgFromTemplate(patternType: string, colors: string[]): string {
+  // Get template or default to simple squares
+  const baseTemplate = SVG_TEMPLATES[patternType] || SVG_TEMPLATES['Simple Squares'];
+  
+  // Ensure we have at least 2 colors
+  if (colors.length < 2) {
+    colors = [...colors, '#4A90A4', '#D4A574', '#8B7355'];
+  }
+  
+  // Build 4x4 grid using ALL colors
+  let blocks = '';
+  let colorIndex = 0;
+  
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 4; col++) {
+      const x = col * 100;
+      const y = row * 100;
+      
+      // Cycle through all available colors
+      const color1 = colors[colorIndex % colors.length];
+      const color2 = colors[(colorIndex + 1) % colors.length];
+      const color3 = colors[(colorIndex + 2) % colors.length];
+      
+      // Replace color placeholders in template
+      const blockTemplate = baseTemplate
+        .replace(/COLOR1/g, color1)
+        .replace(/COLOR2/g, color2)
+        .replace(/COLOR3/g, color3);
+      
+      blocks += `  <g transform="translate(${x},${y})">\n    ${blockTemplate.trim()}\n  </g>\n`;
+      
+      // Move to next color for variety
+      colorIndex++;
     }
-    
-    // Replace color placeholders
-    template = template.replace(/COLOR1/g, colors[0]);
-    template = template.replace(/COLOR2/g, colors[1]);
-    template = template.replace(/COLOR3/g, colors[2] || colors[0]);
-    
-    // Build 4x4 grid
-    let blocks = '';
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 4; col++) {
-        const x = col * 100;
-        const y = row * 100;
-        
-        // Alternate pattern for visual interest
-        let blockTemplate = template;
-        if ((row + col) % 2 === 1) {
-          // Swap colors for alternating blocks
-          blockTemplate = template
-            .replace(new RegExp(colors[0], 'g'), 'TEMP_COLOR')
-            .replace(new RegExp(colors[1], 'g'), colors[0])
-            .replace(/TEMP_COLOR/g, colors[1]);
-        }
-        
-        blocks += `  <g transform="translate(${x},${y})">\n    ${blockTemplate.trim()}\n  </g>\n`;
-      }
-    }
-    
-    return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  }
+  
+  return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <rect width="400" height="400" fill="#f8f8f8"/>
 ${blocks}</svg>`;
-  }
+}
 
   private formatPatternName(patternId: string): string {
     const patternNames: Record<string, string> = {
