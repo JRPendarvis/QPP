@@ -2,13 +2,15 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import api from '@/lib/api';
 
 const pricingTiers = [
   {
     name: 'Free',
+    id: 'free',
     price: { monthly: 0, annual: 0 },
-    patterns: '1 lifetime',
+    patterns: '3 lifetime',
     features: [
       'Basic pattern generation',
       'Standard patterns only',
@@ -20,21 +22,23 @@ const pricingTiers = [
   },
   {
     name: 'Hobbyist',
+    id: 'basic',
     price: { monthly: 5.99, annual: 59.99 },
-    patterns: '2 per month',
+    patterns: '10 per month',
     features: [
       'Skill level matching',
       'Advanced patterns',
       'Priority email support'
     ],
     popular: false,
-    buttonText: 'Start Free Trial',
-    buttonAction: 'upgrade'
+    buttonText: 'Choose Plan',
+    buttonAction: 'subscribe'
   },
   {
     name: 'Enthusiast',
+    id: 'intermediate',
     price: { monthly: 9.99, annual: 94.99 },
-    patterns: '10 per month',
+    patterns: '30 per month',
     features: [
       'All Hobbyist features',
       'Expert-level patterns',
@@ -43,13 +47,14 @@ const pricingTiers = [
       'PDF downloads'
     ],
     popular: true,
-    buttonText: 'Start Free Trial',
-    buttonAction: 'upgrade'
+    buttonText: 'Choose Plan',
+    buttonAction: 'subscribe'
   },
   {
     name: 'Pro',
+    id: 'advanced',
     price: { monthly: 19.99, annual: 199.99 },
-    patterns: '25 patterns',
+    patterns: '100 per month',
     features: [
       'Everything included',
       'Commercial use rights',
@@ -57,14 +62,16 @@ const pricingTiers = [
       'Dedicated support'
     ],
     popular: false,
-    buttonText: 'Start Free Trial',
-    buttonAction: 'upgrade'
+    buttonText: 'Choose Plan',
+    buttonAction: 'subscribe'
   }
 ];
 
 export default function PricingPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -72,14 +79,32 @@ export default function PricingPage() {
     }
   }, [user, loading]);
 
-  const handleButtonClick = (action: string) => {
+  const handleButtonClick = async (action: string, tierId: string) => {
     if (action === 'register') {
       router.push('/register');
-    } else if (action === 'upgrade') {
-      if (user) {
-        router.push('/profile'); // Could be a billing/profile page
-      } else {
+    } else if (action === 'subscribe') {
+      if (!user) {
         router.push('/register');
+        return;
+      }
+
+      setLoadingTier(tierId);
+      try {
+        const response = await api.post('/api/stripe/create-checkout-session', {
+          tier: tierId,
+          interval: billingInterval
+        });
+
+        if (response.data.success && response.data.url) {
+          window.location.href = response.data.url;
+        } else {
+          alert('Failed to create checkout session');
+        }
+      } catch (error) {
+        console.error('Checkout error:', error);
+        alert('Failed to start checkout process');
+      } finally {
+        setLoadingTier(null);
       }
     }
   };
@@ -141,10 +166,31 @@ export default function PricingPage() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             Start with our free tier or upgrade to unlock more patterns, advanced features, and priority support.
             All plans include a 14-day free trial.
           </p>
+
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>
+              Monthly
+            </span>
+            <button
+              onClick={() => setBillingInterval(billingInterval === 'monthly' ? 'yearly' : 'monthly')}
+              className="relative inline-flex h-6 w-11 items-center rounded-full bg-indigo-600 transition-colors"
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  billingInterval === 'yearly' ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className={`text-sm font-medium ${billingInterval === 'yearly' ? 'text-gray-900' : 'text-gray-500'}`}>
+              Yearly
+              <span className="ml-1 text-xs text-green-600 font-normal">Save up to 21%</span>
+            </span>
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -170,13 +216,20 @@ export default function PricingPage() {
                 <div className="mb-4">
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <span className="text-3xl font-bold text-gray-900">
-                      ${tier.price.monthly}
+                      ${billingInterval === 'monthly' ? tier.price.monthly : (tier.price.annual / 12).toFixed(2)}
                     </span>
                     <span className="text-gray-600">/month</span>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    or ${tier.price.annual}/year (save ~${((tier.price.monthly * 12) - tier.price.annual).toFixed(2)})
-                  </div>
+                  {billingInterval === 'yearly' && tier.price.annual > 0 && (
+                    <div className="text-sm text-gray-600">
+                      ${tier.price.annual}/year (save ~${((tier.price.monthly * 12) - tier.price.annual).toFixed(2)})
+                    </div>
+                  )}
+                  {billingInterval === 'monthly' && tier.price.annual > 0 && (
+                    <div className="text-sm text-gray-600">
+                      or ${tier.price.annual}/year (save ~${((tier.price.monthly * 12) - tier.price.annual).toFixed(2)})
+                    </div>
+                  )}
                 </div>
 
                 <div className="text-sm text-gray-600 mb-4">
@@ -187,7 +240,7 @@ export default function PricingPage() {
               <ul className="space-y-3 mb-6">
                 {tier.features.map((feature, index) => (
                   <li key={index} className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     <span className="text-sm text-gray-700">{feature}</span>
@@ -196,14 +249,15 @@ export default function PricingPage() {
               </ul>
 
               <button
-                onClick={() => handleButtonClick(tier.buttonAction)}
+                onClick={() => handleButtonClick(tier.buttonAction, tier.id)}
+                disabled={loadingTier === tier.id}
                 className={`w-full py-3 px-4 rounded-md font-medium transition ${
                   tier.popular
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-400'
+                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:bg-gray-300'
                 }`}
               >
-                {tier.buttonText}
+                {loadingTier === tier.id ? 'Processing...' : tier.buttonText}
               </button>
             </div>
           ))}
