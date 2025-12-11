@@ -36,6 +36,14 @@ export class AuthController {
 
       const result = await authService.register({ email, password, name });
 
+      // Set httpOnly cookie with the token
+      res.cookie('token', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+
       // Return user info WITH token in body
       res.status(201).json({
         success: true,
@@ -73,6 +81,14 @@ export class AuthController {
 
       const result = await authService.login({ email, password });
 
+      // Set httpOnly cookie with the token
+      res.cookie('token', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+
       // Return user info WITH token in body
       res.status(200).json({
         success: true,
@@ -98,6 +114,8 @@ export class AuthController {
   // POST /api/auth/logout
   async logout(req: Request, res: Response) {
     try {
+      // Clear the httpOnly cookie
+      res.clearCookie('token');
       res.json({ success: true, message: 'Logged out' });
     } catch (error) {
       console.error('Logout error:', error);
