@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { AxiosError } from 'axios';
+import { AUTH_CONSTANTS, ROUTES } from '@/lib/constants';
 
 interface User {
   id: string;
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem(AUTH_CONSTANTS.TOKEN_KEY);
       if (!token) {
         setLoading(false);
         return;
@@ -47,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(res.data.data);
         }
       } catch {
-        localStorage.removeItem('token');
+        localStorage.removeItem(AUTH_CONSTANTS.TOKEN_KEY);
         setUser(null);
       } finally {
         if (isMounted) setLoading(false);
@@ -62,10 +63,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await api.post('/api/auth/login', { email, password });
       if (response.data?.success && response.data?.token) {
-        localStorage.setItem('token', response.data.token);
+        localStorage.setItem(AUTH_CONSTANTS.TOKEN_KEY, response.data.token);
         const userData = response.data.data.user;
         setUser(userData);
-        router.push('/dashboard');
+        router.push(ROUTES.DASHBOARD);
       } else {
         throw new Error('Login failed');
       }
@@ -79,10 +80,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await api.post('/api/auth/register', { email, password, name });
       if (response.data?.success && response.data?.token) {
-        localStorage.setItem('token', response.data.token);
+        localStorage.setItem(AUTH_CONSTANTS.TOKEN_KEY, response.data.token);
         const userData = response.data.data.user;
         setUser(userData);
-        router.push('/dashboard');
+        router.push(ROUTES.DASHBOARD);
       } else {
         throw new Error('Registration failed');
       }
@@ -93,9 +94,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem(AUTH_CONSTANTS.TOKEN_KEY);
     setUser(null);
-    router.push('/login');
+    router.push(ROUTES.LOGIN);
   };
 
   return (

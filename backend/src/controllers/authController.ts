@@ -1,7 +1,18 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/authService';
+import { AUTH_CONSTANTS } from '../config/constants';
 
 const authService = new AuthService();
+
+// Helper function to set auth cookie
+const setAuthCookie = (res: Response, token: string) => {
+  res.cookie(AUTH_CONSTANTS.COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: AUTH_CONSTANTS.COOKIE_MAX_AGE
+  });
+};
 
 export class AuthController {
   // POST /api/auth/register
@@ -18,31 +29,25 @@ export class AuthController {
       }
 
       // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
+      if (!AUTH_CONSTANTS.EMAIL_REGEX.test(email)) {
         return res.status(400).json({
           success: false,
           message: 'Invalid email format'
         });
       }
 
-      // Password strength validation (min 8 characters)
-      if (password.length < 8) {
+      // Password strength validation
+      if (password.length < AUTH_CONSTANTS.PASSWORD_MIN_LENGTH) {
         return res.status(400).json({
           success: false,
-          message: 'Password must be at least 8 characters long'
+          message: `Password must be at least ${AUTH_CONSTANTS.PASSWORD_MIN_LENGTH} characters long`
         });
       }
 
       const result = await authService.register({ email, password, name });
 
       // Set httpOnly cookie with the token
-      res.cookie('token', result.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      });
+      setAuthCookie(res, result.token);
 
       // Return user info WITH token in body
       res.status(201).json({
@@ -82,12 +87,7 @@ export class AuthController {
       const result = await authService.login({ email, password });
 
       // Set httpOnly cookie with the token
-      res.cookie('token', result.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      });
+      setAuthCookie(res, result.token);
 
       // Return user info WITH token in body
       res.status(200).json({
@@ -115,7 +115,7 @@ export class AuthController {
   async logout(req: Request, res: Response) {
     try {
       // Clear the httpOnly cookie
-      res.clearCookie('token');
+      res.clearCookie(AUTH_CONSTANTS.COOKIE_NAME);
       res.json({ success: true, message: 'Logged out' });
     } catch (error) {
       console.error('Logout error:', error);

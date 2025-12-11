@@ -10,29 +10,18 @@ import adminRoutes from "./routes/adminRoutes";
 import debugRoutes from "./routes/debugRoutes";
 import { StripeController } from "./controllers/stripeController";
 import { initializeCronJobs } from "./jobs/cronJobs";
+import { SERVER_CONSTANTS, CORS_ORIGINS } from "./config/constants";
 
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || SERVER_CONSTANTS.DEFAULT_PORT;
 
 // Trust proxy for Railway (required for rate limiting behind proxy)
-app.set('trust proxy', 1);
+app.set('trust proxy', SERVER_CONSTANTS.TRUST_PROXY);
 
 // Stripe controller
 const stripeController = new StripeController();
-
-// -------------------------------------
-// Allowed CORS origins
-// -------------------------------------
-const allowedOrigins = [
-  "https://www.quiltplannerpro.com",
-  "https://qpp-frontend-production.up.railway.app",
-  "https://qpp-production.up.railway.app",
-  "http://localhost:3000",
-];
-
-console.log("🔍 Allowed CORS origins:", allowedOrigins);
 
 // -------------------------------------
 // CORS
@@ -40,7 +29,7 @@ console.log("🔍 Allowed CORS origins:", allowedOrigins);
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || CORS_ORIGINS.includes(origin)) {
         return callback(null, true);
       }
       console.warn("🚫 BLOCKED ORIGIN:", origin);

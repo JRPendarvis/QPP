@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { AUTH_CONSTANTS } from '../config/constants';
 
 const prisma = new PrismaClient();
 
@@ -94,7 +95,7 @@ export class AuthService {
   // Generate JWT token
   private generateToken(userId: string, email: string): string {
     const secret = process.env.JWT_SECRET;
-    
+
     if (!secret) {
       throw new Error('JWT_SECRET is not defined in environment variables');
     }
@@ -102,7 +103,7 @@ export class AuthService {
     return jwt.sign(
       { userId, email },
       secret,
-      { expiresIn: '7d' } // Token expires in 7 days
+      { expiresIn: AUTH_CONSTANTS.JWT_EXPIRY }
     );
   }
 
