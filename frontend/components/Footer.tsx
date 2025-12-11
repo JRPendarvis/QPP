@@ -42,6 +42,11 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Legal</h3>
             <ul className="space-y-2 text-sm">
               <li>
+                <Link href="/legal" className="text-gray-300 hover:text-white transition">
+                  All Legal Documents
+                </Link>
+              </li>
+              <li>
                 <Link href="/legal/terms-of-service" className="text-gray-300 hover:text-white transition">
                   Terms of Service
                 </Link>
@@ -54,11 +59,6 @@ export default function Footer() {
               <li>
                 <Link href="/legal/refund-policy" className="text-gray-300 hover:text-white transition">
                   Refund Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/legal/pricing-structure" className="text-gray-300 hover:text-white transition">
-                  Pricing Structure
                 </Link>
               </li>
             </ul>
