@@ -25,8 +25,7 @@ const pricingTiers = [
     features: [
       'Skill level matching',
       'Advanced patterns',
-      'Priority email support',
-      'Pattern customization'
+      'Priority email support'
     ],
     popular: false,
     buttonText: 'Start Free Trial',
@@ -55,7 +54,6 @@ const pricingTiers = [
       'Everything included',
       'Commercial use rights',
       'API access (coming soon)',
-      'White-label options',
       'Dedicated support'
     ],
     popular: false,
