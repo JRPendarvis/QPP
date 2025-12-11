@@ -29,7 +29,7 @@ export default function FabricPreviewGrid({
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {previews.map((preview, index) => (
-          <div key={index} className="relative group">
+          <div key={index} className="relative">
             <div className="aspect-square rounded-lg overflow-hidden border border-gray-200">
               <img
                 src={preview}
@@ -39,7 +39,7 @@ export default function FabricPreviewGrid({
             </div>
             <button
               onClick={() => onRemove(index)}
-              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md transition-colors"
             >
               <svg
                 className="w-4 h-4"
