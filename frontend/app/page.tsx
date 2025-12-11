@@ -112,37 +112,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Welcome back!</h2>
-          
-          <div className="space-y-2">
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Name:</strong> {user.name || 'Not set'}</p>
-            <p><strong>Subscription:</strong> <span className="capitalize">{user.subscriptionTier}</span></p>
-          </div>
-
-          <div className="mt-6">
-            <button
-              onClick={() => router.push('/upload')}
-              className="w-full px-6 py-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition"
-            >
-              Start New Quilt Design
-            </button>
-            
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
-              <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
-              <ol className="list-decimal list-inside text-blue-800 space-y-1">
-                <li>Upload 2-8 fabric images</li>
-                <li>AI generates a custom quilt pattern</li>
-                <li>Download PDF with instructions</li>
-              </ol>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
