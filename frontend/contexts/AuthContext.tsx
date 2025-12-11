@@ -31,13 +31,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     const fetchProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await api.get('/api/user/profile');
         if (isMounted && res.data?.success) {
           setUser(res.data.data);
         }
       } catch (err) {
-        // Not logged in or session expired
+        // Token invalid or expired
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         setUser(null);
       } finally {
         if (isMounted) setLoading(false);
@@ -52,12 +60,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await api.post('/api/auth/login', { email, password });
-      if (response.data?.success) {
-        const user = response.data.data.user;
-        // Server sets httpOnly cookie; store only user info client-side
-        localStorage.setItem('user', JSON.stringify(user));
-        setUser(user);
-        router.push('/dashboard');
+      if (response.data?.success && response.data?.token) {
+        // Store the token
+        localStorage.setItem('token', response.data.token);
+        
+        // Fetch user profile with the new token
+        const profileRes = await api.get('/api/user/profile');
+        if (profileRes.data?.success) {
+          const userData = profileRes.data.data;
+          localStorage.setItem('user', JSON.stringify(userData));
+          setUser(userData);
+          router.push('/dashboard');
+        }
+      } else {
+        throw new Error('Login failed - no token received');
       }
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Login failed');
@@ -67,11 +83,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string, name?: string) => {
     try {
       const response = await api.post('/api/auth/register', { email, password, name });
-      if (response.data?.success) {
-        const user = response.data.data.user;
-        localStorage.setItem('user', JSON.stringify(user));
-        setUser(user);
-        router.push('/dashboard');
+      if (response.data?.success && response.data?.token) {
+        // Store the token
+        localStorage.setItem('token', response.data.token);
+        
+        // Fetch user profile with the new token
+        const profileRes = await api.get('/api/user/profile');
+        if (profileRes.data?.success) {
+          const userData = profileRes.data.data;
+          localStorage.setItem('user', JSON.stringify(userData));
+          setUser(userData);
+          router.push('/dashboard');
+        }
+      } else {
+        throw new Error('Registration failed - no token received');
       }
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Registration failed');
@@ -79,12 +104,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    // Call server to clear httpOnly cookie
-    api.post('/api/auth/logout').finally(() => {
-      localStorage.removeItem('user');
-      setUser(null);
-      router.push('/login');
-    });
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    router.push('/login');
   };
 
   return (

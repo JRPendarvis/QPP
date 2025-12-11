@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-// Create axios instance with default config and include credentials (cookies)
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -10,5 +9,33 @@ const api = axios.create({
   },
   withCredentials: true,
 });
+
+// Add token to every request
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
+// Handle 401 responses (token expired/invalid)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      // Only clear and redirect if we had a token (meaning it expired/invalid)
+      const token = localStorage.getItem('token');
+      if (token) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;
