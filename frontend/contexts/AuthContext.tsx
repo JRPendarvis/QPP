@@ -35,12 +35,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     const fetchProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await api.get('/api/user/profile');
         if (isMounted && res.data?.success) {
           setUser(res.data.data);
         }
       } catch {
+        localStorage.removeItem('token');
         setUser(null);
       } finally {
         if (isMounted) setLoading(false);
@@ -54,7 +61,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await api.post('/api/auth/login', { email, password });
-      if (response.data?.success && response.data?.data?.user) {
+      if (response.data?.success && response.data?.token) {
+        localStorage.setItem('token', response.data.token);
         const userData = response.data.data.user;
         setUser(userData);
         router.push('/dashboard');
@@ -70,7 +78,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string, name?: string) => {
     try {
       const response = await api.post('/api/auth/register', { email, password, name });
-      if (response.data?.success && response.data?.data?.user) {
+      if (response.data?.success && response.data?.token) {
+        localStorage.setItem('token', response.data.token);
         const userData = response.data.data.user;
         setUser(userData);
         router.push('/dashboard');
@@ -84,10 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    api.post('/api/auth/logout').finally(() => {
-      setUser(null);
-      router.push('/login');
-    });
+    localStorage.removeItem('token');
+    setUser(null);
+    router.push('/login');
   };
 
   return (

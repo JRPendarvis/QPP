@@ -21,21 +21,4 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 responses (token expired/invalid)
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      // Only clear and redirect if we had a token (meaning it expired/invalid)
-      const token = localStorage.getItem('token');
-      if (token) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
-
 export default api;
