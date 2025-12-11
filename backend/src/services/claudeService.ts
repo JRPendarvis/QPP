@@ -22,6 +22,114 @@ const SKILL_LEVEL_DESCRIPTIONS: Record<string, string> = {
   expert: 'Expert - all techniques mastered, complex medallions, competition-level work',
 };
 
+const PATTERNS_BY_SKILL: Record<string, string[]> = {
+  beginner: ['Simple Squares', 'Strip Quilt', 'Checkerboard', 'Rail Fence'],
+  advanced_beginner: ['Four Patch', 'Nine Patch', 'Half-Square Triangles', 'Hourglass'],
+  intermediate: ['Flying Geese', 'Pinwheel', 'Log Cabin', 'Bow Tie'],
+  advanced: ['Sawtooth Star', 'Ohio Star', 'Churn Dash', 'Lone Star'],
+  expert: ['Mariner\'s Compass', 'New York Beauty', 'Storm at Sea', 'Double Wedding Ring'],
+};
+
+const SVG_TEMPLATES: Record<string, string> = {
+  'Simple Squares': `
+    <rect x="0" y="0" width="100" height="100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`,
+  'Checkerboard': `
+    <rect x="0" y="0" width="50" height="50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="50" y="0" width="50" height="50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="50" width="50" height="50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="50" y="50" width="50" height="50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`,
+  'Four Patch': `
+    <rect x="0" y="0" width="50" height="50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="50" y="0" width="50" height="50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="50" width="50" height="50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="50" y="50" width="50" height="50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`,
+  'Nine Patch': `
+    <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="33.33" y="0" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.66" y="0" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="33.33" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="33.33" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.66" y="33.33" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.66" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="33.33" y="66.66" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.66" y="66.66" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`,
+  'Pinwheel': `
+    <polygon points="0,0 50,50 0,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,0 100,0 50,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,0 100,100 50,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,100 100,100 50,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
+  'Half-Square Triangles': `
+    <polygon points="0,0 100,0 0,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,0 100,100 0,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
+  'Flying Geese': `
+    <polygon points="50,0 100,100 0,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,0 50,0 0,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 100,0 100,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
+  'Hourglass': `
+    <polygon points="50,0 100,50 50,100 0,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,0 50,0 0,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 100,0 100,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 0,100 50,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,50 100,100 50,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
+  'Rail Fence': `
+    <rect x="0" y="0" width="100" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="33.33" width="100" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.66" width="100" height="33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>`,
+  'Strip Quilt': `
+    <rect x="0" y="0" width="33.33" height="100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="33.33" y="0" width="33.33" height="100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.66" y="0" width="33.33" height="100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>`,
+  'Log Cabin': `
+    <rect x="40" y="40" width="20" height="20" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="60" y="40" width="20" height="20" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="60" y="60" width="20" height="40" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="20" y="60" width="40" height="20" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="20" y="20" width="20" height="40" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="40" y="20" width="40" height="20" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="80" y="20" width="20" height="60" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="20" y="80" width="80" height="20" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="0" width="20" height="100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="0" width="100" height="20" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
+  'Bow Tie': `
+    <rect x="0" y="0" width="50" height="50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="50" y="50" width="50" height="50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 100,0 50,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 0,100 50,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="35" y="35" width="30" height="30" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>`,
+  'Ohio Star': `
+    <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.66" y="0" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.66" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.66" y="66.66" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="33.33" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,0 66.66,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,0 33.33,33.33 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.66,0 66.66,33.33 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.66,33.33 100,33.33 66.66,66.66" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,33.33 100,66.66 66.66,66.66" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,66.66 66.66,66.66 50,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,66.66 33.33,100 50,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.66,66.66 66.66,100 50,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,33.33 33.33,33.33 33.33,66.66" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,33.33 0,66.66 33.33,66.66" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
+  'Sawtooth Star': `
+    <rect x="0" y="0" width="25" height="25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="75" y="0" width="25" height="25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="75" width="25" height="25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="75" y="75" width="25" height="25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="25" y="25" width="50" height="50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="25,0 75,0 50,25" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="25,0 25,25 50,25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="75,0 75,25 50,25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="75,25 100,25 75,75" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,25 100,75 75,75" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="25,75 75,75 50,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="25,75 25,100 50,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="75,75 75,100 50,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,25 25,25 25,75" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,25 0,75 25,75" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
+};
+
 export class ClaudeService {
   async generateQuiltPattern(
     fabricImages: string[], 
@@ -30,130 +138,65 @@ export class ClaudeService {
   ): Promise<QuiltPattern> {
     try {
       const skillDescription = SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
+      const availablePatterns = PATTERNS_BY_SKILL[skillLevel] || PATTERNS_BY_SKILL['beginner'];
       
       // Determine pattern instruction based on user selection
-      const patternInstruction = selectedPattern && selectedPattern !== 'auto'
-        ? `**REQUIRED PATTERN TYPE:** You MUST create a "${this.formatPatternName(selectedPattern)}" pattern. This is not a suggestion - the user specifically requested this pattern style. Design the quilt using this traditional pattern structure.`
-        : `**PATTERN SELECTION:** Choose an appropriate traditional quilt pattern for this skill level.`;
+      let patternInstruction: string;
+      let patternForSvg: string;
+      
+      if (selectedPattern && selectedPattern !== 'auto') {
+        patternForSvg = this.formatPatternName(selectedPattern);
+        patternInstruction = `**REQUIRED PATTERN TYPE:** You MUST create a "${patternForSvg}" pattern. This is not a suggestion - the user specifically requested this pattern style.`;
+      } else {
+        // Auto mode - pick from skill-appropriate patterns
+        patternForSvg = availablePatterns[Math.floor(Math.random() * availablePatterns.length)];
+        patternInstruction = `**REQUIRED PATTERN TYPE:** Create a "${patternForSvg}" pattern. This pattern is appropriate for the ${skillLevel} skill level.`;
+      }
       
       const stream = await anthropic.messages.stream({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 28000,
+        max_tokens: 8000,
         messages: [
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: `You are an expert quilter and fabric designer. I'm providing you with ${fabricImages.length} fabric images. 
+                text: `You are an expert quilter. I'm providing you with ${fabricImages.length} fabric images.
 
 ${patternInstruction}
 
 **STEP 1: ANALYZE THE FABRICS**
-Carefully examine each fabric image and identify the dominant hex color (e.g., #FF5733) from each one.
+Identify the dominant hex color from each fabric image (e.g., #FF5733, #2E86AB).
 
 **STEP 2: CREATE THE PATTERN**
-Create a custom quilt pattern using the ACTUAL colors from the fabrics.
+Create a "${patternForSvg}" quilt pattern using the ACTUAL colors from the fabrics.
 
-**CRITICAL REQUIREMENT: The pattern MUST be appropriate for this skill level:**
-${skillDescription}
+Skill level: ${skillDescription}
 
-Please provide:
+Provide this JSON response:
 
-1. Pattern Name - A creative name referencing the actual fabric colors
-2. Description - Brief overview (2-3 sentences) mentioning specific colors
-3. Fabric Layout - How the actual fabric colors should be arranged
-4. Difficulty Level - MUST be: ${skillLevel.replace('_', ' ')}
-5. Estimated Size - Approximate dimensions (e.g., "60x80 inches throw quilt")
-6. Step-by-Step Instructions - EXACTLY 5-6 clear steps
-7. Visual SVG - A quilt preview with proper grid alignment
-
-**Pattern Complexity Guidelines for ${skillLevel}:**
-${this.getComplexityGuidelines(skillLevel)}
-
-**SVG REQUIREMENTS - STRICT GRID STRUCTURE:**
-- Create EXACTLY a 4x4 grid of quilt blocks (16 blocks total)
-- viewBox: "0 0 400 400" (perfect square)
-- Each block is 100x100 pixels
-- Position blocks using this EXACT formula:
-  * Block at row R, column C → x=(C*100), y=(R*100)
-  * Row 0, Col 0 → x=0, y=0
-  * Row 0, Col 1 → x=100, y=0
-  * Row 0, Col 2 → x=200, y=0
-  * Row 0, Col 3 → x=300, y=0
-  * Row 1, Col 0 → x=0, y=100
-  * Row 1, Col 1 → x=100, y=100
-  * And so on...
-- Use <g> groups with translate(x,y) for each block
-- Inside each <g>, create block pattern using coordinates from 0,0 to 100,100
-- Use ACTUAL hex colors from the fabric images
-- Add stroke="#ccc" stroke-width="0.5" to shapes for definition
-
-**BLOCK PATTERNS BY SKILL LEVEL:**
-- Beginner: Solid squares
-- Advanced Beginner: Four-patch (2x2 grid of 50x50 squares per block)
-- Intermediate: Nine-patch, simple pinwheel (4 triangles), or HSTs
-- Advanced/Expert: More complex arrangements
-
-**STRICT SVG STRUCTURE - COPY THIS PATTERN:**
-
-<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-  <!-- Row 0 -->
-  <g transform="translate(0,0)">
-    <rect x="0" y="0" width="100" height="100" fill="#actualcolor1" stroke="#ccc" stroke-width="0.5"/>
-  </g>
-  <g transform="translate(100,0)">
-    <rect x="0" y="0" width="100" height="100" fill="#actualcolor2" stroke="#ccc" stroke-width="0.5"/>
-  </g>
-  <g transform="translate(200,0)">
-    <rect x="0" y="0" width="100" height="100" fill="#actualcolor3" stroke="#ccc" stroke-width="0.5"/>
-  </g>
-  <g transform="translate(300,0)">
-    <rect x="0" y="0" width="100" height="100" fill="#actualcolor4" stroke="#ccc" stroke-width="0.5"/>
-  </g>
-  <!-- Row 1 -->
-  <g transform="translate(0,100)">
-    <rect x="0" y="0" width="100" height="100" fill="#actualcolor2" stroke="#ccc" stroke-width="0.5"/>
-  </g>
-  <!-- Continue for all 16 blocks... -->
-</svg>
-
-**For four-patch blocks, use this inside a <g>:**
-<rect x="0" y="0" width="50" height="50" fill="#color1" stroke="#ccc" stroke-width="0.5"/>
-<rect x="50" y="0" width="50" height="50" fill="#color2" stroke="#ccc" stroke-width="0.5"/>
-<rect x="0" y="50" width="50" height="50" fill="#color2" stroke="#ccc" stroke-width="0.5"/>
-<rect x="50" y="50" width="50" height="50" fill="#color1" stroke="#ccc" stroke-width="0.5"/>
-
-**For pinwheel blocks, use triangles like this:**
-<polygon points="0,0 50,50 0,100" fill="#color1" stroke="#ccc" stroke-width="0.5"/>
-<polygon points="0,0 100,0 50,50" fill="#color2" stroke="#ccc" stroke-width="0.5"/>
-<polygon points="100,0 100,100 50,50" fill="#color1" stroke="#ccc" stroke-width="0.5"/>
-<polygon points="0,100 100,100 50,50" fill="#color2" stroke="#ccc" stroke-width="0.5"/>
-
-**CRITICAL RULES:**
-1. ALWAYS use translate(x,y) for block positioning
-2. ALL shapes inside a <g> use coordinates relative to 0,0
-3. Use ACTUAL fabric colors (identify the hex codes)
-4. Keep under 3000 characters total
-
-**IMPORTANT: Return ONLY valid JSON, no extra text!**
-
-JSON format:
 {
-  "patternName": "Name with actual colors (e.g., 'Golden Sunset Pinwheels')",
-  "description": "Description mentioning the specific colors you identified",
-  "fabricLayout": "Layout description using actual color names",
+  "patternName": "Creative Name - ${patternForSvg}",
+  "description": "2-3 sentences describing the pattern and colors",
+  "fabricLayout": "How fabrics are arranged",
   "difficulty": "${skillLevel.replace('_', ' ')}",
-  "estimatedSize": "60x80 inches throw quilt",
+  "estimatedSize": "60x72 inches throw quilt",
   "instructions": [
-    "Step 1 - mention actual fabric colors",
-    "Step 2 - clear instruction",
-    "Step 3 - clear instruction",
-    "Step 4 - clear instruction",
-    "Step 5 - clear instruction"
+    "Step 1: Gather materials...",
+    "Step 2: Cut fabric pieces...",
+    "Step 3: Arrange blocks...",
+    "Step 4: Sew blocks together...",
+    "Step 5: Add borders and finish..."
   ],
-  "visualSvg": "<svg viewBox='0 0 400 400'><!-- 16 blocks in 4x4 grid using translate --></svg>"
-}`,
+  "fabricColors": ["#hex1", "#hex2", "#hex3"]
+}
+
+**IMPORTANT:** 
+- Return ONLY valid JSON
+- Include a "fabricColors" array with the hex colors you identified from the images
+- The patternName MUST include "${patternForSvg}" in it
+- Keep instructions clear and specific to this pattern type`,
               },
               ...fabricImages.map((imageBase64) => ({
                 type: 'image' as const,
@@ -183,63 +226,59 @@ JSON format:
 
       // Extract JSON from response
       let jsonText = responseText.trim();
-
-      // Remove markdown code blocks if present
       jsonText = jsonText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-
-      // Remove any debug markers
       jsonText = jsonText.replace(/=+ CLAUDE RESPONSE (START|END) =+\s*/g, '');
 
-      // Try to find JSON object - match from first { to last }
       const firstBrace = jsonText.indexOf('{');
       const lastBrace = jsonText.lastIndexOf('}');
 
       if (firstBrace === -1 || lastBrace === -1 || firstBrace >= lastBrace) {
         console.error('Could not find valid JSON object in response');
-        console.error('Response preview:', responseText.substring(0, 500));
         throw new Error('Could not parse pattern from Claude response');
       }
 
       jsonText = jsonText.substring(firstBrace, lastBrace + 1);
 
-      try {
-        const pattern: QuiltPattern = JSON.parse(jsonText);
-        
-        // Patch incomplete instructions
-        if (pattern.instructions && Array.isArray(pattern.instructions)) {
-          const lastInstruction = pattern.instructions[pattern.instructions.length - 1];
-          if (lastInstruction && lastInstruction.length < 30) {
-            console.warn('⚠️ Last instruction seems truncated, removing it');
-            pattern.instructions = pattern.instructions.slice(0, -1);
-          }
-          
-          if (pattern.instructions.length < 4) {
-            throw new Error('Response missing sufficient instructions (need at least 4)');
-          }
-        }
-        
-        // Validate required fields
-        if (!pattern.patternName || !pattern.instructions) {
-          throw new Error('Response missing required fields');
-        }
-        
-        // Make SVG optional - use placeholder if missing or truncated
-        if (!pattern.visualSvg || pattern.visualSvg.trim() === '' || !pattern.visualSvg.includes('</svg>')) {
-          console.warn('⚠️ SVG missing or incomplete, using placeholder');
-          pattern.visualSvg = '<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#f3f4f6"/><text x="200" y="200" text-anchor="middle" fill="#9ca3af" font-size="18">Pattern Visualization</text></svg>';
-        }
-        
-        console.log(`✅ Successfully generated pattern: ${pattern.patternName}`);
-        console.log(`   Instructions: ${pattern.instructions.length} steps`);
-        console.log(`   SVG length: ${pattern.visualSvg.length} characters`);
-        
-        return pattern;
-        
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        console.error('Attempted to parse:', jsonText.substring(0, 500));
-        throw new Error('Failed to parse Claude response as JSON');
+      const parsedResponse = JSON.parse(jsonText);
+      
+      // Extract colors from response
+      const colors = parsedResponse.fabricColors || ['#4A90A4', '#D4A574', '#8B7355'];
+      
+      // Generate SVG using template
+      const visualSvg = this.generateSvgFromTemplate(patternForSvg, colors);
+      
+      const pattern: QuiltPattern = {
+        patternName: parsedResponse.patternName || `${patternForSvg} Quilt`,
+        description: parsedResponse.description || `A beautiful ${patternForSvg} pattern`,
+        fabricLayout: parsedResponse.fabricLayout || 'Arranged in a 4x4 grid',
+        difficulty: parsedResponse.difficulty || skillLevel.replace('_', ' '),
+        estimatedSize: parsedResponse.estimatedSize || '60x72 inches',
+        instructions: parsedResponse.instructions || [
+          'Gather your fabrics and materials',
+          'Cut pieces according to pattern requirements',
+          'Arrange blocks in desired layout',
+          'Sew blocks together',
+          'Add borders and binding'
+        ],
+        visualSvg: visualSvg,
+      };
+
+      // Validate instructions
+      if (pattern.instructions.length < 4) {
+        pattern.instructions = [
+          'Gather your fabrics and materials',
+          'Cut pieces according to pattern requirements', 
+          'Arrange blocks in desired layout',
+          'Sew blocks together',
+          'Add borders and binding'
+        ];
       }
+      
+      console.log(`✅ Successfully generated pattern: ${pattern.patternName}`);
+      console.log(`   Pattern type: ${patternForSvg}`);
+      console.log(`   Colors: ${colors.join(', ')}`);
+      
+      return pattern;
 
     } catch (error) {
       console.error('Error generating quilt pattern:', error);
@@ -247,16 +286,44 @@ JSON format:
     }
   }
 
-  private getComplexityGuidelines(skillLevel: string): string {
-    const guidelines: Record<string, string> = {
-      beginner: '- Use simple solid squares\n- Straight seams only\n- 2-3 fabrics\n- Simple grid layout',
-      advanced_beginner: '- Four-patch or nine-patch blocks\n- Basic half-square triangles\n- Up to 4 fabrics\n- Repetitive patterns',
-      intermediate: '- Multiple block types\n- Flying geese or pinwheels\n- Points matching required\n- 4-6 fabrics with intentional placement',
-      advanced: '- Complex piecing\n- Paper piecing acceptable\n- Y-seams or curves\n- Intricate color gradients',
-      expert: '- Any technique\n- Complex curves\n- Sophisticated design\n- Advanced color theory',
-    };
-
-    return guidelines[skillLevel] || guidelines['beginner'];
+  private generateSvgFromTemplate(patternType: string, colors: string[]): string {
+    // Get template or default to simple squares
+    let template = SVG_TEMPLATES[patternType] || SVG_TEMPLATES['Simple Squares'];
+    
+    // Ensure we have at least 3 colors
+    while (colors.length < 3) {
+      colors.push(colors[0] || '#888888');
+    }
+    
+    // Replace color placeholders
+    template = template.replace(/COLOR1/g, colors[0]);
+    template = template.replace(/COLOR2/g, colors[1]);
+    template = template.replace(/COLOR3/g, colors[2] || colors[0]);
+    
+    // Build 4x4 grid
+    let blocks = '';
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        const x = col * 100;
+        const y = row * 100;
+        
+        // Alternate pattern for visual interest
+        let blockTemplate = template;
+        if ((row + col) % 2 === 1) {
+          // Swap colors for alternating blocks
+          blockTemplate = template
+            .replace(new RegExp(colors[0], 'g'), 'TEMP_COLOR')
+            .replace(new RegExp(colors[1], 'g'), colors[0])
+            .replace(/TEMP_COLOR/g, colors[1]);
+        }
+        
+        blocks += `  <g transform="translate(${x},${y})">\n    ${blockTemplate.trim()}\n  </g>\n`;
+      }
+    }
+    
+    return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#f8f8f8"/>
+${blocks}</svg>`;
   }
 
   private formatPatternName(patternId: string): string {
@@ -287,6 +354,6 @@ JSON format:
       'pickle-dish': 'Pickle Dish',
       'complex-medallion': 'Complex Medallion',
     };
-    return patternNames[patternId] || patternId.replace(/-/g, ' ');
+    return patternNames[patternId] || patternId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 }
