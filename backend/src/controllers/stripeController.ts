@@ -183,4 +183,37 @@ private async handleCheckoutComplete(session: Stripe.Checkout.Session) {
       res.status(500).json({ success: false, message: 'Failed to create portal session' });
     }
   }
+
+  async cancelSubscription(req: Request, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
+
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user || !user.stripeSubscriptionId) {
+        return res.status(400).json({ success: false, message: 'No active subscription to cancel' });
+      }
+
+      // Cancel subscription at the end of the billing period
+      await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: true
+      });
+
+      // Update user record
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          subscriptionStatus: 'cancel_at_period_end'
+        }
+      });
+
+      console.log(`Subscription scheduled for cancellation for user ${userId}`);
+      res.json({ success: true, message: 'Subscription will be canceled at the end of your billing period' });
+    } catch (error) {
+      console.error('Cancel subscription error:', error);
+      res.status(500).json({ success: false, message: 'Failed to cancel subscription' });
+    }
+  }
 }

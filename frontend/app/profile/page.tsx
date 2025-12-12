@@ -23,6 +23,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [canceling, setCanceling] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -77,6 +78,30 @@ export default function ProfilePage() {
       setError(err.response?.data?.message || 'Failed to update profile');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!window.confirm('Are you sure you want to cancel your subscription? You will lose access at the end of your billing period.')) {
+      return;
+    }
+
+    setCanceling(true);
+    setMessage('');
+    setError('');
+
+    try {
+      const response = await api.post('/api/stripe/cancel-subscription');
+
+      if (response.data.success) {
+        setMessage('Subscription canceled. You will retain access until the end of your billing period.');
+        // Refresh profile to show updated status
+        setTimeout(() => fetchProfile(), 1000);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to cancel subscription');
+    } finally {
+      setCanceling(false);
     }
   };
 
@@ -249,13 +274,30 @@ export default function ProfilePage() {
                       )}
                     </p>
                     {profile.subscriptionTier !== 'free' && (
-                      <button
-                        type="button"
-                        onClick={() => router.push('/pricing')}
-                        className="text-sm text-indigo-600 hover:text-indigo-700"
-                      >
-                        Manage Subscription
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => router.push('/pricing')}
+                          className="text-sm text-indigo-600 hover:text-indigo-700"
+                        >
+                          Manage Subscription
+                        </button>
+                        {profile.subscriptionStatus !== 'cancel_at_period_end' && (
+                          <button
+                            type="button"
+                            onClick={handleCancelSubscription}
+                            disabled={canceling}
+                            className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+                          >
+                            {canceling ? 'Canceling...' : 'Cancel'}
+                          </button>
+                        )}
+                        {profile.subscriptionStatus === 'cancel_at_period_end' && (
+                          <span className="text-sm text-red-600">
+                            Canceling at period end
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

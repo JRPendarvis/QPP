@@ -20,4 +20,9 @@ router.post('/create-portal-session', authenticate, (req, res) =>
   stripeController.createPortalSession(req, res)
 );
 
+// Cancel subscription - user cancels membership
+router.post('/cancel-subscription', authenticate, (req, res) => 
+  stripeController.cancelSubscription(req, res)
+);
+
 export default router;
