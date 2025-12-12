@@ -4,6 +4,7 @@ import { AUTH_CONSTANTS } from '../config/constants';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { emailService } from '../services/emailService';
 
 const authService = new AuthService();
 const prisma = new PrismaClient();
@@ -49,6 +50,11 @@ export class AuthController {
       }
 
       const result = await authService.register({ email, password, name });
+
+      // Send welcome email (don't await - send in background)
+      emailService.sendWelcomeEmail(email, name).catch(err => 
+        console.error('Welcome email failed:', err)
+      );
 
       // Set httpOnly cookie with the token
       setAuthCookie(res, result.token);
@@ -161,12 +167,9 @@ export class AuthController {
       // Build reset URL
       const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
-      // TODO: Replace with Resend email later
-      console.log('=================================');
-      console.log('PASSWORD RESET LINK:');
-      console.log(resetUrl);
-      console.log('For user:', email);
-      console.log('=================================');
+      // Send password reset email
+      await emailService.sendPasswordResetEmail(user.email, resetUrl);
+      console.log(`Password reset email sent to ${email}`);
 
       res.json({
         success: true,
