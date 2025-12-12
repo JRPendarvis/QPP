@@ -36,16 +36,17 @@ export class StripeController {
 
       const priceId = STRIPE_PRICE_IDS[tier as keyof typeof STRIPE_PRICE_IDS][interval as 'monthly' | 'yearly'];
 
-      const session = await stripe.checkout.sessions.create({
-        customer_email: user.email,
-        client_reference_id: userId,
-        mode: 'subscription',
-        payment_method_types: ['card'],
-        line_items: [{ price: priceId, quantity: 1 }],
-        success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.FRONTEND_URL}/pricing`,
-        metadata: { userId, tier, interval }
-      });
+  const session = await stripe.checkout.sessions.create({
+    customer_email: user.email,
+    client_reference_id: userId,
+    mode: 'subscription',
+    payment_method_types: ['card'],
+    line_items: [{ price: priceId, quantity: 1 }],
+    allow_promotion_codes: true,
+    success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.FRONTEND_URL}/pricing`,
+    metadata: { userId, tier, interval }
+  });
 
       res.json({ success: true, sessionId: session.id, url: session.url });
     } catch (error) {
