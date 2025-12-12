@@ -1,15 +1,15 @@
 export const STRIPE_PRICE_IDS = {
   basic: {
-    monthly: 'price_1SZhHcRqNLKgMLBjKDfytLSf',
-    yearly: 'price_1SZhKnRqNLKgMLBjd3Wb8ugf'
+    monthly: 'price_1SdHEORwuOWvN82FIzy01Rrp',
+    yearly: 'price_1SdHEzRwuOWvN82FYgQ3ByP4'
   },
   intermediate: {
-    monthly: 'price_1SZhI4RqNLKgMLBjmAceZPOe',
-    yearly: 'price_1SZhJZRqNLKgMLBjuDgIQHop'
+    monthly: 'price_1SdHGBRwuOWvN82FZmRfuFeR',
+    yearly: 'price_1SdHGlRwuOWvN82FPoLQnCuP'
   },
   advanced: {
-    monthly: 'price_1SZhLXRqNLKgMLBjyDPD3RnR',
-    yearly: 'price_1SZhPJRqNLKgMLBjrmxxG7Ry'
+    monthly: 'price_1SdHHvRwuOWvN82FpBP67VXi',
+    yearly: 'price_1SdHIZRwuOWvN82FEHaNp0ZF'
   }
 } as const;
 
@@ -21,20 +21,20 @@ export const SUBSCRIPTION_TIERS = {
     price: { monthly: 0, yearly: 0 }
   },
   basic: {
-    name: 'Basic',
+    name: 'Hobbyist',
     generationsPerMonth: 10,
     downloadsPerMonth: 2,
     price: { monthly: 5.99, yearly: 59.99 }
   },
   intermediate: {
-    name: 'Intermediate',
-    generationsPerMonth: 30,
+    name: 'Enthusiast',
+    generationsPerMonth: 50,
     downloadsPerMonth: 10,
     price: { monthly: 9.99, yearly: 94.99 }
   },
   advanced: {
-    name: 'Advanced',
-    generationsPerMonth: 100,
+    name: 'Pro',
+    generationsPerMonth: 200,
     downloadsPerMonth: 25,
     price: { monthly: 19.99, yearly: 199.99 }
   }

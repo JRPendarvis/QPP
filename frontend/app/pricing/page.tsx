@@ -25,7 +25,7 @@ const pricingTiers = [
     name: 'Hobbyist',
     id: 'basic',
     price: { monthly: 5.99, annual: 59.99 },
-    patterns: '10 per month',
+    patterns: '2 per month',
     features: [
       'Skill level matching',
       'Advanced patterns',
@@ -39,7 +39,7 @@ const pricingTiers = [
     name: 'Enthusiast',
     id: 'intermediate',
     price: { monthly: 9.99, annual: 94.99 },
-    patterns: '30 per month',
+    patterns: '10 per month',
     features: [
       'All Hobbyist features',
       'Expert-level patterns',
@@ -55,7 +55,7 @@ const pricingTiers = [
     name: 'Pro',
     id: 'advanced',
     price: { monthly: 19.99, annual: 199.99 },
-    patterns: '100 per month',
+    patterns: '25 per month',
     features: [
       'Everything included',
       'Commercial use rights',
