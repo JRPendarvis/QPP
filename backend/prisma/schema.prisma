@@ -38,6 +38,10 @@ model User {
     feedbacks     Feedback[]
     feedbackVotes FeedbackVote[]
 
+    // Password reset
+    resetToken       String?
+    resetTokenExpiry DateTime?
+
     @@map("users")
 }
 

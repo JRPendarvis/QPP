@@ -18,8 +18,8 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+  setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -73,6 +73,12 @@ export default function LoginPage() {
             </div>
           </div>
 
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
+              Forgot your password?
+            </Link>
+          </div>
+
           <div>
             <button
               type="submit"
@@ -85,7 +91,7 @@ export default function LoginPage() {
 
           <div className="text-center">
             <Link href="/register" className="text-indigo-600 hover:text-indigo-500">
-              Don't have an account? Sign up
+              Don&apos;t have an account? Sign up
             </Link>
           </div>
         </form>

@@ -14,4 +14,10 @@ router.post('/login', loginLimiter, (req, res) => authController.login(req, res)
 // POST /api/auth/logout
 router.post('/logout', (req, res) => authController.logout?.(req, res));
 
+// POST /api/auth/forgot-password
+router.post('/forgot-password', loginLimiter, (req, res) => authController.forgotPassword(req, res));
+
+// POST /api/auth/reset-password
+router.post('/reset-password', loginLimiter, (req, res) => authController.resetPassword(req, res));
+
 export default router;
