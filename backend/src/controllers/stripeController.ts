@@ -93,30 +93,27 @@ export class StripeController {
     }
   }
 
-  private async handleCheckoutComplete(session: Stripe.Checkout.Session) {
-    const userId = session.client_reference_id;
-    const subscriptionId = session.subscription as string;
-    const customerId = session.customer as string;
-    if (!userId) return;
+private async handleCheckoutComplete(session: Stripe.Checkout.Session) {
+  const userId = session.client_reference_id;
+  const subscriptionId = session.subscription as string;
+  const customerId = session.customer as string;
+  if (!userId) return;
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const tier = session.metadata?.tier || 'basic';
-    const interval = session.metadata?.interval || 'monthly';
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const tier = session.metadata?.tier || 'basic';
+  const interval = session.metadata?.interval || 'monthly';
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        stripeCustomerId: customerId,
-        stripeSubscriptionId: subscriptionId,
-        subscriptionTier: tier,
-        subscriptionStatus: subscription.status,
-        billingInterval: interval,
-        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
-     }
-    });
-
-    console.log(`Subscription activated for user ${userId}: ${tier} ${interval}`);
-  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
+      subscriptionTier: tier,
+      subscriptionStatus: subscription.status,
+      billingInterval: interval,
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
+   }
+  });
 
   private async handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     const user = await prisma.user.findUnique({
