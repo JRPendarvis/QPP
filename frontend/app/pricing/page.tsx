@@ -161,7 +161,7 @@ export default function PricingPage() {
           {pricingTiers.map((tier) => (
             <div
               key={tier.name}
-              className={`bg-white rounded-lg shadow-md p-6 relative ${
+              className={`bg-white rounded-lg shadow-md p-6 relative transition-all duration-200 hover:shadow-xl hover:-translate-y-1 cursor-pointer ${
                 tier.popular ? 'ring-2 ring-indigo-500' : ''
               }`}
             >
