@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-800 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
             <h3 className="text-lg font-semibold mb-4">QuiltPlannerPro</h3>
@@ -65,6 +65,21 @@ export default function Footer() {
                 <Link href="/legal/refund-policy" className="text-gray-300 hover:text-white transition">
                   Refund Policy
                 </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Support</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a 
+                  href="mailto:quiltplannerpro@gmail.com" 
+                  className="text-gray-300 hover:text-white transition"
+                >
+                  quiltplannerpro@gmail.com
+                </a>
               </li>
             </ul>
           </div>
