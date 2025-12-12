@@ -73,6 +73,7 @@ export default function PricingPage() {
   const router = useRouter();
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [selectedTier, setSelectedTier] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -83,30 +84,34 @@ export default function PricingPage() {
   const handleButtonClick = async (action: string, tierId: string) => {
     if (action === 'register') {
       router.push('/register');
-    } else if (action === 'subscribe') {
-      if (!user) {
-        router.push('/register');
-        return;
-      }
+      return;
+    }
+    
+    // Set selected tier
+    setSelectedTier(tierId);
+    
+    if (!user) {
+      router.push('/register');
+      return;
+    }
 
-      setLoadingTier(tierId);
-      try {
-        const response = await api.post('/api/stripe/create-checkout-session', {
-          tier: tierId,
-          interval: billingInterval
-        });
+    setLoadingTier(tierId);
+    try {
+      const response = await api.post('/api/stripe/create-checkout-session', {
+        tier: tierId,
+        interval: billingInterval
+      });
 
-        if (response.data.success && response.data.url) {
-          window.location.href = response.data.url;
-        } else {
-          alert('Failed to create checkout session');
-        }
-      } catch (error) {
-        console.error('Checkout error:', error);
-        alert('Failed to start checkout process');
-      } finally {
-        setLoadingTier(null);
+      if (response.data.success && response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        alert('Failed to create checkout session');
       }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('Failed to start checkout process');
+    } finally {
+      setLoadingTier(null);
     }
   };
 
@@ -162,7 +167,9 @@ export default function PricingPage() {
             <div
               key={tier.name}
               className={`bg-white rounded-lg shadow-md p-6 relative transition-all duration-200 hover:shadow-xl hover:-translate-y-1 cursor-pointer ${
-                tier.popular ? 'ring-2 ring-indigo-500' : ''
+                tier.popular && selectedTier !== tier.id ? 'ring-2 ring-indigo-500' : ''
+              } ${
+                selectedTier === tier.id ? 'ring-2 ring-indigo-600 shadow-xl -translate-y-1' : ''
               }`}
             >
               {tier.popular && (
@@ -215,9 +222,11 @@ export default function PricingPage() {
                 onClick={() => handleButtonClick(tier.buttonAction, tier.id)}
                 disabled={loadingTier === tier.id}
                 className={`w-full py-3 px-4 rounded-md font-medium transition ${
-                  tier.popular
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-400'
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:bg-gray-300'
+                  selectedTier === tier.id
+                    ? 'bg-indigo-600 text-white'
+                    : tier.popular
+                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-400'
+                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:bg-gray-300'
                 }`}
               >
                 {loadingTier === tier.id ? 'Processing...' : tier.buttonText}
