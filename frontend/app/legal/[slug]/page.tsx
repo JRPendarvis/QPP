@@ -35,8 +35,13 @@ export default async function DocPage({ params }: Props) {
     path.resolve(process.cwd(), '..', 'doc', fileName),
     // project root has doc/
     path.resolve(process.cwd(), 'doc', fileName),
-    // containerized envs where cwd may be /app
-    path.resolve(process.cwd(), '..', '..', 'doc', fileName),
+    // doc files copied into frontend/public/doc during build
+    path.resolve(process.cwd(), 'public', 'doc', fileName),
+    // doc files at /app/doc in container
+    path.resolve('/app', 'doc', fileName),
+    // doc files at project root /QPP/doc
+    path.resolve('/QPP', 'QPP', 'doc', fileName),
+    path.resolve('C:', 'QPP', 'QPP', 'doc', fileName),
   ];
 
   let content = '';
