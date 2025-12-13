@@ -24,12 +24,6 @@ export default function ProfilePage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [canceling, setCanceling] = useState(false);
-  // Feedback form state
-  const [fbTitle, setFbTitle] = useState('');
-  const [fbDesc, setFbDesc] = useState('');
-  const [fbSaving, setFbSaving] = useState(false);
-  const [fbMessage, setFbMessage] = useState('');
-  const [fbError, setFbError] = useState('');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -54,32 +48,6 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error('Failed to fetch profile:', err);
-    }
-  };
-
-  
-
-  const handleFeedbackCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFbMessage('');
-    setFbError('');
-
-    if (!fbTitle.trim()) {
-      setFbError('Please provide a short title');
-      return;
-    }
-    setFbSaving(true);
-    try {
-      const res = await api.post('/api/feedback', { title: fbTitle.trim(), description: fbDesc.trim() || undefined });
-      if (res.data?.success) {
-        setFbTitle('');
-        setFbDesc('');
-        setFbMessage('Thanks! Your suggestion has been submitted.');
-      }
-    } catch (err: any) {
-      setFbError(err.response?.data?.message || 'Failed to submit feedback');
-    } finally {
-      setFbSaving(false);
     }
   };
 
@@ -250,68 +218,6 @@ export default function ProfilePage() {
                 </button>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Suggestions & Feedback */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-2">Share Feedback & Ideas</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Tell us what to improve or which features you want next.
-          </p>
-
-          {fbMessage && (
-            <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-              {fbMessage}
-            </div>
-          )}
-          {fbError && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {fbError}
-            </div>
-          )}
-
-          <form onSubmit={handleFeedbackCreate} className="space-y-4">
-            <div>
-              <label htmlFor="fbTitle" className="block text-sm font-medium text-gray-700">
-                Short Title
-              </label>
-              <input
-                id="fbTitle"
-                type="text"
-                value={fbTitle}
-                onChange={(e) => setFbTitle(e.target.value)}
-                placeholder="E.g., Add pinwheel template editor"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="fbDesc" className="block text-sm font-medium text-gray-700">
-                Details (optional)
-              </label>
-              <textarea
-                id="fbDesc"
-                value={fbDesc}
-                onChange={(e) => setFbDesc(e.target.value)}
-                rows={4}
-                placeholder="Explain how this would help your workflow"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={fbSaving}
-                className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {fbSaving ? 'Submitting...' : 'Submit Feedback'}
-              </button>
-            </div>
-          </form>
-          <div className="mt-3 text-sm">
-            <button className="text-indigo-600 hover:text-indigo-700" onClick={() => router.push('/dashboard/feedback')}>
-              View community suggestions →
-            </button>
           </div>
         </div>
 

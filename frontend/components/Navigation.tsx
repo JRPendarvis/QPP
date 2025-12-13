@@ -32,6 +32,12 @@ export default function Navigation() {
                   Dashboard
                 </Link>
                 <Link
+                  href="/feedback"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                >
+                  Feedback
+                </Link>
+                <Link
                   href="/profile"
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
                 >
