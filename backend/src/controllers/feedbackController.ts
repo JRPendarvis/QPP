@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { emailService } from '../services/emailService';
 
 const prisma = new PrismaClient();
 
@@ -54,6 +55,19 @@ export class FeedbackController {
           authorId: userId,
         },
       });
+
+      // Get user info for email notification
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      
+      // Send notification email (don't await - send in background)
+      if (user) {
+        emailService.sendFeedbackNotification(
+          user.email,
+          user.name || undefined,
+          title,
+          description || null
+        ).catch(err => console.error('Feedback email failed:', err));
+      }
 
       res.status(201).json({ success: true, data: created });
     } catch (error) {

@@ -72,5 +72,39 @@ export const emailService = {
     } catch (error) {
       console.error('Failed to send password reset email:', error);
     }
+  },
+
+  async sendFeedbackNotification(userEmail: string, userName: string | undefined, title: string, description: string | null) {
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL || 'quiltplannerpro@gmail.com';
+      
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: adminEmail,
+        replyTo: userEmail,
+        subject: `New Feedback: ${title}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #4F46E5;">New Feedback Received</h1>
+            <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin: 16px 0;">
+              <p style="margin: 0 0 8px 0;"><strong>From:</strong> ${userName || 'Anonymous'} (${userEmail})</p>
+              <p style="margin: 0;"><strong>Title:</strong> ${title}</p>
+            </div>
+            ${description ? `
+              <div style="background: #fff; border: 1px solid #e5e7eb; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                <p style="margin: 0 0 8px 0;"><strong>Description:</strong></p>
+                <p style="margin: 0; white-space: pre-wrap;">${description}</p>
+              </div>
+            ` : ''}
+            <p style="color: #666; font-size: 14px; margin-top: 20px;">
+              View all feedback at: <a href="https://www.quiltplannerpro.com/dashboard/feedback">Dashboard</a>
+            </p>
+          </div>
+        `
+      });
+      console.log(`Feedback notification sent to ${adminEmail}`);
+    } catch (error) {
+      console.error('Failed to send feedback notification:', error);
+    }
   }
 };
