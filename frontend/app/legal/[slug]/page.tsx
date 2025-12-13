@@ -21,10 +21,13 @@ const slugToFile: Record<string, string> = {
 
 export default async function DocPage({ params }: Props) {
   const { slug } = await params;
+  console.log('Legal doc request - URL slug:', slug);
   const fileName = slugToFile[slug];
   if (!fileName) {
+    console.error('Invalid slug:', slug, 'Valid slugs:', Object.keys(slugToFile));
     return <div className="p-8">Document not found</div>;
   }
+  console.log('Mapped to file:', fileName);
 
   // Resolve potential doc locations to support different dev/prod CWDs
   const candidatePaths = [
