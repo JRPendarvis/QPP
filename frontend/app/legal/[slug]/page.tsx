@@ -36,25 +36,7 @@ export default async function DocPage({ params }: Props) {
     const content = await fs.readFile(docPath, 'utf-8');
     console.log('Successfully loaded:', docPath);
 
-  // Convert Markdown to HTML server-side and sanitize before rendering
-  const rawHtml = marked.parse(content || '');
-  const safeHtml = sanitizeHtml(rawHtml, {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2', 'h3']),
-    allowedAttributes: {
-      a: ['href', 'name', 'target', 'rel'],
-      img: ['src', 'alt', 'title', 'width', 'height'],
-    },
-  });
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto bg-white p-8 rounded shadow">
-        <article className="prose" dangerouslySetInnerHTML={{ __html: safeHtml }} />
-      </div>
-    </div>
-  );
-}
-  // Convert Markdown to HTML server-side and sanitize before rendering
+    // Convert Markdown to HTML server-side and sanitize before rendering
     const rawHtml = marked.parse(content || '');
     const safeHtml = sanitizeHtml(rawHtml, {
       allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2', 'h3']),
@@ -81,3 +63,4 @@ export default async function DocPage({ params }: Props) {
     });
     return <div className="p-8">Failed to load document</div>;
   }
+}
