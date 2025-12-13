@@ -51,6 +51,9 @@ export default async function DocPage({ params }: Props) {
 
   if (!loadedPath) {
     console.error('Failed to load doc: file not found', {
+      slug,
+      fileName,
+      cwd: process.cwd(),
       attempted: candidatePaths,
     });
     return <div className="p-8">Failed to load document</div>;
