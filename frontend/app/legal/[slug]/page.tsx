@@ -26,12 +26,29 @@ export default async function DocPage({ params }: Props) {
     return <div className="p-8">Document not found</div>;
   }
 
-  const docPath = path.join(process.cwd(), '..', 'doc', fileName);
+  // Resolve potential doc locations to support different dev/prod CWDs
+  const candidatePaths = [
+    path.resolve(process.cwd(), '..', 'doc', fileName),
+    path.resolve(process.cwd(), 'doc', fileName),
+  ];
+
   let content = '';
-  try {
-    content = await fs.readFile(docPath, 'utf-8');
-  } catch (err) {
-    console.error('Failed to load doc', err);
+  let loadedPath: string | null = null;
+  for (const p of candidatePaths) {
+    try {
+      await fs.access(p);
+      content = await fs.readFile(p, 'utf-8');
+      loadedPath = p;
+      break;
+    } catch {
+      // try next path
+    }
+  }
+
+  if (!loadedPath) {
+    console.error('Failed to load doc: file not found', {
+      attempted: candidatePaths,
+    });
     return <div className="p-8">Failed to load document</div>;
   }
 
