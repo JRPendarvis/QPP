@@ -47,7 +47,8 @@ export default async function DocPage({ params }: Props) {
       },
     });
 
-    return (">
+    return (
+      <div className="min-h-screen bg-gray-50">
         <Navigation />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="bg-white rounded-lg shadow-sm p-8">
@@ -62,16 +63,8 @@ export default async function DocPage({ params }: Props) {
                 prose-ul:text-gray-700 prose-ol:text-gray-700
                 prose-strong:text-gray-900 prose-strong:font-semibold"
               dangerouslySetInnerHTML={{ __html: safeHtml }} 
-            />min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-          <p className="text-gray-600">Failed to load document</p>
-        </div>
-      </div>
-    
-          </div
-          <article className="prose" dangerouslySetInnerHTML={{ __html: safeHtml }} />
+            />
+          </div>
         </div>
       </div>
     );
@@ -83,6 +76,18 @@ export default async function DocPage({ params }: Props) {
       error: error instanceof Error ? error.message : 'Unknown error',
       cwd: process.cwd(),
     });
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+            <p className="text-gray-600">Failed to load document</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
     return <div className="p-8">Failed to load document</div>;
   }
 }
