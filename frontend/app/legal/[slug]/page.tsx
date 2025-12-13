@@ -28,8 +28,12 @@ export default async function DocPage({ params }: Props) {
 
   // Resolve potential doc locations to support different dev/prod CWDs
   const candidatePaths = [
+    // monorepo: frontend/ is sibling of doc/
     path.resolve(process.cwd(), '..', 'doc', fileName),
+    // project root has doc/
     path.resolve(process.cwd(), 'doc', fileName),
+    // containerized envs where cwd may be /app
+    path.resolve(process.cwd(), '..', '..', 'doc', fileName),
   ];
 
   let content = '';
