@@ -29,43 +29,12 @@ export default async function DocPage({ params }: Props) {
   }
   console.log('Mapped to file:', fileName);
 
-  // Resolve potential doc locations to support different dev/prod CWDs
-  const candidatePaths = [
-    // monorepo: frontend/ is sibling of doc/
-    path.resolve(process.cwd(), '..', 'doc', fileName),
-    // project root has doc/
-    path.resolve(process.cwd(), 'doc', fileName),
-    // doc files copied into frontend/public/doc during build
-    path.resolve(process.cwd(), 'public', 'doc', fileName),
-    // doc files at /app/doc in container
-    path.resolve('/app', 'doc', fileName),
-    // doc files at project root /QPP/doc
-    path.resolve('/QPP', 'QPP', 'doc', fileName),
-    path.resolve('C:', 'QPP', 'QPP', 'doc', fileName),
-  ];
+  // Use public folder path (most reliable for Next.js)
+  const docPath = path.join(process.cwd(), 'public', 'doc', fileName);
 
-  let content = '';
-  let loadedPath: string | null = null;
-  for (const p of candidatePaths) {
-    try {
-      await fs.access(p);
-      content = await fs.readFile(p, 'utf-8');
-      loadedPath = p;
-      break;
-    } catch {
-      // try next path
-    }
-  }
-
-  if (!loadedPath) {
-    console.error('Failed to load doc: file not found', {
-      slug,
-      fileName,
-      cwd: process.cwd(),
-      attempted: candidatePaths,
-    });
-    return <div className="p-8">Failed to load document</div>;
-  }
+  try {
+    const content = await fs.readFile(docPath, 'utf-8');
+    console.log('Successfully loaded:', docPath);
 
   // Convert Markdown to HTML server-side and sanitize before rendering
   const rawHtml = marked.parse(content || '');
@@ -85,3 +54,30 @@ export default async function DocPage({ params }: Props) {
     </div>
   );
 }
+  // Convert Markdown to HTML server-side and sanitize before rendering
+    const rawHtml = marked.parse(content || '');
+    const safeHtml = sanitizeHtml(rawHtml, {
+      allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2', 'h3']),
+      allowedAttributes: {
+        a: ['href', 'name', 'target', 'rel'],
+        img: ['src', 'alt', 'title', 'width', 'height'],
+      },
+    });
+
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-4xl mx-auto bg-white p-8 rounded shadow">
+          <article className="prose" dangerouslySetInnerHTML={{ __html: safeHtml }} />
+        </div>
+      </div>
+    );
+  } catch (error) {
+    console.error('Failed to load doc:', {
+      slug,
+      fileName,
+      docPath,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      cwd: process.cwd(),
+    });
+    return <div className="p-8">Failed to load document</div>;
+  }
