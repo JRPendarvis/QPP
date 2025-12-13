@@ -4,7 +4,7 @@ import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 const slugToFile: Record<string, string> = {
@@ -15,13 +15,13 @@ const slugToFile: Record<string, string> = {
 };
 
 export default async function DocPage({ params }: Props) {
-  const { slug } = params;
+  const { slug } = await params;
   const fileName = slugToFile[slug];
   if (!fileName) {
     return <div className="p-8">Document not found</div>;
   }
 
-  const docPath = path.join(process.cwd(), 'doc', fileName);
+  const docPath = path.join(process.cwd(), '..', 'doc', fileName);
   let content = '';
   try {
     content = await fs.readFile(docPath, 'utf-8');

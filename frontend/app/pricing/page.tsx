@@ -11,7 +11,7 @@ const pricingTiers = [
     name: 'Free',
     id: 'free',
     price: { monthly: 0, annual: 0 },
-    patterns: '3 lifetime',
+    patterns: '1 lifetime pattern',
     features: [
       'Basic pattern generation',
       'Standard patterns only',
@@ -74,6 +74,7 @@ export default function PricingPage() {
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
+  const [hoveredTier, setHoveredTier] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -166,16 +167,41 @@ export default function PricingPage() {
           {pricingTiers.map((tier) => (
             <div
               key={tier.name}
+              onMouseEnter={() => setHoveredTier(tier.id)}
+              onMouseLeave={() => setHoveredTier(null)}
               className={`bg-white rounded-lg shadow-md p-6 relative transition-all duration-200 hover:shadow-xl hover:-translate-y-1 cursor-pointer ${
-                tier.popular && selectedTier !== tier.id ? 'ring-2 ring-indigo-500' : ''
+                tier.popular && selectedTier !== tier.id && !hoveredTier ? 'ring-2 ring-indigo-500' : ''
               } ${
                 selectedTier === tier.id ? 'ring-2 ring-indigo-600 shadow-xl -translate-y-1' : ''
+              } ${
+                hoveredTier === tier.id ? 'ring-2 ring-indigo-500' : ''
               }`}
             >
-              {tier.popular && (
+              {tier.popular && (hoveredTier === tier.id || !hoveredTier) && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <span className="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm font-medium">
                     Most Popular
+                  </span>
+                </div>
+              )}
+              {tier.id === 'free' && hoveredTier === 'free' && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    Just Looking
+                  </span>
+                </div>
+              )}
+              {tier.id === 'basic' && hoveredTier === 'basic' && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    Just Starting
+                  </span>
+                </div>
+              )}
+              {tier.id === 'advanced' && hoveredTier === 'advanced' && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    All In
                   </span>
                 </div>
               )}
@@ -203,7 +229,7 @@ export default function PricingPage() {
                 </div>
 
                 <div className="text-sm text-gray-600 mb-4">
-                  {tier.patterns} patterns
+                  {tier.patterns}
                 </div>
               </div>
 
@@ -224,9 +250,13 @@ export default function PricingPage() {
                 className={`w-full py-3 px-4 rounded-md font-medium transition ${
                   selectedTier === tier.id
                     ? 'bg-indigo-600 text-white'
-                    : tier.popular
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-400'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:bg-gray-300'
+                    : hoveredTier === tier.id
+                      ? 'bg-indigo-600 text-white'
+                      : hoveredTier && hoveredTier !== tier.id
+                        ? 'bg-gray-100 text-gray-900'
+                        : tier.popular
+                          ? 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-400'
+                          : 'bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:bg-gray-300'
                 }`}
               >
                 {loadingTier === tier.id ? 'Processing...' : tier.buttonText}
