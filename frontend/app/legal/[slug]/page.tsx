@@ -3,6 +3,11 @@ import path from 'path';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 
+// Ensure this page runs on the Node.js runtime so we can access the filesystem
+export const runtime = 'nodejs';
+// Render dynamically to avoid caching issues when reading local markdown files
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
