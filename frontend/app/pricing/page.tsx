@@ -125,29 +125,37 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{backgroundColor: '#F9FAFB'}}>
       <Navigation />
+
+      {/* Header Banner */}
+      <div className="py-12 px-4" style={{backgroundColor: '#B91C1C'}}>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Choose Your Plan
+          </h1>
+        </div>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Plan
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl max-w-3xl mx-auto mb-4" style={{color: '#1F2937'}}>
             Start with our free tier or upgrade to unlock more patterns, advanced features, and priority support.
             All plans include a 14-day free trial.
           </p>
+          <p className="text-sm" style={{color: '#5B8C85'}}>Palette 2: Modern Quilter - Terracotta, Dusty Teal, Honey Amber</p>
 
           {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4 mb-8">
+          <div className="flex items-center justify-center gap-4 mb-8 mt-8">
             <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>
               Monthly
             </span>
             <button
               onClick={() => setBillingInterval(billingInterval === 'monthly' ? 'yearly' : 'monthly')}
-              className="relative inline-flex h-6 w-11 items-center rounded-full bg-indigo-600 transition-colors"
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+              style={{backgroundColor: '#5B8C85'}}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -157,7 +165,7 @@ export default function PricingPage() {
             </button>
             <span className={`text-sm font-medium ${billingInterval === 'yearly' ? 'text-gray-900' : 'text-gray-500'}`}>
               Yearly
-              <span className="ml-1 text-xs text-green-600 font-normal">Save up to 21%</span>
+              <span className="ml-1 text-xs font-normal" style={{color: '#D4A574'}}>Save up to 21%</span>
             </span>
           </div>
         </div>

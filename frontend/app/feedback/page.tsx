@@ -64,8 +64,8 @@ export default function FeedbackPage() {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-3xl font-bold mb-2">Share Your Feedback & Ideas</h1>
-          <p className="text-gray-600 mb-8">
+          <h1 className="text-3xl font-bold mb-2" style={{color: '#B91C1C'}}>Share Your Feedback & Ideas</h1>
+          <p className="mb-8" style={{color: '#4B5563'}}>
             We&apos;d love to hear from you! Tell us what features you&apos;d like to see or how we can improve your quilting experience.
           </p>
 
@@ -91,7 +91,9 @@ export default function FeedbackPage() {
                 value={fbTitle}
                 onChange={(e) => setFbTitle(e.target.value)}
                 placeholder="E.g., Add pinwheel template editor"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
+                onFocus={(e) => e.target.style.borderColor = '#2C7A7B'}
+                onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
               />
             </div>
             <div>
@@ -104,7 +106,9 @@ export default function FeedbackPage() {
                 onChange={(e) => setFbDesc(e.target.value)}
                 rows={6}
                 placeholder="Explain how this would help your workflow or why you&apos;d like this feature"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
+                onFocus={(e) => e.target.style.borderColor = '#2C7A7B'}
+                onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
               />
             </div>
             <div className="flex justify-end gap-4">
@@ -118,7 +122,10 @@ export default function FeedbackPage() {
               <button
                 type="submit"
                 disabled={fbSaving}
-                className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow hover:bg-indigo-700 disabled:opacity-50"
+                className="px-6 py-2 text-white font-semibold rounded-md shadow disabled:opacity-50"
+                style={{backgroundColor: '#B91C1C'}}
+                onMouseEnter={(e) => !fbSaving && (e.currentTarget.style.backgroundColor = '#991B1B')}
+                onMouseLeave={(e) => !fbSaving && (e.currentTarget.style.backgroundColor = '#B91C1C')}
               >
                 {fbSaving ? 'Submitting...' : 'Submit Feedback'}
               </button>

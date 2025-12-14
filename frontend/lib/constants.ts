@@ -15,7 +15,7 @@ export const ROUTES = {
 } as const;
 
 export const UI_CONSTANTS = {
-  BRAND_NAME: 'QuiltPlannerPro',
+  BRAND_NAME: 'Quilt Planner Pro',
   PRIMARY_COLOR: 'red',
   SECONDARY_COLOR: 'indigo',
 } as const;

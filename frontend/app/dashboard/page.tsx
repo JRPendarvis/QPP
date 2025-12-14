@@ -74,29 +74,39 @@ export default function DashboardPage() {
   const currentSkill = profile.skillLevel || 'beginner';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{backgroundColor: '#F9FAFB'}}>
       <Navigation />
 
+      {/* Header Banner */}
+      <div className="py-8 px-4" style={{backgroundColor: '#B91C1C'}}>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold text-white mb-2">Your Quilting Dashboard</h1>
+        </div>
+      </div>
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Welcome back!</h2>
+        <div className="rounded-lg shadow-lg p-8" style={{backgroundColor: '#FFF', borderTop: '6px solid #2C7A7B'}}>
+          <h2 className="text-2xl font-bold mb-4" style={{color: '#B91C1C'}}>Welcome back!</h2>
           
           <div className="space-y-2 mb-6">
             <p><strong>Email:</strong> {user.email}</p>
             <p><strong>Name:</strong> {user.name || 'Not set'}</p>
-            <p><strong>Subscription:</strong> <span className="capitalize">{user.subscriptionTier}</span></p>
+            <p><strong>Subscription:</strong> <span className="capitalize" style={{color: '#F59E0B'}}>{user.subscriptionTier}</span></p>
             <p><strong>Skill Level:</strong> {SKILL_LEVELS[currentSkill]}</p>
           </div>
 
           <button
             onClick={handleStartDesign}
-            className="w-full px-6 py-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition"
+            className="w-full px-6 py-4 text-white font-semibold rounded-lg shadow-md transition"
+            style={{backgroundColor: '#2C7A7B'}}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#236B6C'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2C7A7B'}
           >
             Start New Quilt Design
           </button>
           
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
-            <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
+          <div className="mt-4 p-4 rounded" style={{backgroundColor: '#88A98E20', borderColor: '#88A98E', borderWidth: '1px'}}>
+            <h3 className="font-semibold mb-2" style={{color: '#B85C5C'}}>How it works:</h3>
             <ol className="list-decimal list-inside text-blue-800 space-y-1">
               <li>Upload 2-8 fabric images</li>
               <li>AI generates a {SKILL_LEVELS[currentSkill]} level quilt pattern</li>

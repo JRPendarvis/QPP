@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">QuiltPlannerPro</h3>
+            <h3 className="text-lg font-semibold mb-4">Quilt Planner Pro</h3>
             <p className="text-gray-300 text-sm">
               AI-powered quilt pattern generator for quilters of all skill levels.
             </p>

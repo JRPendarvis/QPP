@@ -201,18 +201,21 @@ export default function ProfilePage() {
             </div>
 
             {profile.subscriptionTier === 'free' && (
-              <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
-                <p className="text-sm text-indigo-900 font-semibold mb-2">
+              <div className="mt-4 p-4 rounded-lg" style={{backgroundColor: '#E6FFFA', borderColor: '#2C7A7B', borderWidth: '1px'}}>
+                <p className="text-sm font-semibold mb-2" style={{color: '#1F2937'}}>
                   ⭐ Free Tier Limits
                 </p>
-                <p className="text-sm text-indigo-700 mb-3">
+                <p className="text-sm mb-3" style={{color: '#4B5563'}}>
                   • 3 pattern generations per month (resets monthly)<br />
                   • 1 PDF download lifetime (never resets)<br />
                   Upgrade for more!
                 </p>
                 <button
                   onClick={() => router.push('/pricing')}
-                  className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  className="text-sm px-4 py-2 text-white rounded-md"
+                  style={{backgroundColor: '#2C7A7B'}}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#236B6C'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2C7A7B'}
                 >
                   View Plans
                 </button>
@@ -223,7 +226,7 @@ export default function ProfilePage() {
 
         {/* PROFILE SETTINGS */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-6">Your Quilting Profile</h2>
+          <h2 className="text-xl font-semibold mb-6" style={{color: '#B91C1C'}}>Your Quilting Profile</h2>
 
           {message && (
             <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded">
@@ -257,7 +260,9 @@ export default function ProfilePage() {
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
+                    onFocus={(e) => e.target.style.borderColor = '#2C7A7B'}
+                    onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
                     placeholder="Your name"
                   />
                 </div>
@@ -278,7 +283,10 @@ export default function ProfilePage() {
                         <button
                           type="button"
                           onClick={() => router.push('/pricing')}
-                          className="text-sm text-indigo-600 hover:text-indigo-700"
+                          className="text-sm hover:underline"
+                          style={{color: '#2C7A7B'}}
+                          onMouseEnter={(e) => e.currentTarget.style.color = '#236B6C'}
+                          onMouseLeave={(e) => e.currentTarget.style.color = '#2C7A7B'}
                         >
                           Manage Subscription
                         </button>
@@ -315,7 +323,9 @@ export default function ProfilePage() {
                   id="skillLevel"
                   value={skillLevel}
                   onChange={(e) => setSkillLevel(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
+                  onFocus={(e) => e.target.style.borderColor = '#2C7A7B'}
+                  onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
                 >
                   {SKILL_LEVELS.map((level) => (
                     <option key={level.value} value={level.value}>
@@ -333,7 +343,10 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 disabled:opacity-50"
+                className="px-6 py-3 text-white font-semibold rounded-lg shadow-md disabled:opacity-50"
+                style={{backgroundColor: '#B91C1C'}}
+                onMouseEnter={(e) => !saving && (e.currentTarget.style.backgroundColor = '#991B1B')}
+                onMouseLeave={(e) => !saving && (e.currentTarget.style.backgroundColor = '#B91C1C')}
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>

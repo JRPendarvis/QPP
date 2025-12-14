@@ -1,11 +1,21 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 const FROM_EMAIL = 'QuiltPlannerPro <noreply@quiltplannerpro.com>';
 
+if (!resend) {
+  console.warn('⚠️  RESEND_API_KEY not found - email functionality disabled');
+}
+
 export const emailService = {
   async sendWelcomeEmail(to: string, name?: string) {
+    if (!resend) {
+      console.log('Email service disabled - skipping welcome email');
+      return;
+    }
     try {
       await resend.emails.send({
         from: FROM_EMAIL,
@@ -43,6 +53,10 @@ export const emailService = {
   },
 
   async sendPasswordResetEmail(to: string, resetUrl: string) {
+    if (!resend) {
+      console.log('Email service disabled - skipping password reset email');
+      return;
+    }
     try {
       await resend.emails.send({
         from: FROM_EMAIL,
@@ -75,6 +89,10 @@ export const emailService = {
   },
 
   async sendFeedbackNotification(userEmail: string, userName: string | undefined, title: string, description: string | null) {
+    if (!resend) {
+      console.log('Email service disabled - skipping feedback notification');
+      return;
+    }
     try {
       const adminEmail = process.env.ADMIN_EMAIL || 'quiltplannerpro@gmail.com';
       
