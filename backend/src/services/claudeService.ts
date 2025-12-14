@@ -204,6 +204,48 @@ export class ClaudeService {
     skillLevel: string = 'beginner',
     selectedPattern?: string
   ): Promise<QuiltPattern> {
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🔄 Pattern generation attempt ${attempt}/${maxRetries}`);
+        return await this.attemptPatternGeneration(fabricImages, imageTypes, skillLevel, selectedPattern);
+      } catch (error: any) {
+        lastError = error;
+        
+        // Check if it's an overloaded error
+        const isOverloaded = error?.error?.error?.type === 'overloaded_error' || 
+                            error?.message?.includes('Overloaded') ||
+                            error?.message?.includes('overloaded');
+        
+        if (isOverloaded && attempt < maxRetries) {
+          // Exponential backoff: 2s, 4s, 8s
+          const waitTime = Math.pow(2, attempt) * 1000;
+          console.log(`⏳ Claude API overloaded, retrying in ${waitTime/1000}s (attempt ${attempt + 1}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        } else if (attempt === maxRetries) {
+          console.error(`❌ Failed after ${maxRetries} attempts`);
+          if (isOverloaded) {
+            throw new Error('Claude API is currently experiencing high demand. Please try again in a few moments.');
+          }
+          throw error;
+        } else {
+          // Non-overload error, throw immediately
+          throw error;
+        }
+      }
+    }
+
+    throw lastError || new Error('Failed to generate quilt pattern');
+  }
+
+  private async attemptPatternGeneration(
+    fabricImages: string[],
+    imageTypes: string[] = [],
+    skillLevel: string = 'beginner',
+    selectedPattern?: string
+  ): Promise<QuiltPattern> {
     try {
       const skillDescription = SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
       const availablePatterns = PATTERNS_BY_SKILL[skillLevel] || PATTERNS_BY_SKILL['beginner'];
@@ -391,7 +433,8 @@ Provide this JSON response:
 
     } catch (error) {
       console.error('Error generating quilt pattern:', error);
-      throw new Error('Failed to generate quilt pattern');
+      // Re-throw the original error to preserve error details for retry logic
+      throw error;
     }
   }
 

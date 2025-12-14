@@ -179,7 +179,10 @@ export class PatternController {
       // Provide more helpful error messages
       let message = 'Failed to generate quilt pattern. Please try again.';
       if (error instanceof Error) {
-        if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+        // Check for Claude overload message (from retry logic)
+        if (error.message.includes('high demand') || error.message.includes('experiencing')) {
+          message = error.message; // Use the friendly message from retry logic
+        } else if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
           message = 'Pattern generation timed out. Please try again with fewer images.';
         } else if (error.message.includes('rate limit')) {
           message = 'Service is busy. Please wait a moment and try again.';
