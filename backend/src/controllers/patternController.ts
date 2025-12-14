@@ -40,6 +40,9 @@ export class PatternController {
       const images = fabricImages || fabrics;
       const imageTypes = fabricTypes || [];
 
+      console.log('📸 Received image types:', imageTypes);
+      console.log('📸 Images count:', images.length, 'Types count:', imageTypes.length);
+
       // Validation
       if (!images || !Array.isArray(images) || images.length < 2 || images.length > 8) {
         return res.status(400).json({

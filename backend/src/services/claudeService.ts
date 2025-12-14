@@ -273,12 +273,34 @@ Provide this JSON response:
 - Keep instructions clear and specific to this pattern type`,
               },
               ...fabricImages.map((imageBase64, index) => {
-                // Use provided type or default to jpeg
-                const mimeType = imageTypes[index] || 'image/jpeg';
+                // Detect image type from base64 magic bytes if not provided
+                let mimeType = imageTypes[index];
+                
+                if (!mimeType) {
+                  // Auto-detect from base64 magic bytes
+                  const header = imageBase64.substring(0, 20);
+                  if (header.startsWith('/9j/')) {
+                    mimeType = 'image/jpeg';
+                  } else if (header.startsWith('iVBOR')) {
+                    mimeType = 'image/png';
+                  } else if (header.startsWith('R0lGOD')) {
+                    mimeType = 'image/gif';
+                  } else if (header.startsWith('UklGR')) {
+                    mimeType = 'image/webp';
+                  } else {
+                    console.warn('⚠️  Could not detect image type, defaulting to png');
+                    mimeType = 'image/png';
+                  }
+                  console.log(`🔍 Auto-detected image ${index + 1}: ${mimeType}`);
+                }
+                
                 // Ensure it's a valid Claude-supported format
                 const validType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(mimeType) 
                   ? mimeType 
-                  : 'image/jpeg';
+                  : 'image/png';
+                
+                console.log(`📸 Image ${index + 1}: ${validType}`);
+                
                 return {
                   type: 'image' as const,
                   source: {
