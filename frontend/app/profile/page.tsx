@@ -138,6 +138,15 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
 
+      {/* Header Banner */}
+      <div className="py-12 px-4" style={{backgroundColor: '#B91C1C'}}>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Your Profile
+          </h1>
+        </div>
+      </div>
+
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         
         {/* ✅ USAGE STATS SECTION */}
@@ -226,7 +235,6 @@ export default function ProfilePage() {
 
         {/* PROFILE SETTINGS */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-6" style={{color: '#B91C1C'}}>Your Quilting Profile</h2>
 
           {message && (
             <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded">

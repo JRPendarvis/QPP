@@ -62,9 +62,17 @@ export default function FeedbackPage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
 
+      {/* Header Banner */}
+      <div className="py-12 px-4" style={{backgroundColor: '#B91C1C'}}>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Share Your Feedback & Ideas
+          </h1>
+        </div>
+      </div>
+
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-3xl font-bold mb-2" style={{color: '#B91C1C'}}>Share Your Feedback & Ideas</h1>
           <p className="mb-8" style={{color: '#4B5563'}}>
             We&apos;d love to hear from you! Tell us what features you&apos;d like to see or how we can improve your quilting experience.
           </p>
