@@ -145,7 +145,6 @@ export default function PricingPage() {
             Start with our free tier or upgrade to unlock more patterns, advanced features, and priority support.
             All plans include a 14-day free trial.
           </p>
-          <p className="text-sm" style={{color: '#5B8C85'}}>Palette 2: Modern Quilter - Terracotta, Dusty Teal, Honey Amber</p>
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-4 mb-8 mt-8">
