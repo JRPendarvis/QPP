@@ -142,8 +142,7 @@ export default function PricingPage() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <p className="text-xl max-w-3xl mx-auto mb-4" style={{color: '#1F2937'}}>
-            Start with our free tier or upgrade to unlock more patterns, advanced features, and priority support.
-            All plans include a 14-day free trial.
+            Start with our free tier and upgrade anytime to unlock more patterns, advanced features, and priority support.
           </p>
 
           {/* Billing Toggle */}

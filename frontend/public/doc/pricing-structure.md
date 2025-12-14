@@ -1,32 +1,32 @@
-# QuiltPlannerPro Pricing Structure
+# Quilt Planner Pro Pricing Structure
 
-**Last Updated: December 10, 2024**
+**Last Updated: December 14, 2025**
 
 ## Official Pricing Tiers
 
 ### Free Tier
 - **Cost:** $0
 - **Billing:** None
-- **Patterns:** 3 lifetime downloads
-- **Features:** Basic pattern generation
+- **Patterns:** 1 lifetime pattern
+- **Features:** Basic pattern generation, Standard patterns only, Community support
 
 ### Hobbyist Tier
 - **Monthly:** $5.99/month
 - **Annual:** $59.99/year (save $11.89 - ~17% discount)
-- **Patterns:** 10 per month
-- **Features:** All basic features + skill level matching
+- **Patterns:** 2 per month
+- **Features:** Skill level matching, Advanced patterns, Priority email support
 
 ### Enthusiast Tier
 - **Monthly:** $9.99/month
 - **Annual:** $94.99/year (save $24.89 - ~21% discount)
-- **Patterns:** 30 per month
-- **Features:** All Hobbyist features + advanced patterns + priority support
+- **Patterns:** 10 per month
+- **Features:** All Hobbyist features, Expert-level patterns, Priority support, Advanced customization, PDF downloads
 
 ### Pro Tier
 - **Monthly:** $19.99/month
 - **Annual:** $199.99/year (save $39.89 - ~17% discount)
-- **Patterns:** Unlimited
-- **Features:** Everything + commercial use rights + API access (future)
+- **Patterns:** 25 per month
+- **Features:** Everything included, Commercial use rights, API access (coming soon), Dedicated support
 
 ## Pricing Logic
 
