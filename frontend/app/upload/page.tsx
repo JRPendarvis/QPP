@@ -104,6 +104,7 @@ export default function UploadPage() {
     handleFilesAdded,
     removeFabric,
     clearAll,
+    resetPattern,
     generatePattern,
   } = usePatternGeneration();
 
@@ -306,7 +307,7 @@ export default function UploadPage() {
               pattern={pattern}
               userTier={profile.subscriptionTier}
               usage={profile.usage}
-              onStartOver={clearAll}
+              onStartOver={resetPattern}
             />
           )}
         </div>

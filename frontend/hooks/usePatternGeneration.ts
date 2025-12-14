@@ -47,6 +47,12 @@ export function usePatternGeneration() {
     setError('');
   };
 
+  // Reset pattern only (keep fabrics for "Start Over")
+  const resetPattern = () => {
+    setPattern(null);
+    setError('');
+  };
+
   // Convert file to base64 with mime type
   const fileToBase64 = (file: File): Promise<{data: string, type: string}> => {
     return new Promise((resolve, reject) => {
@@ -110,6 +116,7 @@ export function usePatternGeneration() {
     handleFilesAdded,
     removeFabric,
     clearAll,
+    resetPattern,
     generatePattern,
   };
 }
