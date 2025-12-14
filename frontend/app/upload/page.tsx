@@ -174,6 +174,7 @@ export default function UploadPage() {
 
           {!pattern && (
             <>
+              {console.log('📸 Render: fabrics.length =', fabrics.length, 'previews.length =', previews.length)}
               {/* STEP 1: Pattern Selection Section - NOW FIRST */}
               <div className="mb-8 bg-white border border-gray-200 rounded-lg p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">

@@ -49,11 +49,15 @@ export function usePatternGeneration() {
 
   // Reset pattern only (keep fabrics for "Start Over")
   const resetPattern = useCallback(() => {
+    console.log('🔄 Reset pattern - keeping', fabrics.length, 'fabrics');
     setPattern(null);
     setError('');
+    setGenerating(false); // Also reset generating state
     // Scroll to top to show the fabric preview
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+  }, [fabrics.length]);
 
   // Convert file to base64 with mime type
   const fileToBase64 = (file: File): Promise<{data: string, type: string}> => {
