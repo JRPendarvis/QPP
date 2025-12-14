@@ -199,7 +199,8 @@ const SVG_TEMPLATES: Record<string, string> = {
 
 export class ClaudeService {
   async generateQuiltPattern(
-    fabricImages: string[], 
+    fabricImages: string[],
+    imageTypes: string[] = [],
     skillLevel: string = 'beginner',
     selectedPattern?: string
   ): Promise<QuiltPattern> {
@@ -271,14 +272,22 @@ Provide this JSON response:
 - The difficulty MUST be "${skillLevel.replace('_', ' ')}"
 - Keep instructions clear and specific to this pattern type`,
               },
-              ...fabricImages.map((imageBase64) => ({
-                type: 'image' as const,
-                source: {
-                  type: 'base64' as const,
-                  media_type: 'image/jpeg' as const,
-                  data: imageBase64,
-                },
-              })),
+              ...fabricImages.map((imageBase64, index) => {
+                // Use provided type or default to jpeg
+                const mimeType = imageTypes[index] || 'image/jpeg';
+                // Ensure it's a valid Claude-supported format
+                const validType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(mimeType) 
+                  ? mimeType 
+                  : 'image/jpeg';
+                return {
+                  type: 'image' as const,
+                  source: {
+                    type: 'base64' as const,
+                    media_type: validType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
+                    data: imageBase64,
+                  },
+                };
+              }),
             ],
           },
         ],

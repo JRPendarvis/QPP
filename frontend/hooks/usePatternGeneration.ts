@@ -47,15 +47,18 @@ export function usePatternGeneration() {
     setError('');
   };
 
-  // Convert file to base64
-  const fileToBase64 = (file: File): Promise<string> => {
+  // Convert file to base64 with mime type
+  const fileToBase64 = (file: File): Promise<{data: string, type: string}> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
         const base64 = reader.result as string;
         const base64Data = base64.split(',')[1];
-        resolve(base64Data);
+        resolve({
+          data: base64Data,
+          type: file.type
+        });
       };
       reader.onerror = error => reject(error);
     });
@@ -72,9 +75,10 @@ export function usePatternGeneration() {
     setPattern(null);
 
     try {
-      const fabricsBase64 = await Promise.all(fabrics.map(file => fileToBase64(file)));
+      const fabricsWithTypes = await Promise.all(fabrics.map(file => fileToBase64(file)));
       const response = await api.post('/api/patterns/generate', { 
-        fabrics: fabricsBase64,
+        fabrics: fabricsWithTypes.map(f => f.data),
+        fabricTypes: fabricsWithTypes.map(f => f.type),
         skillLevel: userSkillLevel,
         challengeMe: challengeMe,
         selectedPattern: selectedPattern || 'auto',
