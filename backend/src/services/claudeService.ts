@@ -511,6 +511,7 @@ Provide this JSON response:
     }
     
     console.log(`  Template Being Used: "${templateUsed}"`);
+    console.log(`  Template Content Preview: ${baseTemplate.substring(0, 150)}...`);
     console.log('═══════════════════════════════════════════════════');
     
     // Ensure we have at least 2 colors
