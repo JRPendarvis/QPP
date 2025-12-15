@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem(AUTH_CONSTANTS.TOKEN_KEY, response.data.token);
         const userData = response.data.data.user;
         setUser(userData);
-        router.push(ROUTES.DASHBOARD);
+        router.push(ROUTES.PROFILE);
       } else {
         throw new Error('Registration failed');
       }
