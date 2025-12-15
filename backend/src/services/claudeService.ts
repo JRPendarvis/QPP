@@ -276,6 +276,14 @@ export class ClaudeService {
       }
       
       console.log(`🎯 Final pattern: ${patternForSvg}, Skill level: ${skillLevel}`);
+      console.log('═══════════════════════════════════════════════');
+      console.log('📤 CLAUDE API REQUEST PARAMETERS:');
+      console.log(`  Pattern Type: ${patternForSvg}`);
+      console.log(`  Skill Level: ${skillLevel}`);
+      console.log(`  Fabric Images: ${fabricImages.length}`);
+      console.log(`  Image Types: ${imageTypes.join(', ') || 'auto-detect'}`);
+      console.log(`  Selected Pattern: ${selectedPattern || 'auto'}`);
+      console.log('═══════════════════════════════════════════════');
       
       const stream = await anthropic.messages.stream({
         model: 'claude-sonnet-4-20250514',
@@ -400,6 +408,13 @@ Provide this JSON response:
       jsonText = jsonText.substring(firstBrace, lastBrace + 1);
 
       const parsedResponse = JSON.parse(jsonText);
+      
+      console.log('═══════════════════════════════════════════════');
+      console.log('📥 CLAUDE API RESPONSE:');
+      console.log(`  Pattern Name from Claude: ${parsedResponse.patternName}`);
+      console.log(`  Fabric Colors: ${parsedResponse.fabricColors?.join(', ') || 'none'}`);
+      console.log(`  Description: ${parsedResponse.description?.substring(0, 100)}...`);
+      console.log('═══════════════════════════════════════════════');
       
       // Extract colors from response
       const colors = parsedResponse.fabricColors || ['#4A90A4', '#D4A574', '#8B7355', '#6B8E23'];
