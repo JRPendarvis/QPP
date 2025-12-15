@@ -25,6 +25,11 @@ import { NEW_YORK_BEAUTY } from './patterns/new-york-beauty';
 import { MARINERS_COMPASS } from './patterns/mariners-compass';
 import { STORM_AT_SEA } from './patterns/storm-at-sea';
 import { DOUBLE_WEDDING_RING } from './patterns/double-wedding-ring';
+import { DRUNKARDS_PATH } from './patterns/drunkards-path';
+import { FEATHERED_STAR } from './patterns/feathered-star';
+import { GRANDMOTHERS_FLOWER_GARDEN } from './patterns/grandmothers-flower-garden';
+import { PICKLE_DISH } from './patterns/pickle-dish';
+import { COMPLEX_MEDALLION } from './patterns/complex-medallion';
 
 export const SVG_TEMPLATES: Record<string, string> = {
   'Simple Squares': SIMPLE_SQUARES,
@@ -47,4 +52,9 @@ export const SVG_TEMPLATES: Record<string, string> = {
   "Mariner's Compass": MARINERS_COMPASS,
   'Storm at Sea': STORM_AT_SEA,
   'Double Wedding Ring': DOUBLE_WEDDING_RING,
+  "Drunkard's Path": DRUNKARDS_PATH,
+  'Feathered Star': FEATHERED_STAR,
+  "Grandmother's Flower Garden": GRANDMOTHERS_FLOWER_GARDEN,
+  'Pickle Dish': PICKLE_DISH,
+  'Complex Medallion': COMPLEX_MEDALLION,
 };
