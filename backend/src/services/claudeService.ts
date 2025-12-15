@@ -480,8 +480,14 @@ Provide this JSON response:
   }
 
   private generateSvgFromTemplate(patternType: string, colors: string[]): string {
+    console.log('═══════════════════════════════════════════════════');
+    console.log('🎨 SVG TEMPLATE GENERATION:');
+    console.log(`  Requested Pattern: "${patternType}"`);
+    console.log(`  Available Templates: ${Object.keys(SVG_TEMPLATES).join(', ')}`);
+    
     // Get template - try exact match first, then fallback
     let baseTemplate = SVG_TEMPLATES[patternType];
+    let templateUsed = patternType;
     
     if (!baseTemplate) {
       // Try to find a close match
@@ -493,12 +499,19 @@ Provide this JSON response:
       
       if (closeMatch) {
         baseTemplate = SVG_TEMPLATES[closeMatch];
-        console.log(`📐 Using close match template: ${closeMatch} for ${patternType}`);
+        templateUsed = closeMatch;
+        console.log(`  ⚠️ No exact match! Using close match: "${closeMatch}"`);
       } else {
         baseTemplate = SVG_TEMPLATES['Simple Squares'];
-        console.log(`📐 No template for ${patternType}, using Simple Squares fallback`);
+        templateUsed = 'Simple Squares';
+        console.log(`  ❌ No template found! Using fallback: "Simple Squares"`);
       }
+    } else {
+      console.log(`  ✅ Exact template match found: "${patternType}"`);
     }
+    
+    console.log(`  Template Being Used: "${templateUsed}"`);
+    console.log('═══════════════════════════════════════════════════');
     
     // Ensure we have at least 2 colors
     if (colors.length < 2) {
