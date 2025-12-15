@@ -411,8 +411,20 @@ Provide this JSON response:
       // Force the correct difficulty level
       const formattedDifficulty = skillLevel.replace('_', ' ');
       
+      // Extract creative prefix from Claude's pattern name if it has one
+      // Pattern name format from Claude should be "Creative Name - Pattern Type"
+      let displayPatternName = patternForSvg;
+      if (parsedResponse.patternName) {
+        const nameParts = parsedResponse.patternName.split(' - ');
+        if (nameParts.length > 1 && nameParts[0]) {
+          // Use creative prefix but ensure it ends with the correct pattern type
+          displayPatternName = `${nameParts[0]} - ${patternForSvg}`;
+        }
+      }
+      console.log(`📛 Pattern name: ${displayPatternName} (SVG template: ${patternForSvg})`);
+      
       const pattern: QuiltPattern = {
-        patternName: parsedResponse.patternName || `${patternForSvg} Quilt`,
+        patternName: displayPatternName,
         description: parsedResponse.description || `A beautiful ${patternForSvg} pattern`,
         fabricLayout: parsedResponse.fabricLayout || 'Arranged in a 4x4 grid',
         difficulty: formattedDifficulty, // Force the correct difficulty
