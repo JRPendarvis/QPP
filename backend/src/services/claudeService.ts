@@ -129,19 +129,28 @@ const SVG_TEMPLATES: Record<string, string> = {
     <polygon points="0,25 25,25 25,75" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     <polygon points="0,25 0,75 25,75" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
   'Churn Dash': `
-    <rect x="33.33" y="0" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="0" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="66.66" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="33.33" y="66.66" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Center square -->
     <rect x="33.33" y="33.33" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="0,0 33.33,0 0,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="33.33,0 33.33,33.33 0,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.66,0 100,0 100,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.66,0 66.66,33.33 100,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="0,66.66 0,100 33.33,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="0,66.66 33.33,66.66 33.33,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="100,66.66 100,100 66.66,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.66,66.66 100,66.66 66.66,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
+    <!-- Top center rectangle -->
+    <rect x="33.33" y="0" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom center rectangle -->
+    <rect x="33.33" y="66.66" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Left center rectangle -->
+    <rect x="0" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Right center rectangle -->
+    <rect x="66.66" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top-left corner HSTs -->
+    <polygon points="0,0 33.33,0 33.33,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,0 0,33.33 33.33,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top-right corner HSTs -->
+    <polygon points="66.66,0 100,0 66.66,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,0 100,33.33 66.66,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom-left corner HSTs -->
+    <polygon points="0,66.66 33.33,66.66 0,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,66.66 33.33,100 0,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom-right corner HSTs -->
+    <polygon points="66.66,66.66 100,66.66 100,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.66,66.66 66.66,100 100,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`,
   'Lone Star': `
     <polygon points="50,0 60,40 100,50 60,60 50,100 40,60 0,50 40,40" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     <polygon points="50,20 55,40 50,40" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
@@ -281,11 +290,16 @@ export class ClaudeService {
 
 ${patternInstruction}
 
+**CRITICAL: YOU MUST CREATE A "${patternForSvg.toUpperCase()}" PATTERN - NOT ANY OTHER PATTERN TYPE**
+
+For reference, a "${patternForSvg}" pattern has these characteristics:
+${this.getPatternDescription(patternForSvg)}
+
 **STEP 1: ANALYZE THE FABRICS**
 Identify the dominant hex color from EACH fabric image (e.g., #FF5733, #2E86AB). You MUST identify one color per fabric - so ${fabricImages.length} colors total.
 
 **STEP 2: CREATE THE PATTERN**
-Create a "${patternForSvg}" quilt pattern using ALL the colors from the fabrics.
+Create a "${patternForSvg}" quilt pattern using ALL the colors from the fabrics. DO NOT create a different pattern type.
 
 Skill level: ${skillDescription}
 
@@ -494,6 +508,21 @@ Provide this JSON response:
     return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <rect width="400" height="400" fill="#f8f8f8"/>
 ${blocks}</svg>`;
+  }
+
+  private getPatternDescription(patternName: string): string {
+    const descriptions: Record<string, string> = {
+      'Churn Dash': '- A 9-patch style block with a center square, 4 rectangles on the sides, and 4 half-square triangle units in the corners\n- The corners feature diagonal splits creating a "churning" motion effect\n- NOT a Shoo Fly pattern (which has solid squares in corners)',
+      'Shoo Fly': '- A 9-patch block with solid squares in all four corners\n- A center square\n- Four half-square triangles on the sides forming an X pattern',
+      'Ohio Star': '- 8-pointed star in the center formed by quarter-square triangles\n- Four corner squares\n- The star points extend from center to the midpoints of each side',
+      'Sawtooth Star': '- Similar to Ohio Star but with half-square triangles creating sawtooth edges\n- Large center square\n- Four corner squares with triangular star points between them',
+      'Pinwheel': '- Four triangular sections spiraling from center\n- Creates a spinning windmill effect\n- Triangles all point in the same rotational direction',
+      'Flying Geese': '- Large triangles pointing in one direction (the "geese")\n- Smaller background triangles on the sides\n- Creates a directional, flowing pattern',
+      'Four Patch': '- Simple 2x2 grid of squares\n- Alternating two colors in checkerboard pattern',
+      'Nine Patch': '- 3x3 grid of equal-sized squares\n- Often alternates two colors in a checkerboard arrangement',
+      'Log Cabin': '- Center square with strips of fabric added around it\n- Strips get progressively longer as you move outward\n- Creates a spiral or concentric square effect',
+    };
+    return descriptions[patternName] || `- Traditional ${patternName} quilt block pattern`;
   }
 
   private formatPatternName(patternId: string): string {
