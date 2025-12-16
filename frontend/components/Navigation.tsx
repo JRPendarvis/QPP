@@ -47,6 +47,18 @@ export default function Navigation() {
           </div>
           <div className="flex gap-4">
             <Link
+              href="/about"
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              About
+            </Link>
+            <Link
+              href="/faq"
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              FAQ
+            </Link>
+            <Link
               href={ROUTES.PRICING}
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
             >
