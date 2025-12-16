@@ -51,6 +51,10 @@ const faqs: FAQItem[] = [
     answer: 'Yes, you can change your subscription tier at any time. Upgrades take effect immediately, while downgrades take effect at the next billing cycle.',
   },
   {
+    question: 'How can I cancel my subscription?',
+    answer: 'You can cancel your subscription at any time from your Profile page. Your access will continue until the end of your current billing period, and you won&apos;t be charged again.',
+  },
+  {
     question: 'Is my payment information secure?',
     answer: 'Yes! We use Stripe for payment processing, which is PCI-DSS compliant. We never store your credit card information on our servers.',
   },
