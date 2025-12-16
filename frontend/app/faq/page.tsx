@@ -131,14 +131,14 @@ export default function FAQPage() {
           </div>
 
           {/* Contact CTA */}
-          <div className="bg-linear-to-r from-red-100 to-teal-100 p-8 rounded-lg text-center">
+          <div className="bg-linear-to-r from-red-100 to-teal-100 p-8 rounded-lg">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
               Still have questions?
             </h2>
             <p className="text-gray-700 mb-6">
               Can&apos;t find what you&apos;re looking for? We&apos;re here to help!
             </p>
-            <div className="flex justify-center gap-4">
+            <div className="flex gap-4">
               <Link
                 href="/feedback"
                 className="px-6 py-3 bg-red-700 text-white font-semibold rounded-lg hover:bg-red-800 transition-colors"

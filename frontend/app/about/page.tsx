@@ -81,12 +81,12 @@ export default function AboutPage() {
           </section>
 
           {/* Contact CTA */}
-          <section className="bg-linear-to-r from-red-100 to-teal-100 p-8 rounded-lg text-center">
+          <section className="bg-linear-to-r from-red-100 to-teal-100 p-8 rounded-lg">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Ready to Start Quilting?</h2>
             <p className="text-gray-700 mb-6">
               Join thousands of quilters who are already using Quilt Planner Pro to create amazing quilts.
             </p>
-            <div className="flex justify-center gap-4">
+            <div className="flex gap-4">
               <Link
                 href="/register"
                 className="px-6 py-3 bg-red-700 text-white font-semibold rounded-lg hover:bg-red-800 transition-colors"
