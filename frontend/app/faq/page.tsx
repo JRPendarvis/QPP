@@ -16,7 +16,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'What image formats are supported?',
-    answer: 'We support JPG, and PNG image formats. For best results, upload clear, well-lit photos of your fabrics.',
+    answer: 'We support JPG and PNG image formats. For best results, upload clear, well-lit photos of your fabrics.',
   },
   {
     question: 'How many fabrics can I upload?',
@@ -32,7 +32,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'How many patterns can I generate?',
-    answer: 'Pattern generation limits depend on your subscription tier: Hobbyist (5/month), Enthusiast (20/month), or Professional (50/month).',
+    answer: 'Pattern generation limits depend on your subscription tier: Free (3/month), Hobbyist (10/month), Enthusiast (50/month), or Pro (200/month).',
   },
   {
     question: 'Can I download my patterns?',
