@@ -62,8 +62,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await api.post('/api/auth/login', { email, password });
-      if (response.data?.success && response.data?.token) {
-        localStorage.setItem(AUTH_CONSTANTS.TOKEN_KEY, response.data.token);
+      if (response.data?.success && response.data?.data?.token) {
+        localStorage.setItem(AUTH_CONSTANTS.TOKEN_KEY, response.data.data.token);
         const userData = response.data.data.user;
         setUser(userData);
         router.push(ROUTES.DASHBOARD);
@@ -79,8 +79,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string, name?: string) => {
     try {
       const response = await api.post('/api/auth/register', { email, password, name });
-      if (response.data?.success && response.data?.token) {
-        localStorage.setItem(AUTH_CONSTANTS.TOKEN_KEY, response.data.token);
+      if (response.data?.success && response.data?.data?.token) {
+        localStorage.setItem(AUTH_CONSTANTS.TOKEN_KEY, response.data.data.token);
         const userData = response.data.data.user;
         setUser(userData);
         router.push(ROUTES.PROFILE);
