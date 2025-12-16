@@ -79,9 +79,9 @@ export default function FabricDropzone({
         )}
       </div>
       
-      {/* Camera Button for Mobile/Tablet */}
+      {/* Camera Button for Mobile/Tablet Only */}
       {currentCount < maxFiles && (
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 flex justify-center md:hidden">
           <button
             onClick={handleCameraClick}
             type="button"
