@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { emailService } from '../services/emailService';
+import { FeedbackService } from '../services/feedbackService';
+import { FeedbackValidator } from '../validators/feedbackValidator';
+import { ResponseHelper } from '../utils/responseHelper';
 
-const prisma = new PrismaClient();
+const feedbackService = new FeedbackService();
 
 export class FeedbackController {
   // GET /api/feedback
@@ -10,30 +12,12 @@ export class FeedbackController {
     try {
       const userId = req.user?.userId;
 
-      const feedback = await prisma.feedback.findMany({
-        orderBy: [{ votesCount: 'desc' }, { createdAt: 'desc' }],
-      });
+      const data = await feedbackService.getFeedbackList(userId);
 
-      // If user is authenticated, fetch their votes to annotate results
-      let userVotes: Record<string, boolean> = {};
-      if (userId) {
-        const votes = await prisma.feedbackVote.findMany({ where: { userId } });
-        userVotes = votes.reduce((acc, v) => ({ ...acc, [v.feedbackId]: true }), {} as Record<string, boolean>);
-      }
-
-      const data = feedback.map((f) => ({
-        id: f.id,
-        title: f.title,
-        description: f.description,
-        votesCount: f.votesCount,
-        createdAt: f.createdAt,
-        voted: !!userVotes[f.id],
-      }));
-
-      res.json({ success: true, data });
+      return ResponseHelper.success(res, 200, 'Feedback retrieved', { feedback: data });
     } catch (error) {
       console.error('List feedback error:', error);
-      res.status(500).json({ success: false, message: 'Failed to list feedback' });
+      return ResponseHelper.serverError(res, 'Failed to list feedback');
     }
   }
 
@@ -41,24 +25,24 @@ export class FeedbackController {
   async createFeedback(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
-      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
-
-      const { title, description } = req.body;
-      if (!title || typeof title !== 'string') {
-        return res.status(400).json({ success: false, message: 'Title is required' });
+      if (!userId) {
+        return ResponseHelper.unauthorizedError(res, 'Unauthorized');
       }
 
-      const created = await prisma.feedback.create({
-        data: {
-          title,
-          description: description || null,
-          authorId: userId,
-        },
-      });
+      const { title, description } = req.body;
 
-      // Get user info for email notification
-      const user = await prisma.user.findUnique({ where: { id: userId } });
-      
+      // Validate input
+      const validation = FeedbackValidator.validateCreateFeedback(title);
+      if (!validation.valid) {
+        return ResponseHelper.validationError(res, validation.message!);
+      }
+
+      const { feedback, user } = await feedbackService.createFeedback(
+        userId, 
+        title, 
+        description
+      );
+
       // Send notification email (don't await - send in background)
       if (user) {
         emailService.sendFeedbackNotification(
@@ -69,10 +53,10 @@ export class FeedbackController {
         ).catch(err => console.error('Feedback email failed:', err));
       }
 
-      res.status(201).json({ success: true, data: created });
+      return ResponseHelper.success(res, 201, 'Feedback created', { feedback });
     } catch (error) {
       console.error('Create feedback error:', error);
-      res.status(500).json({ success: false, message: 'Failed to create feedback' });
+      return ResponseHelper.serverError(res, 'Failed to create feedback');
     }
   }
 
@@ -80,34 +64,24 @@ export class FeedbackController {
   async toggleVote(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
-      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+      if (!userId) {
+        return ResponseHelper.unauthorizedError(res, 'Unauthorized');
+      }
 
       const { id } = req.params;
-      const feedbackId = id;
 
-      // Use findFirst to avoid relying on the generated composite unique name
-      const existing = await prisma.feedbackVote.findFirst({ where: { userId, feedbackId } });
-
-      if (existing) {
-        // remove vote
-        const [_, updated] = await prisma.$transaction([
-          prisma.feedbackVote.delete({ where: { id: existing.id } }),
-          prisma.feedback.update({ where: { id: feedbackId }, data: { votesCount: { decrement: 1 } } }),
-        ]);
-
-        return res.json({ success: true, data: { voted: false, votesCount: updated.votesCount } });
-      } else {
-        // add vote
-        const [vote, updated] = await prisma.$transaction([
-          prisma.feedbackVote.create({ data: { userId, feedbackId } }),
-          prisma.feedback.update({ where: { id: feedbackId }, data: { votesCount: { increment: 1 } } }),
-        ]);
-
-        return res.json({ success: true, data: { voted: true, votesCount: updated.votesCount } });
+      // Validate feedback ID
+      const validation = FeedbackValidator.validateFeedbackId(id);
+      if (!validation.valid) {
+        return ResponseHelper.validationError(res, validation.message!);
       }
+
+      const result = await feedbackService.toggleVote(userId, id);
+
+      return ResponseHelper.success(res, 200, 'Vote toggled', result);
     } catch (error) {
       console.error('Toggle vote error:', error);
-      res.status(500).json({ success: false, message: 'Failed to toggle vote' });
+      return ResponseHelper.serverError(res, 'Failed to toggle vote');
     }
   }
 }
