@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import UploadHeader from '@/components/upload/UploadHeader';
 import FabricDropzone from '@/components/upload/FabricDropzone';
 import FabricPreviewGrid from '@/components/upload/FabricPreviewGrid';
@@ -191,8 +193,15 @@ export default function UploadPage() {
   const availablePatterns = getPatternsForSkillLevel(targetSkill);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <UploadHeader />
+    <div className="min-h-screen" style={{background: 'linear-gradient(135deg, #FEF2F2 0%, #F0FDFA 50%, #FFFBEB 100%)'}}>
+      <Navigation />
+
+      {/* Hero Section */}
+      <div className="py-8 px-4" style={{backgroundColor: '#B91C1C'}}>
+        <div className="max-w-7xl mx-auto">
+          <UploadHeader />
+        </div>
+      </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
@@ -344,6 +353,8 @@ export default function UploadPage() {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
