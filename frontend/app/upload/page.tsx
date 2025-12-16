@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
 import UploadHeader from '@/components/upload/UploadHeader';
 import FabricDropzone from '@/components/upload/FabricDropzone';
 import FabricPreviewGrid from '@/components/upload/FabricPreviewGrid';
@@ -353,8 +352,6 @@ export default function UploadPage() {
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
 
 interface FAQItem {
   question: string;
@@ -17,7 +16,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'What image formats are supported?',
-    answer: 'We support JPG, PNG, and WEBP image formats. For best results, upload clear, well-lit photos of your fabrics.',
+    answer: 'We support JPG, and PNG image formats. For best results, upload clear, well-lit photos of your fabrics.',
   },
   {
     question: 'How many fabrics can I upload?',
@@ -41,15 +40,11 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'Can I save patterns for later?',
-    answer: 'Absolutely! Your pattern history is saved in your dashboard, and you can access any previously generated pattern at any time.',
+    answer: 'Not Yet! Your pattern history is saved and we are working on displaying them. This is a feature that is COMING SOON!',
   },
   {
     question: 'What if I\'m not happy with the generated pattern?',
     answer: 'You can regenerate patterns as many times as you want (within your plan limits). Try adjusting your fabric selection, skill level, or pattern choice for different results.',
-  },
-  {
-    question: 'Do you offer refunds?',
-    answer: 'Yes, we offer a 30-day money-back guarantee. If you\'re not satisfied, contact us within 30 days of purchase for a full refund.',
   },
   {
     question: 'Can I upgrade or downgrade my subscription?',
@@ -157,8 +152,6 @@ export default function FAQPage() {
 
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }

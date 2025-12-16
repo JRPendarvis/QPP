@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
 
 export default function AboutPage() {
   return (
@@ -105,8 +104,6 @@ export default function AboutPage() {
 
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }
