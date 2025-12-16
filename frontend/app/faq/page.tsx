@@ -32,7 +32,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'How many patterns can I generate?',
-    answer: 'Pattern generation limits depend on your subscription tier: Hobbyist (5/month), Enthusiast (20/month), Professional (50/month), or Advanced (unlimited).',
+    answer: 'Pattern generation limits depend on your subscription tier: Hobbyist (5/month), Enthusiast (20/month), or Professional (50/month).',
   },
   {
     question: 'Can I download my patterns?',
@@ -56,7 +56,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'Can I use the patterns commercially?',
-    answer: 'Patterns generated for personal use are yours to keep. For commercial use (selling quilts or patterns), please upgrade to our Professional or Advanced tier.',
+    answer: 'Patterns generated for personal use are yours to keep. For commercial use (selling quilts or patterns), please upgrade to our Professional tier.',
   },
   {
     question: 'Do you provide quilting supplies or fabrics?',
