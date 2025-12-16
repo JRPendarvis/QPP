@@ -19,6 +19,14 @@ const SKILL_LEVELS: Record<string, string> = {
   expert: 'Expert',
 };
 
+const SKILL_HIERARCHY = [
+  'beginner',
+  'advanced_beginner',
+  'intermediate',
+  'advanced',
+  'expert',
+];
+
 const NEXT_LEVEL: Record<string, string> = {
   beginner: 'advanced_beginner',
   advanced_beginner: 'intermediate',
@@ -64,6 +72,28 @@ const PATTERN_OPTIONS: Record<string, { id: string; name: string }[]> = {
     { id: 'complex-medallion', name: 'Complex Medallion' },
   ],
 };
+
+/**
+ * Get all patterns available for a skill level (includes current level and all levels below)
+ */
+function getPatternsForSkillLevel(skillLevel: string): { id: string; name: string }[] {
+  const skillIndex = SKILL_HIERARCHY.indexOf(skillLevel);
+  
+  // If skill level not found, default to beginner
+  if (skillIndex === -1) {
+    return PATTERN_OPTIONS['beginner'] || [];
+  }
+
+  // Collect patterns from current level and all levels below
+  const availablePatterns: { id: string; name: string }[] = [];
+  
+  for (let i = 0; i <= skillIndex; i++) {
+    const levelPatterns = PATTERN_OPTIONS[SKILL_HIERARCHY[i]] || [];
+    availablePatterns.push(...levelPatterns);
+  }
+
+  return availablePatterns;
+}
 
 interface UserProfile {
   skillLevel: string;
@@ -158,6 +188,7 @@ export default function UploadPage() {
 
   const currentSkill = profile.skillLevel || 'beginner';
   const targetSkill = challengeMe ? NEXT_LEVEL[currentSkill] : currentSkill;
+  const availablePatterns = getPatternsForSkillLevel(targetSkill);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -226,7 +257,7 @@ export default function UploadPage() {
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         >
                           <option value="">Select a pattern...</option>
-                          {PATTERN_OPTIONS[targetSkill]?.map((patternOption) => (
+                          {availablePatterns.map((patternOption) => (
                             <option key={patternOption.id} value={patternOption.id}>
                               {patternOption.name}
                             </option>

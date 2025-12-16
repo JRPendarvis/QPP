@@ -1,7 +1,7 @@
 import { SKILL_LEVEL_DESCRIPTIONS } from '../config/skillLevels';
-import { PATTERNS_BY_SKILL } from '../config/patternsBySkill';
 import { PatternFormatter } from '../utils/patternFormatter';
 import { ImageTypeDetector } from '../utils/imageTypeDetector';
+import { getPatternsForSkillLevel } from '../utils/skillLevelHelper';
 
 export interface PatternSelectionResult {
   patternForSvg: string;
@@ -16,7 +16,8 @@ export class PromptBuilder {
    * Select pattern based on skill level and user preference
    */
   static selectPattern(skillLevel: string, selectedPattern?: string): PatternSelectionResult {
-    const availablePatterns = PATTERNS_BY_SKILL[skillLevel] || PATTERNS_BY_SKILL['beginner'];
+    // Get all patterns available for this skill level (includes current and lower levels)
+    const availablePatterns = getPatternsForSkillLevel(skillLevel);
     
     let patternForSvg: string;
     let patternInstruction: string;
@@ -27,10 +28,10 @@ export class PromptBuilder {
       patternInstruction = `**REQUIRED PATTERN TYPE:** You MUST create a "${patternForSvg}" pattern. This is the user's specific choice.`;
       console.log(`📋 User selected pattern: ${patternForSvg}`);
     } else {
-      // Auto mode - pick from skill-appropriate patterns
+      // Auto mode - pick from all patterns available at this skill level
       patternForSvg = availablePatterns[Math.floor(Math.random() * availablePatterns.length)];
       patternInstruction = `**REQUIRED PATTERN TYPE:** Create a "${patternForSvg}" pattern. This pattern is appropriate for the ${skillLevel} skill level.`;
-      console.log(`🎲 Auto-selected pattern: ${patternForSvg} for skill level: ${skillLevel}`);
+      console.log(`🎲 Auto-selected pattern: ${patternForSvg} for skill level: ${skillLevel} (${availablePatterns.length} patterns available)`);
     }
     
     return { patternForSvg, patternInstruction };
