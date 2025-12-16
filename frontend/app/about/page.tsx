@@ -22,11 +22,11 @@ export default function AboutPage() {
             <p className="text-gray-700 leading-relaxed mb-4">
               Quilt Planner Pro was born from a passion for quilting and a vision to make pattern design 
               accessible to everyone. We understand that choosing the right pattern and colors can be 
-              overwhelming, especially when you have beautiful fabrics but aren't sure how to combine them.
+              overwhelming, especially when you have beautiful fabrics but aren&apos;t sure how to combine them.
             </p>
             <p className="text-gray-700 leading-relaxed">
-              Using cutting-edge AI technology, we've created a tool that analyzes your fabric choices 
-              and generates custom quilt patterns tailored to your skill level. Whether you're a beginner 
+              Using cutting-edge AI technology, we&apos;ve created a tool that analyzes your fabric choices 
+              and generates custom quilt patterns tailored to your skill level. Whether you&apos;re a beginner 
               making your first quilt or an expert looking for inspiration, Quilt Planner Pro is here to help.
             </p>
           </section>

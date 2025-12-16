@@ -1,17 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
 
 export default function CookieConsent() {
-  const [showBanner, setShowBanner] = useState(false);
-
-  useEffect(() => {
-    // Check if user has already consented
+  // Use lazy initialization to check localStorage once on mount
+  const [showBanner, setShowBanner] = useState(() => {
+    if (typeof window === 'undefined') return false;
     const consent = localStorage.getItem('cookieConsent');
-    if (!consent) {
-      setShowBanner(true);
-    }
-  }, []);
+    return !consent;
+  });
 
   const acceptCookies = () => {
     localStorage.setItem('cookieConsent', 'accepted');
@@ -32,10 +30,10 @@ export default function CookieConsent() {
           <div className="flex-1">
             <p className="text-sm text-gray-700">
               🍪 We use cookies to enhance your experience, analyze site traffic, and provide personalized content. 
-              By clicking "Accept", you consent to our use of cookies.{' '}
-              <a href="/legal/privacy-policy" className="text-red-600 hover:underline font-medium">
+              By clicking &quot;Accept&quot;, you consent to our use of cookies.{' '}
+              <Link href="/legal/privacy-policy" className="text-red-600 hover:underline font-medium">
                 Learn more
-              </a>
+              </Link>
             </p>
           </div>
           <div className="flex gap-3">

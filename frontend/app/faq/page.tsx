@@ -83,7 +83,7 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-50 to-teal-50">
+    <div className="min-h-screen bg-linear-to-b from-red-50 to-teal-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="bg-white rounded-lg shadow-xl p-8 md:p-12">
           
@@ -111,7 +111,7 @@ export default function FAQPage() {
                   <span className="font-semibold text-gray-900 pr-4">
                     {faq.question}
                   </span>
-                  <span className="text-2xl text-gray-500 flex-shrink-0">
+                  <span className="text-2xl text-gray-500 shrink-0">
                     {openIndex === index ? '−' : '+'}
                   </span>
                 </button>
@@ -125,12 +125,12 @@ export default function FAQPage() {
           </div>
 
           {/* Contact CTA */}
-          <div className="bg-gradient-to-r from-red-100 to-teal-100 p-8 rounded-lg text-center">
+          <div className="bg-linear-to-r from-red-100 to-teal-100 p-8 rounded-lg text-center">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
               Still have questions?
             </h2>
             <p className="text-gray-700 mb-6">
-              Can't find what you're looking for? We're here to help!
+              Can&apos;t find what you&apos;re looking for? We&apos;re here to help!
             </p>
             <div className="flex justify-center gap-4">
               <Link
