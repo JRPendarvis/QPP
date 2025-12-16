@@ -1,20 +1,26 @@
 import Link from 'next/link';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-50 to-teal-50">
+    <div className="min-h-screen" style={{background: 'linear-gradient(135deg, #FEF2F2 0%, #F0FDFA 50%, #FFFBEB 100%)'}}>
+      <Navigation />
+
+      {/* Hero Section */}
+      <div className="py-12 px-4" style={{backgroundColor: '#B91C1C'}}>
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            About Quilt Planner Pro
+          </h1>
+          <p className="text-xl text-red-100">
+            AI-powered quilt pattern generation for quilters of all skill levels
+          </p>
+        </div>
+      </div>
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="bg-white rounded-lg shadow-xl p-8 md:p-12">
-          
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              About Quilt Planner Pro
-            </h1>
-            <p className="text-xl text-gray-600">
-              AI-powered quilt pattern generation for quilters of all skill levels
-            </p>
-          </div>
 
           {/* Our Story */}
           <section className="mb-12">
@@ -99,6 +105,8 @@ export default function AboutPage() {
 
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
