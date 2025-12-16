@@ -14,7 +14,6 @@ export const SERVER_CONSTANTS = {
 
 export const CORS_ORIGINS = [
   "https://www.quiltplannerpro.com",
-  "https://qpp-frontend-production.up.railway.app",
-  "https://qpp-production.up.railway.app",
+  "https://app-frontend-production.up.railway.app",
   "http://localhost:3000",
 ];
