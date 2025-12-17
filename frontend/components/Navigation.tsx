@@ -79,6 +79,13 @@ export default function Navigation() {
               </svg>
               <h1 className="text-2xl font-bold text-gray-900">{UI_CONSTANTS.BRAND_NAME}</h1>
             </Link>
+            {profile?.badge && (
+              <img 
+                src={profile.badge === 'tester' ? '/QPPTester.png' : '/QPPFounder.png'}
+                alt={profile.badge === 'tester' ? 'QPP Tester' : 'QPP Founder'}
+                className="h-10 w-auto ml-2"
+              />
+            )}
           </div>
           <div className="flex gap-4">
             <Link
@@ -101,13 +108,6 @@ export default function Navigation() {
             </Link>
             {user ? (
               <>
-                {profile?.badge && (
-                  <img 
-                    src={profile.badge === 'tester' ? '/QPPTester.png' : '/QPPFounder.png'}
-                    alt={profile.badge === 'tester' ? 'QPP Tester' : 'QPP Founder'}
-                    className="h-8 w-auto"
-                  />
-                )}
                 <Link
                   href={ROUTES.DASHBOARD}
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
