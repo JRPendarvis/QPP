@@ -11,6 +11,8 @@ import debugRoutes from "./routes/debugRoutes";
 import { StripeController } from "./controllers/stripeController";
 import { initializeCronJobs } from "./jobs/cronJobs";
 import { SERVER_CONSTANTS, CORS_ORIGINS } from "./config/constants";
+import { sanitizeInput } from "./middleware/sanitization";
+import { requestLogger } from "./middleware/requestLogger";
 
 dotenv.config();
 
@@ -65,6 +67,12 @@ app.post(
 // -------------------------------------
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+
+// -------------------------------------
+// Security Middleware
+// -------------------------------------
+app.use(requestLogger); // Request logging for audit trails
+app.use(sanitizeInput); // XSS protection via input sanitization
 
 // -------------------------------------
 // Health Route

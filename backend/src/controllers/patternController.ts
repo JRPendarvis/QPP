@@ -51,6 +51,19 @@ export class PatternController {
         });
       }
 
+      // Validate image sizes (5MB per image in base64)
+      const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+      for (let i = 0; i < images.length; i++) {
+        const base64Data = images[i].replace(/^data:image\/\w+;base64,/, '');
+        const sizeInBytes = (base64Data.length * 3) / 4;
+        if (sizeInBytes > MAX_IMAGE_SIZE) {
+          return res.status(400).json({
+            success: false,
+            message: `Image ${i + 1} exceeds 5MB limit`,
+          });
+        }
+      }
+
       const validSkillLevels = ['beginner', 'advanced_beginner', 'intermediate', 'advanced', 'expert'];
       if (skillLevel && !validSkillLevels.includes(skillLevel)) {
         return res.status(400).json({

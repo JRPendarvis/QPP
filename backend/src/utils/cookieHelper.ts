@@ -6,7 +6,7 @@ export class CookieHelper {
     res.cookie(AUTH_CONSTANTS.COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: AUTH_CONSTANTS.COOKIE_MAX_AGE
     });
   }

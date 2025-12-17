@@ -73,14 +73,14 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid credentials');
     }
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValidPassword) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid credentials');
     }
 
     // Generate JWT token
