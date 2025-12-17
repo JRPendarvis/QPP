@@ -24,15 +24,17 @@ export default function Navigation() {
       if (!token) return;
       
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
         
         if (response.ok) {
-          const data = await response.json();
-          setProfile(data);
+          const result = await response.json();
+          if (result.success && result.data) {
+            setProfile({ badge: result.data.badge });
+          }
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
