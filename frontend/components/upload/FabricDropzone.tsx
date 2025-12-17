@@ -9,6 +9,72 @@ interface FabricDropzoneProps {
   maxFiles: number;
 }
 
+// Compress image to be under 5MB
+const compressImage = async (file: File): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Calculate scale to reduce file size
+        const maxDimension = 2048;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = (height / width) * maxDimension;
+            width = maxDimension;
+          } else {
+            width = (width / height) * maxDimension;
+            height = maxDimension;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Start with quality 0.8 and reduce if needed
+        let quality = 0.8;
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            // If still too large, try lower quality
+            if (blob.size > 5242880) {
+              quality = 0.6;
+              canvas.toBlob(async (secondBlob) => {
+                if (secondBlob) {
+                  const compressedFile = new File([secondBlob], file.name, {
+                    type: 'image/jpeg',
+                    lastModified: Date.now(),
+                  });
+                  resolve(compressedFile);
+                } else {
+                  reject(new Error('Compression failed'));
+                }
+              }, 'image/jpeg', quality);
+            } else {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            }
+          } else {
+            reject(new Error('Compression failed'));
+          }
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = reject;
+    };
+    reader.onerror = reject;
+  });
+};
+
 export default function FabricDropzone({ 
   onFilesAdded, 
   currentCount, 
@@ -21,7 +87,7 @@ export default function FabricDropzone({
     accept: {
       'image/*': ['.png', '.jpg', '.jpeg', '.webp']
     },
-    maxSize: 10485760, // 10MB
+    maxSize: 5242880, // 5MB (Claude API limit)
     disabled: currentCount >= maxFiles,
   });
 
@@ -30,10 +96,20 @@ export default function FabricDropzone({
     cameraInputRef.current?.click();
   };
 
-  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      onFilesAdded(Array.from(files));
+      try {
+        // Compress images from camera
+        const compressedFiles = await Promise.all(
+          Array.from(files).map(file => compressImage(file))
+        );
+        onFilesAdded(compressedFiles);
+      } catch (error) {
+        console.error('Error compressing images:', error);
+        // Fallback to original files if compression fails
+        onFilesAdded(Array.from(files));
+      }
     }
   };
 
@@ -73,7 +149,7 @@ export default function FabricDropzone({
               Drag and drop fabric images here, or click to select files
             </p>
             <p className="mt-1 text-xs text-gray-500">
-              Max 10MB per image • {currentCount}/{maxFiles} uploaded
+              Max 5MB per image • {currentCount}/{maxFiles} uploaded
             </p>
           </div>
         )}
