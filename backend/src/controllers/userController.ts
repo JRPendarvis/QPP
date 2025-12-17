@@ -31,6 +31,7 @@ export class UserController {
           downloadsThisMonth: true,
           lastResetDate: true,
           createdAt: true,
+          badge: true,
         },
       });
 
