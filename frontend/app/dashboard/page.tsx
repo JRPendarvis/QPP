@@ -19,6 +19,7 @@ interface UserProfile {
   subscriptionTier: string;
   name?: string;
   email: string;
+  badge?: string;
 }
 
 export default function DashboardPage() {
@@ -80,7 +81,16 @@ export default function DashboardPage() {
       {/* Header Banner */}
       <div className="py-8 px-4" style={{backgroundColor: '#B91C1C'}}>
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-2">Your Quilting Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold text-white">Your Quilting Dashboard</h1>
+            {profile.badge && (
+              <img 
+                src={profile.badge === 'tester' ? '/QPPTester.png' : '/QPPFounder.png'}
+                alt={profile.badge === 'tester' ? 'QPP Tester' : 'QPP Founder'}
+                className="h-12 w-auto"
+              />
+            )}
+          </div>
         </div>
       </div>
 

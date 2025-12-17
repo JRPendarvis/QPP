@@ -35,6 +35,7 @@ model User {
 
     // Quilter profile
     skillLevel    String         @default("beginner") // beginner, advanced_beginner, intermediate, advanced, expert
+    badge         String? // 'tester' or 'founder'
     feedbacks     Feedback[]
     feedbackVotes FeedbackVote[]
 

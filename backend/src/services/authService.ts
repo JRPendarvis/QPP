@@ -33,6 +33,10 @@ export class AuthService {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
+    // Determine if user gets tester badge (registered before Feb 28, 2026)
+    const cutoffDate = new Date('2026-02-28T23:59:59Z');
+    const badge = new Date() < cutoffDate ? 'tester' : undefined;
+
     // Create user
     const user = await prisma.user.create({
       data: {
@@ -40,7 +44,8 @@ export class AuthService {
         passwordHash,
         name,
         subscriptionTier: 'free',
-        subscriptionStatus: 'active'
+        subscriptionStatus: 'active',
+        badge
       }
     });
 

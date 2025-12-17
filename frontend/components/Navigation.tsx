@@ -3,9 +3,41 @@
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { ROUTES, UI_CONSTANTS } from '@/lib/constants';
+import { useState, useEffect } from 'react';
+
+interface UserProfile {
+  badge?: string;
+}
 
 export default function Navigation() {
   const { user, logout } = useAuth();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) {
+        setProfile(null);
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
+          headers: {
+            'Authorization': `Bearer ${user.token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   return (
     <nav className="bg-white shadow-sm">
@@ -66,6 +98,13 @@ export default function Navigation() {
             </Link>
             {user ? (
               <>
+                {profile?.badge && (
+                  <img 
+                    src={profile.badge === 'tester' ? '/QPPTester.png' : '/QPPFounder.png'}
+                    alt={profile.badge === 'tester' ? 'QPP Tester' : 'QPP Founder'}
+                    className="h-8 w-auto"
+                  />
+                )}
                 <Link
                   href={ROUTES.DASHBOARD}
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
