@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { ROUTES, UI_CONSTANTS } from '@/lib/constants';
+import { ROUTES, UI_CONSTANTS, AUTH_CONSTANTS } from '@/lib/constants';
 import { useState, useEffect } from 'react';
 
 interface UserProfile {
@@ -20,10 +20,13 @@ export default function Navigation() {
         return;
       }
       
+      const token = localStorage.getItem(AUTH_CONSTANTS.TOKEN_KEY);
+      if (!token) return;
+      
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
           headers: {
-            'Authorization': `Bearer ${user.token}`
+            'Authorization': `Bearer ${token}`
           }
         });
         
