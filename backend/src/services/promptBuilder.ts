@@ -58,11 +58,19 @@ ${patternInstruction}
 For reference, a "${patternForSvg}" pattern has these characteristics:
 ${patternDescription}
 
-**STEP 1: ANALYZE THE FABRICS**
-Identify the dominant hex color from EACH fabric image (e.g., #FF5733, #2E86AB). You MUST identify one color per fabric - so ${fabricCount} colors total.
+**STEP 1: ANALYZE EACH FABRIC**
+For EACH fabric image, identify:
+1. Is it a PRINTED fabric (has patterns/designs/characters) or a SOLID fabric (single color)?
+2. If PRINTED: Describe the print (e.g., "Winnie the Pooh characters on tan background", "rubber duckies and baby toys", "floral print with roses")
+3. If SOLID: Identify the hex color (e.g., #FF5733)
+4. Identify the dominant/background color as a hex code for the SVG visualization
 
 **STEP 2: CREATE THE PATTERN**
-Create a "${patternForSvg}" quilt pattern using ALL the colors from the fabrics. DO NOT create a different pattern type.
+Create a "${patternForSvg}" quilt pattern that incorporates ALL ${fabricCount} fabrics:
+- For PRINTED fabrics: Reference them by their print description in the instructions (e.g., "Use the Winnie the Pooh fabric for the center squares")
+- For SOLID fabrics: Reference them by color (e.g., "Use the coral solid for the borders")
+- The pattern name should reflect the theme of the printed fabrics if present
+- Instructions should specify which fabric goes where in the pattern
 
 Skill level: ${skillDescription}
 
@@ -70,24 +78,27 @@ Provide this JSON response:
 
 {
   "patternName": "Creative Name - ${patternForSvg}",
-  "description": "2-3 sentences describing the pattern and colors",
-  "fabricLayout": "How fabrics are arranged",
+  "description": "2-3 sentences describing the pattern, mentioning the specific fabrics (their prints or colors)",
+  "fabricLayout": "Describe how each specific fabric (by print or color) is used in the pattern",
   "difficulty": "${skillLevel.replace('_', ' ')}",
   "estimatedSize": "60x72 inches throw quilt",
   "instructions": [
-    "Step 1: Gather materials...",
-    "Step 2: Cut fabric pieces...",
-    "Step 3: Arrange blocks...",
+    "Step 1: Gather materials - list each fabric by its print or color...",
+    "Step 2: Cut fabric pieces - specify which fabric (by print or color) and dimensions...",
+    "Step 3: Arrange blocks - describe placement using fabric descriptions...",
     "Step 4: Sew blocks together...",
     "Step 5: Add borders and finish..."
   ],
-  "fabricColors": ["#hex1", "#hex2", "#hex3", "...one color per fabric"]
+  "fabricColors": ["#hex1", "#hex2", "#hex3", "...one hex per fabric for SVG visualization"],
+  "fabricDescriptions": ["description of fabric 1", "description of fabric 2", "...one description per fabric"]
 }
 
 **IMPORTANT:** 
 - Return ONLY valid JSON
-- The "fabricColors" array MUST have exactly ${fabricCount} hex colors - one for each fabric image
-- The patternName MUST include "${patternForSvg}" in it
+- The "fabricColors" array MUST have exactly ${fabricCount} hex colors (dominant/background colors for SVG)
+- The "fabricDescriptions" array MUST have exactly ${fabricCount} descriptions (e.g., "Winnie the Pooh print on tan" or "Solid coral")
+- The patternName should reference the prints if present (e.g., "Nursery Dreams - ${patternForSvg}" for baby fabrics)
+- Instructions MUST reference fabrics by their descriptions, not just "Fabric 1" or generic terms
 - The difficulty MUST be "${skillLevel.replace('_', ' ')}"
 - Keep instructions clear and specific to this pattern type`;
   }
