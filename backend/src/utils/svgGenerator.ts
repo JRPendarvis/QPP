@@ -153,4 +153,5 @@ ${blocks}  </g>
   <!-- Subtle overall texture overlay -->
   <rect width="400" height="400" fill="url(#fabricTexture)" opacity="0.4"/>
 </svg>`;
+  }
 }
