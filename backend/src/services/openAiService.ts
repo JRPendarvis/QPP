@@ -22,7 +22,12 @@ export class OpenAiService {
       const descriptions: string[] = [];
       
       for (let i = 0; i < fabricImages.length; i++) {
-        const image = fabricImages[i];
+        let imageUrl = fabricImages[i];
+        
+        // Ensure image has proper data URL format
+        if (!imageUrl.startsWith('data:')) {
+          imageUrl = `data:image/jpeg;base64,${imageUrl}`;
+        }
         
         const response = await openai.chat.completions.create({
           model: 'gpt-4o',
@@ -37,7 +42,7 @@ export class OpenAiService {
                 {
                   type: 'image_url',
                   image_url: {
-                    url: image
+                    url: imageUrl
                   }
                 }
               ]
