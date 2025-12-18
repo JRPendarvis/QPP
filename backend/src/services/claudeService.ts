@@ -173,7 +173,7 @@ export class ClaudeService {
       fabricLayout: parsedResponse.fabricLayout || 'Arranged in a 4x4 grid',
       difficulty: formattedDifficulty,
       estimatedSize: parsedResponse.estimatedSize || '60x72 inches',
-      instructions: this.validateInstructions(parsedResponse.instructions),
+      instructions: this.addDisclaimerToInstructions(this.validateInstructions(parsedResponse.instructions)),
       visualSvg: visualSvg,
     };
 
@@ -194,5 +194,21 @@ export class ClaudeService {
       ];
     }
     return instructions;
+  }
+
+  /**
+   * Add disclaimer to beginning of instructions
+   */
+  private addDisclaimerToInstructions(instructions: string[]): string[] {
+    const disclaimer = '📋 IMPORTANT: This is only a recommendation. You are free to design this quilt however you wish - rearrange blocks, change colors, or modify the layout to suit your creative vision!';
+    return [disclaimer, ...instructions];
+  }
+
+  /**
+   * Add disclaimer to beginning of instructions
+   */
+  private addDisclaimerToInstructions(instructions: string[]): string[] {
+    const disclaimer = '📋 IMPORTANT: This is only a recommendation. You are free to design this quilt however you wish - rearrange blocks, change colors, or modify the layout to suit your creative vision!';
+    return [disclaimer, ...instructions];
   }
 }
