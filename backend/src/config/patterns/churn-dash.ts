@@ -9,15 +9,15 @@ export const CHURN_DASH = `
     <rect x="0" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     <!-- Right center rectangle -->
     <rect x="66.66" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Top-left corner HSTs -->
-    <polygon points="0,0 33.33,0 33.33,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="0,0 0,33.33 33.33,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Top-right corner HSTs -->
-    <polygon points="66.66,0 100,0 66.66,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="100,0 100,33.33 66.66,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Bottom-left corner HSTs -->
-    <polygon points="0,66.66 33.33,66.66 0,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="33.33,66.66 33.33,100 0,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Bottom-right corner HSTs -->
-    <polygon points="66.66,66.66 100,66.66 100,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.66,66.66 66.66,100 100,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`;
+    <!-- Top-left corner - quarter rectangles creating "churn dash" effect -->
+    <rect x="0" y="0" width="16.665" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="16.665" y="0" width="16.665" height="33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top-right corner -->
+    <rect x="66.66" y="0" width="16.665" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="83.325" y="0" width="16.675" height="33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom-left corner -->
+    <rect x="0" y="66.66" width="16.665" height="33.34" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="16.665" y="66.66" width="16.665" height="33.34" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom-right corner -->
+    <rect x="66.66" y="66.66" width="16.665" height="33.34" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="83.325" y="66.66" width="16.675" height="33.34" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>`;
