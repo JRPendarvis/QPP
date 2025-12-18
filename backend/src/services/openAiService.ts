@@ -68,7 +68,7 @@ export class OpenAiService {
   ): string {
     const colorDescriptions = this.convertHexToColorNames(fabricColors);
     
-    return `A beautifully crafted, professional photograph of a finished ${patternName} quilt pattern laid flat on a white background. The quilt features a ${patternType} design with ${colorDescriptions} fabrics. ${description}. The quilt should look handmade with visible stitching, showing realistic fabric texture and depth. Professional product photography style, well-lit, high quality, detailed quilting work. The entire quilt should be visible in the frame, photographed from directly above.`;
+    return `Professional flat-lay photograph of a handmade ${patternName} quilt laid completely flat on a pure white background, photographed from directly above. CRITICAL: Use ONLY the user's provided fabric colors: ${colorDescriptions}. Do NOT add any other colors or fabrics - ONLY use these ${fabricColors.length} colors provided. The quilt follows a traditional ${patternType} pattern design. The quilt is perfectly flat with no folds, no wrinkles, no draping, and no 3D effects. Show realistic cotton fabric texture, visible hand stitching, and quilting detail. Bright even lighting, sharp focus, high resolution. The entire quilt fills the frame, centered, photographed straight down from above.`;
   }
 
   /**
