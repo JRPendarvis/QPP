@@ -24,12 +24,17 @@ export class SvgGenerator {
    * Find appropriate template for pattern type
    */
   private static findTemplate(patternType: string): { template: string; templateUsed: string } {
+    console.log(`  🔍 Looking for template: "${patternType}"`);
+    console.log(`  📋 Available templates: ${Object.keys(SVG_TEMPLATES).join(', ')}`);
+    
     let template = SVG_TEMPLATES[patternType];
     let templateUsed = patternType;
     
     if (!template) {
       // Try to find a close match
       const templateKeys = Object.keys(SVG_TEMPLATES);
+      console.log(`  ⚠️ No exact match for "${patternType}"! Trying fuzzy matching...`);
+      
       const closeMatch = templateKeys.find(key => 
         key.toLowerCase().includes(patternType.toLowerCase()) ||
         patternType.toLowerCase().includes(key.toLowerCase())
@@ -38,11 +43,11 @@ export class SvgGenerator {
       if (closeMatch) {
         template = SVG_TEMPLATES[closeMatch];
         templateUsed = closeMatch;
-        console.log(`  ⚠️ No exact match! Using close match: "${closeMatch}"`);
+        console.log(`  ⚠️ Using close match: "${closeMatch}" for requested "${patternType}"`);
       } else {
         template = SVG_TEMPLATES['Simple Squares'];
         templateUsed = 'Simple Squares';
-        console.log(`  ❌ No template found! Using fallback: "Simple Squares"`);
+        console.log(`  ❌ No template found for "${patternType}"! Using fallback: "Simple Squares"`);
       }
     } else {
       console.log(`  ✅ Exact template match found: "${patternType}"`);
