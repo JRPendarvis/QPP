@@ -96,26 +96,6 @@ export class ClaudeService {
       console.log(`   Difficulty: ${pattern.difficulty}`);
       console.log(`   Colors: ${parsedResponse.fabricColors?.join(', ') || 'none'}`);
       
-      // Generate realistic image with DALL-E (non-blocking)
-      console.log('🎨 Attempting DALL-E image generation...');
-      try {
-        const imageUrl = await openAiService.generateQuiltImage(
-          pattern.patternName,
-          pattern.description,
-          parsedResponse.fabricColors || [],
-          patternForSvg
-        );
-        if (imageUrl) {
-          pattern.imageUrl = imageUrl;
-          console.log('✅ DALL-E image added to pattern');
-        } else {
-          console.log('⚠️  DALL-E returned empty string (likely API error)');
-        }
-      } catch (error) {
-        console.error('❌ DALL-E image generation failed:', error);
-        console.log('⚠️  Using SVG only');
-      }
-      
       return pattern;
 
     } catch (error) {

@@ -13,7 +13,6 @@ interface QuiltPattern {
   estimatedSize: string;
   instructions: string[];
   visualSvg: string;
-  imageUrl?: string;
 }
 
 interface Usage {
@@ -148,31 +147,7 @@ export default function PatternDisplay({
       </div>
 
       {/* Pattern Visualization */}
-      {pattern.imageUrl ? (
-        // Display DALL-E generated image if available
-        <div className="bg-gray-50 rounded-lg p-6 flex justify-center">
-          <div className="max-w-2xl w-full">
-            <img 
-              src={pattern.imageUrl} 
-              alt={pattern.patternName}
-              className="w-full h-auto rounded-lg shadow-lg"
-              onError={(e) => {
-                // Fallback to SVG if image fails to load
-                console.error('Failed to load DALL-E image, showing SVG fallback');
-                e.currentTarget.style.display = 'none';
-                const svgContainer = e.currentTarget.nextElementSibling;
-                if (svgContainer) svgContainer.classList.remove('hidden');
-              }}
-            />
-            {/* Hidden SVG fallback */}
-            <div
-              className="hidden max-w-md w-full mx-auto"
-              dangerouslySetInnerHTML={{ __html: useMemo(() => DOMPurify.sanitize(pattern.visualSvg, { SAFE_FOR_TEMPLATES: true }), [pattern.visualSvg]) }}
-            />
-          </div>
-        </div>
-      ) : pattern.visualSvg && pattern.visualSvg.includes('svg') ? (
-        // Fallback to SVG if no DALL-E image
+      {pattern.visualSvg && pattern.visualSvg.includes('svg') ? (
         <div className="bg-gray-50 rounded-lg p-6 flex justify-center">
           <div
             className="max-w-md w-full"
