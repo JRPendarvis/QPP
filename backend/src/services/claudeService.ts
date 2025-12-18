@@ -3,10 +3,13 @@ import { RetryHandler } from '../utils/retryHandler';
 import { SvgGenerator } from '../utils/svgGenerator';
 import { PatternFormatter } from '../utils/patternFormatter';
 import { PromptBuilder } from './promptBuilder';
+import { OpenAiService } from './openAiService';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
+
+const openAiService = new OpenAiService();
 
 interface QuiltPattern {
   patternName: string;
@@ -16,6 +19,7 @@ interface QuiltPattern {
   estimatedSize: string;
   instructions: string[];
   visualSvg: string;
+  imageUrl?: string;
 }
 
 export class ClaudeService {
@@ -91,6 +95,22 @@ export class ClaudeService {
       console.log(`   Pattern type: ${patternForSvg}`);
       console.log(`   Difficulty: ${pattern.difficulty}`);
       console.log(`   Colors: ${parsedResponse.fabricColors?.join(', ') || 'none'}`);
+      
+      // Generate realistic image with DALL-E (non-blocking)
+      try {
+        const imageUrl = await openAiService.generateQuiltImage(
+          pattern.patternName,
+          pattern.description,
+          parsedResponse.fabricColors || [],
+          patternForSvg
+        );
+        if (imageUrl) {
+          pattern.imageUrl = imageUrl;
+          console.log('✅ DALL-E image added to pattern');
+        }
+      } catch (error) {
+        console.log('⚠️  DALL-E image generation failed, using SVG only');
+      }
       
       return pattern;
 

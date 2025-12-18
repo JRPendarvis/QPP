@@ -25,7 +25,7 @@ export default function HomePage() {
       <div className="py-12 px-4" style={{backgroundColor: '#B91C1C'}}>
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-            Create Custom Quilt Patterns with AI
+            Match Your Fabrics to Traditional Quilt Patterns
           </h1>
         </div>
       </div>
@@ -33,9 +33,9 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">
           <p className="text-xl mb-8 max-w-3xl mx-auto" style={{color: '#1F2937'}}>
-            Upload your fabric images and let our AI generate personalized quilt patterns
-            tailored to your skill level. From beginner to expert, create beautiful quilts
-            that match your fabrics perfectly.
+            Upload your fabric images and let our AI match them to traditional quilt patterns
+            like Ohio Star, Log Cabin, and more. Get personalized instructions and realistic
+            visualizations tailored to your skill level and fabric collection.
           </p>
           <button
             onClick={handleGetStarted}

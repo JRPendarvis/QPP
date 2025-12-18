@@ -13,6 +13,7 @@ interface QuiltPattern {
   estimatedSize: string;
   instructions: string[];
   visualSvg: string;
+  imageUrl?: string;
 }
 
 interface Usage {
@@ -146,16 +147,39 @@ export default function PatternDisplay({
         </button>
       </div>
 
-      {/* SVG Visualization */}
-      {pattern.visualSvg && pattern.visualSvg.includes('svg') && (
+      {/* Pattern Visualization */}
+      {pattern.imageUrl ? (
+        // Display DALL-E generated image if available
+        <div className="bg-gray-50 rounded-lg p-6 flex justify-center">
+          <div className="max-w-2xl w-full">
+            <img 
+              src={pattern.imageUrl} 
+              alt={pattern.patternName}
+              className="w-full h-auto rounded-lg shadow-lg"
+              onError={(e) => {
+                // Fallback to SVG if image fails to load
+                console.error('Failed to load DALL-E image, showing SVG fallback');
+                e.currentTarget.style.display = 'none';
+                const svgContainer = e.currentTarget.nextElementSibling;
+                if (svgContainer) svgContainer.classList.remove('hidden');
+              }}
+            />
+            {/* Hidden SVG fallback */}
+            <div
+              className="hidden max-w-md w-full mx-auto"
+              dangerouslySetInnerHTML={{ __html: useMemo(() => DOMPurify.sanitize(pattern.visualSvg, { SAFE_FOR_TEMPLATES: true }), [pattern.visualSvg]) }}
+            />
+          </div>
+        </div>
+      ) : pattern.visualSvg && pattern.visualSvg.includes('svg') ? (
+        // Fallback to SVG if no DALL-E image
         <div className="bg-gray-50 rounded-lg p-6 flex justify-center">
           <div
             className="max-w-md w-full"
-            // Sanitize incoming SVG to prevent XSS
             dangerouslySetInnerHTML={{ __html: useMemo(() => DOMPurify.sanitize(pattern.visualSvg, { SAFE_FOR_TEMPLATES: true }), [pattern.visualSvg]) }}
           />
         </div>
-      )}
+      ) : null}
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
@@ -183,8 +207,8 @@ export default function PatternDisplay({
       )}
 
       {/* Preview of Instructions */}
-      <div className="bg-linear-to-b from-white to-gray-100 border border-gray-200 rounded-lg p-6 relative">
-        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-white pointer-events-none rounded-lg"></div>
+      <div className="bg-gradient-to-b from-white to-gray-100 border border-gray-200 rounded-lg p-6 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white pointer-events-none rounded-lg"></div>
         <h3 className="font-semibold text-gray-700 mb-2">Step-by-Step Instructions</h3>
         <ol className="list-decimal list-inside space-y-2 text-gray-600">
           {pattern.instructions.slice(0, Math.min(2, instructionsCount)).map((instruction, index) => (
