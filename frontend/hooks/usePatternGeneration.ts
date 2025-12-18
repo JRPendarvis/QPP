@@ -10,7 +10,6 @@ interface QuiltPattern {
   estimatedSize: string;
   instructions: string[];
   visualSvg: string;
-  imageUrl?: string;
 }
 
 export function usePatternGeneration() {

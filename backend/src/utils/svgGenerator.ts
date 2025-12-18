@@ -66,7 +66,7 @@ export class SvgGenerator {
   }
 
   /**
-   * Generate 4x4 grid of pattern blocks
+   * Generate 4x4 grid of pattern blocks with enhanced styling
    */
   private static generateBlocks(template: string, colors: string[]): string {
     let blocks = '';
@@ -83,12 +83,18 @@ export class SvgGenerator {
         const color3 = colors[(colorIndex + 2) % colors.length];
         
         // Replace color placeholders in template
-        const blockTemplate = template
+        let blockTemplate = template
           .replace(/COLOR1/g, color1)
           .replace(/COLOR2/g, color2)
           .replace(/COLOR3/g, color3);
         
-        blocks += `  <g transform="translate(${x},${y})">\n    ${blockTemplate.trim()}\n  </g>\n`;
+        // Add subtle stroke for definition
+        blockTemplate = blockTemplate.replace(/<rect /g, '<rect stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
+                                       .replace(/<polygon /g, '<polygon stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
+                                       .replace(/<path /g, '<path stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
+                                       .replace(/<circle /g, '<circle stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ');
+        
+        blocks += `    <g transform="translate(${x},${y})">\n      ${blockTemplate.trim()}\n    </g>\n`;
         
         // Move to next color for variety
         colorIndex++;
@@ -99,11 +105,52 @@ export class SvgGenerator {
   }
 
   /**
-   * Wrap blocks in SVG container
+   * Wrap blocks in SVG container with enhanced styling
    */
   private static wrapSvg(blocks: string): string {
     return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-  <rect width="400" height="400" fill="#f8f8f8"/>
-${blocks}</svg>`;
-  }
+  <defs>
+    <!-- Subtle fabric texture -->
+    <pattern id="fabricTexture" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="rgba(255,255,255,0.02)"/>
+      <circle cx="2" cy="2" r="0.5" fill="rgba(0,0,0,0.03)"/>
+    </pattern>
+    
+    <!-- Soft shadow for depth -->
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0.5"/>
+      <feOffset dx="0.5" dy="0.5" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.15"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Quilting stitch effect -->
+    <filter id="quilting">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0.3"/>
+      <feOffset dx="0.2" dy="0.2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Clean white background -->
+  <rect width="400" height="400" fill="#ffffff"/>
+  
+  <!-- Pattern blocks with enhanced styling -->
+  <g filter="url(#quilting)">
+${blocks}  </g>
+  
+  <!-- Subtle overall texture overlay -->
+  <rect width="400" height="400" fill="url(#fabricTexture)" opacity="0.4"/>
+</svg>`;
 }
