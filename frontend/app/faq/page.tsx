@@ -32,7 +32,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'How many patterns can I generate?',
-    answer: 'Pattern generation limits depend on your subscription tier: Free (3/month), Hobbyist (10/month), Enthusiast (50/month), or Pro (200/month).',
+    answer: 'Pattern generation limits depend on your subscription tier: Free (3/month), Hobbyist (5/month), Enthusiast (15/month), or Pro (50/month).'
   },
   {
     question: 'Can I download my patterns?',

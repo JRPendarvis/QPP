@@ -1,86 +1,27 @@
 import { Request, Response, NextFunction } from 'express';
+import { sanitizeWithSkipFields, sanitizeObject } from '../utils/sanitizer';
+import { SKIP_SANITIZATION_FIELDS } from '../config/sanitizationConfig';
 
 /**
- * Sanitize input to prevent XSS attacks
- * Removes potentially dangerous characters and HTML tags
- */
-function sanitizeString(input: string): string {
-  if (typeof input !== 'string') return input;
-  
-  return input
-    .replace(/[<>]/g, '') // Remove < and > to prevent HTML injection
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+\s*=/gi, '') // Remove event handlers like onclick=
-    .trim();
-}
-
-/**
- * Recursively sanitize object properties
- */
-function sanitizeObject(obj: any): any {
-  if (typeof obj === 'string') {
-    return sanitizeString(obj);
-  }
-  
-  if (Array.isArray(obj)) {
-    return obj.map(sanitizeObject);
-  }
-  
-  if (obj && typeof obj === 'object') {
-    const sanitized: any = {};
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        sanitized[key] = sanitizeObject(obj[key]);
-      }
-    }
-    return sanitized;
-  }
-  
-  return obj;
-}
-
-/**
- * Middleware to sanitize request body, query, and params
- * Protects against XSS attacks
+ * Input Sanitization Middleware
+ * Responsible for applying sanitization to incoming HTTP requests
+ * Protects against XSS attacks by sanitizing body, query, and params
  */
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Skip sanitization for certain fields that need raw data
-    const skipFields = ['password', 'passwordHash', 'fabricImages', 'fabrics', 'token'];
-    
-    // Sanitize body
+    // Sanitize request body (with skip fields for raw data)
     if (req.body) {
-      const sanitized: any = {};
-      for (const key in req.body) {
-        if (req.body.hasOwnProperty(key)) {
-          sanitized[key] = skipFields.includes(key) 
-            ? req.body[key] 
-            : sanitizeObject(req.body[key]);
-        }
-      }
-      req.body = sanitized;
+      req.body = sanitizeWithSkipFields(req.body, [...SKIP_SANITIZATION_FIELDS]);
     }
     
-    // Sanitize query params
+    // Sanitize query params (no skip fields needed)
     if (req.query) {
-      const sanitized: any = {};
-      for (const key in req.query) {
-        if (req.query.hasOwnProperty(key)) {
-          sanitized[key] = sanitizeObject(req.query[key]);
-        }
-      }
-      req.query = sanitized;
+      req.query = sanitizeObject(req.query);
     }
     
-    // Sanitize URL params
+    // Sanitize URL params (no skip fields needed)
     if (req.params) {
-      const sanitized: any = {};
-      for (const key in req.params) {
-        if (req.params.hasOwnProperty(key)) {
-          sanitized[key] = sanitizeObject(req.params[key]);
-        }
-      }
-      req.params = sanitized;
+      req.params = sanitizeObject(req.params);
     }
     
     next();

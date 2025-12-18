@@ -22,19 +22,19 @@ export const SUBSCRIPTION_TIERS = {
   },
   basic: {
     name: 'Hobbyist',
-    generationsPerMonth: 10,
+    generationsPerMonth: 5,
     downloadsPerMonth: 2,
     price: { monthly: 5.99, yearly: 59.99 }
   },
   intermediate: {
     name: 'Enthusiast',
-    generationsPerMonth: 50,
+    generationsPerMonth: 15,
     downloadsPerMonth: 10,
     price: { monthly: 9.99, yearly: 94.99 }
   },
   advanced: {
     name: 'Pro',
-    generationsPerMonth: 200,
+    generationsPerMonth: 50,
     downloadsPerMonth: 25,
     price: { monthly: 19.99, yearly: 199.99 }
   }
