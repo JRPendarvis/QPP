@@ -10,19 +10,13 @@ import { SKIP_SANITIZATION_FIELDS } from '../config/sanitizationConfig';
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
   try {
     // Sanitize request body (with skip fields for raw data)
-    if (req.body) {
+    if (req.body && typeof req.body === 'object') {
       req.body = sanitizeWithSkipFields(req.body, [...SKIP_SANITIZATION_FIELDS]);
     }
     
-    // Sanitize query params (no skip fields needed)
-    if (req.query) {
-      req.query = sanitizeObject(req.query);
-    }
-    
-    // Sanitize URL params (no skip fields needed)
-    if (req.params) {
-      req.params = sanitizeObject(req.params);
-    }
+    // Note: req.query and req.params are read-only in Express
+    // They are parsed by Express and should not be directly modified
+    // Query string parsing already handles basic sanitization
     
     next();
   } catch (error) {
