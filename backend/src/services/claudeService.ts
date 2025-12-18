@@ -204,5 +204,3 @@ export class ClaudeService {
     return [disclaimer, ...instructions];
   }
 }
-  }
-}
