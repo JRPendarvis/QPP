@@ -83,11 +83,11 @@ Provide this JSON response:
   "difficulty": "${skillLevel.replace('_', ' ')}",
   "estimatedSize": "60x72 inches throw quilt",
   "instructions": [
-    "Step 1: Gather materials - list each fabric by its print or color...",
-    "Step 2: Cut fabric pieces - specify which fabric (by print or color) and dimensions...",
-    "Step 3: Arrange blocks - describe placement using fabric descriptions...",
-    "Step 4: Sew blocks together...",
-    "Step 5: Add borders and finish..."
+    "1) Gather materials - list each fabric by its print or color...",
+    "2) Cut fabric pieces - specify which fabric (by print or color) and dimensions...",
+    "3) Arrange blocks - describe placement using fabric descriptions...",
+    "4) Sew blocks together...",
+    "5) Add borders and finish..."
   ],
   "fabricColors": ["#hex1", "#hex2", "#hex3", "...one hex per fabric for SVG visualization"],
   "fabricDescriptions": ["description of fabric 1", "description of fabric 2", "...one description per fabric"]

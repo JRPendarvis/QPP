@@ -66,21 +66,25 @@ export class SvgGenerator {
   }
 
   /**
-   * Generate 4x4 grid of pattern blocks with enhanced styling
+   * Generate 3x4 grid of pattern blocks (3 columns, 4 rows)
    */
   private static generateBlocks(template: string, colors: string[]): string {
     let blocks = '';
-    let colorIndex = 0;
     
     for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 4; col++) {
+      for (let col = 0; col < 3; col++) {
         const x = col * 100;
         const y = row * 100;
         
-        // Cycle through all available colors
-        const color1 = colors[colorIndex % colors.length];
-        const color2 = colors[(colorIndex + 1) % colors.length];
-        const color3 = colors[(colorIndex + 2) % colors.length];
+        // Randomly shuffle colors for each block
+        const shuffledColors = this.shuffleArray([...colors]);
+        const color1 = shuffledColors[0 % shuffledColors.length];
+        const color2 = shuffledColors[1 % shuffledColors.length];
+        const color3 = shuffledColors[2 % shuffledColors.length];
+        
+        // Random rotation (0, 90, 180, or 270 degrees) for variety
+        const rotations = [0, 90, 180, 270];
+        const rotation = rotations[Math.floor(Math.random() * rotations.length)];
         
         // Replace color placeholders in template
         let blockTemplate = template
@@ -94,10 +98,12 @@ export class SvgGenerator {
                                        .replace(/<path /g, '<path stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
                                        .replace(/<circle /g, '<circle stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ');
         
-        blocks += `    <g transform="translate(${x},${y})">\n      ${blockTemplate.trim()}\n    </g>\n`;
+        // Apply rotation around block center (50, 50)
+        const transform = rotation > 0 
+          ? `translate(${x},${y}) rotate(${rotation} 50 50)`
+          : `translate(${x},${y})`;
         
-        // Move to next color for variety
-        colorIndex++;
+        blocks += `    <g transform="${transform}">\n      ${blockTemplate.trim()}\n    </g>\n`;
       }
     }
     
@@ -120,7 +126,7 @@ export class SvgGenerator {
    * Wrap blocks in SVG container with enhanced styling
    */
   private static wrapSvg(blocks: string): string {
-    return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    return `<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <!-- Subtle fabric texture -->
     <pattern id="fabricTexture" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
@@ -156,14 +162,14 @@ export class SvgGenerator {
   </defs>
   
   <!-- Clean white background -->
-  <rect width="400" height="400" fill="#ffffff"/>
+  <rect width="300" height="400" fill="#ffffff"/>
   
   <!-- Pattern blocks with enhanced styling -->
   <g filter="url(#quilting)">
 ${blocks}  </g>
   
   <!-- Subtle overall texture overlay -->
-  <rect width="400" height="400" fill="url(#fabricTexture)" opacity="0.4"/>
+  <rect width="300" height="400" fill="url(#fabricTexture)" opacity="0.4"/>
 </svg>`;
   }
 }
