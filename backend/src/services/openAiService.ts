@@ -37,7 +37,7 @@ export class OpenAiService {
               content: [
                 {
                   type: 'text',
-                  text: 'Analyze this quilting fabric in detail. Describe: 1) Primary colors (be specific with shades), 2) Pattern type (solid, floral, geometric, dots, stripes, batik, etc.), 3) Pattern scale (small, medium, large), 4) Visual texture and style (vintage, modern, traditional, whimsical). Be concise but detailed - this will be used to recreate the fabric in a quilt visualization.'
+                  text: 'Describe this fabric in one short sentence for recreating it in an image. Include: exact colors (with hex codes if possible), pattern type, and scale. Example: "Navy blue (#1a237e) with small white polka dots"'
                 },
                 {
                   type: 'image_url',
@@ -48,19 +48,19 @@ export class OpenAiService {
               ]
             }
           ],
-          max_tokens: 150
+          max_tokens: 80
         });
         
-        const description = response.choices[0]?.message?.content || 'unknown fabric';
+        const description = response.choices[0]?.message?.content || 'cotton fabric';
         descriptions.push(description);
-        console.log(`   Fabric ${i + 1}: ${description.substring(0, 80)}...`);
+        console.log(`   Fabric ${i + 1}: ${description}`);
       }
       
       console.log('✅ [GPT-4V] Fabric analysis complete');
       return descriptions;
     } catch (error) {
       console.error('❌ [GPT-4V] Error analyzing fabrics:', error);
-      return fabricImages.map(() => 'quilting cotton fabric');
+      return fabricImages.map(() => 'cotton quilting fabric');
     }
   }
 
@@ -116,7 +116,7 @@ export class OpenAiService {
   }
 
   /**
-   * Build a detailed prompt for DALL-E to generate a realistic quilt image
+   * Build a simplified prompt for DALL-E to generate a realistic quilt image
    */
   private buildImagePrompt(
     patternName: string,
@@ -124,8 +124,9 @@ export class OpenAiService {
     fabricDescriptions: string[],
     patternType: string
   ): string {
-    const fabricList = fabricDescriptions.map((desc, i) => `Fabric ${i + 1}: ${desc}`).join('. ');
+    // Simplify fabric descriptions for better DALL-E matching
+    const fabricList = fabricDescriptions.map((desc, i) => `${i + 1}. ${desc}`).join('; ');
     
-    return `Professional flat-lay photograph of a handmade ${patternName} quilt laid completely flat on a pure white background, photographed from directly above. CRITICAL: Use ONLY these ${fabricDescriptions.length} specific fabrics exactly as described: ${fabricList}. Do NOT add any additional fabrics or colors. Match these exact fabric descriptions as closely as possible. The quilt follows a traditional ${patternType} pattern design. The quilt is perfectly flat with no folds, no wrinkles, no draping, and no 3D effects. Show realistic quilting cotton fabric texture with visible hand stitching and quilting detail. Bright even lighting, sharp focus, high resolution. The entire quilt fills the frame, centered, photographed straight down from above.`;
+    return `Flat-lay photo of ${patternName} quilt on white background, aerial view. ${patternType} pattern using exactly these fabrics: ${fabricList}. No other colors or fabrics. Completely flat, no folds or shadows. Hand-quilted cotton, clear lighting.`;
   }
 }
