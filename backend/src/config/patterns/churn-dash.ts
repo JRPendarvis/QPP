@@ -9,15 +9,23 @@ export const CHURN_DASH = `
     <rect x="0" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     <!-- Right center rectangle -->
     <rect x="66.66" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Top-left corner - quarter rectangles creating "churn dash" effect -->
-    <rect x="0" y="0" width="16.665" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="16.665" y="0" width="16.665" height="33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Top-right corner -->
-    <rect x="66.66" y="0" width="16.665" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="83.325" y="0" width="16.675" height="33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Bottom-left corner -->
-    <rect x="0" y="66.66" width="16.665" height="33.34" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="16.665" y="66.66" width="16.665" height="33.34" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Bottom-right corner -->
-    <rect x="66.66" y="66.66" width="16.665" height="33.34" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="83.325" y="66.66" width="16.675" height="33.34" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>`;
+    <!-- Top-left corner: 2x2 grid of small squares -->
+    <rect x="0" y="0" width="16.665" height="16.665" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="16.665" y="0" width="16.665" height="16.665" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="16.665" width="16.665" height="16.665" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="16.665" y="16.665" width="16.665" height="16.665" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top-right corner: 2x2 grid of small squares -->
+    <rect x="66.66" y="0" width="16.665" height="16.665" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="83.325" y="0" width="16.675" height="16.665" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.66" y="16.665" width="16.665" height="16.665" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="83.325" y="16.665" width="16.675" height="16.665" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom-left corner: 2x2 grid of small squares -->
+    <rect x="0" y="66.66" width="16.665" height="16.665" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="16.665" y="66.66" width="16.665" height="16.665" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="83.325" width="16.665" height="16.675" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="16.665" y="83.325" width="16.665" height="16.675" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom-right corner: 2x2 grid of small squares -->
+    <rect x="66.66" y="66.66" width="16.665" height="16.665" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="83.325" y="66.66" width="16.675" height="16.665" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.66" y="83.325" width="16.665" height="16.675" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="83.325" y="83.325" width="16.675" height="16.675" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`;
