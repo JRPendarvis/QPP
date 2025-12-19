@@ -44,12 +44,13 @@ export class ClaudeService {
   ): Promise<QuiltPattern> {
     try {
       // Select pattern type
-      const { patternForSvg, patternInstruction } = PromptBuilder.selectPattern(skillLevel, selectedPattern);
+      const { patternForSvg, patternInstruction, patternId } = PromptBuilder.selectPattern(skillLevel, selectedPattern);
       
       console.log(`🎯 Final pattern: ${patternForSvg}, Skill level: ${skillLevel}`);
       console.log('═══════════════════════════════════════════════');
       console.log('📤 CLAUDE API REQUEST PARAMETERS:');
       console.log(`  Pattern Type: ${patternForSvg}`);
+      console.log(`  Pattern ID: ${patternId || 'N/A'}`);
       console.log(`  Skill Level: ${skillLevel}`);
       console.log(`  Fabric Images: ${fabricImages.length}`);
       console.log(`  Image Types: ${imageTypes.join(', ') || 'auto-detect'}`);
@@ -61,7 +62,8 @@ export class ClaudeService {
         fabricImages.length,
         patternForSvg,
         patternInstruction,
-        skillLevel
+        skillLevel,
+        patternId
       );
       const imageContent = PromptBuilder.buildImageContent(fabricImages, imageTypes);
       

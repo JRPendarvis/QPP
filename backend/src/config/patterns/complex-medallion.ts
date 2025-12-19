@@ -1,4 +1,8 @@
 export const COMPLEX_MEDALLION = `
+    <!-- Background -->
+    <rect x="0" y="0" width="100" height="100" fill="COLOR1" stroke="none"/>
+    <!-- Outer border -->
+    <rect x="0" y="0" width="100" height="100" fill="none" stroke="COLOR3" stroke-width="8"/>
     <!-- Outer border -->
     <rect x="0" y="0" width="100" height="100" fill="none" stroke="COLOR3" stroke-width="8"/>
     <!-- Second border with triangles -->

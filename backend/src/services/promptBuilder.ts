@@ -2,10 +2,13 @@ import { SKILL_LEVEL_DESCRIPTIONS } from '../config/skillLevels';
 import { PatternFormatter } from '../utils/patternFormatter';
 import { ImageTypeDetector } from '../utils/imageTypeDetector';
 import { getPatternsForSkillLevel } from '../utils/skillLevelHelper';
+import { getPatternPrompt } from '../config/prompts';
+import { getPatternById } from '../config/quiltPatterns';
 
 export interface PatternSelectionResult {
   patternForSvg: string;
   patternInstruction: string;
+  patternId?: string;
 }
 
 export type FabricValue = 'light' | 'medium' | 'dark';
@@ -57,24 +60,37 @@ export class PromptBuilder {
    */
   static selectPattern(skillLevel: string, selectedPattern?: string): PatternSelectionResult {
     // Get all patterns available for this skill level (includes current and lower levels)
-    const availablePatterns = getPatternsForSkillLevel(skillLevel);
+    const availablePatternIds = getPatternsForSkillLevel(skillLevel);
     
     let patternForSvg: string;
     let patternInstruction: string;
+    let patternId: string | undefined;
     
     if (selectedPattern && selectedPattern !== 'auto') {
-      // User selected a specific pattern
+      // User selected a specific pattern - use the ID directly
+      patternId = selectedPattern;
       patternForSvg = PatternFormatter.formatPatternName(selectedPattern);
       patternInstruction = `**REQUIRED PATTERN TYPE:** You MUST create a "${patternForSvg}" pattern. This is the user's specific choice.`;
-      console.log(`📋 User selected pattern: ${patternForSvg}`);
+      console.log(`📋 User selected pattern: ${patternForSvg} (ID: ${patternId})`);
     } else {
       // Auto mode - pick from all patterns available at this skill level
-      patternForSvg = availablePatterns[Math.floor(Math.random() * availablePatterns.length)];
+      const randomPatternId = availablePatternIds[Math.floor(Math.random() * availablePatternIds.length)];
+      const patternObj = getPatternById(randomPatternId);
+      
+      if (patternObj) {
+        patternId = patternObj.id;
+        patternForSvg = patternObj.name;
+      } else {
+        // Fallback if pattern not found
+        patternId = randomPatternId;
+        patternForSvg = PatternFormatter.formatPatternName(randomPatternId);
+      }
+      
       patternInstruction = `**REQUIRED PATTERN TYPE:** Create a "${patternForSvg}" pattern. This pattern is appropriate for the ${skillLevel} skill level.`;
-      console.log(`🎲 Auto-selected pattern: ${patternForSvg} for skill level: ${skillLevel} (${availablePatterns.length} patterns available)`);
+      console.log(`🎲 Auto-selected pattern: ${patternForSvg} (ID: ${patternId}) for skill level: ${skillLevel} (${availablePatternIds.length} patterns available)`);
     }
     
-    return { patternForSvg, patternInstruction };
+    return { patternForSvg, patternInstruction, patternId };
   }
 
   /**
@@ -84,10 +100,18 @@ export class PromptBuilder {
     fabricCount: number,
     patternForSvg: string,
     patternInstruction: string,
-    skillLevel: string
+    skillLevel: string,
+    patternId?: string
   ): string {
     const skillDescription = SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
-    const patternDescription = PatternFormatter.getPatternDescription(patternForSvg);
+    
+    // Get pattern-specific prompt if available
+    const patternPrompt = patternId ? getPatternPrompt(patternId) : null;
+    
+    // Use pattern-specific characteristics or fall back to generic description
+    const patternDescription = patternPrompt 
+      ? patternPrompt.characteristics 
+      : PatternFormatter.getPatternDescription(patternForSvg);
     
     return `You are an expert quilter with deep knowledge of fabric selection and color theory. I'm providing you with ${fabricCount} fabric images.
 
@@ -97,6 +121,21 @@ ${patternInstruction}
 
 For reference, a "${patternForSvg}" pattern has these characteristics:
 ${patternDescription}
+
+${patternPrompt ? `
+**PATTERN-SPECIFIC GUIDANCE FOR ${patternForSvg.toUpperCase()}:**
+
+${patternPrompt.fabricRoleGuidance}
+
+**Cutting Guidance:**
+${patternPrompt.cuttingInstructions}
+
+**Assembly Guidance:**
+${patternPrompt.assemblyNotes}
+
+**Common Mistakes to Avoid:**
+${patternPrompt.commonMistakes}
+` : ''}
 
 **STEP 1: ANALYZE EACH FABRIC**
 For EACH fabric image, identify:
@@ -218,10 +257,16 @@ Provide this JSON response:
     fabricAnalysis: FabricAnalysis[],
     newRoleAssignments: RoleAssignments,
     patternForSvg: string,
-    skillLevel: string
+    skillLevel: string,
+    patternId?: string
   ): string {
     const skillDescription = SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
-    const patternDescription = PatternFormatter.getPatternDescription(patternForSvg);
+    
+    // Get pattern-specific prompt if available
+    const patternPrompt = patternId ? getPatternPrompt(patternId) : null;
+    const patternDescription = patternPrompt 
+      ? patternPrompt.characteristics 
+      : PatternFormatter.getPatternDescription(patternForSvg);
 
     const fabricSummary = fabricAnalysis
       .map(f => `- Fabric ${f.fabricIndex}: ${f.description} (${f.value} value, ${f.printScale} print)`)
@@ -239,6 +284,15 @@ ${fabricSummary}
 
 **USER'S ROLE ASSIGNMENTS:**
 ${rolesSummary}
+
+**PATTERN:** ${patternForSvg}
+${patternDescription}
+
+${patternPrompt ? `
+**PATTERN-SPECIFIC GUIDANCE:**
+${patternPrompt.fabricRoleGuidance}
+${patternPrompt.assemblyNotes}
+` : ''}
 
 **PATTERN:** ${patternForSvg}
 ${patternDescription}
