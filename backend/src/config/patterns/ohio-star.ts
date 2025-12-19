@@ -1,28 +1,209 @@
 export const OHIO_STAR = `
-    <!-- Four corner squares (background) -->
+    <!-- Classic 2-color: COLOR1 star+center, COLOR2 background -->
+    <!-- Four corner squares -->
     <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="66.66" y="0" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="0" y="66.66" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <rect x="66.66" y="66.66" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Center square (star center) -->
-    <rect x="33.33" y="33.33" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Top star point (4 QSTs forming diamond) -->
+    <rect x="66.67" y="0" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.67" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="66.67" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Center square -->
+    <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top star point QST -->
     <polygon points="33.33,0 50,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="50,0 66.66,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 66.67,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     <polygon points="33.33,0 33.33,33.33 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.66,0 66.66,33.33 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Right star point -->
-    <polygon points="66.66,33.33 100,33.33 66.66,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="100,33.33 100,50 66.66,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.66,50 100,50 66.66,66.66" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="100,50 100,66.66 66.66,66.66" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Bottom star point -->
-    <polygon points="33.33,66.66 33.33,100 50,66.66" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="33.33,100 50,100 50,66.66" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="50,66.66 50,100 66.66,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="50,66.66 66.66,66.66 66.66,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Left star point -->
+    <polygon points="66.67,0 66.67,33.33 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Right star point QST -->
+    <polygon points="66.67,33.33 100,33.33 66.67,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,33.33 100,50 66.67,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,50 100,50 66.67,66.67" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,50 100,66.67 66.67,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom star point QST -->
+    <polygon points="33.33,66.67 33.33,100 50,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,100 50,100 50,66.67" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 50,100 66.67,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 66.67,66.67 66.67,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Left star point QST -->
     <polygon points="0,33.33 33.33,33.33 0,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
     <polygon points="0,50 33.33,50 33.33,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="0,50 0,66.66 33.33,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="0,66.66 33.33,66.66 33.33,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`;
+    <polygon points="0,50 0,66.67 33.33,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,66.67 33.33,66.67 33.33,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`;
+
+export const OHIO_STAR_3 = `
+    <!-- 3-color: COLOR1 star points, COLOR2 background, COLOR3 center -->
+    <!-- Four corner squares -->
+    <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="0" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.67" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="66.67" width="33.33" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Center square -->
+    <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top star point QST -->
+    <polygon points="33.33,0 50,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 66.67,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,0 33.33,33.33 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,0 66.67,33.33 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Right star point QST -->
+    <polygon points="66.67,33.33 100,33.33 66.67,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,33.33 100,50 66.67,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,50 100,50 66.67,66.67" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,50 100,66.67 66.67,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom star point QST -->
+    <polygon points="33.33,66.67 33.33,100 50,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,100 50,100 50,66.67" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 50,100 66.67,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 66.67,66.67 66.67,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Left star point QST -->
+    <polygon points="0,33.33 33.33,33.33 0,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 33.33,50 33.33,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 0,66.67 33.33,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,66.67 33.33,66.67 33.33,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`;
+
+export const OHIO_STAR_4 = `
+    <!-- 4-color: COLOR1/COLOR2 star point pairs, COLOR3 background, COLOR4 center -->
+    <!-- Four corner squares -->
+    <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="0" width="33.33" height="33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.67" width="33.33" height="33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="66.67" width="33.33" height="33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Center square -->
+    <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top star point QST - COLOR1 -->
+    <polygon points="33.33,0 50,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 66.67,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,0 33.33,33.33 50,33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,0 66.67,33.33 50,33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Right star point QST - COLOR2 -->
+    <polygon points="66.67,33.33 100,33.33 66.67,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,33.33 100,50 66.67,50" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,50 100,50 66.67,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,50 100,66.67 66.67,66.67" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom star point QST - COLOR1 -->
+    <polygon points="33.33,66.67 33.33,100 50,66.67" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,100 50,100 50,66.67" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 50,100 66.67,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 66.67,66.67 66.67,100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Left star point QST - COLOR2 -->
+    <polygon points="0,33.33 33.33,33.33 0,50" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 33.33,50 33.33,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 0,66.67 33.33,50" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,66.67 33.33,66.67 33.33,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`;
+
+export const OHIO_STAR_5 = `
+    <!-- 5-color: 4 unique star points, COLOR5 background, COLOR1 center -->
+    <!-- Four corner squares -->
+    <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="0" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.67" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="66.67" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Center square -->
+    <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top star point QST - COLOR2 -->
+    <polygon points="33.33,0 50,0 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 66.67,0 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,0 33.33,33.33 50,33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,0 66.67,33.33 50,33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Right star point QST - COLOR3 -->
+    <polygon points="66.67,33.33 100,33.33 66.67,50" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,33.33 100,50 66.67,50" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,50 100,50 66.67,66.67" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,50 100,66.67 66.67,66.67" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom star point QST - COLOR4 -->
+    <polygon points="33.33,66.67 33.33,100 50,66.67" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,100 50,100 50,66.67" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 50,100 66.67,100" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 66.67,66.67 66.67,100" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Left star point QST - COLOR2 -->
+    <polygon points="0,33.33 33.33,33.33 0,50" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 33.33,50 33.33,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 0,66.67 33.33,50" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,66.67 33.33,66.67 33.33,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`;
+
+export const OHIO_STAR_6 = `
+    <!-- 6-color: 4 unique star points, COLOR5 background, COLOR6 center -->
+    <!-- Four corner squares -->
+    <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="0" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.67" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="66.67" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Center square -->
+    <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top star point QST - COLOR1 -->
+    <polygon points="33.33,0 50,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 66.67,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,0 33.33,33.33 50,33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,0 66.67,33.33 50,33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Right star point QST - COLOR2 -->
+    <polygon points="66.67,33.33 100,33.33 66.67,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,33.33 100,50 66.67,50" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,50 100,50 66.67,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,50 100,66.67 66.67,66.67" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom star point QST - COLOR3 -->
+    <polygon points="33.33,66.67 33.33,100 50,66.67" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,100 50,100 50,66.67" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 50,100 66.67,100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 66.67,66.67 66.67,100" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Left star point QST - COLOR4 -->
+    <polygon points="0,33.33 33.33,33.33 0,50" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 33.33,50 33.33,33.33" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 0,66.67 33.33,50" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,66.67 33.33,66.67 33.33,50" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>`;
+
+export const OHIO_STAR_7 = `
+    <!-- 7-color: 4 unique star points, 2 corner colors, COLOR7 center -->
+    <!-- Four corner squares - alternating COLOR5/COLOR6 -->
+    <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="0" width="33.33" height="33.33" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.67" width="33.33" height="33.33" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="66.67" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Center square -->
+    <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR7" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top star point QST - COLOR1 -->
+    <polygon points="33.33,0 50,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 66.67,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,0 33.33,33.33 50,33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,0 66.67,33.33 50,33.33" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Right star point QST - COLOR2 -->
+    <polygon points="66.67,33.33 100,33.33 66.67,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,33.33 100,50 66.67,50" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,50 100,50 66.67,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,50 100,66.67 66.67,66.67" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom star point QST - COLOR3 -->
+    <polygon points="33.33,66.67 33.33,100 50,66.67" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,100 50,100 50,66.67" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 50,100 66.67,100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 66.67,66.67 66.67,100" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Left star point QST - COLOR4 -->
+    <polygon points="0,33.33 33.33,33.33 0,50" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 33.33,50 33.33,33.33" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 0,66.67 33.33,50" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,66.67 33.33,66.67 33.33,50" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>`;
+
+export const OHIO_STAR_8 = `
+    <!-- 8-color: 4 unique star points, 4 unique corners, COLOR8 center -->
+    <!-- Four corner squares - each unique -->
+    <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="0" width="33.33" height="33.33" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="0" y="66.67" width="33.33" height="33.33" fill="COLOR7" stroke="#ccc" stroke-width="0.5"/>
+    <rect x="66.67" y="66.67" width="33.33" height="33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Center square -->
+    <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR8" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top star point QST - COLOR1 -->
+    <polygon points="33.33,0 50,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,0 66.67,0 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,0 33.33,33.33 50,33.33" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,0 66.67,33.33 50,33.33" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Right star point QST - COLOR2 -->
+    <polygon points="66.67,33.33 100,33.33 66.67,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,33.33 100,50 66.67,50" fill="COLOR6" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,50 100,50 66.67,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="100,50 100,66.67 66.67,66.67" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom star point QST - COLOR3 -->
+    <polygon points="33.33,66.67 33.33,100 50,66.67" fill="COLOR7" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,100 50,100 50,66.67" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 50,100 66.67,100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,66.67 66.67,66.67 66.67,100" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Left star point QST - COLOR4 -->
+    <polygon points="0,33.33 33.33,33.33 0,50" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 33.33,50 33.33,33.33" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,50 0,66.67 33.33,50" fill="COLOR7" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,66.67 33.33,66.67 33.33,50" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>`;
