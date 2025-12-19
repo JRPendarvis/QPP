@@ -7,6 +7,11 @@ import { patternLimiter } from '../middleware/rateLimiters';
 const router = Router();
 const patternController = new PatternController();
 
+// GET /api/patterns/list - Get all available patterns
+router.get('/list', (req, res) => 
+  patternController.listPatterns(req, res)
+);
+
 // POST /api/patterns/generate - Protected route
 router.post('/generate', authenticate, patternLimiter, (req, res) => 
   patternController.generatePattern(req, res)

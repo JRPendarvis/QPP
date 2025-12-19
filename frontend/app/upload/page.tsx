@@ -36,48 +36,48 @@ const NEXT_LEVEL: Record<string, string> = {
   expert: 'expert',
 };
 
-const PATTERN_OPTIONS: Record<string, { id: string; name: string }[]> = {
+const PATTERN_OPTIONS: Record<string, { id: string; name: string; recommendedFabricCount?: number | { min: number; max: number } }[]> = {
   beginner: [
-    { id: 'simple-squares', name: 'Simple Squares' },
-    { id: 'strip-quilt', name: 'Strip Quilt' },
-    { id: 'checkerboard', name: 'Checkerboard' },
-    { id: 'rail-fence', name: 'Rail Fence' },
+    { id: 'simple-squares', name: 'Simple Squares', recommendedFabricCount: { min: 3, max: 6 } },
+    { id: 'strip-quilt', name: 'Strip Quilt', recommendedFabricCount: { min: 3, max: 8 } },
+    { id: 'checkerboard', name: 'Checkerboard', recommendedFabricCount: 2 },
+    { id: 'rail-fence', name: 'Rail Fence', recommendedFabricCount: { min: 3, max: 4 } },
   ],
   advanced_beginner: [
-    { id: 'four-patch', name: 'Four Patch' },
-    { id: 'nine-patch', name: 'Nine Patch' },
-    { id: 'half-square-triangles', name: 'Half-Square Triangles' },
-    { id: 'hourglass', name: 'Hourglass' },
-    { id: 'bow-tie', name: 'Bow Tie' },
+    { id: 'four-patch', name: 'Four Patch', recommendedFabricCount: 2 },
+    { id: 'nine-patch', name: 'Nine Patch', recommendedFabricCount: { min: 2, max: 3 } },
+    { id: 'half-square-triangles', name: 'Half-Square Triangles', recommendedFabricCount: 2 },
+    { id: 'hourglass', name: 'Hourglass', recommendedFabricCount: 2 },
+    { id: 'bow-tie', name: 'Bow Tie', recommendedFabricCount: { min: 2, max: 3 } },
   ],
   intermediate: [
-    { id: 'flying-geese', name: 'Flying Geese' },
-    { id: 'pinwheel', name: 'Pinwheel' },
-    { id: 'log-cabin', name: 'Log Cabin' },
-    { id: 'sawtooth-star', name: 'Sawtooth Star' },
-    { id: 'ohio-star', name: 'Ohio Star' },
-    { id: 'churn-dash', name: 'Churn Dash' },
+    { id: 'flying-geese', name: 'Flying Geese', recommendedFabricCount: { min: 2, max: 3 } },
+    { id: 'pinwheel', name: 'Pinwheel', recommendedFabricCount: { min: 2, max: 4 } },
+    { id: 'log-cabin', name: 'Log Cabin', recommendedFabricCount: { min: 4, max: 8 } },
+    { id: 'sawtooth-star', name: 'Sawtooth Star', recommendedFabricCount: 3 },
+    { id: 'ohio-star', name: 'Ohio Star', recommendedFabricCount: 3 },
+    { id: 'churn-dash', name: 'Churn Dash', recommendedFabricCount: 3 },
   ],
   advanced: [
-    { id: 'lone-star', name: 'Lone Star' },
-    { id: 'mariners-compass', name: "Mariner's Compass" },
-    { id: 'new-york-beauty', name: 'New York Beauty' },
-    { id: 'storm-at-sea', name: 'Storm at Sea' },
-    { id: 'drunkards-path', name: "Drunkard's Path" },
+    { id: 'lone-star', name: 'Lone Star', recommendedFabricCount: { min: 5, max: 8 } },
+    { id: 'mariners-compass', name: "Mariner's Compass", recommendedFabricCount: { min: 4, max: 6 } },
+    { id: 'new-york-beauty', name: 'New York Beauty', recommendedFabricCount: { min: 3, max: 5 } },
+    { id: 'storm-at-sea', name: 'Storm at Sea', recommendedFabricCount: { min: 3, max: 4 } },
+    { id: 'drunkards-path', name: "Drunkard's Path", recommendedFabricCount: 2 },
   ],
   expert: [
-    { id: 'feathered-star', name: 'Feathered Star' },
-    { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden" },
-    { id: 'double-wedding-ring', name: 'Double Wedding Ring' },
-    { id: 'pickle-dish', name: 'Pickle Dish' },
-    { id: 'complex-medallion', name: 'Complex Medallion' },
+    { id: 'feathered-star', name: 'Feathered Star', recommendedFabricCount: { min: 3, max: 5 } },
+    { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden", recommendedFabricCount: { min: 5, max: 12 } },
+    { id: 'double-wedding-ring', name: 'Double Wedding Ring', recommendedFabricCount: { min: 4, max: 8 } },
+    { id: 'pickle-dish', name: 'Pickle Dish', recommendedFabricCount: { min: 4, max: 6 } },
+    { id: 'complex-medallion', name: 'Complex Medallion', recommendedFabricCount: { min: 6, max: 10 } },
   ],
 };
 
 /**
  * Get all patterns available for a skill level (includes current level and all levels below)
  */
-function getPatternsForSkillLevel(skillLevel: string): { id: string; name: string }[] {
+function getPatternsForSkillLevel(skillLevel: string): { id: string; name: string; recommendedFabricCount?: number | { min: number; max: number } }[] {
   const skillIndex = SKILL_HIERARCHY.indexOf(skillLevel);
   
   // If skill level not found, default to beginner
@@ -86,7 +86,7 @@ function getPatternsForSkillLevel(skillLevel: string): { id: string; name: strin
   }
 
   // Collect patterns from current level and all levels below
-  const availablePatterns: { id: string; name: string }[] = [];
+  const availablePatterns: { id: string; name: string; recommendedFabricCount?: number | { min: number; max: number } }[] = [];
   
   for (let i = 0; i <= skillIndex; i++) {
     const levelPatterns = PATTERN_OPTIONS[SKILL_HIERARCHY[i]] || [];
@@ -94,6 +94,17 @@ function getPatternsForSkillLevel(skillLevel: string): { id: string; name: strin
   }
 
   return availablePatterns;
+}
+
+/**
+ * Format recommended fabric count for display
+ */
+function formatFabricCount(count: number | { min: number; max: number } | undefined): string {
+  if (!count) return '';
+  if (typeof count === 'number') {
+    return `${count} fabric${count !== 1 ? 's' : ''}`;
+  }
+  return `${count.min}-${count.max} fabrics`;
 }
 
 interface UserProfile {
@@ -239,7 +250,7 @@ export default function UploadPage() {
                         Let QuiltPlannerPro Choose
                       </div>
                       <div className="text-sm text-gray-600">
-                        Our AI will pick the best pattern for your skill level and fabrics
+                        Our AI will pick the best pattern for your skill level and number of fabrics
                       </div>
                     </div>
                   </label>
@@ -268,6 +279,9 @@ export default function UploadPage() {
                           {availablePatterns.map((patternOption) => (
                             <option key={patternOption.id} value={patternOption.id}>
                               {patternOption.name}
+                              {patternOption.recommendedFabricCount && 
+                                ` (Best with ${formatFabricCount(patternOption.recommendedFabricCount)})`
+                              }
                             </option>
                           ))}
                         </select>

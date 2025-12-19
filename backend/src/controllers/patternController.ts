@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { ClaudeService } from '../services/claudeService';
 import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
 import { PDFService } from '../services/pdfService';
+import { QUILT_PATTERNS_BY_SKILL } from '../config/quiltPatterns';
 
 const prisma = new PrismaClient();
 
@@ -328,6 +329,33 @@ export class PatternController {
       res.status(500).json({
         success: false,
         message: 'Failed to download pattern. Please try again.',
+      });
+    }
+  }
+
+  // GET /api/patterns/list - Get all available patterns with metadata
+  async listPatterns(req: Request, res: Response) {
+    try {
+      // Flatten all patterns from all skill levels
+      const allPatterns = Object.entries(QUILT_PATTERNS_BY_SKILL).flatMap(([skillLevel, patterns]) =>
+        patterns.map(pattern => ({
+          id: pattern.id,
+          name: pattern.name,
+          skillLevel: pattern.skillLevel,
+          description: pattern.description,
+          recommendedFabricCount: pattern.recommendedFabricCount || null
+        }))
+      );
+
+      res.json({
+        success: true,
+        data: allPatterns
+      });
+    } catch (error) {
+      console.error('List patterns error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to list patterns'
       });
     }
   }
