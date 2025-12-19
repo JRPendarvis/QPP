@@ -1,4 +1,4 @@
-export const GRANDMOTHERS_FLOWER_GARDEN_2 = `
+export const GRANDMOTHERS_FLOWER_GARDEN = `
     <!-- Center hexagon -->
     <polygon points="50,35 63,42.5 63,57.5 50,65 37,57.5 37,42.5" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     <!-- Surrounding hexagons - all COLOR2 -->

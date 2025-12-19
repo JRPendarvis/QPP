@@ -1,4 +1,4 @@
-export const FLYING_GEESE_2 = `
+export const FLYING_GEESE = `
     <!-- Single goose - 2 colors -->
     <polygon points="50,0 100,100 0,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     <polygon points="0,0 50,0 0,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>

@@ -1,4 +1,4 @@
-export const SIMPLE_SQUARES_2 = `
+export const SIMPLE_SQUARES = `
     <!-- 2x2 checkerboard - 2 fabrics, each appears twice -->
     <rect x="0" y="0" width="50" height="50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     <rect x="50" y="0" width="50" height="50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
