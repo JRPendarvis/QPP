@@ -225,109 +225,114 @@ export default function UploadPage() {
           {!pattern && (
             <>
               {console.log('📸 Render: fabrics.length =', fabrics.length, 'previews.length =', previews.length)}
-              {/* STEP 1: Pattern Selection Section - NOW FIRST */}
-              <div className="mb-8 bg-white border border-gray-200 rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Step 1: Choose Your Pattern Style
-                </h2>
+              
+              {/* Side-by-side layout for desktop, stacked for mobile */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                
+                {/* STEP 1: Pattern Selection Section */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                    Step 1: Choose Your Pattern Style
+                  </h2>
 
-                {/* Pattern Choice Radio Buttons */}
-                <div className="space-y-4 mb-6">
-                  <label className="flex items-start cursor-pointer">
+                  {/* Pattern Choice Radio Buttons */}
+                  <div className="space-y-4 mb-6">
+                    <label className="flex items-start cursor-pointer">
+                      <input
+                        type="radio"
+                        name="patternChoice"
+                        value="auto"
+                        checked={patternChoice === 'auto'}
+                        onChange={() => {
+                          setPatternChoice('auto');
+                          setSelectedPattern('');
+                        }}
+                        className="mt-1 mr-3"
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          Let QuiltPlannerPro Choose
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Our AI will pick the best pattern for your skill level and number of fabrics
+                        </div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start cursor-pointer">
+                      <input
+                        type="radio"
+                        name="patternChoice"
+                        value="manual"
+                        checked={patternChoice === 'manual'}
+                        onChange={() => setPatternChoice('manual')}
+                        className="mt-1 mr-3"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 mb-2">
+                          I&apos;ll Choose My Pattern
+                        </div>
+                        
+                        {patternChoice === 'manual' && (
+                          <select
+                            value={selectedPattern}
+                            onChange={(e) => setSelectedPattern(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          >
+                            <option value="">Select a pattern...</option>
+                            {availablePatterns.map((patternOption) => (
+                              <option key={patternOption.id} value={patternOption.id}>
+                                {patternOption.name}
+                                {patternOption.recommendedFabricCount && 
+                                  ` (Best with ${formatFabricCount(patternOption.recommendedFabricCount)})`
+                                }
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Challenge Me Checkbox */}
+                  <label className="flex items-center cursor-pointer p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
                     <input
-                      type="radio"
-                      name="patternChoice"
-                      value="auto"
-                      checked={patternChoice === 'auto'}
-                      onChange={() => {
-                        setPatternChoice('auto');
-                        setSelectedPattern('');
-                      }}
-                      className="mt-1 mr-3"
+                      type="checkbox"
+                      checked={challengeMe}
+                      onChange={(e) => setChallengeMe(e.target.checked)}
+                      className="mr-3 h-5 w-5 text-indigo-600"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">
-                        Let QuiltPlannerPro Choose
+                      <div className="font-medium text-indigo-900">
+                        🚀 Challenge Me
                       </div>
-                      <div className="text-sm text-gray-600">
-                        Our AI will pick the best pattern for your skill level and number of fabrics
+                      <div className="text-sm text-indigo-700">
+                        Use {SKILL_LEVELS[targetSkill]} level complexity
+                        {challengeMe && currentSkill !== 'expert' && (
+                          <span className="ml-1 font-semibold">(one level up!)</span>
+                        )}
                       </div>
-                    </div>
-                  </label>
-
-                  <label className="flex items-start cursor-pointer">
-                    <input
-                      type="radio"
-                      name="patternChoice"
-                      value="manual"
-                      checked={patternChoice === 'manual'}
-                      onChange={() => setPatternChoice('manual')}
-                      className="mt-1 mr-3"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900 mb-2">
-                        I&apos;ll Choose My Pattern
-                      </div>
-                      
-                      {patternChoice === 'manual' && (
-                        <select
-                          value={selectedPattern}
-                          onChange={(e) => setSelectedPattern(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                          <option value="">Select a pattern...</option>
-                          {availablePatterns.map((patternOption) => (
-                            <option key={patternOption.id} value={patternOption.id}>
-                              {patternOption.name}
-                              {patternOption.recommendedFabricCount && 
-                                ` (Best with ${formatFabricCount(patternOption.recommendedFabricCount)})`
-                              }
-                            </option>
-                          ))}
-                        </select>
-                      )}
                     </div>
                   </label>
                 </div>
 
-                {/* Challenge Me Checkbox */}
-                <label className="flex items-center cursor-pointer p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
-                  <input
-                    type="checkbox"
-                    checked={challengeMe}
-                    onChange={(e) => setChallengeMe(e.target.checked)}
-                    className="mr-3 h-5 w-5 text-indigo-600"
+                {/* STEP 2: Upload Section */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                    Step 2: Upload Your Fabric Images
+                  </h2>
+                  
+                  <p className="text-gray-600 mb-6">
+                    Upload {MIN_FABRICS}-{MAX_FABRICS} fabric images to generate your quilt pattern. 
+                    Supported formats: JPG, PNG, WEBP
+                  </p>
+
+                  <FabricDropzone
+                    onFilesAdded={handleFilesAdded}
+                    currentCount={fabrics.length}
+                    maxFiles={MAX_FABRICS}
                   />
-                  <div>
-                    <div className="font-medium text-indigo-900">
-                      🚀 Challenge Me
-                    </div>
-                    <div className="text-sm text-indigo-700">
-                      Use {SKILL_LEVELS[targetSkill]} level complexity
-                      {challengeMe && currentSkill !== 'expert' && (
-                        <span className="ml-1 font-semibold">(one level up!)</span>
-                      )}
-                    </div>
-                  </div>
-                </label>
-              </div>
-
-              {/* STEP 2: Upload Section - NOW SECOND */}
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-2">
-                  Step 2: Upload Your Fabric Images
-                </h2>
-                
-                <p className="text-gray-600 mb-6">
-                  Upload {MIN_FABRICS}-{MAX_FABRICS} fabric images to generate your quilt pattern. 
-                  Supported formats: JPG, PNG, WEBP
-                </p>
-
-                <FabricDropzone
-                  onFilesAdded={handleFilesAdded}
-                  currentCount={fabrics.length}
-                  maxFiles={MAX_FABRICS}
-                />
+                </div>
               </div>
 
               {/* Fabric Preview Grid */}
