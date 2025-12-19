@@ -76,11 +76,10 @@ export class SvgGenerator {
         const x = col * 100;
         const y = row * 100;
         
-        // Randomly shuffle colors for each block
-        const shuffledColors = this.shuffleArray([...colors]);
-        const color1 = shuffledColors[0 % shuffledColors.length];
-        const color2 = shuffledColors[1 % shuffledColors.length];
-        const color3 = shuffledColors[2 % shuffledColors.length];
+        // Use colors in order
+        const color1 = colors[0 % colors.length];
+        const color2 = colors[1 % colors.length];
+        const color3 = colors[2 % colors.length];
         
         // Random rotation (0, 90, 180, or 270 degrees) for variety
         const rotations = [0, 90, 180, 270];
