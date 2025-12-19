@@ -1,4 +1,4 @@
-export const STORM_AT_SEA_TRADITIONAL = `
+export const STORM_AT_SEA = `
   <!-- Corners -->
   <polygon points="10,0 20,10 10,20 0,10" fill="COLOR1"/>
   <polygon points="10,5 15,10 10,15 5,10" fill="COLOR3"/>
