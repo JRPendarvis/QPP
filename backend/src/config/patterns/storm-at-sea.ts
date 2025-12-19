@@ -1,4 +1,6 @@
 export const STORM_AT_SEA = `
+  <!-- Background -->
+  <rect x="0" y="0" width="100" height="100" fill="COLOR2"/>
   <!-- Corners -->
   <polygon points="10,0 20,10 10,20 0,10" fill="COLOR1"/>
   <polygon points="10,5 15,10 10,15 5,10" fill="COLOR3"/>
