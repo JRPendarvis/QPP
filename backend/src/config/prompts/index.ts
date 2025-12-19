@@ -3,6 +3,7 @@
  */
 export interface PatternPrompt {
   patternName: string;
+  recommendedFabricCount?: number | { min: number; max: number }; // For best results (optional for stubs)
   characteristics: string;
   fabricRoleGuidance: string;
   cuttingInstructions: string;
@@ -15,6 +16,7 @@ export interface PatternPrompt {
  */
 export const GENERIC_PATTERN_PROMPT = {
   patternName: 'Generic Pattern',
+  recommendedFabricCount: { min: 2, max: 6 },
   
   characteristics: `This is a traditional quilt pattern. Follow standard quilting principles for construction.`,
 

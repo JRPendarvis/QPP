@@ -1,5 +1,6 @@
 export const SIMPLE_SQUARES_PROMPT = {
   patternName: 'Simple Squares',
+  recommendedFabricCount: { min: 3, max: 6 },
   
   characteristics: `Simple Squares is the most basic and versatile quilt pattern:
 - A grid of equal-sized squares

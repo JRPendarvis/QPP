@@ -3,6 +3,7 @@
  */
 export const CHURN_DASH_PROMPT = {
   patternName: 'Churn Dash',
+  recommendedFabricCount: 3,
   
  characteristics: `A Churn Dash is a traditional nine-patch variation named for its resemblance to a butter churn dasher:
 - Center square (1 fabric)
