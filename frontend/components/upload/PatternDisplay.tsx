@@ -49,28 +49,21 @@ export default function PatternDisplay({
   // Check if user has downloads remaining
   const hasDownloadsRemaining = usage?.downloads?.remaining ? usage.downloads.remaining > 0 : false;
 
-  // Sanitize SVG with logging
+  // TEMPORARY: Bypass DOMPurify for testing
   const sanitizedSvg = useMemo(() => {
     console.log('═══════════════════════════════════════════════════');
-    console.log('🎨 SVG SANITIZATION PROCESS:');
+    console.log('⚠️ DOMPURIFY BYPASSED (TESTING ONLY)');
     console.log(`  Pattern Name: ${pattern?.patternName}`);
     console.log('');
-    console.log('📥 BEFORE DOMPurify (Raw SVG from API):');
+    console.log('📥 Raw SVG from API (NO SANITIZATION):');
     console.log(`  Length: ${pattern?.visualSvg?.length || 0} characters`);
     console.log('  Raw SVG:', pattern?.visualSvg);
     console.log('');
-    
-    const sanitized = DOMPurify.sanitize(pattern?.visualSvg || '', { SAFE_FOR_TEMPLATES: true });
-    
-    console.log('🧹 AFTER DOMPurify (Sanitized):');
-    console.log(`  Length: ${sanitized?.length || 0} characters`);
-    console.log('  Sanitized SVG:', sanitized);
-    console.log('');
-    console.log(`  ✅ Changed: ${pattern?.visualSvg !== sanitized ? 'YES' : 'NO'}`);
-    console.log(`  Δ Length: ${(pattern?.visualSvg?.length || 0) - (sanitized?.length || 0)} characters`);
+    console.log('⚠️ WARNING: Using unsanitized SVG directly!');
     console.log('═══════════════════════════════════════════════════');
     
-    return sanitized;
+    // Return raw SVG without sanitization
+    return pattern?.visualSvg || '';
   }, [pattern?.visualSvg, pattern?.patternName]);
 
   // Validate pattern data
