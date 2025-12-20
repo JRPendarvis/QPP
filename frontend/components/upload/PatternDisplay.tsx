@@ -46,19 +46,32 @@ export default function PatternDisplay({
   const router = useRouter();
   const [downloading, setDownloading] = useState(false);
 
-  // Log the received SVG for debugging
-  console.log('═══════════════════════════════════════════════════');
-  console.log('🎨 FRONTEND RECEIVED SVG:');
-  console.log(`  Pattern Name: ${pattern?.patternName}`);
-  console.log(`  SVG Length: ${pattern?.visualSvg?.length || 0} characters`);
-  console.log(`  SVG Preview (first 500 chars):`);
-  console.log(pattern?.visualSvg?.substring(0, 500));
-  console.log('  Full SVG:');
-  console.log(pattern?.visualSvg);
-  console.log('═══════════════════════════════════════════════════');
-
   // Check if user has downloads remaining
   const hasDownloadsRemaining = usage?.downloads?.remaining ? usage.downloads.remaining > 0 : false;
+
+  // Sanitize SVG with logging
+  const sanitizedSvg = useMemo(() => {
+    console.log('═══════════════════════════════════════════════════');
+    console.log('🎨 SVG SANITIZATION PROCESS:');
+    console.log(`  Pattern Name: ${pattern?.patternName}`);
+    console.log('');
+    console.log('📥 BEFORE DOMPurify (Raw SVG from API):');
+    console.log(`  Length: ${pattern?.visualSvg?.length || 0} characters`);
+    console.log('  Raw SVG:', pattern?.visualSvg);
+    console.log('');
+    
+    const sanitized = DOMPurify.sanitize(pattern?.visualSvg || '', { SAFE_FOR_TEMPLATES: true });
+    
+    console.log('🧹 AFTER DOMPurify (Sanitized):');
+    console.log(`  Length: ${sanitized?.length || 0} characters`);
+    console.log('  Sanitized SVG:', sanitized);
+    console.log('');
+    console.log(`  ✅ Changed: ${pattern?.visualSvg !== sanitized ? 'YES' : 'NO'}`);
+    console.log(`  Δ Length: ${(pattern?.visualSvg?.length || 0) - (sanitized?.length || 0)} characters`);
+    console.log('═══════════════════════════════════════════════════');
+    
+    return sanitized;
+  }, [pattern?.visualSvg, pattern?.patternName]);
 
   // Validate pattern data
   const hasName = pattern && pattern.patternName;
@@ -162,7 +175,7 @@ export default function PatternDisplay({
         <div className="bg-gray-50 rounded-lg p-6 flex justify-center">
           <div
             className="max-w-md w-full"
-            dangerouslySetInnerHTML={{ __html: useMemo(() => DOMPurify.sanitize(pattern.visualSvg, { SAFE_FOR_TEMPLATES: true }), [pattern.visualSvg]) }}
+            dangerouslySetInnerHTML={{ __html: sanitizedSvg }}
           />
         </div>
       ) : null}
