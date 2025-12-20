@@ -1,22 +1,20 @@
-/**
- * Pattern-specific prompt for Churn Dash
- */
 export const CHURN_DASH_PROMPT = {
   patternName: 'Churn Dash',
   recommendedFabricCount: 3,
   
- characteristics: `A Churn Dash is a traditional nine-patch variation named for its resemblance to a butter churn dasher:
+  characteristics: `A Churn Dash is a traditional nine-patch variation named for its resemblance to a butter churn dasher:
 - Center square (1 fabric)
 - Four rectangular "dashes" forming a plus/cross shape (1 fabric)
 - Four corner half-square triangles (2 fabrics per corner, split diagonally)
-- The accent color sits on the OUTER corner of each HST, creating a framing effect
-- The background color fills the INNER triangles, connecting visually to the center
-- NOT a simple nine-patch (corners are split diagonally, not solid squares)`,
+- The accent color sits on ALL FOUR OUTER corners, creating a framing effect
+- The background/primary color fills ALL FOUR INNER triangles, connecting visually to the center
+- NOT a simple nine-patch (corners are split diagonally, not solid squares)
+- NOT alternating colors in corners — outer corners are consistent, inner corners are consistent`,
 
   fabricRoleGuidance: `For Churn Dash specifically:
-- BACKGROUND: Best in the corner half-square triangles (alternating with accent)
-- PRIMARY: Works well as the four "dash" rectangles on the sides - these are the most prominent feature
-- SECONDARY/ACCENT: Best in the center square and alternating corner triangles`,
+- COLOR1 (PRIMARY/BACKGROUND): Center square AND inner corner triangles — creates visual connection
+- COLOR2 (SECONDARY): The four rectangular "dash" bars — the most prominent feature
+- COLOR3 (ACCENT): Outer corner triangles only — frames the entire block`,
 
   cuttingInstructions: `Churn Dash cutting specifics:
 - Cut squares for the center
@@ -28,12 +26,12 @@ export const CHURN_DASH_PROMPT = {
 - Piece the half-square triangles first for the corners
 - Arrange in a 3x3 grid: corner HSTs, side dashes, and center square
 - Press seams toward the darker fabric
-- The "churning" effect comes from the diagonal splits in the corners`,
+- Ensure all outer corner triangles are the same accent color
+- Ensure all inner corner triangles match the center square`,
 
   commonMistakes: `Avoid these Churn Dash mistakes:
 - Using solid squares in corners instead of half-square triangles (makes it a nine-patch)
-- Using four-patch units in corners (too complex, not traditional)
+- Alternating corner triangle colors (outer corners should ALL be accent, inner corners should ALL match center)
 - Not enough contrast between the dashes and background
-- Placing accent triangles on inner corners instead of outer corners (inverts the framing effect).
-- Forgetting to alternate the triangle colors in corners`
+- Placing accent triangles on inner corners instead of outer corners (inverts the framing effect)`
 };
