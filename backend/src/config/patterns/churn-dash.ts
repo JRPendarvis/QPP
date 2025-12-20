@@ -18,18 +18,18 @@ export const CHURN_DASH = `
     <rect x="66.67" y="33.33" width="16.66" height="33.34" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
     <rect x="83.33" y="33.33" width="16.67" height="33.34" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     
-    <!-- Top-left corner HST (outer=feature, inner=background) -->
-    <polygon points="0,0 33.33,0 0,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="33.33,0 33.33,33.33 0,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+        <!-- Top-left corner HST (outer=background, inner=feature) -->
+    <polygon points="0,0 33.33,0 0,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="33.33,0 33.33,33.33 0,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
     
-    <!-- Top-right corner HST (outer=feature, inner=background) -->
-    <polygon points="66.67,0 100,0 100,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.67,0 66.67,33.33 100,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Top-right corner HST (outer=background, inner=feature) -->
+    <polygon points="66.67,0 100,0 100,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,0 66.67,33.33 100,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
     
-    <!-- Bottom-left corner HST (outer=feature, inner=background) -->
-    <polygon points="0,66.67 0,100 33.33,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="0,66.67 33.33,66.67 33.33,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Bottom-left corner HST (outer=background, inner=feature) -->
+    <polygon points="0,66.67 0,100 33.33,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="0,66.67 33.33,66.67 33.33,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
     
-    <!-- Bottom-right corner HST (outer=feature, inner=background) -->
-    <polygon points="100,66.67 100,100 66.67,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.67,66.67 100,66.67 66.67,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`;
+    <!-- Bottom-right corner HST (outer=background, inner=feature) -->
+    <polygon points="100,66.67 100,100 66.67,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="66.67,66.67 100,66.67 66.67,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`;
