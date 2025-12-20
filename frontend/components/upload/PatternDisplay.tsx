@@ -201,14 +201,15 @@ export default function PatternDisplay({
       {/* Preview of Instructions */}
       <div className="bg-gradient-to-b from-white to-gray-100 border border-gray-200 rounded-lg p-6 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white pointer-events-none rounded-lg"></div>
-        <h3 className="font-semibold text-gray-700 mb-2">Step-by-Step Instructions</h3>
         
-        {/* Disclaimer if present as first instruction */}
+        {/* Disclaimer if present as first instruction - shown ABOVE heading */}
         {pattern.instructions[0]?.startsWith('📋 IMPORTANT:') && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg relative z-10">
             <p className="text-sm text-blue-900">{pattern.instructions[0]}</p>
           </div>
         )}
+        
+        <h3 className="font-semibold text-gray-700 mb-2">Step-by-Step Instructions</h3>
         
         <ol className="list-decimal list-inside space-y-2 text-gray-600">
           {pattern.instructions
