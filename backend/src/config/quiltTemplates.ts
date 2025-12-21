@@ -6,7 +6,7 @@
  */
 
 import { SIMPLE_SQUARES } from './patterns/simple-squares';
-import { CHECKERBOARD } from './patterns/checkerboard';
+import { CHECKERBOARD } from './patterns/checkerboard/template';
 import { FOUR_PATCH } from './patterns/four-patch';
 import { NINE_PATCH } from './patterns/nine-patch';
 import { PINWHEEL } from './patterns/pinwheel';
@@ -16,10 +16,10 @@ import { HOURGLASS } from './patterns/hourglass';
 import { RAIL_FENCE } from './patterns/rail-fence';
 import { STRIP_QUILT } from './patterns/strip-quilt';
 import { LOG_CABIN } from './patterns/log-cabin';
-import { BOW_TIE } from './patterns/bow-tie';
+import { BOW_TIE } from './patterns/bow-tie/template';
 import { OHIO_STAR } from './patterns/ohio-star';
 import { SAWTOOTH_STAR } from './patterns/sawtooth-star';
-import { CHURN_DASH } from './patterns/churn-dash';
+import { CHURN_DASH } from './patterns/churn-dash/template';
 import { LONE_STAR } from './patterns/lone-star';
 import { NEW_YORK_BEAUTY } from './patterns/new-york-beauty';
 import { MARINERS_COMPASS } from './patterns/mariners-compass';
@@ -30,6 +30,8 @@ import { FEATHERED_STAR } from './patterns/feathered-star';
 import { GRANDMOTHERS_FLOWER_GARDEN } from './patterns/grandmothers-flower-garden';
 import { PICKLE_DISH } from './patterns/pickle-dish';
 import { COMPLEX_MEDALLION } from './patterns/complex-medallion';
+
+console.log('🔍 CHURN_DASH import check:', typeof CHURN_DASH, CHURN_DASH ? 'has content' : 'UNDEFINED');
 
 export const SVG_TEMPLATES: Record<string, string> = {
   'Simple Squares': SIMPLE_SQUARES,

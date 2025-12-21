@@ -140,7 +140,7 @@ calculateFabricCountScore(pattern, fabricCount):
 **Backend:**
 - `src/config/quiltPatterns.ts` - Added recommendedFabricCount to all patterns + scoring function
 - `src/config/prompts/index.ts` - Made recommendedFabricCount optional in interface
-- `src/config/prompts/churn-dash.prompt.ts` - Added fabric count
+- `src/config/patterns/churn-dash/prompt.ts` - Added fabric count
 - `src/config/prompts/simple-squares.prompt.ts` - Added fabric count
 - `src/services/promptBuilder.ts` - Updated selectPattern() to use fabric-count scoring
 - `src/services/claudeService.ts` - Pass fabricCount to selectPattern()

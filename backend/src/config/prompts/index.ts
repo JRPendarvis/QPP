@@ -47,19 +47,19 @@ export const GENERIC_PATTERN_PROMPT = {
 // Import all pattern-specific prompts
 import { SIMPLE_SQUARES_PROMPT } from './simple-squares.prompt';
 import { STRIP_QUILT_PROMPT } from './strip-quilt.prompt';
-import { CHECKERBOARD_PROMPT } from './checkerboard.prompt';
+import { CHECKERBOARD_PROMPT } from '../patterns/checkerboard/prompt';
 import { RAIL_FENCE_PROMPT } from './rail-fence.prompt';
 import { FOUR_PATCH_PROMPT } from './four-patch.prompt';
 import { NINE_PATCH_PROMPT } from './nine-patch.prompt';
 import { HALF_SQUARE_TRIANGLES_PROMPT } from './half-square-triangles.prompt';
 import { HOURGLASS_PROMPT } from './hourglass.prompt';
-import { BOW_TIE_PROMPT } from './bow-tie.prompt';
+import { BOW_TIE_PROMPT } from '../patterns/bow-tie/prompt';
 import { FLYING_GEESE_PROMPT } from './flying-geese.prompt';
 import { PINWHEEL_PROMPT } from './pinwheel.prompt';
 import { LOG_CABIN_PROMPT } from './log-cabin.prompt';
 import { SAWTOOTH_STAR_PROMPT } from './sawtooth-star.prompt';
 import { OHIO_STAR_PROMPT } from './ohio-star.prompt';
-import { CHURN_DASH_PROMPT } from './churn-dash.prompt';
+import { CHURN_DASH_PROMPT } from '../patterns/churn-dash/prompt';
 import { LONE_STAR_PROMPT } from './lone-star.prompt';
 import { MARINERS_COMPASS_PROMPT } from './mariners-compass.prompt';
 import { NEW_YORK_BEAUTY_PROMPT } from './new-york-beauty.prompt';

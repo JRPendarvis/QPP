@@ -1,5 +1,8 @@
-export const BOW_TIE_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const BOW_TIE_PROMPT: PatternPrompt = {
   patternName: 'Bow Tie',
+  recommendedFabricCount: 2,
   
   characteristics: `A Bow Tie block creates the illusion of a knotted bow tie:
 - A 2x2 four-patch base structure

@@ -1,5 +1,8 @@
-export const CHECKERBOARD_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const CHECKERBOARD_PROMPT: PatternPrompt = {
   patternName: 'Checkerboard',
+  recommendedFabricCount: 2,
   
   characteristics: `A Checkerboard is the simplest alternating pattern:
 - A 2x2 four-patch grid

@@ -1,6 +1,8 @@
-export const CHURN_DASH_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const CHURN_DASH_PROMPT: PatternPrompt = {
   patternName: 'Churn Dash',
-  recommendedFabricCount: 3,
+  recommendedFabricCount: 2,
   
   characteristics: `A Churn Dash is a traditional nine-patch variation named for its resemblance to a butter churn dasher:
 - Center square (1 fabric)

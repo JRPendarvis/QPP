@@ -1,4 +1,4 @@
-export const CHURN_DASH = `
+export const CHURN_DASH_TEMPLATE = `
     <!-- Center square - BACKGROUND -->
     <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     
@@ -33,3 +33,6 @@ export const CHURN_DASH = `
     <!-- Bottom-right corner HST (outer=background, inner=feature) -->
     <polygon points="100,66.67 100,100 66.67,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
     <polygon points="66.67,66.67 100,66.67 66.67,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`;
+
+    // Backward compatibility alias
+export const CHURN_DASH = CHURN_DASH_TEMPLATE;

@@ -1,4 +1,5 @@
 import { SVG_TEMPLATES } from '../config/quiltTemplates';
+import { getPattern } from '../config/patterns';
 
 /**
  * SVG generation utilities for quilt patterns
@@ -13,19 +14,32 @@ export class SvgGenerator {
     console.log(`  Requested Pattern: "${patternType}"`);
     console.log(`  Available Templates: ${Object.keys(SVG_TEMPLATES).join(', ')}`);
     
-    const { template, templateUsed } = this.findTemplate(patternType);
+    const { template, templateUsed, patternDef } = this.findTemplate(patternType);
     const normalizedColors = this.normalizeColors(colors);
-    const blocks = this.generateBlocks(template, normalizedColors);
+    const blocks = this.generateBlocks(template, normalizedColors, patternDef);
     
     return this.wrapSvg(blocks);
   }
 
   /**
    * Find appropriate template for pattern type
+   * Returns both the template string and the PatternDefinition (if available)
    */
-  private static findTemplate(patternType: string): { template: string; templateUsed: string } {
+  private static findTemplate(patternType: string): { 
+    template: string; 
+    templateUsed: string; 
+    patternDef: ReturnType<typeof getPattern> | undefined;
+  } {
     let template = SVG_TEMPLATES[patternType];
     let templateUsed = patternType;
+    
+    // Try to get PatternDefinition for new system
+    const patternId = this.toPatternId(patternType);
+    const patternDef = getPattern(patternId);
+    
+    if (patternDef) {
+      console.log(`  ✅ PatternDefinition found: "${patternDef.id}" (new system)`);
+    }
     
     if (!template) {
       // Try to find a close match
@@ -52,7 +66,15 @@ export class SvgGenerator {
     console.log(`  Template Content Preview: ${template.substring(0, 150)}...`);
     console.log('═══════════════════════════════════════════════════');
     
-    return { template, templateUsed };
+    return { template, templateUsed, patternDef };
+  }
+
+  /**
+   * Convert display name to pattern ID
+   * "Churn Dash" -> "churn-dash"
+   */
+  private static toPatternId(patternType: string): string {
+    return patternType.toLowerCase().replace(/\s+/g, '-').replace(/'/g, '');
   }
 
   /**
@@ -68,18 +90,34 @@ export class SvgGenerator {
   /**
    * Generate 3x4 grid of pattern blocks (3 columns, 4 rows)
    */
-  private static generateBlocks(template: string, colors: string[]): string {
+  private static generateBlocks(
+    template: string, 
+    colors: string[],
+    patternDef?: ReturnType<typeof getPattern>
+  ): string {
     let blocks = '';
     
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 3; col++) {
+        const blockIndex = row * 3 + col;
         const x = col * 100;
         const y = row * 100;
         
-        // Use colors in order
-        const color1 = colors[0 % colors.length];
-        const color2 = colors[1 % colors.length];
-        const color3 = colors[2 % colors.length];
+        // Get colors for this block
+        let blockColors: string[];
+        
+        if (patternDef?.getColors) {
+          // New system: pattern controls color assignment
+          blockColors = patternDef.getColors(colors, blockIndex);
+          console.log(`  Block ${blockIndex}: ${blockColors.join(', ')} (via ${patternDef.id}.getColors)`);
+        } else {
+          // Legacy: static color assignment
+          blockColors = [
+            colors[0 % colors.length],
+            colors[1 % colors.length],
+            colors[2 % colors.length],
+          ];
+        }
         
         // Random rotation (0, 90, 180, or 270 degrees) for variety
         const rotations = [0, 90, 180, 270];
@@ -87,9 +125,9 @@ export class SvgGenerator {
         
         // Replace color placeholders in template
         let blockTemplate = template
-          .replace(/COLOR1/g, color1)
-          .replace(/COLOR2/g, color2)
-          .replace(/COLOR3/g, color3);
+          .replace(/COLOR1/g, blockColors[0] || colors[0])
+          .replace(/COLOR2/g, blockColors[1] || colors[1] || colors[0])
+          .replace(/COLOR3/g, blockColors[2] || colors[2] || colors[0]);
         
         // Add subtle stroke for definition
         blockTemplate = blockTemplate.replace(/<rect /g, '<rect stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
