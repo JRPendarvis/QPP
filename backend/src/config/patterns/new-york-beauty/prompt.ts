@@ -1,5 +1,8 @@
-export const NEW_YORK_BEAUTY_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const NEW_YORK_BEAUTY_PROMPT: PatternPrompt = {
   patternName: 'New York Beauty',
+  recommendedFabricCount: 5,
   
   characteristics: `New York Beauty is a dramatic curved pattern with radiating spikes:
 - Quarter-circle design radiating from one corner

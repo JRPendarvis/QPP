@@ -1,5 +1,8 @@
-export const FOUR_PATCH_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const FOUR_PATCH_PROMPT: PatternPrompt = {
   patternName: 'Four Patch',
+  recommendedFabricCount: 4,
   
   characteristics: `Four Patch is a fundamental building-block pattern based on 2x2 units:
 - Each four-patch unit is a 2x2 grid with matching colors on opposite diagonals

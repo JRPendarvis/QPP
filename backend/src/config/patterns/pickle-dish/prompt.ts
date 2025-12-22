@@ -1,5 +1,8 @@
-export const PICKLE_DISH_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const PICKLE_DISH_PROMPT: PatternPrompt = {
   patternName: 'Pickle Dish',
+  recommendedFabricCount: 5,
   
   characteristics: `Pickle Dish (also called Indian Wedding Ring) is an intricate curved pattern with pointed spikes:
 - Four curved arc bands arranged in a ring formation

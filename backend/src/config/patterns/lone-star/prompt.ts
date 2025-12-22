@@ -1,5 +1,8 @@
-export const LONE_STAR_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const LONE_STAR_PROMPT: PatternPrompt = {
   patternName: 'Lone Star',
+  recommendedFabricCount: 7,
   
   characteristics: `Lone Star (also called Star of Bethlehem) is a dramatic radiating 8-pointed star:
 - Built from concentric rings of diamonds radiating from center

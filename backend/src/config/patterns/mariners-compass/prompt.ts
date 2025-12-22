@@ -1,5 +1,8 @@
-export const MARINERS_COMPASS_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const MARINERS_COMPASS_PROMPT: PatternPrompt = {
   patternName: "Mariner's Compass",
+  recommendedFabricCount: 6,
   
   characteristics: `Mariner's Compass is a dramatic radiating pattern with layered points of varying lengths:
 - 16 points total radiating from a center octagon

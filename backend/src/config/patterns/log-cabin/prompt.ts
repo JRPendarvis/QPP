@@ -1,5 +1,8 @@
-export const LOG_CABIN_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const LOG_CABIN_PROMPT: PatternPrompt = {
   patternName: 'Log Cabin',
+  recommendedFabricCount: 8,
   
   characteristics: `Log Cabin is an iconic American pattern built from strips spiraling around a center:
 - Center square (the "hearth") represents the fireplace in a cabin

@@ -1,5 +1,8 @@
-export const GRANDMOTHERS_FLOWER_GARDEN_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const GRANDMOTHERS_FLOWER_GARDEN_PROMPT: PatternPrompt = {
   patternName: "Grandmother's Flower Garden",
+  recommendedFabricCount: 6,
   
   characteristics: `Grandmother's Flower Garden is a classic hexagon-based pattern forming flower clusters:
 - One center hexagon surrounded by six hexagons sharing edges

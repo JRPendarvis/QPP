@@ -1,5 +1,8 @@
-export const NINE_PATCH_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const NINE_PATCH_PROMPT: PatternPrompt = {
   patternName: 'Nine Patch',
+  recommendedFabricCount:2,
   
   characteristics: `Nine Patch is a fundamental 3x3 grid pattern:
 - Nine equal squares arranged in a 3x3 grid

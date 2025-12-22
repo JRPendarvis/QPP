@@ -1,5 +1,8 @@
-export const HOURGLASS_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const HOURGLASS_PROMPT: PatternPrompt = {
   patternName: 'Hourglass',
+  recommendedFabricCount: 2,
   
   characteristics: `Hourglass is a simple but dynamic block divided by both diagonals:
 - Square divided into four triangles meeting at center point

@@ -1,5 +1,8 @@
-export const OHIO_STAR_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const OHIO_STAR_PROMPT: PatternPrompt = {
   patternName: 'Ohio Star',
+  recommendedFabricCount: 2,
   
   characteristics: `Ohio Star is a classic 3x3 grid star pattern using quarter-square triangles:
 - Four corner squares (background)

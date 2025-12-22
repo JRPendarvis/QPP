@@ -1,5 +1,8 @@
-export const HALF_SQUARE_TRIANGLES_PROMPT = {
+import { PatternPrompt } from '../types';
+
+export const HALF_SQUARE_TRIANGLES_PROMPT: PatternPrompt = {
   patternName: 'Half-Square Triangles',
+  recommendedFabricCount: 4,
   
   characteristics: `Half-Square Triangles (HST) is the fundamental diagonal-split unit in quilting:
 - Each HST unit is a square divided diagonally into two triangles
