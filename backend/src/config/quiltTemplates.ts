@@ -5,31 +5,31 @@
  * The templates are repeated in a 4x4 grid to create the final quilt
  */
 
-import { SIMPLE_SQUARES } from './patterns/simple-squares';
+import { SIMPLE_SQUARES } from './patterns/simple-squares/template';
 import { CHECKERBOARD } from './patterns/checkerboard/template';
-import { FOUR_PATCH } from './patterns/four-patch';
-import { NINE_PATCH } from './patterns/nine-patch';
-import { PINWHEEL } from './patterns/pinwheel';
-import { HALF_SQUARE_TRIANGLES } from './patterns/half-square-triangles';
-import { FLYING_GEESE } from './patterns/flying-geese';
-import { HOURGLASS } from './patterns/hourglass';
-import { RAIL_FENCE } from './patterns/rail-fence';
-import { STRIP_QUILT } from './patterns/strip-quilt';
-import { LOG_CABIN } from './patterns/log-cabin';
+import { FOUR_PATCH } from './patterns/four-patch/four-patch';
+import { NINE_PATCH } from './patterns/nine-patch/nine-patch';
+import { PINWHEEL } from './patterns/pinwheel/template';
+import { HALF_SQUARE_TRIANGLES } from './patterns/half-square-triangles/half-square-triangles';
+import { FLYING_GEESE } from './patterns/flying-geese/template';
+import { HOURGLASS } from './patterns/hourglass/hourglass';
+import { RAIL_FENCE } from './patterns/rail-fence/template';
+import { STRIP_QUILT } from './patterns/strip-quilt/template';
+import { LOG_CABIN } from './patterns/log-cabin/log-cabin';
 import { BOW_TIE } from './patterns/bow-tie/template';
-import { OHIO_STAR } from './patterns/ohio-star';
-import { SAWTOOTH_STAR } from './patterns/sawtooth-star';
+import { OHIO_STAR } from './patterns/ohio-star/ohio-star';
+import { SAWTOOTH_STAR } from './patterns/sawtooth-star/template';
 import { CHURN_DASH } from './patterns/churn-dash/template';
-import { LONE_STAR } from './patterns/lone-star';
-import { NEW_YORK_BEAUTY } from './patterns/new-york-beauty';
-import { MARINERS_COMPASS } from './patterns/mariners-compass';
-import { STORM_AT_SEA } from './patterns/storm-at-sea';
-import { DOUBLE_WEDDING_RING } from './patterns/double-wedding-ring';
-import { DRUNKARDS_PATH } from './patterns/drunkards-path';
-import { FEATHERED_STAR } from './patterns/feathered-star';
-import { GRANDMOTHERS_FLOWER_GARDEN } from './patterns/grandmothers-flower-garden';
-import { PICKLE_DISH } from './patterns/pickle-dish';
-import { COMPLEX_MEDALLION } from './patterns/complex-medallion';
+import { LONE_STAR } from './patterns/lone-star/lone-star';
+import { NEW_YORK_BEAUTY } from './patterns/new-york-beauty/new-york-beauty';
+import { MARINERS_COMPASS } from './patterns/mariners-compass/mariners-compass';
+import { STORM_AT_SEA } from './patterns/storm-at-sea/template';
+import { DOUBLE_WEDDING_RING } from './patterns/double-wedding-ring/template';
+import { DRUNKARDS_PATH } from './patterns/drunkards-path/template';
+import { FEATHERED_STAR } from './patterns/feathered-star/template';
+import { GRANDMOTHERS_FLOWER_GARDEN } from './patterns/grandmothers-flower-garden/grandmothers-flower-garden';
+import { PICKLE_DISH } from './patterns/pickle-dish/pickle-dish';
+import { COMPLEX_MEDALLION } from './patterns/complex-medallion/template';
 
 console.log('🔍 CHURN_DASH import check:', typeof CHURN_DASH, CHURN_DASH ? 'has content' : 'UNDEFINED');
 
