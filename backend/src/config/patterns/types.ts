@@ -17,5 +17,5 @@ export interface PatternDefinition {
   prompt: PatternPrompt;
   minColors: number;                   // Minimum fabrics needed
   maxColors: number;                   // Maximum fabrics supported
-  getColors: (fabricColors: string[], blockIndex?: number) => string[];  // blockIndex is optional
+  getColors: (fabricColors: string[], opts: { blockIndex?: number; row?: number; col?: number }) => string[];  // blockIndex is optional
 }

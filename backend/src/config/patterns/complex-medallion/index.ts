@@ -10,7 +10,12 @@ const Checkerboard: PatternDefinition = {
   minColors: 2,
   maxColors: 8,
   
-  getColors: (fabricColors: string[], blockIndex: number = 0): string[] => {
+  getColors: (
+    fabricColors: string[],
+    opts: { blockIndex?: number; row?: number; col?: number } = {}
+  ): string[] => {
+    const blockIndex = opts.blockIndex ?? 0;
+
     if (fabricColors.length < 2) {
       return [fabricColors[0], fabricColors[0]];
     }

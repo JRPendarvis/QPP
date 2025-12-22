@@ -15,21 +15,13 @@ const Checkerboard: PatternDefinition = {
    * With multiple fabrics, creates "scrappy" look by rotating the second color
    * COLOR1 stays consistent; COLOR2 rotates per block
    */
-  getColors: (fabricColors: string[], blockIndex: number = 0): string[] => {
-    if (fabricColors.length < 2) {
-      return [fabricColors[0], fabricColors[0]];
-    }
-    
-    if (fabricColors.length === 2) {
-      return [fabricColors[0], fabricColors[1]];
-    }
-    
-    // 3+ fabrics: first is always primary, rotate through rest for alternating squares
-    const primary = fabricColors[0];
-    const secondaryOptions = fabricColors.slice(1);
-    const secondary = secondaryOptions[blockIndex % secondaryOptions.length];
-    
-    return [primary, secondary];
+ getColors: (fabricColors: string[], opts: { row?: number; col?: number }): string[] => {
+    const colorA = fabricColors[0];
+    const colorB = fabricColors[1] || fabricColors[0];
+    const row = opts.row || 0;
+    const col = opts.col || 0;
+    const color = (row + col) % 2 === 0 ? colorA : colorB;
+    return [color];
   }
 };
 

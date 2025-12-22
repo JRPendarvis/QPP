@@ -211,11 +211,12 @@ export default function PatternDisplay({
         
         <h3 className="font-semibold text-gray-700 mb-2">Step-by-Step Instructions</h3>
         
+
         <ol className="list-decimal list-inside space-y-2 text-gray-600">
           {pattern.instructions
             .slice(pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 1 : 0, Math.min(pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 3 : 2, instructionsCount))
             .map((instruction, index) => (
-              <li key={index}>{instruction}</li>
+              <li key={index}>{instruction.replace(/^[0-9]+[).]\s*/, '')}</li>
             ))}
           {instructionsCount > (pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 3 : 2) && (
             <li className="text-gray-400 italic">+ {instructionsCount - (pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 3 : 2)} more steps...</li>

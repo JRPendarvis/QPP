@@ -16,7 +16,12 @@ const BowTie: PatternDefinition = {
    * With multiple fabrics, creates "scrappy" look by rotating bow tie colors
    * Background (COLOR1) stays consistent; bow tie (COLOR2) rotates per block
    */
-  getColors: (fabricColors: string[], blockIndex: number = 0): string[] => {
+  getColors: (
+    fabricColors: string[],
+    opts: { blockIndex?: number; row?: number; col?: number } = {}
+  ): string[] => {
+    const blockIndex = opts.blockIndex ?? 0;
+
     if (fabricColors.length < 2) {
       return [fabricColors[0], fabricColors[0]];
     }
