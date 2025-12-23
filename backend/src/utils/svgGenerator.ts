@@ -108,8 +108,9 @@ export class SvgGenerator {
         
         if (patternDef?.getColors) {
           // New system: pattern controls color assignment
-          blockColors = patternDef.getColors(colors, blockIndex);
-          console.log(`  Block ${blockIndex}: ${blockColors.join(', ')} (via ${patternDef.id}.getColors)`);
+          // Pass all position info so patterns can use what they need
+          blockColors = patternDef.getColors(colors, { blockIndex, row, col });
+          console.log(`  Block ${blockIndex} (row=${row}, col=${col}): ${blockColors.join(', ')} (via ${patternDef.id}.getColors)`);
         } else {
           // Legacy: static color assignment
           blockColors = [
@@ -127,19 +128,25 @@ export class SvgGenerator {
         let blockTemplate = template
           .replace(/COLOR1/g, blockColors[0] || colors[0])
           .replace(/COLOR2/g, blockColors[1] || colors[1] || colors[0])
-          .replace(/COLOR3/g, blockColors[2] || colors[2] || colors[0]);
-        
+          .replace(/COLOR3/g, blockColors[2] || colors[2] || colors[0])
+          .replace(/COLOR4/g, blockColors[3] || colors[3] || colors[0])
+          .replace(/COLOR5/g, blockColors[4] || colors[4] || colors[0])
+          .replace(/COLOR6/g, blockColors[5] || colors[5] || colors[0]);
+
+        // Remove any nested <svg> tags from block templates
+        blockTemplate = blockTemplate.replace(/<svg[^>]*>/gi, '').replace(/<\/svg>/gi, '');
+
         // Add subtle stroke for definition
         blockTemplate = blockTemplate.replace(/<rect /g, '<rect stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
                                        .replace(/<polygon /g, '<polygon stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
                                        .replace(/<path /g, '<path stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
                                        .replace(/<circle /g, '<circle stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ');
-        
+
         // Apply rotation around block center (50, 50)
         const transform = rotation > 0 
           ? `translate(${x},${y}) rotate(${rotation} 50 50)`
           : `translate(${x},${y})`;
-        
+
         blocks += `    <g transform="${transform}">\n      ${blockTemplate.trim()}\n    </g>\n`;
       }
     }
