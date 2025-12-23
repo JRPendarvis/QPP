@@ -49,22 +49,11 @@ export default function PatternDisplay({
   // Check if user has downloads remaining
   const hasDownloadsRemaining = usage?.downloads?.remaining ? usage.downloads.remaining > 0 : false;
 
-  // TEMPORARY: Bypass DOMPurify for testing
+  // Restore DOMPurify for SVG sanitization
   const sanitizedSvg = useMemo(() => {
-    console.log('═══════════════════════════════════════════════════');
-    console.log('⚠️ DOMPURIFY BYPASSED (TESTING ONLY)');
-    console.log(`  Pattern Name: ${pattern?.patternName}`);
-    console.log('');
-    console.log('📥 Raw SVG from API (NO SANITIZATION):');
-    console.log(`  Length: ${pattern?.visualSvg?.length || 0} characters`);
-    console.log('  Raw SVG:', pattern?.visualSvg);
-    console.log('');
-    console.log('⚠️ WARNING: Using unsanitized SVG directly!');
-    console.log('═══════════════════════════════════════════════════');
-    
-    // Return raw SVG without sanitization
-    return pattern?.visualSvg || '';
-  }, [pattern?.visualSvg, pattern?.patternName]);
+    if (!pattern?.visualSvg) return '';
+    return DOMPurify.sanitize(pattern.visualSvg, { USE_PROFILES: { svg: true } });
+  }, [pattern?.visualSvg]);
 
   // Validate pattern data
   const hasName = pattern && pattern.patternName;
@@ -174,14 +163,18 @@ export default function PatternDisplay({
       ) : null}
 
       <div className="grid md:grid-cols-2 gap-4">
-        <div>
-          <h3 className="font-semibold text-gray-700">Difficulty</h3>
-          <p className="text-gray-900">{pattern.difficulty || 'Not specified'}</p>
-        </div>
-        <div>
-          <h3 className="font-semibold text-gray-700">Estimated Size</h3>
-          <p className="text-gray-900">{pattern.estimatedSize || 'Not specified'}</p>
-        </div>
+        {pattern.difficulty && (
+          <div>
+            <h3 className="font-semibold text-gray-700">Difficulty</h3>
+            <p className="text-gray-900">{pattern.difficulty}</p>
+          </div>
+        )}
+        {pattern.estimatedSize && (
+          <div>
+            <h3 className="font-semibold text-gray-700">Estimated Size</h3>
+            <p className="text-gray-900">{pattern.estimatedSize}</p>
+          </div>
+        )}
       </div>
 
       {pattern.description && (
@@ -214,13 +207,10 @@ export default function PatternDisplay({
 
         <ol className="list-decimal list-inside space-y-2 text-gray-600">
           {pattern.instructions
-            .slice(pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 1 : 0, Math.min(pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 3 : 2, instructionsCount))
+            .slice(pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 1 : 0)
             .map((instruction, index) => (
               <li key={index}>{instruction.replace(/^[0-9]+[).]\s*/, '')}</li>
             ))}
-          {instructionsCount > (pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 3 : 2) && (
-            <li className="text-gray-400 italic">+ {instructionsCount - (pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 3 : 2)} more steps...</li>
-          )}
         </ol>
         
         <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded relative z-10">

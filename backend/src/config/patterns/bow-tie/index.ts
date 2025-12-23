@@ -6,15 +6,14 @@ const BowTie: PatternDefinition = {
   id: 'bow-tie',
   name: 'Bow Tie',
   template: BOW_TIE_TEMPLATE,
-  
   prompt: BOW_TIE_PROMPT,
-  minColors: 2,
+  minColors: 3,
   maxColors: 8,
   
   /**
-   * Bow Tie uses 2 colors per block: background + bow tie
-   * With multiple fabrics, creates "scrappy" look by rotating bow tie colors
-   * Background (COLOR1) stays consistent; bow tie (COLOR2) rotates per block
+   * Bow Tie has tie squares, background squares, and center knot
+   * COLOR1 = tie (diagonal pair), COLOR2 = background (opposite diagonal), COLOR3 = knot
+   * With multiple fabrics, creates "scrappy" look by rotating tie colors
    */
   getColors: (
     fabricColors: string[],
@@ -22,20 +21,26 @@ const BowTie: PatternDefinition = {
   ): string[] => {
     const blockIndex = opts.blockIndex ?? 0;
 
-    if (fabricColors.length < 2) {
-      return [fabricColors[0], fabricColors[0]];
+    if (fabricColors.length < 3) {
+      return [
+        fabricColors[0],
+        fabricColors[1] || fabricColors[0],
+        fabricColors[1] || fabricColors[0]
+      ];
     }
     
-    if (fabricColors.length === 2) {
-      return [fabricColors[0], fabricColors[1]];
+    if (fabricColors.length === 3) {
+      // 3 fabrics: tie + background + knot
+      return [fabricColors[0], fabricColors[1], fabricColors[2]];
     }
     
-    // 3+ fabrics: first is always background, rotate through rest for bow tie
+    // 4+ fabrics: background + knot consistent, rotate tie colors for scrappy look
     const background = fabricColors[0];
-    const featureOptions = fabricColors.slice(1);
-    const feature = featureOptions[blockIndex % featureOptions.length];
+    const knot = fabricColors[fabricColors.length - 1];
+    const tieOptions = fabricColors.slice(1, -1);
+    const tie = tieOptions[blockIndex % tieOptions.length];
     
-    return [background, feature];
+    return [tie, background, knot];
   }
 };
 

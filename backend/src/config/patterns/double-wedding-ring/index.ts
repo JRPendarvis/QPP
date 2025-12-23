@@ -7,29 +7,28 @@ const DoubleWeddingRing: PatternDefinition = {
   name: 'Double Wedding Ring',
   template: DOUBLE_WEDDING_RING_TEMPLATE,
   prompt: DOUBLE_WEDDING_RING_PROMPT,
-  minColors: 2,
-  maxColors: 8,
+  minColors: 3,
+  maxColors: 4,
   
   /**
-   * Double Wedding Ring uses multiple colors in interlocking rings
-   * With multiple fabrics, creates "scrappy" look by rotating the secondary colors
-   * COLOR1 stays consistent; other colors rotate per block
+   * Double Wedding Ring has interlocking curved rings
+   * Colors must stay CONSISTENT for the rings to interlock properly
+   * COLOR1 = background, COLOR2 = ring arcs, COLOR3 = melon connectors
    */
-  getColors: (fabricColors: string[], blockIndex: number = 0): string[] => {
-    if (fabricColors.length < 2) {
-      return [fabricColors[0], fabricColors[0]];
+  getColors: (
+    fabricColors: string[],
+    opts: { blockIndex?: number; row?: number; col?: number } = {}
+  ): string[] => {
+    if (fabricColors.length < 3) {
+      return [
+        fabricColors[0],
+        fabricColors[1] || fabricColors[0],
+        fabricColors[1] || fabricColors[0]
+      ];
     }
     
-    if (fabricColors.length === 2) {
-      return [fabricColors[0], fabricColors[1]];
-    }
-    
-    // 3+ fabrics: first is always primary, rotate through rest for alternating squares
-    const primary = fabricColors[0];
-    const secondaryOptions = fabricColors.slice(1);
-    const secondary = secondaryOptions[blockIndex % secondaryOptions.length];
-    
-    return [primary, secondary];
+    // Consistent colors every block - rings must align for interlocking effect
+    return [fabricColors[0], fabricColors[1], fabricColors[2]];
   }
 };
 

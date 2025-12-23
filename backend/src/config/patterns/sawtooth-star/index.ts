@@ -1,19 +1,19 @@
 import { PatternDefinition } from '../types';
-import { OHIO_STAR_TEMPLATE } from './template';
-import { OHIO_STAR_PROMPT } from './prompt';
+import { SAWTOOTH_STAR_TEMPLATE } from './template';
+import { SAWTOOTH_STAR_PROMPT } from './prompt';
 
-const OhioStar: PatternDefinition = {
-  id: 'ohio-star',
-  name: 'Ohio Star',
-  template: OHIO_STAR_TEMPLATE,
-  prompt: OHIO_STAR_PROMPT,
+const SawtoothStar: PatternDefinition = {
+  id: 'sawtooth-star',
+  name: 'Sawtooth Star',
+  template: SAWTOOTH_STAR_TEMPLATE,
+  prompt: SAWTOOTH_STAR_PROMPT,
   minColors: 2,
   maxColors: 8,
   
   /**
-   * Ohio Star has background, quarter-square triangle points, and center
-   * COLOR1 = background (corners), COLOR2 = star points, COLOR3 = center
+   * Sawtooth Star has background, star points, and center
    * With multiple fabrics, creates "scrappy" stars by rotating point colors
+   * COLOR1 = background (corners + behind points), COLOR2 = star points, COLOR3 = center
    */
   getColors: (
     fabricColors: string[],
@@ -35,14 +35,14 @@ const OhioStar: PatternDefinition = {
       return [fabricColors[0], fabricColors[1], fabricColors[2]];
     }
     
-    // 4+ fabrics: background consistent, rotate star point colors, center from last
+    // 4+ fabrics: background consistent, rotate star point colors, center from remaining
     const background = fabricColors[0];
-    const pointOptions = fabricColors.slice(1, -1);
-    const center = fabricColors[fabricColors.length - 1];
+    const pointOptions = fabricColors.slice(1, -1); // All except first and last
+    const center = fabricColors[fabricColors.length - 1]; // Last color for center
     const points = pointOptions[blockIndex % pointOptions.length];
     
     return [background, points, center];
   }
 };
 
-export default OhioStar;
+export default SawtoothStar;

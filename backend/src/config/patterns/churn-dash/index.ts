@@ -2,7 +2,7 @@ import { PatternDefinition } from '../types';
 import { CHURN_DASH_TEMPLATE } from './template';
 import { CHURN_DASH_PROMPT } from './prompt';
 
-export const ChurnDash: PatternDefinition = {
+const ChurnDash: PatternDefinition = {
   id: 'churn-dash',
   name: 'Churn Dash',
   template: CHURN_DASH_TEMPLATE,
@@ -15,14 +15,17 @@ export const ChurnDash: PatternDefinition = {
    * With multiple fabrics, creates "scrappy" look by rotating feature colors
    * Background (COLOR1) stays consistent; feature (COLOR2) rotates per block
    */
-  getColors: (fabricColors: string[], blockIndex: number = 0): string[] => {
+  getColors: (
+    fabricColors: string[],
+    opts: { blockIndex?: number; row?: number; col?: number } = {}
+  ): string[] => {
+    const { blockIndex = 0 } = opts;
+
     if (fabricColors.length < 2) {
-      // Fallback: duplicate single color
       return [fabricColors[0], fabricColors[0]];
     }
     
     if (fabricColors.length === 2) {
-      // Exactly 2 fabrics: straightforward assignment
       return [fabricColors[0], fabricColors[1]];
     }
     

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { AxiosError } from 'axios';
 import api from '@/lib/api';
 
 interface QuiltPattern {
@@ -103,9 +104,10 @@ export function usePatternGeneration() {
       } else {
         setError(response.data.message || 'Failed to generate pattern');
       }
-    } catch (err: any) {
-      console.error('Pattern generation error:', err);
-      setError(err.response?.data?.message || 'Failed to generate pattern. Please try again.');
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
+      console.error('Pattern generation error:', error);
+      setError(error.response?.data?.message || 'Failed to generate pattern. Please try again.');
     } finally {
       setGenerating(false);
     }
