@@ -3,19 +3,17 @@ import { PrismaClient } from '@prisma/client';
 import { ClaudeService } from '../services/claudeService';
 import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
 import { PDFService } from '../services/pdfService';
-import { QUILT_PATTERNS_BY_SKILL } from '../config/quiltPatterns';
+import { getAllPatterns } from '../config/patterns';
+import { getPatternsForSkillLevel, getQuiltPattern } from '../config/quiltPatterns';
 
 const prisma = new PrismaClient();
 
-// Valid pattern IDs for validation
-const VALID_PATTERN_IDS = [
-  'auto',
-  'simple-squares', 'strip-quilt', 'checkerboard', 'rail-fence',
-  'four-patch', 'nine-patch', 'half-square-triangles', 'hourglass', 'bow-tie',
-  'flying-geese', 'pinwheel', 'log-cabin', 'sawtooth-star', 'ohio-star', 'churn-dash',
-  'lone-star', 'mariners-compass', 'new-york-beauty', 'storm-at-sea', 'drunkards-path',
-  'feathered-star', 'grandmothers-flower-garden', 'double-wedding-ring', 'pickle-dish', 'complex-medallion',
-];
+/**
+ * Get valid pattern IDs from the pattern registry
+ */
+function getValidPatternIds(): string[] {
+  return ['auto', ...getAllPatterns().map(p => p.id)];
+}
 
 export class PatternController {
   private claudeService: ClaudeService;
@@ -74,7 +72,8 @@ export class PatternController {
       }
 
       // Validate selectedPattern if provided
-      const patternToUse = selectedPattern && VALID_PATTERN_IDS.includes(selectedPattern) 
+      const validPatternIds = getValidPatternIds();
+      const patternToUse = selectedPattern && validPatternIds.includes(selectedPattern) 
         ? selectedPattern 
         : 'auto';
 
@@ -336,16 +335,20 @@ export class PatternController {
   // GET /api/patterns/list - Get all available patterns with metadata
   async listPatterns(req: Request, res: Response) {
     try {
-      // Flatten all patterns from all skill levels
-      const allPatterns = Object.entries(QUILT_PATTERNS_BY_SKILL).flatMap(([skillLevel, patterns]) =>
-        patterns.map(pattern => ({
-          id: pattern.id,
-          name: pattern.name,
-          skillLevel: pattern.skillLevel,
-          description: pattern.description,
-          recommendedFabricCount: pattern.recommendedFabricCount || null
-        }))
-      );
+      // Get all patterns from the new pattern system
+      const allPatterns = getAllPatterns().map(patternDef => {
+        const quiltPattern = getQuiltPattern(patternDef.id);
+        return {
+          id: patternDef.id,
+          name: patternDef.name,
+          skillLevel: quiltPattern?.skillLevel || 'intermediate',
+          description: quiltPattern?.description || '',
+          recommendedFabricCount: quiltPattern?.recommendedFabricCount || null,
+          minColors: patternDef.minColors,
+          maxColors: patternDef.maxColors,
+          allowRotation: patternDef.allowRotation ?? true,
+        };
+      });
 
       res.json({
         success: true,

@@ -1,8 +1,10 @@
 /**
  * SVG Templates for Quilt Patterns
- * Each template is a 100x100 unit block that uses COLOR1, COLOR2, and COLOR3 placeholders
+ * Each template is a 100x100 unit block that uses COLOR1, COLOR2, etc. placeholders
  * These placeholders are replaced with actual fabric colors during generation
- * The templates are repeated in a 4x4 grid to create the final quilt
+ * 
+ * NOTE: This file provides backward compatibility. The primary template source
+ * is now PatternDefinition.getTemplate() in each pattern module.
  */
 
 import { SIMPLE_SQUARES } from './patterns/simple-squares/template';
@@ -31,17 +33,50 @@ import { GRANDMOTHERS_FLOWER_GARDEN } from './patterns/grandmothers-flower-garde
 import { PICKLE_DISH } from './patterns/pickle-dish/template';
 import { COMPLEX_MEDALLION } from './patterns/complex-medallion/template';
 
-console.log('🔍 CHURN_DASH import check:', typeof CHURN_DASH, CHURN_DASH ? 'has content' : 'UNDEFINED');
+/**
+ * Templates indexed by pattern ID (preferred)
+ */
+export const SVG_TEMPLATES_BY_ID: Record<string, string> = {
+  'simple-squares': SIMPLE_SQUARES,
+  'checkerboard': CHECKERBOARD,
+  'four-patch': FOUR_PATCH,
+  'nine-patch': NINE_PATCH,
+  'pinwheel': PINWHEEL,
+  'half-square-triangles': HALF_SQUARE_TRIANGLES,
+  'flying-geese': FLYING_GEESE,
+  'hourglass': HOURGLASS,
+  'rail-fence': RAIL_FENCE,
+  'strip-quilt': STRIP_QUILT,
+  'log-cabin': LOG_CABIN,
+  'bow-tie': BOW_TIE,
+  'ohio-star': OHIO_STAR,
+  'sawtooth-star': SAWTOOTH_STAR,
+  'churn-dash': CHURN_DASH,
+  'lone-star': LONE_STAR,
+  'new-york-beauty': NEW_YORK_BEAUTY,
+  'mariners-compass': MARINERS_COMPASS,
+  'storm-at-sea': STORM_AT_SEA,
+  'double-wedding-ring': DOUBLE_WEDDING_RING,
+  'drunkards-path': DRUNKARDS_PATH,
+  'feathered-star': FEATHERED_STAR,
+  'grandmothers-flower-garden': GRANDMOTHERS_FLOWER_GARDEN,
+  'pickle-dish': PICKLE_DISH,
+  'complex-medallion': COMPLEX_MEDALLION,
+};
 
+/**
+ * Templates indexed by display name (backward compatibility)
+ * @deprecated Use SVG_TEMPLATES_BY_ID or PatternDefinition.getTemplate() instead
+ */
 export const SVG_TEMPLATES: Record<string, string> = {
   'Simple Squares': SIMPLE_SQUARES,
-  Checkerboard: CHECKERBOARD,
+  'Checkerboard': CHECKERBOARD,
   'Four Patch': FOUR_PATCH,
   'Nine Patch': NINE_PATCH,
-  Pinwheel: PINWHEEL,
+  'Pinwheel': PINWHEEL,
   'Half-Square Triangles': HALF_SQUARE_TRIANGLES,
   'Flying Geese': FLYING_GEESE,
-  Hourglass: HOURGLASS,
+  'Hourglass': HOURGLASS,
   'Rail Fence': RAIL_FENCE,
   'Strip Quilt': STRIP_QUILT,
   'Log Cabin': LOG_CABIN,
@@ -60,3 +95,10 @@ export const SVG_TEMPLATES: Record<string, string> = {
   'Pickle Dish': PICKLE_DISH,
   'Complex Medallion': COMPLEX_MEDALLION,
 };
+
+/**
+ * Get template by pattern ID or display name
+ */
+export function getTemplate(patternIdOrName: string): string | undefined {
+  return SVG_TEMPLATES_BY_ID[patternIdOrName] || SVG_TEMPLATES[patternIdOrName];
+}
