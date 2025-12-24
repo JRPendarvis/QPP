@@ -170,14 +170,32 @@ export class ClaudeService {
     const displayPatternName = PatternFormatter.extractDisplayName(parsedResponse.patternName, patternForSvg);
     console.log(`📛 Pattern name: ${displayPatternName} (SVG template: ${patternForSvg})`);
     
-    // Force the correct difficulty level
-    const formattedDifficulty = skillLevel.replace('_', ' ');
-    
+    // Look up the actual quilt difficulty from the pattern definition
+    let actualDifficulty = 'Unknown';
+    try {
+      // Import pattern registry dynamically to avoid circular deps
+      const { getPattern } = require('../config/patterns');
+      const patternDef = getPattern(patternForSvg);
+      if (patternDef && patternDef.prompt && patternDef.prompt.characteristics) {
+        // Try to extract difficulty from characteristics (first line, e.g., 'Ideal beginner pattern')
+        const lines = patternDef.prompt.characteristics.split('\n');
+        const diffLine = lines.find(l => l.toLowerCase().includes('beginner') || l.toLowerCase().includes('intermediate') || l.toLowerCase().includes('advanced') || l.toLowerCase().includes('expert'));
+        if (diffLine) {
+          if (diffLine.toLowerCase().includes('beginner')) actualDifficulty = 'Beginner';
+          else if (diffLine.toLowerCase().includes('intermediate')) actualDifficulty = 'Intermediate';
+          else if (diffLine.toLowerCase().includes('advanced')) actualDifficulty = 'Advanced';
+          else if (diffLine.toLowerCase().includes('expert')) actualDifficulty = 'Expert';
+        }
+      }
+    } catch (err) {
+      console.warn('Could not determine quilt difficulty:', err);
+    }
+
     const pattern: QuiltPattern = {
       patternName: displayPatternName,
       description: parsedResponse.description || `A beautiful ${patternForSvg} pattern`,
       fabricLayout: parsedResponse.fabricLayout || 'Arranged in a 4x4 grid',
-      difficulty: formattedDifficulty,
+      difficulty: actualDifficulty,
       estimatedSize: parsedResponse.estimatedSize || '60x72 inches',
       instructions: this.addDisclaimerToInstructions(this.validateInstructions(parsedResponse.instructions)),
       visualSvg: visualSvg,
