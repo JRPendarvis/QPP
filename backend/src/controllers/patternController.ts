@@ -4,7 +4,7 @@ import { ClaudeService } from '../services/claudeService';
 import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
 import { PDFService } from '../services/pdfService';
 import { getAllPatterns } from '../config/patterns';
-import { getPatternsForSkillLevel, getQuiltPattern } from '../config/quiltPatterns';
+import { getQuiltPattern } from '../config/quiltPatterns';
 
 const prisma = new PrismaClient();
 
@@ -13,6 +13,39 @@ const prisma = new PrismaClient();
  */
 function getValidPatternIds(): string[] {
   return ['auto', ...getAllPatterns().map(p => p.id)];
+}
+
+/**
+ * Normalize pattern input to ID format
+ * Handles both IDs ('strip-quilt') and display names ('Strip Quilt')
+ */
+function normalizePatternId(input: string | undefined): string {
+  if (!input || input === 'auto') return 'auto';
+  
+  // Already in ID format?
+  const validIds = getValidPatternIds();
+  if (validIds.includes(input)) {
+    return input;
+  }
+  
+  // Try converting display name to ID
+  // 'Strip Quilt' -> 'strip-quilt'
+  // "Drunkard's Path" -> 'drunkards-path'
+  // "Grandmother's Flower Garden" -> 'grandmothers-flower-garden'
+  const normalizedId = input
+    .toLowerCase()
+    .replace(/['']/g, '')      // Remove apostrophes
+    .replace(/\s+/g, '-')      // Spaces to dashes
+    .replace(/--+/g, '-');     // Collapse multiple dashes
+  
+  if (validIds.includes(normalizedId)) {
+    console.log(`📋 Normalized pattern: "${input}" -> "${normalizedId}"`);
+    return normalizedId;
+  }
+  
+  // Still not found? Log warning and fall back
+  console.warn(`⚠️ Unknown pattern: "${input}" (normalized: "${normalizedId}") - falling back to auto`);
+  return 'auto';
 }
 
 export class PatternController {
@@ -41,6 +74,7 @@ export class PatternController {
 
       console.log('📸 Received image types:', imageTypes);
       console.log('📸 Images count:', images.length, 'Types count:', imageTypes.length);
+      console.log('📋 Raw selectedPattern from frontend:', selectedPattern);
 
       // Validation
       if (!images || !Array.isArray(images) || images.length < 2 || images.length > 8) {
@@ -71,11 +105,9 @@ export class PatternController {
         });
       }
 
-      // Validate selectedPattern if provided
-      const validPatternIds = getValidPatternIds();
-      const patternToUse = selectedPattern && validPatternIds.includes(selectedPattern) 
-        ? selectedPattern 
-        : 'auto';
+      // ✅ FIX: Normalize pattern input (handles both IDs and display names)
+      const patternToUse = normalizePatternId(selectedPattern);
+      console.log(`📋 Pattern to use: "${patternToUse}" (from: "${selectedPattern}")`);
 
       // Get user with subscription info
       const user = await prisma.user.findUnique({
@@ -133,7 +165,7 @@ export class PatternController {
         }
       }
 
-      // Generate pattern using Claude - with validated selectedPattern
+      // Generate pattern using Claude - with normalized pattern ID
       const pattern = await this.claudeService.generateQuiltPattern(
         images,
         imageTypes,
@@ -267,7 +299,7 @@ export class PatternController {
         });
       }
 
-      // ✅ FIX: Only count against limit if this is a FIRST download
+      // Only count against limit if this is a FIRST download
       const isFirstDownload = !pattern.downloaded;
 
       if (isFirstDownload) {
@@ -292,7 +324,7 @@ export class PatternController {
         user.name || user.email
       );
 
-      // ✅ FIX: Only increment counter and mark downloaded on FIRST download
+      // Only increment counter and mark downloaded on FIRST download
       if (isFirstDownload) {
         await prisma.$transaction(async (tx) => {
           // Increment download counter
@@ -335,7 +367,7 @@ export class PatternController {
   // GET /api/patterns/list - Get all available patterns with metadata
   async listPatterns(req: Request, res: Response) {
     try {
-      // Get all patterns from the new pattern system
+      // Get all patterns from the pattern system
       const allPatterns = getAllPatterns().map(patternDef => {
         const quiltPattern = getQuiltPattern(patternDef.id);
         return {

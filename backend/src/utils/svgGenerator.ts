@@ -1,4 +1,4 @@
-import { SVG_TEMPLATES } from '../config/quiltTemplates';
+import { SVG_TEMPLATES, SVG_TEMPLATES_BY_ID } from '../config/quiltTemplates';
 import { getPattern } from '../config/patterns';
 
 /**
@@ -12,13 +12,26 @@ export class SvgGenerator {
     console.log('═══════════════════════════════════════════════════');
     console.log('🎨 SVG TEMPLATE GENERATION:');
     console.log(`  Requested Pattern: "${patternType}"`);
-    console.log(`  Available Templates: ${Object.keys(SVG_TEMPLATES).join(', ')}`);
     
     const { template, templateUsed, patternDef } = this.findTemplate(patternType);
     const normalizedColors = this.normalizeColors(colors);
     const blocks = this.generateBlocks(template, normalizedColors, patternDef);
     
     return this.wrapSvg(blocks);
+  }
+
+  /**
+   * Convert display name to pattern ID
+   * "Churn Dash" -> "churn-dash"
+   * "Strip Quilt" -> "strip-quilt"
+   * "Drunkard's Path" -> "drunkards-path"
+   */
+  private static toPatternId(patternType: string): string {
+    return patternType
+      .toLowerCase()
+      .replace(/['']/g, '')     // Remove apostrophes
+      .replace(/\s+/g, '-')     // Spaces to dashes
+      .replace(/--+/g, '-');    // Collapse multiple dashes
   }
 
   /**
@@ -30,19 +43,41 @@ export class SvgGenerator {
     templateUsed: string; 
     patternDef: ReturnType<typeof getPattern> | undefined;
   } {
-    let template = SVG_TEMPLATES[patternType];
-    let templateUsed = patternType;
-    
-    // Try to get PatternDefinition for new system
+    // Convert to pattern ID
     const patternId = this.toPatternId(patternType);
+    console.log(`  Pattern ID: "${patternId}" (from "${patternType}")`);
+    
+    // Try to get PatternDefinition from new system
     const patternDef = getPattern(patternId);
     
     if (patternDef) {
-      console.log(`  ✅ PatternDefinition found: "${patternDef.id}" (new system)`);
+      console.log(`  ✅ PatternDefinition found: "${patternDef.id}"`);
+      console.log(`     - allowRotation: ${patternDef.allowRotation}`);
+      console.log(`     - minColors: ${patternDef.minColors}, maxColors: ${patternDef.maxColors}`);
+      console.log(`     - hasGetColors: ${!!patternDef.getColors}`);
+      console.log(`     - hasGetTemplate: ${!!patternDef.getTemplate}`);
+    } else {
+      console.log(`  ⚠️ PatternDefinition NOT found for ID: "${patternId}"`);
     }
-    
-    if (!template) {
-      // Try to find a close match
+
+    // Try to find template (first by ID, then by display name)
+    let template: string | undefined;
+    let templateUsed: string;
+
+    // 1. Try SVG_TEMPLATES_BY_ID first (if it exists)
+    if (typeof SVG_TEMPLATES_BY_ID !== 'undefined' && SVG_TEMPLATES_BY_ID[patternId]) {
+      template = SVG_TEMPLATES_BY_ID[patternId];
+      templateUsed = patternId;
+      console.log(`  ✅ Template found by ID: "${patternId}"`);
+    }
+    // 2. Try SVG_TEMPLATES by display name
+    else if (SVG_TEMPLATES[patternType]) {
+      template = SVG_TEMPLATES[patternType];
+      templateUsed = patternType;
+      console.log(`  ✅ Template found by display name: "${patternType}"`);
+    }
+    // 3. Try to find a close match
+    else {
       const templateKeys = Object.keys(SVG_TEMPLATES);
       const closeMatch = templateKeys.find(key => 
         key.toLowerCase().includes(patternType.toLowerCase()) ||
@@ -58,23 +93,13 @@ export class SvgGenerator {
         templateUsed = 'Simple Squares';
         console.log(`  ❌ No template found! Using fallback: "Simple Squares"`);
       }
-    } else {
-      console.log(`  ✅ Exact template match found: "${patternType}"`);
     }
     
     console.log(`  Template Being Used: "${templateUsed}"`);
-    console.log(`  Template Content Preview: ${template.substring(0, 150)}...`);
+    console.log(`  Template Preview: ${template.substring(0, 100)}...`);
     console.log('═══════════════════════════════════════════════════');
     
     return { template, templateUsed, patternDef };
-  }
-
-  /**
-   * Convert display name to pattern ID
-   * "Churn Dash" -> "churn-dash"
-   */
-  private static toPatternId(patternType: string): string {
-    return patternType.toLowerCase().replace(/\s+/g, '-').replace(/'/g, '');
   }
 
   /**
@@ -90,15 +115,23 @@ export class SvgGenerator {
   /**
    * Generate 3x4 grid of pattern blocks (3 columns, 4 rows)
    */
-private static generateBlocks(
+  private static generateBlocks(
     template: string, 
     colors: string[],
     patternDef?: ReturnType<typeof getPattern>
   ): string {
     let blocks = '';
     
-    // Determine if rotation is allowed for this pattern (default to true for legacy patterns)
+    // Determine if rotation is allowed for this pattern
+    // Default to true for legacy patterns without PatternDefinition
     const canRotate = patternDef?.allowRotation ?? true;
+    
+    console.log(`🔄 Rotation for this pattern: ${canRotate ? 'ENABLED' : 'DISABLED'}`);
+    if (patternDef) {
+      console.log(`   (from PatternDefinition: ${patternDef.id})`);
+    } else {
+      console.log(`   (using default: true - no PatternDefinition found)`);
+    }
     
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 3; col++) {
@@ -110,13 +143,13 @@ private static generateBlocks(
         let blockColors: string[];
         if (patternDef?.getColors) {
           blockColors = patternDef.getColors(colors, { blockIndex, row, col });
-          console.log(`  Block ${blockIndex} (row=${row}, col=${col}): ${blockColors.join(', ')} (via ${patternDef.id}.getColors)`);
         } else {
-          blockColors = [
-            colors[0 % colors.length],
-            colors[1 % colors.length],
-            colors[2 % colors.length],
-          ];
+          // Default: use first 3 colors or cycle through available
+          blockColors = colors.slice(0, Math.max(3, colors.length));
+          // Pad with existing colors if needed
+          while (blockColors.length < 8) {
+            blockColors.push(colors[blockColors.length % colors.length]);
+          }
         }
 
         // Use dynamic template if available
@@ -124,22 +157,25 @@ private static generateBlocks(
           ? patternDef.getTemplate(blockColors)
           : template;
           
-        // Always replace up to 8 COLORn placeholders for robustness
+        // Replace up to 8 COLORn placeholders
         for (let i = 0; i < 8; i++) {
           const colorPlaceholder = new RegExp(`COLOR${i + 1}`, 'g');
-          blockTemplate = blockTemplate.replace(colorPlaceholder, blockColors[i] || colors[i] || colors[0]);
+          blockTemplate = blockTemplate.replace(colorPlaceholder, blockColors[i] || colors[i % colors.length] || colors[0]);
         }
 
         // Remove any nested <svg> tags from block templates
         blockTemplate = blockTemplate.replace(/<svg[^>]*>/gi, '').replace(/<\/svg>/gi, '');
 
-        // Add subtle stroke for definition
-        blockTemplate = blockTemplate.replace(/<rect /g, '<rect stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
-                                       .replace(/<polygon /g, '<polygon stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
-                                       .replace(/<path /g, '<path stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
-                                       .replace(/<circle /g, '<circle stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ');
+        // Add subtle stroke for definition (if not already present)
+        if (!blockTemplate.includes('stroke=')) {
+          blockTemplate = blockTemplate
+            .replace(/<rect /g, '<rect stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
+            .replace(/<polygon /g, '<polygon stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
+            .replace(/<path /g, '<path stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
+            .replace(/<circle /g, '<circle stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ');
+        }
 
-        // Apply rotation around block center (50, 50) only if pattern allows it
+        // Apply rotation around block center (50, 50) ONLY if pattern allows it
         let transform: string;
         if (canRotate) {
           const rotations = [0, 90, 180, 270];
@@ -148,6 +184,7 @@ private static generateBlocks(
             ? `translate(${x},${y}) rotate(${rotation} 50 50)`
             : `translate(${x},${y})`;
         } else {
+          // NO ROTATION - just translate to position
           transform = `translate(${x},${y})`;
         }
 
