@@ -179,7 +179,7 @@ export class ClaudeService {
       if (patternDef && patternDef.prompt && patternDef.prompt.characteristics) {
         // Try to extract difficulty from characteristics (first line, e.g., 'Ideal beginner pattern')
         const lines = patternDef.prompt.characteristics.split('\n');
-        const diffLine = lines.find(l => l.toLowerCase().includes('beginner') || l.toLowerCase().includes('intermediate') || l.toLowerCase().includes('advanced') || l.toLowerCase().includes('expert'));
+        const diffLine = lines.find((l: string) => l.toLowerCase().includes('beginner') || l.toLowerCase().includes('intermediate') || l.toLowerCase().includes('advanced') || l.toLowerCase().includes('expert'));
         if (diffLine) {
           if (diffLine.toLowerCase().includes('beginner')) actualDifficulty = 'Beginner';
           else if (diffLine.toLowerCase().includes('intermediate')) actualDifficulty = 'Intermediate';
