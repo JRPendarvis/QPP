@@ -9,7 +9,7 @@ const HalfSquareTriangles: PatternDefinition = {
   prompt: HALF_SQUARE_TRIANGLES_PROMPT,
   minColors: 2,
   maxColors: 8,
-  
+   allowRotation: false,
   /**
    * Half Square Triangle (HST) is a square divided diagonally into 2 triangles
    * The most versatile quilting unit - basis for many patterns

@@ -90,48 +90,45 @@ export class SvgGenerator {
   /**
    * Generate 3x4 grid of pattern blocks (3 columns, 4 rows)
    */
-  private static generateBlocks(
+private static generateBlocks(
     template: string, 
     colors: string[],
     patternDef?: ReturnType<typeof getPattern>
   ): string {
     let blocks = '';
     
+    // Determine if rotation is allowed for this pattern (default to true for legacy patterns)
+    const canRotate = patternDef?.allowRotation ?? true;
+    
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 3; col++) {
         const blockIndex = row * 3 + col;
         const x = col * 100;
         const y = row * 100;
-        
+
         // Get colors for this block
         let blockColors: string[];
-        
         if (patternDef?.getColors) {
-          // New system: pattern controls color assignment
-          // Pass all position info so patterns can use what they need
           blockColors = patternDef.getColors(colors, { blockIndex, row, col });
           console.log(`  Block ${blockIndex} (row=${row}, col=${col}): ${blockColors.join(', ')} (via ${patternDef.id}.getColors)`);
         } else {
-          // Legacy: static color assignment
           blockColors = [
             colors[0 % colors.length],
             colors[1 % colors.length],
             colors[2 % colors.length],
           ];
         }
-        
-        // Random rotation (0, 90, 180, or 270 degrees) for variety
-        const rotations = [0, 90, 180, 270];
-        const rotation = rotations[Math.floor(Math.random() * rotations.length)];
-        
-        // Replace color placeholders in template
-        let blockTemplate = template
-          .replace(/COLOR1/g, blockColors[0] || colors[0])
-          .replace(/COLOR2/g, blockColors[1] || colors[1] || colors[0])
-          .replace(/COLOR3/g, blockColors[2] || colors[2] || colors[0])
-          .replace(/COLOR4/g, blockColors[3] || colors[3] || colors[0])
-          .replace(/COLOR5/g, blockColors[4] || colors[4] || colors[0])
-          .replace(/COLOR6/g, blockColors[5] || colors[5] || colors[0]);
+
+        // Use dynamic template if available
+        let blockTemplate = (patternDef?.getTemplate)
+          ? patternDef.getTemplate(blockColors)
+          : template;
+          
+        // Always replace up to 8 COLORn placeholders for robustness
+        for (let i = 0; i < 8; i++) {
+          const colorPlaceholder = new RegExp(`COLOR${i + 1}`, 'g');
+          blockTemplate = blockTemplate.replace(colorPlaceholder, blockColors[i] || colors[i] || colors[0]);
+        }
 
         // Remove any nested <svg> tags from block templates
         blockTemplate = blockTemplate.replace(/<svg[^>]*>/gi, '').replace(/<\/svg>/gi, '');
@@ -142,15 +139,21 @@ export class SvgGenerator {
                                        .replace(/<path /g, '<path stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
                                        .replace(/<circle /g, '<circle stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ');
 
-        // Apply rotation around block center (50, 50)
-        const transform = rotation > 0 
-          ? `translate(${x},${y}) rotate(${rotation} 50 50)`
-          : `translate(${x},${y})`;
+        // Apply rotation around block center (50, 50) only if pattern allows it
+        let transform: string;
+        if (canRotate) {
+          const rotations = [0, 90, 180, 270];
+          const rotation = rotations[Math.floor(Math.random() * rotations.length)];
+          transform = rotation > 0 
+            ? `translate(${x},${y}) rotate(${rotation} 50 50)`
+            : `translate(${x},${y})`;
+        } else {
+          transform = `translate(${x},${y})`;
+        }
 
         blocks += `    <g transform="${transform}">\n      ${blockTemplate.trim()}\n    </g>\n`;
       }
     }
-    
     return blocks;
   }
 

@@ -9,7 +9,7 @@ const FourPatch: PatternDefinition = {
   prompt: FOUR_PATCH_PROMPT,
   minColors: 2,
   maxColors: 8,
-  
+   allowRotation: true,
   /**
    * Four Patch is a 2x2 grid of squares
    * COLOR1 = diagonal pair (top-left, bottom-right)

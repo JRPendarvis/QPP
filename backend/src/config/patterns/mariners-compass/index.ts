@@ -9,7 +9,7 @@ const MarinersCompass: PatternDefinition = {
   prompt: MARINERS_COMPASS_PROMPT,
   minColors: 3,
   maxColors: 4,
-  
+   allowRotation: false,
   /**
    * Mariner's Compass has radiating points like a compass rose
    * Colors must stay CONSISTENT for the precision star effect

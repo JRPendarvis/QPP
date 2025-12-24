@@ -9,7 +9,7 @@ const Checkerboard: PatternDefinition = {
   prompt: CHECKERBOARD_PROMPT,
   minColors: 2,
   maxColors: 2,
-  
+  allowRotation: true,
   /**
    * Checkerboard alternates colors based on position
    * Uses row + col to determine color - creates classic checkerboard effect

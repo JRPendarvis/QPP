@@ -9,7 +9,7 @@ const SawtoothStar: PatternDefinition = {
   prompt: SAWTOOTH_STAR_PROMPT,
   minColors: 2,
   maxColors: 8,
-  
+   allowRotation: true,
   /**
    * Sawtooth Star has background, star points, and center
    * With multiple fabrics, creates "scrappy" stars by rotating point colors

@@ -9,7 +9,7 @@ const PickleDish: PatternDefinition = {
   prompt: PICKLE_DISH_PROMPT,
   minColors: 3,
   maxColors: 4,
-  
+   allowRotation: false,
   /**
    * Pickle Dish has curved arcs with pointed "teeth" creating an interlocking effect
    * Colors must stay CONSISTENT across all blocks for the curves to connect

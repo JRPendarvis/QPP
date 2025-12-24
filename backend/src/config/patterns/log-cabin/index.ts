@@ -9,7 +9,7 @@ const LogCabin: PatternDefinition = {
   prompt: LOG_CABIN_PROMPT,
   minColors: 3,
   maxColors: 4,
-  
+   allowRotation: false,
   /**
    * Log Cabin has strips/logs built around a center square (hearth)
    * Light strips on two sides, dark strips on two sides

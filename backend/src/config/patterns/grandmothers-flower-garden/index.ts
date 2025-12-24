@@ -9,7 +9,7 @@ const GrandmothersFlowerGarden: PatternDefinition = {
   prompt: GRANDMOTHERS_FLOWER_GARDEN_PROMPT,
   minColors: 3,
   maxColors: 4,
-  
+   allowRotation: false,
   /**
    * Grandmother's Flower Garden uses hexagons to create flower clusters
    * Center hexagon (flower center) + ring of petals + pathway/background

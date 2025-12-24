@@ -9,7 +9,7 @@ const SimpleSquares: PatternDefinition = {
   prompt: SIMPLE_SQUARES_PROMPT,
   minColors: 1,
   maxColors: 8,
-  
+   allowRotation: true,
   /**
    * Simple Squares - each block is a single solid square
    * Rotates through all available colors block by block

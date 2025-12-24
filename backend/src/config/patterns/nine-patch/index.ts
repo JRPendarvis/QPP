@@ -9,7 +9,7 @@ const NinePatch: PatternDefinition = {
   prompt: NINE_PATCH_PROMPT,
   minColors: 2,
   maxColors: 8,
-  
+   allowRotation: true,
   /**
    * Nine Patch is a 3x3 grid of squares
    * Traditional: corners + center = COLOR1, cross/plus = COLOR2

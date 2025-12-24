@@ -9,6 +9,7 @@ const BowTie: PatternDefinition = {
   prompt: BOW_TIE_PROMPT,
   minColors: 3,
   maxColors: 8,
+  allowRotation: true,
   
   /**
    * Bow Tie has tie squares, background squares, and center knot

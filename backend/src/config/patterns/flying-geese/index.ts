@@ -1,5 +1,13 @@
 import { PatternDefinition } from '../types';
-import { FLYING_GEESE_TEMPLATE } from './template';
+import { 
+  FLYING_GEESE_TEMPLATE, 
+  FLYING_GEESE_3, 
+  FLYING_GEESE_4, 
+  FLYING_GEESE_5, 
+  FLYING_GEESE_6, 
+  FLYING_GEESE_7, 
+  FLYING_GEESE_8 
+} from './template';
 import { FLYING_GEESE_PROMPT } from './prompt';
 
 const FlyingGeese: PatternDefinition = {
@@ -9,33 +17,25 @@ const FlyingGeese: PatternDefinition = {
   prompt: FLYING_GEESE_PROMPT,
   minColors: 2,
   maxColors: 8,
+  allowRotation: false,
   
-  /**
-   * Flying Geese has a large center triangle (goose) flanked by two small triangles (sky)
-   * COLOR1 = sky/background triangles on sides
-   * COLOR2 = goose triangle (the "flying" element)
-   * With multiple fabrics, creates "scrappy" flock by rotating goose colors
-   */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    const blockIndex = opts.blockIndex ?? 0;
-
-    if (fabricColors.length < 2) {
-      return [fabricColors[0], fabricColors[0]];
-    }
-    
-    if (fabricColors.length === 2) {
-      return [fabricColors[0], fabricColors[1]];
-    }
-    
-    // 3+ fabrics: sky consistent, rotate goose colors for scrappy flock
-    const sky = fabricColors[0];
-    const gooseOptions = fabricColors.slice(1);
-    const goose = gooseOptions[blockIndex % gooseOptions.length];
-    
-    return [sky, goose];
+    // Pass through all colors — template handles goose/sky assignment
+    return fabricColors;
+  },
+  
+  getTemplate: (colors: string[]): string => {
+    const count = colors.length;
+    if (count <= 2) return FLYING_GEESE_TEMPLATE;
+    if (count === 3) return FLYING_GEESE_3;
+    if (count === 4) return FLYING_GEESE_4;
+    if (count === 5) return FLYING_GEESE_5;
+    if (count === 6) return FLYING_GEESE_6;
+    if (count === 7) return FLYING_GEESE_7;
+    return FLYING_GEESE_8;
   }
 };
 

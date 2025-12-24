@@ -9,7 +9,7 @@ const Pinwheel: PatternDefinition = {
   prompt: PINWHEEL_PROMPT,
   minColors: 2,
   maxColors: 8,
-  
+   allowRotation: true,
   /**
    * Pinwheel has 4 half-square triangles creating a spinning effect
    * COLOR1 = background triangles, COLOR2 = blade triangles

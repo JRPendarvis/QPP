@@ -2,7 +2,7 @@ import { PatternPrompt } from '../types';
 
 export const MARINERS_COMPASS_PROMPT: PatternPrompt = {
   patternName: "Mariner's Compass",
-  recommendedFabricCount: 6,
+  recommendedFabricCount: 4,
   
   characteristics: `Mariner's Compass is a dramatic radiating pattern with layered points of varying lengths:
 - 16 points total radiating from a center octagon
@@ -12,16 +12,43 @@ export const MARINERS_COMPASS_PROMPT: PatternPrompt = {
 - All pieced from triangular wedges — no appliqué circles
 - Center octagon anchors the design
 - Different point lengths create dramatic depth and visual interest
-- One of the most challenging and impressive traditional patterns`,
+- One of the most challenging and impressive traditional patterns
+- Typically a single statement block, not a repeating unit`,
 
-  fabricRoleGuidance: `For Mariner's Compass specifically:
-- COLOR1: Long cardinal points and/or center — highest visual impact
-- COLOR2: Medium ordinal points — secondary prominence
-- COLOR3-6: Short intermediate points — can alternate for added interest
-- Highest COLOR number: Background
-- With more fabrics, points alternate colors within each type
-- High contrast between points and background makes the compass pop
-- Consider value gradation: light points on dark background (or vice versa)`,
+  fabricRoleGuidance: `Mariner's Compass fabric assignments (supports 2-8 fabrics):
+
+WITH 2 FABRICS:
+- COLOR1 (PRIMARY): All 16 points (cardinal, ordinal, and intermediate)
+- COLOR2 (BACKGROUND): Background square and center octagon
+
+WITH 3 FABRICS:
+- COLOR1 (PRIMARY): Long cardinal points — highest visual impact
+- COLOR2 (SECONDARY): Medium ordinal points and short intermediate points
+- COLOR3 (BACKGROUND): Background square and center octagon
+
+WITH 4 FABRICS (recommended):
+- COLOR1 (BACKGROUND): Background square
+- COLOR2 (PRIMARY): Long cardinal points — most prominent
+- COLOR3 (SECONDARY): Medium ordinal points
+- COLOR4 (ACCENT): Short intermediate points and center octagon
+
+WITH 5-6 FABRICS:
+- COLOR1 (BACKGROUND): Background square
+- COLOR2 (ACCENT): Center octagon — focal anchor
+- COLOR3 (PRIMARY): Long cardinal points
+- COLOR4 (SECONDARY): Medium ordinal points
+- COLOR5-6 (TERTIARY): Short intermediate points, alternating colors
+
+WITH 7-8 FABRICS (maximum variety):
+- COLOR1 (BACKGROUND): Background square
+- COLOR2 (ACCENT): Center octagon
+- COLOR3-4 (PRIMARY): Long cardinal points, alternating
+- COLOR5-6 (SECONDARY): Medium ordinal points, alternating
+- COLOR7-8 (TERTIARY): Short intermediate points, alternating
+
+High contrast between points and background makes the compass pop. Consider value gradation: light points on dark background (or vice versa).
+
+Note: Mariner's Compass is a radial design — fabric placement is fixed, not rotated block-to-block.`,
 
   cuttingInstructions: `Mariner's Compass cutting specifics:
 - All points are elongated triangles (kite-shaped with pointed ends)
@@ -45,5 +72,6 @@ export const MARINERS_COMPASS_PROMPT: PatternPrompt = {
 - Inconsistent seam allowances (points won't meet at center)
 - Not using foundation paper piecing (accuracy suffers dramatically)
 - Rushing Y-seams when setting in center and background
-- Low contrast between points and background (pattern loses drama)`
+- Low contrast between points and background (pattern loses drama)
+- Adjacent point types with too-similar colors (layered effect disappears)`
 };

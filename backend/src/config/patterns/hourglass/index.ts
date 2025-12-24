@@ -9,7 +9,7 @@ const Hourglass: PatternDefinition = {
   prompt: HOURGLASS_PROMPT,
   minColors: 2,
   maxColors: 8,
-  
+   allowRotation: true,
   /**
    * Hourglass has 4 quarter-square triangles forming an hourglass shape
    * COLOR1 = background triangles (top-left, bottom-right)

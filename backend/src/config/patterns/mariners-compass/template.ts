@@ -1,13 +1,38 @@
 export const MARINERS_COMPASS_TEMPLATE = `
-    <rect x="0" y="0" width="100" height="100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <circle cx="50" cy="50" r="45" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="50,5 55,35 50,50 45,35" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="95,50 65,55 50,50 65,45" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="50,95 45,65 50,50 55,65" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="5,50 35,45 50,50 35,55" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="82,18 60,40 50,50 60,38" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="82,82 60,60 50,50 62,60" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="18,82 40,60 50,50 38,60" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="18,18 40,40 50,50 38,40" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <circle cx="50" cy="50" r="10" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`;
+    <!-- Background - COLOR1 -->
+    <rect x="0" y="0" width="100" height="100" fill="COLOR1"/>
+    
+    <!-- Long cardinal points (N, E, S, W) - COLOR2 PRIMARY -->
+    <polygon points="50,2 56,40 50,50 44,40" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="98,50 60,56 50,50 60,44" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="50,98 44,60 50,50 56,60" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="2,50 40,44 50,50 40,56" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+    
+    <!-- Medium ordinal points (NE, SE, SW, NW) - COLOR3 SECONDARY -->
+    <polygon points="85,15 58,42 50,50 56,38" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="85,85 58,58 50,50 56,62" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="15,85 42,58 50,50 44,62" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    <polygon points="15,15 42,42 50,50 44,38" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+    
+    <!-- Short intermediate points (8 total) - COLOR4 ACCENT -->
+    <!-- Between N and NE -->
+    <polygon points="68,8 55,38 50,50 52,40" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Between NE and E -->
+    <polygon points="92,32 62,45 50,50 60,48" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Between E and SE -->
+    <polygon points="92,68 62,55 50,50 60,52" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Between SE and S -->
+    <polygon points="68,92 55,62 50,50 52,60" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Between S and SW -->
+    <polygon points="32,92 45,62 50,50 48,60" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Between SW and W -->
+    <polygon points="8,68 38,55 50,50 40,52" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Between W and NW -->
+    <polygon points="8,32 38,45 50,50 40,48" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    <!-- Between NW and N -->
+    <polygon points="32,8 45,38 50,50 48,40" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>
+    
+    <!-- Center octagon - COLOR4 ACCENT -->
+    <polygon points="44,40 50,38 56,40 58,46 58,54 56,60 50,62 44,60 42,54 42,46" fill="COLOR4" stroke="#ccc" stroke-width="0.5"/>`;
+
 export const MARINERS_COMPASS = MARINERS_COMPASS_TEMPLATE;

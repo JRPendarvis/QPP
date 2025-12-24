@@ -269,23 +269,26 @@ export default function PatternDisplay({
         <h3 className="font-semibold text-gray-700 mb-2">Step-by-Step Instructions</h3>
 
         <ol className="list-decimal list-inside space-y-2 text-gray-600">
-          {pattern.instructions
-            .slice(pattern.instructions[0]?.startsWith('📋 IMPORTANT:') ? 1 : 0)
-            .map((instruction, index) => (
+          {(() => {
+            const important = pattern.instructions[0]?.startsWith('📋 IMPORTANT:');
+            const visibleInstructions = pattern.instructions.slice(important ? 1 : 0).slice(0, 2);
+            return visibleInstructions.map((instruction, index) => (
               <li key={index}>{instruction.replace(/^[0-9]+[).]\s*/, '')}</li>
-            ))}
+            ));
+          })()}
         </ol>
 
         <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded relative z-10">
           <p className="text-sm text-indigo-900 font-semibold mb-2">🔒 Unlock Full Instructions</p>
           <p className="text-sm text-indigo-700 mb-3">
-            Upgrade to see all {instructionsCount} detailed steps in the PDF.
+            Only the first 2 steps are shown. Download the PDF to see all {instructionsCount} detailed steps.
           </p>
           <button
-            onClick={() => router.push('/pricing')}
-            className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            onClick={handleDownload}
+            disabled={downloading || !pattern.id}
+            className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            View Plans
+            {downloading ? 'Downloading...' : 'Download PDF'}
           </button>
         </div>
       </div>

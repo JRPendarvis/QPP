@@ -9,7 +9,7 @@ const StormAtSea: PatternDefinition = {
   prompt: STORM_AT_SEA_PROMPT,
   minColors: 3,
   maxColors: 4,
-  
+   allowRotation: false,
   /**
    * Storm at Sea creates an optical illusion of waves
    * Colors must stay CONSISTENT across all blocks for the wave effect to work

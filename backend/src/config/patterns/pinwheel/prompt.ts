@@ -13,20 +13,38 @@ export const PINWHEEL_PROMPT: PatternPrompt = {
 - When tiled, pinwheels can spin in same or alternating directions
 - Simple construction with high visual impact`,
 
-  fabricRoleGuidance: `For Pinwheel specifically:
-- 2 colors: COLOR1 blades spinning, COLOR2 background
-- 3 colors: Opposite blade pairs share color, distinct background
-- 4 colors: Blade pairs + background pairs for more variety
-- 5-8 colors: Multiple pinwheel units in 2x2 grid, each using a color pair
-- High contrast between blades and background creates strong spin effect
-- Consider which direction you want the pinwheel to spin when choosing colors`,
+  fabricRoleGuidance: `Pinwheel fabric assignments (supports 2-8 fabrics):
+
+WITH 2 FABRICS (traditional):
+- COLOR1 (PRIMARY): Blade triangles — the spinning element
+- COLOR2 (BACKGROUND): Background triangles — frames the spin
+
+WITH 3 FABRICS:
+- COLOR1 (PRIMARY): One diagonal pair of blades
+- COLOR2 (SECONDARY): Other diagonal pair of blades
+- COLOR3 (BACKGROUND): All background triangles
+
+WITH 4 FABRICS:
+- COLOR1 (PRIMARY): One diagonal pair of blades
+- COLOR2 (SECONDARY): Other diagonal pair of blades
+- COLOR3 (BACKGROUND): One diagonal pair of backgrounds
+- COLOR4 (BACKGROUND): Other diagonal pair of backgrounds
+
+WITH 5-8 FABRICS (scrappy):
+- COLOR1 (BACKGROUND): Consistent background triangles across all blocks
+- COLOR2-8 (PRIMARY options): Blade colors rotate across blocks for variety
+
+High contrast between blades and background creates a strong spin effect. Consider which direction you want the pinwheel to spin when orienting HSTs.
+
+Note: All blades must point the same rotational direction (all clockwise or all counter-clockwise) for the spin effect to work.`,
 
   cuttingInstructions: `Pinwheel cutting specifics:
 - Made from four half-square triangles (HSTs)
 - HST method: Cut squares 7/8" larger than finished size, cut diagonally
 - Or use the two-at-a-time HST method for efficiency
-- Need two HSTs with COLOR1 on one side, two with COLOR1 on the other
-- All HSTs must be identical size for points to meet at center`,
+- Need two HSTs with blade color on one side, two with blade color on the other
+- All HSTs must be identical size for points to meet at center
+- For scrappy pinwheels: cut blade triangles from multiple fabrics`,
 
   assemblyNotes: `Assembly tips for Pinwheel:
 - Make four HSTs first
@@ -34,12 +52,14 @@ export const PINWHEEL_PROMPT: PatternPrompt = {
 - Sew HSTs into two rows of two
 - Press seams in opposite directions for nesting
 - Join rows with center seams nesting
-- Press final seam open to reduce bulk at center`,
+- Press final seam open to reduce bulk at center
+- For scrappy layouts: keep background consistent, vary blade colors`,
 
   commonMistakes: `Avoid these Pinwheel mistakes:
 - HST orientation wrong (blades won't spin — all must point same rotational direction)
 - Confusing with Hourglass (pinwheel uses single-diagonal HSTs, not X-divided)
 - Stretching bias edges (HSTs distort)
 - Inconsistent HST sizes (center point won't meet)
-- Pressing all seams same direction (won't nest, bulk at center)`
+- Pressing all seams same direction (won't nest, bulk at center)
+- In scrappy versions: losing the consistent background (breaks the spin effect)`
 };

@@ -9,7 +9,7 @@ const NewYorkBeauty: PatternDefinition = {
   prompt: NEW_YORK_BEAUTY_PROMPT,
   minColors: 3,
   maxColors: 4,
-  
+   allowRotation: false,
   /**
    * New York Beauty has curved arcs with pointed spikes radiating from a corner
    * Colors must stay CONSISTENT for the dramatic arc effect to work

@@ -9,7 +9,7 @@ const DrunkardsPath: PatternDefinition = {
   prompt: DRUNKARDS_PATH_PROMPT,
   minColors: 2,
   maxColors: 2,
-  
+   allowRotation: false,
   /**
    * Drunkard's Path has a quarter circle creating curved, winding paths
    * Colors must stay CONSISTENT - the path effect comes from block rotation

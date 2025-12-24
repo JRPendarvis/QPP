@@ -9,7 +9,7 @@ const OhioStar: PatternDefinition = {
   prompt: OHIO_STAR_PROMPT,
   minColors: 2,
   maxColors: 8,
-  
+   allowRotation: true,
   /**
    * Ohio Star has background, quarter-square triangle points, and center
    * COLOR1 = background (corners), COLOR2 = star points, COLOR3 = center

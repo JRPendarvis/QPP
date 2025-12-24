@@ -9,7 +9,7 @@ const ComplexMedallion: PatternDefinition = {
   prompt: COMPLEX_MEDALLION_PROMPT,
   minColors: 3,
   maxColors: 5,
-  
+   allowRotation: false,
   /**
    * Complex Medallion has a central focal point with radiating borders/frames
    * Colors must stay CONSISTENT for the medallion to radiate properly

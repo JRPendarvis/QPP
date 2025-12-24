@@ -9,7 +9,7 @@ const LoneStar: PatternDefinition = {
   prompt: LONE_STAR_PROMPT,
   minColors: 3,
   maxColors: 6,
-  
+   allowRotation: false,
   /**
    * Lone Star (Star of Bethlehem) has 8 diamond points radiating from center
    * Colors must stay CONSISTENT to create the graduated/radiating effect

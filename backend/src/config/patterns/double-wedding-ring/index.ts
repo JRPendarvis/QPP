@@ -9,7 +9,7 @@ const DoubleWeddingRing: PatternDefinition = {
   prompt: DOUBLE_WEDDING_RING_PROMPT,
   minColors: 3,
   maxColors: 4,
-  
+   allowRotation: false,
   /**
    * Double Wedding Ring has interlocking curved rings
    * Colors must stay CONSISTENT for the rings to interlock properly

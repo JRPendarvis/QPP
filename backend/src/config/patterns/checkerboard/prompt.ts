@@ -7,16 +7,18 @@ export const CHECKERBOARD_PROMPT: PatternPrompt = {
   characteristics: `A Checkerboard is the simplest alternating pattern:
 - A 2x2 four-patch grid
 - Two colors alternate in a diagonal arrangement
-- COLOR1 on one diagonal (top-left and bottom-right)
-- COLOR2 on the opposite diagonal (top-right and bottom-left)
+- One color on one diagonal (top-left and bottom-right)
+- Second color on the opposite diagonal (top-right and bottom-left)
 - When tiled, creates the classic checkerboard effect
 - No triangles, no center overlay — just four equal squares`,
 
-  fabricRoleGuidance: `For Checkerboard specifically:
-- COLOR1 (PRIMARY): One diagonal pair of squares
-- COLOR2 (SECONDARY): The opposite diagonal pair
-- High contrast between the two colors creates the strongest visual impact
-- Can also use low contrast for a subtle, textured look`,
+  fabricRoleGuidance: `Checkerboard requires exactly 2 fabrics:
+- FABRIC 1 (PRIMARY): Squares at even positions (top-left, bottom-right diagonal)
+- FABRIC 2 (SECONDARY): Squares at odd positions (top-right, bottom-left diagonal)
+
+High contrast between the two fabrics creates the strongest visual impact. Low contrast creates a subtle, textured look.
+
+Note: This pattern uses exactly 2 fabrics — additional fabrics are not supported.`,
 
   cuttingInstructions: `Checkerboard cutting specifics:
 - Cut equal-sized squares in two fabrics

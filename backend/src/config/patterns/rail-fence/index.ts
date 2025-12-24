@@ -9,7 +9,7 @@ const RailFence: PatternDefinition = {
   prompt: RAIL_FENCE_PROMPT,
   minColors: 3,
   maxColors: 4,
-  
+   allowRotation: false,
   /**
    * Rail Fence has 3 horizontal strips (rails) per block
    * Colors stay CONSISTENT across all blocks - the zigzag effect comes from rotation

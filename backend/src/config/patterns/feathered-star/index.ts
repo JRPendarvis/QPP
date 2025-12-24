@@ -9,7 +9,7 @@ const FeatheredStar: PatternDefinition = {
   prompt: FEATHERED_STAR_PROMPT,
   minColors: 3,
   maxColors: 4,
-  
+   allowRotation: true,
   /**
    * Feathered Star has star points edged with tiny "feather" triangles
    * Complex, precision pattern - colors must stay CONSISTENT

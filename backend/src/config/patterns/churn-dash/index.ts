@@ -9,7 +9,7 @@ const ChurnDash: PatternDefinition = {
   prompt: CHURN_DASH_PROMPT,
   minColors: 2,
   maxColors: 8,
-  
+   allowRotation: true,
   /**
    * Churn Dash uses 2 colors per block: background + feature
    * With multiple fabrics, creates "scrappy" look by rotating feature colors
