@@ -127,28 +127,15 @@ interface UserProfile {
   };
 }
 
-export default function UploadPage() {
-    // Helper to get min required fabrics for selected pattern
-    function getMinRequiredFabrics(): number {
-      if (patternChoice === 'manual' && selectedPattern) {
-        const selected = availablePatterns.find(p => p.id === selectedPattern);
-        if (selected && selected.recommendedFabricCount) {
-          if (typeof selected.recommendedFabricCount === 'number') return selected.recommendedFabricCount;
-          if (selected.recommendedFabricCount.min) return selected.recommendedFabricCount.min;
-        }
-      }
-      return MIN_FABRICS;
-    }
 
-    const minRequiredFabrics = getMinRequiredFabrics();
-    const notEnoughFabrics = patternChoice === 'manual' && selectedPattern && fabrics.length < minRequiredFabrics;
+export default function UploadPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [patternChoice, setPatternChoice] = useState<'auto' | 'manual'>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
-  
+
   const {
     fabrics,
     previews,
@@ -163,6 +150,21 @@ export default function UploadPage() {
     resetPattern,
     generatePattern,
   } = usePatternGeneration();
+
+  // Helper to get min required fabrics for selected pattern
+  function getMinRequiredFabrics(): number {
+    if (patternChoice === 'manual' && selectedPattern) {
+      const selected = availablePatterns.find(p => p.id === selectedPattern);
+      if (selected && selected.recommendedFabricCount) {
+        if (typeof selected.recommendedFabricCount === 'number') return selected.recommendedFabricCount;
+        if (selected.recommendedFabricCount.min) return selected.recommendedFabricCount.min;
+      }
+    }
+    return MIN_FABRICS;
+  }
+
+  const minRequiredFabrics = getMinRequiredFabrics();
+  const notEnoughFabrics = patternChoice === 'manual' && selectedPattern && fabrics.length < minRequiredFabrics;
 
   useEffect(() => {
     if (!loading && !user) {
