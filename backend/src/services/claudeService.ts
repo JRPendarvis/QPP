@@ -3,13 +3,11 @@ import { RetryHandler } from '../utils/retryHandler';
 import { SvgGenerator } from '../utils/svgGenerator';
 import { PatternFormatter } from '../utils/patternFormatter';
 import { PromptBuilder } from './promptBuilder';
-import { OpenAiService } from './openAiService';
+import { compressImages } from '../utils/imageCompressor';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
-
-const openAiService = new OpenAiService();
 
 interface QuiltPattern {
   patternName: string;
@@ -61,6 +59,25 @@ export class ClaudeService {
       console.log(`  Selected Pattern: ${selectedPattern || 'auto (fabric-count optimized)'}`);
       console.log('═══════════════════════════════════════════════');
       
+      // Compress images if needed (Claude has 5MB per image limit)
+      console.log('🖼️ Checking image sizes...');
+      const compressedImages = await compressImages(fabricImages, imageTypes);
+      
+      const compressedBase64s = compressedImages.map(img => img.base64);
+      const compressedMimeTypes = compressedImages.map(img => img.mimeType);
+      
+      // Log compression results
+      const totalOriginal = compressedImages.reduce((sum, img) => sum + img.originalSize, 0);
+      const totalCompressed = compressedImages.reduce((sum, img) => sum + img.compressedSize, 0);
+      const compressedCount = compressedImages.filter(img => img.wasCompressed).length;
+      
+      if (compressedCount > 0) {
+        console.log(`📦 Compressed ${compressedCount}/${fabricImages.length} images`);
+        console.log(`   Total: ${(totalOriginal / 1024 / 1024).toFixed(2)}MB → ${(totalCompressed / 1024 / 1024).toFixed(2)}MB`);
+      } else {
+        console.log(`✅ All images within size limits (${(totalOriginal / 1024 / 1024).toFixed(2)}MB total)`);
+      }
+      
       // Build prompt and images
       const promptText = PromptBuilder.buildPrompt(
         fabricImages.length,
@@ -69,7 +86,7 @@ export class ClaudeService {
         skillLevel,
         patternId
       );
-      const imageContent = PromptBuilder.buildImageContent(fabricImages, imageTypes);
+      const imageContent = PromptBuilder.buildImageContent(compressedBase64s, compressedMimeTypes);
       
       // Call Claude API
       const stream = await anthropic.messages.stream({
@@ -170,32 +187,14 @@ export class ClaudeService {
     const displayPatternName = PatternFormatter.extractDisplayName(parsedResponse.patternName, patternForSvg);
     console.log(`📛 Pattern name: ${displayPatternName} (SVG template: ${patternForSvg})`);
     
-    // Look up the actual quilt difficulty from the pattern definition
-    let actualDifficulty = 'Unknown';
-    try {
-      // Import pattern registry dynamically to avoid circular deps
-      const { getPattern } = require('../config/patterns');
-      const patternDef = getPattern(patternForSvg);
-      if (patternDef && patternDef.prompt && patternDef.prompt.characteristics) {
-        // Try to extract difficulty from characteristics (first line, e.g., 'Ideal beginner pattern')
-        const lines = patternDef.prompt.characteristics.split('\n');
-        const diffLine = lines.find((l: string) => l.toLowerCase().includes('beginner') || l.toLowerCase().includes('intermediate') || l.toLowerCase().includes('advanced') || l.toLowerCase().includes('expert'));
-        if (diffLine) {
-          if (diffLine.toLowerCase().includes('beginner')) actualDifficulty = 'Beginner';
-          else if (diffLine.toLowerCase().includes('intermediate')) actualDifficulty = 'Intermediate';
-          else if (diffLine.toLowerCase().includes('advanced')) actualDifficulty = 'Advanced';
-          else if (diffLine.toLowerCase().includes('expert')) actualDifficulty = 'Expert';
-        }
-      }
-    } catch (err) {
-      console.warn('Could not determine quilt difficulty:', err);
-    }
-
+    // Force the correct difficulty level
+    const formattedDifficulty = skillLevel.replace('_', ' ');
+    
     const pattern: QuiltPattern = {
       patternName: displayPatternName,
       description: parsedResponse.description || `A beautiful ${patternForSvg} pattern`,
       fabricLayout: parsedResponse.fabricLayout || 'Arranged in a 4x4 grid',
-      difficulty: actualDifficulty,
+      difficulty: formattedDifficulty,
       estimatedSize: parsedResponse.estimatedSize || '60x72 inches',
       instructions: this.addDisclaimerToInstructions(this.validateInstructions(parsedResponse.instructions)),
       visualSvg: visualSvg,
