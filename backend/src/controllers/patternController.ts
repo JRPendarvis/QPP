@@ -19,7 +19,7 @@ function getValidPatternIds(): string[] {
  * Normalize pattern input to ID format
  * Handles both IDs ('strip-quilt') and display names ('Strip Quilt')
  */
-function normalizePatternId(input: string | undefined): string {
+export function normalizePatternId(input: string | undefined): string {
   if (!input || input === 'auto') return 'auto';
   
   // Already in ID format?
