@@ -29,9 +29,12 @@ export function getPatternSkillLevel(patternId: string): string | undefined {
  * Build QuiltPattern from the new pattern system
  */
 export function getQuiltPattern(patternId: string): QuiltPattern | undefined {
-  const patternDef = getPattern(patternId);
-  const prompt = getPatternPrompt(patternId);
-  const skillLevel = getPatternSkillLevel(patternId);
+  // Always normalize patternId before lookup
+  const { normalizePatternId } = require('../controllers/patternController');
+  const normalizedId = normalizePatternId(patternId);
+  const patternDef = getPattern(normalizedId);
+  const prompt = getPatternPrompt(normalizedId);
+  const skillLevel = getPatternSkillLevel(normalizedId);
   
   if (!patternDef) return undefined;
   

@@ -141,8 +141,12 @@ export class PromptBuilder {
   ): string {
     const skillDescription = SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
     
-    // Get pattern-specific prompt if available
-    const patternPrompt = patternId ? getPatternPrompt(patternId) : null;
+    // Always normalize patternId before lookup
+    let patternPrompt = null;
+    if (patternId) {
+      const { normalizePatternId } = require('../controllers/patternController');
+      patternPrompt = getPatternPrompt(normalizePatternId(patternId));
+    }
     
     // Use pattern-specific characteristics or fall back to generic description
     const patternDescription = patternPrompt 
@@ -298,8 +302,12 @@ Provide this JSON response:
   ): string {
     const skillDescription = SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
     
-    // Get pattern-specific prompt if available
-    const patternPrompt = patternId ? getPatternPrompt(patternId) : null;
+    // Always normalize patternId before lookup
+    let patternPrompt = null;
+    if (patternId) {
+      const { normalizePatternId } = require('../controllers/patternController');
+      patternPrompt = getPatternPrompt(normalizePatternId(patternId));
+    }
     const patternDescription = patternPrompt 
       ? patternPrompt.characteristics 
       : PatternFormatter.getPatternDescription(patternForSvg);

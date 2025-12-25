@@ -43,10 +43,10 @@ export class SvgGenerator {
     templateUsed: string; 
     patternDef: ReturnType<typeof getPattern> | undefined;
   } {
-    // Convert to pattern ID
-    const patternId = this.toPatternId(patternType);
+    // Convert to pattern ID and normalize
+    const { normalizePatternId } = require('../controllers/patternController');
+    const patternId = normalizePatternId(this.toPatternId(patternType));
     console.log(`  Pattern ID: "${patternId}" (from "${patternType}")`);
-    
     // Try to get PatternDefinition from new system
     const patternDef = getPattern(patternId);
     
