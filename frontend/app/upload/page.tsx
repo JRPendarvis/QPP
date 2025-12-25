@@ -200,7 +200,8 @@ export default function UploadPage() {
 
   const currentSkill = profile.skillLevel || 'beginner';
   const targetSkill = challengeMe ? NEXT_LEVEL[currentSkill] : currentSkill;
-  const availablePatterns = getPatternsForSkillLevel(targetSkill);
+  // Sort patterns alphabetically by name for dropdown
+  const availablePatterns = getPatternsForSkillLevel(targetSkill).slice().sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="min-h-screen" style={{background: 'linear-gradient(135deg, #FEF2F2 0%, #F0FDFA 50%, #FFFBEB 100%)'}}>
