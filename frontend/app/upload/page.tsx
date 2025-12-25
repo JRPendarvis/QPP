@@ -44,7 +44,7 @@ const PATTERN_OPTIONS: Record<string, { id: string; name: string; recommendedFab
     { id: 'rail-fence', name: 'Rail Fence', recommendedFabricCount: { min: 3, max: 4 } },
   ],
   advanced_beginner: [
-    { id: 'four-patch', name: 'Four Patch', recommendedFabricCount: 2 },
+    { id: 'four-patch', name: 'Four Patch', recommendedFabricCount: { min: 3, max: 4 } },
     { id: 'nine-patch', name: 'Nine Patch', recommendedFabricCount: { min: 2, max: 3 } },
     { id: 'half-square-triangles', name: 'Half-Square Triangles', recommendedFabricCount: 2 },
     { id: 'hourglass', name: 'Hourglass', recommendedFabricCount: 2 },
