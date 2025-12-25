@@ -128,6 +128,20 @@ interface UserProfile {
 }
 
 export default function UploadPage() {
+    // Helper to get min required fabrics for selected pattern
+    function getMinRequiredFabrics(): number {
+      if (patternChoice === 'manual' && selectedPattern) {
+        const selected = availablePatterns.find(p => p.id === selectedPattern);
+        if (selected && selected.recommendedFabricCount) {
+          if (typeof selected.recommendedFabricCount === 'number') return selected.recommendedFabricCount;
+          if (selected.recommendedFabricCount.min) return selected.recommendedFabricCount.min;
+        }
+      }
+      return MIN_FABRICS;
+    }
+
+    const minRequiredFabrics = getMinRequiredFabrics();
+    const notEnoughFabrics = patternChoice === 'manual' && selectedPattern && fabrics.length < minRequiredFabrics;
   const { user, loading } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -346,14 +360,21 @@ export default function UploadPage() {
                 />
               )}
 
+              {/* Minimum fabric warning for selected pattern */}
+              {notEnoughFabrics && (
+                <div className="mb-4 text-red-600 font-semibold">
+                  This pattern requires at least {minRequiredFabrics} fabric images.
+                </div>
+              )}
+
               {/* Generate Button */}
               {fabrics.length >= MIN_FABRICS && (
                 <GenerateButton
                   onClick={handleGenerateClick}
                   disabled={
-                    fabrics.length < MIN_FABRICS || 
-                    generating || 
-                    (patternChoice === 'manual' && !selectedPattern)
+                    fabrics.length < MIN_FABRICS ||
+                    generating ||
+                    (patternChoice === 'manual' && (!selectedPattern || fabrics.length < minRequiredFabrics))
                   }
                   generating={generating}
                   fabricCount={fabrics.length}
