@@ -1,3 +1,34 @@
+/**
+ * Check if the number of fabric images meets the minimum required for a pattern
+ * @param patternId - The pattern ID (e.g., 'grandmothers-flower-garden')
+ * @param imageCount - Number of uploaded fabric images
+ * @returns { minRequired: number, isValid: boolean, error?: string }
+ */
+export function validateMinFabricImages(patternId: string, imageCount: number) {
+  // Import pattern registry and normalization
+  const { getPattern } = require('../config/patterns');
+  const { normalizePatternId } = require('../controllers/patternController');
+  const normalizedId = normalizePatternId(patternId);
+  const patternDef = getPattern(normalizedId);
+  let minRequired = 2;
+  if (patternDef) {
+    if (patternDef.prompt && patternDef.prompt.recommendedFabricCount) {
+      if (typeof patternDef.prompt.recommendedFabricCount === 'number') {
+        minRequired = patternDef.prompt.recommendedFabricCount;
+      } else if (patternDef.prompt.recommendedFabricCount.min) {
+        minRequired = patternDef.prompt.recommendedFabricCount.min;
+      }
+    } else if (patternDef.minColors) {
+      minRequired = patternDef.minColors;
+    }
+  }
+  const isValid = imageCount >= minRequired;
+  return {
+    minRequired,
+    isValid,
+    error: isValid ? undefined : `This pattern requires at least ${minRequired} fabric images.`
+  };
+}
 import sharp from 'sharp';
 
 /**
