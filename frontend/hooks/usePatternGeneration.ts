@@ -20,7 +20,7 @@ export function usePatternGeneration() {
   const [pattern, setPattern] = useState<QuiltPattern | null>(null);
   const [error, setError] = useState('');
 
-  const MAX_FABRICS = 8;
+  const MAX_FABRICS = 9;
   const MIN_FABRICS = 2;
 
   // Handle file addition

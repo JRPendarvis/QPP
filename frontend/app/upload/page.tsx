@@ -38,15 +38,15 @@ const NEXT_LEVEL: Record<string, string> = {
 
 const PATTERN_OPTIONS: Record<string, { id: string; name: string; recommendedFabricCount?: number | { min: number; max: number } }[]> = {
   beginner: [
-    { id: 'simple-squares', name: 'Simple Squares', recommendedFabricCount: { min: 3, max: 6 } },
+    { id: 'simple-squares', name: 'Simple Squares', recommendedFabricCount: { min: 3, max: 8 } },
     { id: 'strip-quilt', name: 'Strip Quilt', recommendedFabricCount: { min: 3, max: 8 } },
     { id: 'checkerboard', name: 'Checkerboard', recommendedFabricCount: 2 },
-    { id: 'rail-fence', name: 'Rail Fence', recommendedFabricCount: { min: 3, max: 4 } },
+    { id: 'rail-fence', name: 'Rail Fence', recommendedFabricCount: { min: 3, max: 5 } },
   ],
   advanced_beginner: [
-    { id: 'four-patch', name: 'Four Patch', recommendedFabricCount: { min: 3, max: 4 } },
-    { id: 'nine-patch', name: 'Nine Patch', recommendedFabricCount: { min: 2, max: 3 } },
-    { id: 'half-square-triangles', name: 'Half-Square Triangles', recommendedFabricCount: 2 },
+    { id: 'four-patch', name: 'Four Patch', recommendedFabricCount: { min: 3, max: 8 } },
+    { id: 'nine-patch', name: 'Nine Patch', recommendedFabricCount: { min: 2, max: 9 } },
+    { id: 'half-square-triangles', name: 'Half-Square Triangles', recommendedFabricCount: { min: 2, max: 8 } },
     { id: 'hourglass', name: 'Hourglass', recommendedFabricCount: 2 },
     { id: 'bow-tie', name: 'Bow Tie', recommendedFabricCount: { min: 2, max: 3 } },
   ],
