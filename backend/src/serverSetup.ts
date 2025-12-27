@@ -19,8 +19,11 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || SERVER_CONSTANTS.DEFAULT_PORT;
 
-// Trust proxy for Railway (required for rate limiting behind proxy)
-app.set('trust proxy', SERVER_CONSTANTS.TRUST_PROXY);
+// Trust proxy only if running behind a trusted proxy (e.g., Railway, Heroku, Vercel)
+// Use environment variable or default to false for local/dev
+const isProduction = process.env.NODE_ENV === 'production';
+const trustProxySetting = process.env.TRUST_PROXY || (isProduction ? 1 : false);
+app.set('trust proxy', trustProxySetting);
 
 // Stripe controller
 const stripeController = new StripeController();
