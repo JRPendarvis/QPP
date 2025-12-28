@@ -22,6 +22,9 @@ interface QuiltPattern {
 
 export class ClaudeService {
 
+  // Store the last used fabric images for SVG generation
+  private _fabricImages: string[] = [];
+
   async generateQuiltPattern(
     fabricImages: string[],
     imageTypes: string[] = [],
@@ -241,19 +244,35 @@ export class ClaudeService {
    */
   private buildPattern(parsedResponse: any, patternForSvg: string, skillLevel: string): QuiltPattern {
     // Extract colors from response
-    const colors = parsedResponse.fabricColors || ['#4A90A4', '#D4A574', '#8B7355', '#6B8E23'];
-    console.log(`🎨 Fabric colors identified: ${colors.join(', ')}`);
-    
-    // Generate SVG using template
-    const visualSvg = SvgGenerator.generateFromTemplate(patternForSvg, colors);
-    
+    // Build fabrics array with color, type, and image
+    const fabricAnalysis = parsedResponse.fabricAnalysis || [];
+    const fabricColors = parsedResponse.fabricColors || [];
+    // Use the original images passed to the generator (base64s)
+    // Assume the order matches fabricAnalysis/fabricColors
+    // If not, fallback to empty string for image
+    const fabrics = fabricAnalysis.map((fa: any, idx: number) => ({
+      color: fa.dominantColor || fabricColors[idx] || '#CCCCCC',
+      type: fa.type || 'solid',
+      image: this._fabricImages && this._fabricImages[idx] ? this._fabricImages[idx] : '',
+    }));
+
+    // Fallback if fabricAnalysis is missing
+    if (!fabrics.length && fabricColors.length) {
+      for (let i = 0; i < fabricColors.length; i++) {
+        fabrics.push({ color: fabricColors[i], type: 'solid', image: this._fabricImages && this._fabricImages[i] ? this._fabricImages[i] : '' });
+      }
+    }
+
+    // Generate SVG using template and fabric objects
+    const visualSvg = SvgGenerator.generateFromTemplate(patternForSvg, fabrics);
+
     // Format pattern name
     const displayPatternName = PatternFormatter.extractDisplayName(parsedResponse.patternName, patternForSvg);
     console.log(`📛 Pattern name: ${displayPatternName} (SVG template: ${patternForSvg})`);
-    
+
     // Force the correct difficulty level
     const formattedDifficulty = skillLevel.replace('_', ' ');
-    
+
     const pattern: QuiltPattern = {
       patternName: displayPatternName,
       description: parsedResponse.description || `A beautiful ${patternForSvg} pattern`,
