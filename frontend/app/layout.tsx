@@ -32,6 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="p:domain_verify" content="8ab6c3ed54672f505c78a26d88a2d136" />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-NHMK7M6NTZ"
           strategy="afterInteractive"
