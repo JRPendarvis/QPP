@@ -1,7 +1,7 @@
 'use client';
 
 import { useDropzone } from 'react-dropzone';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 interface FabricDropzoneProps {
   onFilesAdded: (files: File[]) => void;
@@ -72,20 +72,30 @@ export default function FabricDropzone({
   maxFiles 
 }: FabricDropzoneProps) {
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  
+  const [totalSize, setTotalSize] = useState<number>(0);
 
-  // Wrap onDrop to compress images before passing to parent
+  // Helper to format bytes as MB string
+  const formatMB = (bytes: number) => (bytes / 1024 / 1024).toFixed(2) + ' MB';
+
+  // Wrap onDrop to check file sizes and compress images before passing to parent
   const handleDrop = async (acceptedFiles: File[]) => {
+    // Check for any files over 5MB before compression
+    const tooLarge = acceptedFiles.filter(f => f.size > 5 * 1024 * 1024);
+    if (tooLarge.length > 0) {
+      alert(`Some images are over 5MB and may take longer to upload or may be rejected. Please upload smaller images.\nFiles: ${tooLarge.map(f => f.name + ' (' + formatMB(f.size) + ')').join(', ')}`);
+    }
     const compressedResults = await Promise.all(
       acceptedFiles.map(file => compressImage(file))
     );
-    const compressedFiles: File[] = compressedResults.filter((f): f is File => f instanceof File);
-    const skipped = acceptedFiles.length - compressedFiles.length;
+    const validFiles: File[] = compressedResults.filter((f): f is File => f instanceof File);
+    const skipped = acceptedFiles.length - validFiles.length;
     if (skipped > 0) {
       alert(`Some images could not be compressed under 5MB and were skipped. Please upload smaller or lower-resolution images.`);
     }
-    if (compressedFiles.length > 0) {
-      onFilesAdded(compressedFiles);
+    if (validFiles.length > 0) {
+      // Update running total size
+      setTotalSize(prev => prev + validFiles.reduce((sum, f) => sum + f.size, 0));
+      onFilesAdded(validFiles);
     }
   };
 
@@ -106,6 +116,11 @@ export default function FabricDropzone({
   const handleCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
+      // Check for any files over 5MB before compression
+      const tooLarge = Array.from(files).filter(f => f.size > 5 * 1024 * 1024);
+      if (tooLarge.length > 0) {
+        alert(`Some images are over 5MB and may take longer to upload or may be rejected. Please upload smaller images.\nFiles: ${tooLarge.map(f => f.name + ' (' + formatMB(f.size) + ')').join(', ')}`);
+      }
       try {
         // Compress images from camera
         const compressedResults = await Promise.all(
@@ -117,6 +132,7 @@ export default function FabricDropzone({
           alert(`Some images could not be compressed under 5MB and were skipped. Please upload smaller or lower-resolution images.`);
         }
         if (validFiles.length > 0) {
+          setTotalSize(prev => prev + validFiles.reduce((sum, f) => sum + f.size, 0));
           onFilesAdded(validFiles);
         }
       } catch (error) {
@@ -209,6 +225,9 @@ export default function FabricDropzone({
           />
         </div>
       )}
+      <div className="mt-2 text-xs text-gray-500">
+        Total uploaded image size: {formatMB(totalSize)}
+      </div>
     </div>
   );
 }
