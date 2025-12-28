@@ -79,7 +79,7 @@ export default function FabricDropzone({
     const compressedResults = await Promise.all(
       acceptedFiles.map(file => compressImage(file))
     );
-    const compressedFiles = compressedResults.filter(Boolean) as File[];
+    const compressedFiles: File[] = compressedResults.filter((f): f is File => f instanceof File);
     const skipped = acceptedFiles.length - compressedFiles.length;
     if (skipped > 0) {
       alert(`Some images could not be compressed under 5MB and were skipped. Please upload smaller or lower-resolution images.`);
@@ -108,10 +108,17 @@ export default function FabricDropzone({
     if (files && files.length > 0) {
       try {
         // Compress images from camera
-        const compressedFiles = await Promise.all(
+        const compressedResults = await Promise.all(
           Array.from(files).map(file => compressImage(file))
         );
-        onFilesAdded(compressedFiles);
+        const validFiles: File[] = compressedResults.filter((f): f is File => f instanceof File);
+        const skipped = files.length - validFiles.length;
+        if (skipped > 0) {
+          alert(`Some images could not be compressed under 5MB and were skipped. Please upload smaller or lower-resolution images.`);
+        }
+        if (validFiles.length > 0) {
+          onFilesAdded(validFiles);
+        }
       } catch (error) {
         console.error('Error compressing images:', error);
         // Fallback to original files if compression fails
