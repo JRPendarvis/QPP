@@ -21,14 +21,16 @@ interface QuiltPattern {
 }
 
 export class ClaudeService {
+
   async generateQuiltPattern(
     fabricImages: string[],
     imageTypes: string[] = [],
     skillLevel: string = 'beginner',
-    selectedPattern?: string
+    selectedPattern?: string,
+    roleAssignments?: any // Accept roleAssignments from controller
   ): Promise<QuiltPattern> {
     return RetryHandler.withRetry(
-      () => this.attemptPatternGeneration(fabricImages, imageTypes, skillLevel, selectedPattern),
+      () => this.attemptPatternGeneration(fabricImages, imageTypes, skillLevel, selectedPattern, roleAssignments),
       3,
       'Pattern generation'
     );
@@ -38,7 +40,8 @@ export class ClaudeService {
     fabricImages: string[],
     imageTypes: string[] = [],
     skillLevel: string = 'beginner',
-    selectedPattern?: string
+    selectedPattern?: string,
+    roleAssignments?: any
   ): Promise<QuiltPattern> {
     try {
       // Select pattern type (with fabric count for intelligent auto-selection)
@@ -78,15 +81,68 @@ export class ClaudeService {
         console.log(`✅ All images within size limits (${(totalOriginal / 1024 / 1024).toFixed(2)}MB total)`);
       }
       
+
       // Build prompt and images
-      const promptText = PromptBuilder.buildPrompt(
-        fabricImages.length,
-        patternForSvg,
-        patternInstruction,
-        skillLevel,
-        patternId
-      );
+      let promptText: string;
       const imageContent = PromptBuilder.buildImageContent(compressedBase64s, compressedMimeTypes);
+
+      // If user provided role assignments, we need to run a two-step process:
+      // 1. Run fabric analysis prompt to get fabricAnalysis array
+      // 2. Use buildRoleSwapPrompt with user assignments and fabricAnalysis
+      if (roleAssignments) {
+        // Step 1: Get fabric analysis by running a special prompt (STEP 1 only)
+        const analysisPrompt = `You are an expert quilter. For each uploaded fabric image, provide a JSON array with objects containing: fabricIndex, description, type (printed|solid), value (light|medium|dark), printScale (solid|small|medium|large), dominantColor (hex code). Do NOT assign roles. Example: [{"fabricIndex":1, ...}, ...]`;
+        const analysisStream = await anthropic.messages.stream({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 2000,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: analysisPrompt },
+                ...imageContent,
+              ],
+            },
+          ],
+        });
+        const analysisResponse = await this.collectStreamResponse(analysisStream);
+        let fabricAnalysis: any[] = [];
+        try {
+          const firstBracket = analysisResponse.indexOf('[');
+          const lastBracket = analysisResponse.lastIndexOf(']');
+          if (firstBracket !== -1 && lastBracket !== -1) {
+            fabricAnalysis = JSON.parse(analysisResponse.substring(firstBracket, lastBracket + 1));
+          }
+        } catch (e) {
+          console.warn('Could not parse fabric analysis, falling back to default prompt.');
+        }
+        if (fabricAnalysis.length > 0) {
+          promptText = PromptBuilder.buildRoleSwapPrompt(
+            fabricAnalysis,
+            roleAssignments,
+            patternForSvg,
+            skillLevel,
+            patternId
+          );
+        } else {
+          // Fallback to normal prompt if analysis fails
+          promptText = PromptBuilder.buildPrompt(
+            fabricImages.length,
+            patternForSvg,
+            patternInstruction,
+            skillLevel,
+            patternId
+          );
+        }
+      } else {
+        promptText = PromptBuilder.buildPrompt(
+          fabricImages.length,
+          patternForSvg,
+          patternInstruction,
+          skillLevel,
+          patternId
+        );
+      }
       
       // Call Claude API
       const stream = await anthropic.messages.stream({

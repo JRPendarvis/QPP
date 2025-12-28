@@ -67,8 +67,9 @@ export class PatternController {
         });
       }
 
-      // Accept both 'fabricImages' and 'fabrics' field names, plus selectedPattern
-      const { fabricImages, fabrics, fabricTypes, skillLevel, challengeMe, selectedPattern } = req.body;
+
+      // Accept both 'fabricImages' and 'fabrics' field names, plus selectedPattern and roleAssignments
+      const { fabricImages, fabrics, fabricTypes, skillLevel, challengeMe, selectedPattern, roleAssignments } = req.body;
       const images = fabricImages || fabrics;
       const imageTypes = fabricTypes || [];
 
@@ -165,12 +166,14 @@ export class PatternController {
         }
       }
 
-      // Generate pattern using Claude - with normalized pattern ID
+
+      // Generate pattern using Claude - with normalized pattern ID and optional role assignments
       const pattern = await this.claudeService.generateQuiltPattern(
         images,
         imageTypes,
         targetSkillLevel,
-        patternToUse
+        patternToUse,
+        roleAssignments // Pass through to service layer (may be undefined)
       );
 
       // Use transaction to ensure both operations succeed or fail together

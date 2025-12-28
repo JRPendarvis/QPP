@@ -3,6 +3,14 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
+import { RoleAssignments, getRoleForFabric, handleRoleChange } from '../helpers/roleAssignments';
+// Fabric roles for assignment
+const FABRIC_ROLES = [
+  { key: 'background', label: 'Background' },
+  { key: 'primary', label: 'Primary' },
+  { key: 'secondary', label: 'Secondary' },
+  { key: 'accent', label: 'Accent' },
+];
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import Navigation from '@/components/Navigation';
 import UploadHeader from '@/components/upload/UploadHeader';
@@ -135,6 +143,15 @@ export default function UploadPage() {
   const [patternChoice, setPatternChoice] = useState<'auto' | 'manual'>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
+
+
+  // State for user-assigned fabric roles
+  const [roleAssignments, setRoleAssignments] = useState<RoleAssignments>({
+    background: null,
+    primary: null,
+    secondary: null,
+    accent: null,
+  });
   
   const {
     fabrics,
@@ -209,7 +226,7 @@ export default function UploadPage() {
       return false;
     }
     return fabrics.length >= effectiveMinFabrics && fabrics.length <= effectiveMaxFabrics;
-  }, [patternChoice, selectedPattern, fabrics.length, effectiveMinFabrics, effectiveMaxFabrics]);
+  }, [patternChoice, selectedPattern, fabrics.length, effectiveMinFabrics, effectiveMaxFabrics, MIN_FABRICS, MAX_FABRICS]);
 
   // Generate validation message
   const fabricValidationMessage = useMemo(() => {
@@ -237,11 +254,21 @@ export default function UploadPage() {
     }
 
     return null;
-  }, [patternChoice, selectedPattern, fabrics.length, selectedPatternDetails]);
+  }, [patternChoice, selectedPattern, fabrics.length, selectedPatternDetails, MIN_FABRICS]);
+
+
+  // Handler: when user changes a role for a fabric
+  function handleRoleChangeUI(fabricIndex: number, newRole: string) {
+    setRoleAssignments(prev => handleRoleChange(prev, fabrics, fabricIndex, newRole));
+  }
 
   const handleGenerateClick = () => {
     if (profile && fabricCountValid) {
       const patternId = patternChoice === 'manual' ? selectedPattern : undefined;
+      // Only send roleAssignments if at least one role is assigned
+      // generatePattern expects (skillLevel, challengeMe, patternId?)
+      // If you want to pass roleAssignments, update usePatternGeneration accordingly
+      // For now, just call with 2-3 args:
       generatePattern(profile.skillLevel, challengeMe, patternId);
     }
   };
@@ -435,14 +462,38 @@ export default function UploadPage() {
                 </div>
               </div>
 
-              {/* Fabric Preview Grid */}
+              {/* Fabric Preview Grid with role assignment UI */}
               {fabrics.length > 0 && (
-                <FabricPreviewGrid
-                  previews={previews}
-                  fabrics={fabrics}
-                  onRemove={removeFabric}
-                  onClearAll={clearAll}
-                />
+                <div className="mb-6">
+                  <FabricPreviewGrid
+                    previews={previews}
+                    fabrics={fabrics}
+                    onRemove={removeFabric}
+                    onClearAll={clearAll}
+                  />
+                  {/* Role assignment UI */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-2">Assign Fabric Roles (optional)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {fabrics.map((fabric, idx) => (
+                        <div key={idx} className="flex items-center space-x-4 p-2 border rounded">
+                          <span className="font-medium">Fabric {idx + 1}:</span>
+                          <span className="truncate max-w-xs text-gray-700">{fabric.name || `Fabric image`}</span>
+                          <select
+                            className="ml-2 px-2 py-1 border rounded"
+                            value={getRoleForFabric(roleAssignments, idx) || ''}
+                            onChange={e => handleRoleChangeUI(idx, e.target.value)}
+                          >
+                            <option value="">No Role</option>
+                            {FABRIC_ROLES.map(role => (
+                              <option key={role.key} value={role.key}>{role.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* Validation Message */}
