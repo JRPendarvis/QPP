@@ -81,6 +81,14 @@ export class ClaudeService {
         console.log(`✅ All images within size limits (${(totalOriginal / 1024 / 1024).toFixed(2)}MB total)`);
       }
       
+      // After compression, check for any images still over 5MB
+      const MAX_CLAUDE_IMAGE_SIZE = 5 * 1024 * 1024;
+      const tooLarge = compressedImages.find(img => img.compressedSize > MAX_CLAUDE_IMAGE_SIZE);
+      if (tooLarge) {
+        throw new Error(
+          `One or more images could not be compressed below 5MB. Please upload smaller or lower-resolution images. (Image size: ${(tooLarge.compressedSize / 1024 / 1024).toFixed(2)}MB)`
+        );
+      }
 
       // Build prompt and images
       let promptText: string;

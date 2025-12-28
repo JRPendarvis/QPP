@@ -9,69 +9,60 @@ interface FabricDropzoneProps {
   maxFiles: number;
 }
 
-// Compress image to be under 5MB
-const compressImage = async (file: File): Promise<File> => {
-  return new Promise((resolve, reject) => {
+
+// Utility: Robust image compression loop
+const compressImage = async (file: File): Promise<File | null> => {
+  const MAX_SIZE = 5 * 1024 * 1024;
+  const MIN_QUALITY = 0.3;
+  const MAX_DIM = 2048;
+  return new Promise((resolve) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (e) => {
-      const img = new Image();
+      const img = new window.Image();
       img.src = e.target?.result as string;
       img.onload = () => {
-        const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        
-        // Calculate scale to reduce file size
-        const maxDimension = 2048;
-        if (width > maxDimension || height > maxDimension) {
+        if (width > MAX_DIM || height > MAX_DIM) {
           if (width > height) {
-            height = (height / width) * maxDimension;
-            width = maxDimension;
+            height = (height / width) * MAX_DIM;
+            width = MAX_DIM;
           } else {
-            width = (width / height) * maxDimension;
-            height = maxDimension;
+            width = (width / height) * MAX_DIM;
+            height = MAX_DIM;
           }
         }
-        
+        const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
-        
-        // Start with quality 0.8 and reduce if needed
         let quality = 0.8;
-        canvas.toBlob(async (blob) => {
-          if (blob) {
-            // If still too large, try lower quality
-            if (blob.size > 5242880) {
-              quality = 0.6;
-              canvas.toBlob(async (secondBlob) => {
-                if (secondBlob) {
-                  const compressedFile = new File([secondBlob], file.name, {
-                    type: 'image/jpeg',
-                    lastModified: Date.now(),
-                  });
-                  resolve(compressedFile);
-                } else {
-                  reject(new Error('Compression failed'));
-                }
-              }, 'image/jpeg', quality);
+        function tryCompress() {
+          canvas.toBlob((blob) => {
+            if (!blob) return resolve(null);
+            if (blob.size <= MAX_SIZE || quality <= MIN_QUALITY) {
+              if (blob.size > MAX_SIZE) {
+                // Can't compress enough
+                resolve(null);
+              } else {
+                resolve(new File([blob], file.name, {
+                  type: 'image/jpeg',
+                  lastModified: Date.now(),
+                }));
+              }
             } else {
-              const compressedFile = new File([blob], file.name, {
-                type: 'image/jpeg',
-                lastModified: Date.now(),
-              });
-              resolve(compressedFile);
+              quality -= 0.1;
+              tryCompress();
             }
-          } else {
-            reject(new Error('Compression failed'));
-          }
-        }, 'image/jpeg', quality);
+          }, 'image/jpeg', quality);
+        }
+        tryCompress();
       };
-      img.onerror = reject;
+      img.onerror = () => resolve(null);
     };
-    reader.onerror = reject;
+    reader.onerror = () => resolve(null);
   });
 };
 
@@ -82,8 +73,24 @@ export default function FabricDropzone({
 }: FabricDropzoneProps) {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   
+
+  // Wrap onDrop to compress images before passing to parent
+  const handleDrop = async (acceptedFiles: File[]) => {
+    const compressedResults = await Promise.all(
+      acceptedFiles.map(file => compressImage(file))
+    );
+    const compressedFiles = compressedResults.filter(Boolean) as File[];
+    const skipped = acceptedFiles.length - compressedFiles.length;
+    if (skipped > 0) {
+      alert(`Some images could not be compressed under 5MB and were skipped. Please upload smaller or lower-resolution images.`);
+    }
+    if (compressedFiles.length > 0) {
+      onFilesAdded(compressedFiles);
+    }
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: onFilesAdded,
+    onDrop: handleDrop,
     accept: {
       'image/*': ['.png', '.jpg', '.jpeg', '.webp']
     },
