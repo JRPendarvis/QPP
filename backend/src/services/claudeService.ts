@@ -177,6 +177,9 @@ export class ClaudeService {
       console.log(responseText.substring(0, 1000));
       console.log('===== CLAUDE RESPONSE END =====');
 
+      // Store the images for use in buildPattern
+      this._fabricImages = compressedBase64s;
+
       // Parse and build pattern
       const parsedResponse = this.parseJsonResponse(responseText);
       const pattern = this.buildPattern(parsedResponse, patternForSvg, skillLevel);
