@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface UploadSectionProps {
+export interface UploadSectionProps {
   patternChoice: 'auto' | 'manual';
   selectedPatternDetails: { name: string; minFabrics: number; maxFabrics: number } | null;
   MIN_FABRICS: number;

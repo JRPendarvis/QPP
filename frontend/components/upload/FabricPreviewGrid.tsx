@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-interface FabricPreviewGridProps {
+export interface FabricPreviewGridProps {
   previews: string[];
   fabrics: File[];
   onRemove: (index: number) => void;

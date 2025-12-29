@@ -1,6 +1,6 @@
 'use client';
 
-interface GenerateButtonProps {
+export interface GenerateButtonProps {
   onClick: () => void;
   disabled: boolean;
   generating: boolean;

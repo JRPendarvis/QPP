@@ -7,7 +7,7 @@ import { useDropzone } from 'react-dropzone';
 import { useRef } from 'react';
 
 
-interface FabricDropzoneProps {
+export interface FabricDropzoneProps {
   onFilesAdded: (files: File[]) => void;
   currentCount: number;
   maxFiles: number;

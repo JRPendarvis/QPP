@@ -7,7 +7,7 @@ interface PatternOption {
   maxFabrics: number;
 }
 
-interface PatternSelectionSectionProps {
+export interface PatternSelectionSectionProps {
   patternChoice: 'auto' | 'manual';
   setPatternChoice: (choice: 'auto' | 'manual') => void;
   selectedPattern: string;
