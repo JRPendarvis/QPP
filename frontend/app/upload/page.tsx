@@ -167,6 +167,8 @@ export default function UploadPage() {
     clearAll,
     resetPattern,
     generatePattern,
+    setFabrics,
+    setPreviews,
   } = usePatternGeneration();
 
   // Compute total uploaded image size directly from fabrics
@@ -475,6 +477,18 @@ export default function UploadPage() {
                     fabrics={fabrics}
                     onRemove={removeFabric}
                     onClearAll={clearAll}
+                    onReorder={(fromIdx, toIdx) => {
+                      if (fromIdx === toIdx) return;
+                      // Reorder fabrics and previews arrays
+                      const newFabrics = [...fabrics];
+                      const [movedFabric] = newFabrics.splice(fromIdx, 1);
+                      newFabrics.splice(toIdx, 0, movedFabric);
+                      const newPreviews = [...previews];
+                      const [movedPreview] = newPreviews.splice(fromIdx, 1);
+                      newPreviews.splice(toIdx, 0, movedPreview);
+                      setFabrics(newFabrics);
+                      setPreviews(newPreviews);
+                    }}
                   />
                   {/* Drag-and-drop Role assignment UI */}
                   <div className="mt-6">

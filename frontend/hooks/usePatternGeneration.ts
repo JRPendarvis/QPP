@@ -126,5 +126,7 @@ export function usePatternGeneration() {
     clearAll,
     resetPattern,
     generatePattern,
+    setFabrics,
+    setPreviews,
   };
 }

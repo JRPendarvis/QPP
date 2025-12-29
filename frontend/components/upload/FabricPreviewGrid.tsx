@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 interface FabricPreviewGridProps {
   previews: string[];
   fabrics: File[];
   onRemove: (index: number) => void;
   onClearAll: () => void;
+  onReorder: (fromIdx: number, toIdx: number) => void;
 }
 
 export default function FabricPreviewGrid({
@@ -12,7 +14,9 @@ export default function FabricPreviewGrid({
   fabrics,
   onRemove,
   onClearAll,
+  onReorder,
 }: FabricPreviewGridProps) {
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   return (
     <div className="mt-8">
       <div className="flex justify-between items-center mb-4">
@@ -31,18 +35,34 @@ export default function FabricPreviewGrid({
         {previews.map((preview, index) => (
           <div
             key={index}
-            className="relative"
+            className={`relative group ${draggedIdx === index ? 'opacity-60' : ''}`}
             draggable
             onDragStart={e => {
+              setDraggedIdx(index);
+              e.dataTransfer.effectAllowed = 'move';
               e.dataTransfer.setData('fabricIdx', String(index));
             }}
-            title="Drag to assign role"
+            onDragEnd={() => setDraggedIdx(null)}
+            onDragOver={e => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+            }}
+            onDrop={e => {
+              e.preventDefault();
+              const fromIdx = draggedIdx;
+              const toIdx = index;
+              if (fromIdx !== null && fromIdx !== toIdx) {
+                onReorder(fromIdx, toIdx);
+              }
+              setDraggedIdx(null);
+            }}
+            title="Drag to reorder or assign role"
             style={{ cursor: 'grab' }}
           >
             <div className="aspect-square rounded-lg overflow-hidden border border-gray-200">
               <img
                 src={preview}
-                alt={`Fabric ${index + 1}`}
+                alt={fabrics[index]?.name || `Fabric ${index + 1}`}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -64,12 +84,13 @@ export default function FabricPreviewGrid({
                 />
               </svg>
             </button>
-            <p className="mt-1 text-xs text-gray-500 truncate">
-              {fabrics[index].name}
+            <p className="mt-1 text-xs text-gray-700 truncate text-center">
+              <span className="font-medium">{fabrics[index]?.name || `Fabric ${index + 1}`}</span>
             </p>
           </div>
         ))}
       </div>
+      <p className="mt-2 text-xs text-gray-400">Drag and drop to reorder fabrics. The order affects pattern generation and role assignment.</p>
     </div>
   );
 }
