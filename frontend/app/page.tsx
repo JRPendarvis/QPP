@@ -145,6 +145,15 @@ export default function UploadPage() {
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
   
+  "use client";
+
+  // Extend Window interface for drag-and-drop fabric reordering
+  declare global {
+    interface Window {
+      __setFabrics?: (fabrics: File[]) => void;
+      __setPreviews?: (previews: string[]) => void;
+    }
+  }
   const {
     fabrics,
     previews,
@@ -154,7 +163,6 @@ export default function UploadPage() {
     MAX_FABRICS,
     MIN_FABRICS,
     handleFilesAdded,
-    removeFabric,
     clearAll,
     resetPattern,
     generatePattern,
