@@ -5,7 +5,8 @@ declare global {
     __setPreviews?: (previews: string[]) => void;
   }
 }
-'use client';
+
+"use client";
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
