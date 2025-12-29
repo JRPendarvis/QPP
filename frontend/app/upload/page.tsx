@@ -457,15 +457,12 @@ export default function UploadPage() {
               {/* Validation Message */}
               <ValidationMessage message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} />
 
-              {/* Generate Button */}
+              {/* Generate Button (always visible) */}
               <div className="mt-6 flex justify-end">
                 <button
-                  className={`px-6 py-3 rounded-md text-white font-semibold transition-colors duration-200 ${fabricCountValid && !fabricValidationMessage ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-300 cursor-not-allowed'}`}
-                  disabled={!fabricCountValid || !!fabricValidationMessage}
+                  className="px-6 py-3 rounded-md text-white font-semibold transition-colors duration-200 bg-indigo-600 hover:bg-indigo-700"
                   onClick={() => {
-                    if (fabricCountValid && !fabricValidationMessage) {
-                      generatePattern(currentSkill, challengeMe, patternChoice === 'manual' ? selectedPattern : undefined);
-                    }
+                    generatePattern(currentSkill, challengeMe, patternChoice === 'manual' ? selectedPattern : undefined);
                   }}
                   data-testid="generate-button"
                 >
