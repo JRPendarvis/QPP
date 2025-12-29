@@ -1,41 +1,6 @@
-'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
-import { RoleAssignments, handleRoleChange } from '../helpers/roleAssignments';
-// Fabric roles for assignment
-const FABRIC_ROLES = [
-  { key: 'background', label: 'Background' },
-  { key: 'primary', label: 'Primary' },
-  { key: 'secondary', label: 'Secondary' },
-  { key: 'accent', label: 'Accent' },
-];
-import { usePatternGeneration } from '@/hooks/usePatternGeneration';
-import Navigation from '@/components/Navigation';
-import UploadHeader from '@/components/upload/UploadHeader';
-import FabricDropzone from '@/components/upload/FabricDropzone';
-import FabricPreviewGrid from '@/components/upload/FabricPreviewGrid';
-import GenerateButton from '@/components/upload/GenerateButton';
-import PatternDisplay from '@/components/upload/PatternDisplay';
-import api from '@/lib/api';
 
-const SKILL_LEVELS: Record<string, string> = {
-  beginner: 'Beginner',
-  advanced_beginner: 'Advanced Beginner',
-  intermediate: 'Intermediate',
-  advanced: 'Advanced',
-  expert: 'Expert',
-};
-
-const SKILL_HIERARCHY = [
-  'beginner',
-  'advanced_beginner',
-  'intermediate',
-  'advanced',
-  'expert',
-];
-
+  //
 const NEXT_LEVEL: Record<string, string> = {
   beginner: 'advanced_beginner',
   advanced_beginner: 'intermediate',
@@ -44,8 +9,6 @@ const NEXT_LEVEL: Record<string, string> = {
   expert: 'expert',
 };
 
-// Pattern options with accurate fabric count requirements
-// These values must match the backend PatternDefinition minColors/maxColors
 const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabrics: number; maxFabrics: number }[]> = {
   beginner: [
     { id: 'simple-squares', name: 'Simple Squares', minFabrics: 1, maxFabrics: 8 },
@@ -84,37 +47,61 @@ const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabrics: nu
   ],
 };
 
-/**
- * Get all patterns available for a skill level (includes current level and all levels below)
- */
 function getPatternsForSkillLevel(skillLevel: string): { id: string; name: string; minFabrics: number; maxFabrics: number }[] {
+  const SKILL_HIERARCHY = [
+    'beginner',
+    'advanced_beginner',
+    'intermediate',
+    'advanced',
+    'expert',
+  ];
   const skillIndex = SKILL_HIERARCHY.indexOf(skillLevel);
-  
-  // If skill level not found, default to beginner
-  if (skillIndex === -1) {
-    return PATTERN_OPTIONS['beginner'] || [];
-  }
-
-  // Collect patterns from current level and all levels below
+  if (skillIndex === -1) return PATTERN_OPTIONS['beginner'] || [];
   const availablePatterns: { id: string; name: string; minFabrics: number; maxFabrics: number }[] = [];
-  
   for (let i = 0; i <= skillIndex; i++) {
     const levelPatterns = PATTERN_OPTIONS[SKILL_HIERARCHY[i]] || [];
     availablePatterns.push(...levelPatterns);
   }
-
   return availablePatterns;
 }
 
-/**
- * Format fabric count range for display
- */
 function formatFabricRange(min: number, max: number): string {
   if (min === max) {
     return `${min} fabric${min !== 1 ? 's' : ''}`;
   }
   return `${min}-${max} fabrics`;
 }
+
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, useMemo } from 'react';
+import { RoleAssignments, handleRoleChange } from '../helpers/roleAssignments';
+// Fabric roles for assignment
+const FABRIC_ROLES = [
+  { key: 'background', label: 'Background' },
+  { key: 'primary', label: 'Primary' },
+  { key: 'secondary', label: 'Secondary' },
+  { key: 'accent', label: 'Accent' },
+];
+import { usePatternGeneration } from '@/hooks/usePatternGeneration';
+import Navigation from '@/components/Navigation';
+import UploadHeader from '@/components/upload/UploadHeader';
+import FabricDropzone from '@/components/upload/FabricDropzone';
+import FabricPreviewGrid from '@/components/upload/FabricPreviewGrid';
+
+import UploadSection from '@/components/upload/UploadSection';
+import RoleAssignmentSection from '@/components/upload/RoleAssignmentSection';
+import ValidationMessage from '@/components/upload/ValidationMessage';
+import PatternDisplay from '@/components/upload/PatternDisplay';
+import api from '@/lib/api';
+
+const SKILL_LEVELS: Record<string, string> = {
+  beginner: 'Beginner',
+  advanced_beginner: 'Advanced Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+  expert: 'Expert',
+};
 
 interface UserProfile {
   skillLevel: string;
@@ -152,12 +139,11 @@ export default function UploadPage() {
     secondary: null,
     accent: null,
   });
-  
 
   const {
     fabrics,
     previews,
-    generating,
+
     pattern,
     error,
     MAX_FABRICS,
@@ -166,7 +152,7 @@ export default function UploadPage() {
     removeFabric,
     clearAll,
     resetPattern,
-    generatePattern,
+
     setFabrics,
     setPreviews,
   } = usePatternGeneration();
@@ -268,16 +254,7 @@ export default function UploadPage() {
   // Handler: when user changes a role for a fabric
 
 
-  const handleGenerateClick = () => {
-    if (profile && fabricCountValid) {
-      const patternId = patternChoice === 'manual' ? selectedPattern : undefined;
-      // Only send roleAssignments if at least one role is assigned
-      // generatePattern expects (skillLevel, challengeMe, patternId?)
-      // If you want to pass roleAssignments, update usePatternGeneration accordingly
-      // For now, just call with 2-3 args:
-      generatePattern(profile.skillLevel, challengeMe, patternId);
-    }
-  };
+
 
   // Reset selected pattern when switching back to auto
   const handlePatternChoiceChange = (choice: 'auto' | 'manual') => {
@@ -427,46 +404,21 @@ export default function UploadPage() {
                   </label>
                 </div>
 
-                {/* STEP 2: Upload Section */}
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Step 2: Upload Your Fabric Images
-                  </h2>
-                  
-                  <p className="text-gray-600 mb-4">
-                    {patternChoice === 'manual' && selectedPatternDetails ? (
-                      <>
-                        <span className="font-medium">{selectedPatternDetails.name}</span> requires{' '}
-                        <span className="font-medium text-indigo-600">
-                          {formatFabricRange(selectedPatternDetails.minFabrics, selectedPatternDetails.maxFabrics)}
-                        </span>
-                      </>
-                    ) : (
-                      <>Upload {MIN_FABRICS}-{MAX_FABRICS} fabric images to generate your quilt pattern</>
-                    )}
-                  </p>
-                  
-                  <p className="text-sm text-gray-500 mb-6">
-                    Supported formats: JPG, PNG, WEBP (max 5MB per image)
-                  </p>
-
-                  <FabricDropzone
-                    onFilesAdded={handleFilesAdded}
-                    currentCount={fabrics.length}
-                    maxFiles={effectiveMaxFabrics}
-                    totalSize={totalImageSize}
-                  />
-                  
-                  {/* Fabric count indicator */}
-                  {fabrics.length > 0 && (
-                    <div className={`mt-4 text-sm ${fabricCountValid ? 'text-green-600' : 'text-amber-600'}`}>
-                      {fabrics.length} of {patternChoice === 'manual' && selectedPatternDetails 
-                        ? formatFabricRange(selectedPatternDetails.minFabrics, selectedPatternDetails.maxFabrics)
-                        : `${MIN_FABRICS}-${MAX_FABRICS}`
-                      } fabrics uploaded
-                    </div>
-                  )}
-                </div>
+                <UploadSection
+                  patternChoice={patternChoice}
+                  selectedPatternDetails={selectedPatternDetails}
+                  MIN_FABRICS={MIN_FABRICS}
+                  MAX_FABRICS={MAX_FABRICS}
+                  fabricsLength={fabrics.length}
+                  formatFabricRange={formatFabricRange}
+                  fabricCountValid={fabricCountValid}
+                />
+                <FabricDropzone
+                  onFilesAdded={handleFilesAdded}
+                  currentCount={fabrics.length}
+                  maxFiles={effectiveMaxFabrics}
+                  totalSize={totalImageSize}
+                />
               </div>
 
               {/* Fabric Preview Grid with drag-and-drop role assignment UI */}
@@ -490,70 +442,20 @@ export default function UploadPage() {
                       setPreviews(newPreviews);
                     }}
                   />
-                  {/* Drag-and-drop Role assignment UI */}
-                  <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-2">Assign Fabric Roles (drag and drop)</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {FABRIC_ROLES.map(role => (
-                        <div
-                          key={role.key}
-                          onDragOver={e => e.preventDefault()}
-                          onDrop={e => {
-                            const fabricIdx = Number(e.dataTransfer.getData('fabricIdx'));
-                            if (!isNaN(fabricIdx)) {
-                              setRoleAssignments(prev => handleRoleChange(prev, fabrics, fabricIdx, role.key));
-                            }
-                          }}
-                          className="flex items-center space-x-4 p-4 border-2 border-dashed rounded min-h-16 bg-gray-50"
-                        >
-                          <span className="font-medium w-24">{role.label}:</span>
-                          {roleAssignments[role.key as keyof RoleAssignments] !== null ? (
-                            <span className="truncate max-w-xs text-gray-700">
-                              {(() => {
-                                const assignment = roleAssignments[role.key as keyof RoleAssignments];
-                                if (assignment && typeof assignment.fabricIndex === 'number') {
-                                  return fabrics[assignment.fabricIndex]?.name || `Fabric ${assignment.fabricIndex + 1}`;
-                                }
-                                return '';
-                              })()}
-                              <button
-                                className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-600 rounded"
-                                onClick={() => setRoleAssignments(prev => ({ ...prev, [role.key]: null }))}
-                              >
-                                Remove
-                              </button>
-                            </span>
-                          ) : (
-                            <span className="text-gray-400">Drop a fabric here</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <RoleAssignmentSection
+                    fabrics={fabrics}
+                    FABRIC_ROLES={FABRIC_ROLES}
+                    roleAssignments={roleAssignments}
+                    setRoleAssignments={setRoleAssignments}
+                    handleRoleChange={handleRoleChange}
+                  />
                 </div>
               )}
 
               {/* Validation Message */}
-              {fabricValidationMessage && fabrics.length > 0 && (
-                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="flex items-center text-amber-800">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span>{fabricValidationMessage}</span>
-                  </div>
-                </div>
-              )}
+              <ValidationMessage message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} />
 
-              {/* Generate Button */}
-              {fabrics.length > 0 && (
-                <GenerateButton
-                  onClick={handleGenerateClick}
-                  disabled={!fabricCountValid || generating}
-                  generating={generating}
-                  fabricCount={fabrics.length}
-                />
-              )}
+              {/* Generate Button removed as per user request */}
             </>
           )}
 
