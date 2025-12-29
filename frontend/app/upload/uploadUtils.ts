@@ -16,14 +16,14 @@ export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabr
     { id: 'rail-fence', name: 'Rail Fence', minFabrics: 3, maxFabrics: 5 },
   ],
   advanced_beginner: [
-    { id: 'four-patch', name: 'Four Patch', minFabrics: 3, maxFabrics: 8 },
-    { id: 'nine-patch', name: 'Nine Patch', minFabrics: 2, maxFabrics: 9 },
-    { id: 'half-square-triangles', name: 'Half-Square Triangles', minFabrics: 2, maxFabrics: 8 },
+    { id: 'four-patch', name: 'Four Patch', minFabrics: 3, maxFabrics: 4 },
+    { id: 'nine-patch', name: 'Nine Patch', minFabrics: 2, maxFabrics: 5 },
+    { id: 'half-square-triangles', name: 'Half-Square Triangles', minFabrics: 2, maxFabrics: 6 },
     { id: 'hourglass', name: 'Hourglass', minFabrics: 2, maxFabrics: 4 },
     { id: 'bow-tie', name: 'Bow Tie', minFabrics: 2, maxFabrics: 3 },
   ],
   intermediate: [
-    { id: 'flying-geese', name: 'Flying Geese', minFabrics: 2, maxFabrics: 8 },
+    { id: 'flying-geese', name: 'Flying Geese', minFabrics: 2, maxFabrics: 6 },
     { id: 'pinwheel', name: 'Pinwheel', minFabrics: 2, maxFabrics: 4 },
     { id: 'log-cabin', name: 'Log Cabin', minFabrics: 3, maxFabrics: 8 },
     { id: 'sawtooth-star', name: 'Sawtooth Star', minFabrics: 2, maxFabrics: 3 },
@@ -31,18 +31,18 @@ export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabr
     { id: 'churn-dash', name: 'Churn Dash', minFabrics: 2, maxFabrics: 3 },
   ],
   advanced: [
-    { id: 'lone-star', name: 'Lone Star', minFabrics: 3, maxFabrics: 8 },
+    { id: 'lone-star', name: 'Lone Star', minFabrics: 4, maxFabrics: 8 },
     { id: 'mariners-compass', name: "Mariner's Compass", minFabrics: 4, maxFabrics: 6 },
-    { id: 'new-york-beauty', name: 'New York Beauty', minFabrics: 4, maxFabrics: 5 },
+    { id: 'new-york-beauty', name: 'New York Beauty', minFabrics: 3, maxFabrics: 5 },
     { id: 'storm-at-sea', name: 'Storm at Sea', minFabrics: 3, maxFabrics: 4 },
-    { id: 'drunkards-path', name: "Drunkard's Path", minFabrics: 2, maxFabrics: 2 },
+    { id: 'drunkards-path', name: "Drunkard's Path", minFabrics: 2, maxFabrics: 4 },
   ],
   expert: [
     { id: 'feathered-star', name: 'Feathered Star', minFabrics: 3, maxFabrics: 5 },
-    { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden", minFabrics: 3, maxFabrics: 8 },
-    { id: 'double-wedding-ring', name: 'Double Wedding Ring', minFabrics: 3, maxFabrics: 4 },
+    { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden", minFabrics: 3, maxFabrics: 5 },
+    { id: 'double-wedding-ring', name: 'Double Wedding Ring', minFabrics: 3, maxFabrics: 6 },
     { id: 'pickle-dish', name: 'Pickle Dish', minFabrics: 4, maxFabrics: 6 },
-    { id: 'complex-medallion', name: 'Complex Medallion', minFabrics: 3, maxFabrics: 8 },
+    { id: 'complex-medallion', name: 'Complex Medallion', minFabrics: 4, maxFabrics: 8 },
   ],
 };
 

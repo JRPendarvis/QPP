@@ -1,3 +1,4 @@
+// index.ts
 import { PatternDefinition } from '../types';
 import { GRANDMOTHERS_FLOWER_GARDEN_TEMPLATE } from './template';
 import { GRANDMOTHERS_FLOWER_GARDEN_PROMPT } from './prompt';
@@ -8,28 +9,63 @@ const GrandmothersFlowerGarden: PatternDefinition = {
   template: GRANDMOTHERS_FLOWER_GARDEN_TEMPLATE,
   prompt: GRANDMOTHERS_FLOWER_GARDEN_PROMPT,
   minColors: 3,
-  maxColors: 4,
-   allowRotation: false,
+  maxColors: 5,
+  allowRotation: false,
   /**
-   * Grandmother's Flower Garden uses hexagons to create flower clusters
-   * Center hexagon (flower center) + ring of petals + pathway/background
-   * Colors must stay CONSISTENT for the garden to bloom properly
-   * COLOR1 = flower center, COLOR2 = petals, COLOR3 = pathway/background
+   * Grandmother's Flower Garden color roles:
+   * COLOR1 = background/pathway
+   * COLOR2 = flower center
+   * COLOR3 = inner petals (positions 1, 3, 5)
+   * COLOR4 = outer petals (positions 2, 4, 6) - falls back to COLOR3 if not provided
+   * COLOR5 = second flower center for variety - falls back to COLOR2 if not provided
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    if (fabricColors.length < 3) {
+    const len = fabricColors.length;
+    
+    // Minimum 3 colors: background, center, petals
+    if (len < 3) {
       return [
         fabricColors[0],
+        fabricColors[1] || fabricColors[0],
+        fabricColors[1] || fabricColors[0],
         fabricColors[1] || fabricColors[0],
         fabricColors[1] || fabricColors[0]
       ];
     }
     
-    // Consistent colors every block - hexagon flowers must align
-    return [fabricColors[0], fabricColors[1], fabricColors[2]];
+    // 3 colors: background, center, all petals same
+    if (len === 3) {
+      return [
+        fabricColors[0],  // background
+        fabricColors[1],  // center
+        fabricColors[2],  // inner petals
+        fabricColors[2],  // outer petals (same)
+        fabricColors[1]   // alternate center (same)
+      ];
+    }
+    
+    // 4 colors: background, center, inner petals, outer petals
+    if (len === 4) {
+      return [
+        fabricColors[0],  // background
+        fabricColors[1],  // center
+        fabricColors[2],  // inner petals
+        fabricColors[3],  // outer petals
+        fabricColors[1]   // alternate center (same as primary)
+      ];
+    }
+    
+    // 5 colors: full variety
+    return [
+      fabricColors[0],  // background
+      fabricColors[1],  // center
+      fabricColors[2],  // inner petals
+      fabricColors[3],  // outer petals
+      fabricColors[4]   // alternate center for row variation
+    ];
   }
 };
 
