@@ -156,6 +156,7 @@ export default function UploadPage() {
 
     setFabrics,
     setPreviews,
+    generatePattern,
   } = usePatternGeneration();
 
   // Compute total uploaded image size directly from fabrics
@@ -456,7 +457,21 @@ export default function UploadPage() {
               {/* Validation Message */}
               <ValidationMessage message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} />
 
-              {/* Generate Button removed as per user request */}
+              {/* Generate Button */}
+              <div className="mt-6 flex justify-end">
+                <button
+                  className={`px-6 py-3 rounded-md text-white font-semibold transition-colors duration-200 ${fabricCountValid && !fabricValidationMessage ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-300 cursor-not-allowed'}`}
+                  disabled={!fabricCountValid || !!fabricValidationMessage}
+                  onClick={() => {
+                    if (fabricCountValid && !fabricValidationMessage) {
+                      generatePattern(currentSkill, challengeMe, patternChoice === 'manual' ? selectedPattern : undefined);
+                    }
+                  }}
+                  data-testid="generate-button"
+                >
+                  Generate Pattern
+                </button>
+              </div>
             </>
           )}
 
