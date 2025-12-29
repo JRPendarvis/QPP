@@ -334,6 +334,7 @@ export default function UploadPage() {
                     onFilesAdded={handleFilesAdded}
                     currentCount={fabrics.length}
                     maxFiles={MAX_FABRICS}
+                    totalSize={fabrics && fabrics.length > 0 ? fabrics.reduce((sum, f) => sum + (f.size || 0), 0) : 0}
                   />
                 </div>
               </div>
