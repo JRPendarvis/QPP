@@ -29,7 +29,16 @@ export default function FabricPreviewGrid({
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {previews.map((preview, index) => (
-          <div key={index} className="relative">
+          <div
+            key={index}
+            className="relative"
+            draggable
+            onDragStart={e => {
+              e.dataTransfer.setData('fabricIdx', String(index));
+            }}
+            title="Drag to assign role"
+            style={{ cursor: 'grab' }}
+          >
             <div className="aspect-square rounded-lg overflow-hidden border border-gray-200">
               <img
                 src={preview}
