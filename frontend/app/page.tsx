@@ -1,3 +1,10 @@
+// Extend Window interface for drag-and-drop fabric reordering
+declare global {
+  interface Window {
+    __setFabrics?: (fabrics: File[]) => void;
+    __setPreviews?: (previews: string[]) => void;
+  }
+}
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
