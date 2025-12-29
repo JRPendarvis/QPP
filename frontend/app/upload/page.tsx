@@ -153,6 +153,7 @@ export default function UploadPage() {
     accent: null,
   });
   
+
   const {
     fabrics,
     previews,
@@ -167,6 +168,11 @@ export default function UploadPage() {
     resetPattern,
     generatePattern,
   } = usePatternGeneration();
+
+  // Compute total uploaded image size directly from fabrics
+  const totalImageSize = fabrics && fabrics.length > 0
+    ? fabrics.reduce((sum, f) => sum + (f.size || 0), 0)
+    : 0;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -448,6 +454,7 @@ export default function UploadPage() {
                     onFilesAdded={handleFilesAdded}
                     currentCount={fabrics.length}
                     maxFiles={effectiveMaxFabrics}
+                    totalSize={totalImageSize}
                   />
                   
                   {/* Fabric count indicator */}
@@ -525,7 +532,12 @@ export default function UploadPage() {
               pattern={pattern}
               userTier={profile.subscriptionTier}
               usage={profile.usage}
-              onStartOver={resetPattern}
+              onStartOver={() => {
+                resetPattern();
+                setRoleAssignments({ background: null, primary: null, secondary: null, accent: null });
+                setSelectedPattern('');
+                setPatternChoice('auto');
+              }}
             />
           )}
         </div>
