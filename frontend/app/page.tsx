@@ -346,6 +346,22 @@ export default function UploadPage() {
                   fabrics={fabrics}
                   onRemove={removeFabric}
                   onClearAll={clearAll}
+                  onReorder={(fromIdx, toIdx) => {
+                    if (fromIdx === toIdx) return;
+                    const newFabrics = [...fabrics];
+                    const [movedFabric] = newFabrics.splice(fromIdx, 1);
+                    newFabrics.splice(toIdx, 0, movedFabric);
+                    const newPreviews = [...previews];
+                    const [movedPreview] = newPreviews.splice(fromIdx, 1);
+                    newPreviews.splice(toIdx, 0, movedPreview);
+                    // If using usePatternGeneration, expose setFabrics/setPreviews for this
+                    // @ts-ignore
+                    if (typeof window !== 'undefined') {
+                      // @ts-ignore
+                      window.__setFabrics && window.__setFabrics(newFabrics);
+                      window.__setPreviews && window.__setPreviews(newPreviews);
+                    }
+                  }}
                 />
               )}
 
