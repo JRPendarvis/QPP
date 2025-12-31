@@ -165,11 +165,12 @@ export default function PatternDisplay({
     setDownloading(true);
 
     try {
+      const token = localStorage.getItem('token'); // Or use your AUTH_CONSTANTS.TOKEN_KEY
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/patterns/${pattern.id}/download`,
         {
           method: 'GET',
-          credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         }
       );
 
