@@ -61,11 +61,11 @@ export class PromptBuilder {
   static selectPattern(skillLevel: string, selectedPattern?: string, fabricCount?: number): PatternSelectionResult {
     // Get all patterns available for this skill level (includes current and lower levels)
     const availablePatternIds = getPatternsForSkillLevel(skillLevel);
-    
+
     let patternForSvg: string;
     let patternInstruction: string;
     let patternId: string | undefined;
-    
+
     if (selectedPattern && selectedPattern !== 'auto') {
       // User selected a specific pattern - use the ID directly
       patternId = selectedPattern;
@@ -74,58 +74,44 @@ export class PromptBuilder {
       console.log(`📋 User selected pattern: ${patternForSvg} (ID: ${patternId})`);
     } else {
       // Auto mode - pick best pattern based on fabric count if provided
-      if (fabricCount) {
-        // Score all available patterns based on fabric count
-        const scoredPatterns = availablePatternIds
-          .map(id => {
-            const pattern = getPatternById(id);
-            if (!pattern) return null;
-            const score = calculateFabricCountScore(pattern, fabricCount);
-            return { pattern, score };
-          })
-          .filter((item): item is { pattern: any; score: number } => item !== null)
+      let filteredPatterns = availablePatternIds
+        .map(id => getPatternById(id))
+        .filter((p): p is any => !!p && typeof p.minColors === 'number' && typeof p.maxFabrics === 'number');
+
+      if (typeof fabricCount === 'number') {
+        // Only consider patterns that support the given fabric count
+        filteredPatterns = filteredPatterns.filter(
+          (pattern) => fabricCount >= pattern.minColors && fabricCount <= pattern.maxFabrics
+        );
+      }
+
+      if (filteredPatterns.length > 0) {
+        // Score all filtered patterns based on fabric count
+        const scoredPatterns = filteredPatterns
+          .map(pattern => ({ pattern, score: calculateFabricCountScore(pattern, fabricCount ?? pattern.recommendedFabricCount) }))
           .sort((a, b) => b.score - a.score);
 
-        if (scoredPatterns.length > 0) {
-          // Pick from top 3 scored patterns (adds variety while staying optimal)
-          const topPatterns = scoredPatterns.slice(0, Math.min(3, scoredPatterns.length));
-          const selected = topPatterns[Math.floor(Math.random() * topPatterns.length)];
-          
-          patternId = selected.pattern.id;
-          patternForSvg = selected.pattern.name;
-          
-          console.log(`🎯 Fabric-count optimized selection: ${patternForSvg} (ID: ${patternId})`);
-          console.log(`   Fabric count: ${fabricCount}, Match score: ${selected.score}/100`);
-          console.log(`   Top matches: ${topPatterns.map(p => `${p.pattern.name} (${p.score})`).join(', ')}`);
-        } else {
-          // Fallback to random if scoring fails
-          const randomPatternId = availablePatternIds[Math.floor(Math.random() * availablePatternIds.length)];
-          const patternObj = getPatternById(randomPatternId);
-          patternId = patternObj?.id || randomPatternId;
-          patternForSvg = patternObj?.name || PatternFormatter.formatPatternName(randomPatternId);
-          console.log(`⚠️ Fallback random selection: ${patternForSvg}`);
-        }
+        // Pick from top 3 scored patterns (adds variety while staying optimal)
+        const topPatterns = scoredPatterns.slice(0, Math.min(3, scoredPatterns.length));
+        const selected = topPatterns[Math.floor(Math.random() * topPatterns.length)];
+
+        patternId = selected.pattern.id;
+        patternForSvg = selected.pattern.name;
+
+        console.log(`🎯 Auto mode: selected pattern '${patternForSvg}' (ID: ${patternId}) for fabric count ${fabricCount}`);
       } else {
-        // No fabric count provided - random selection
-        const randomPatternId = availablePatternIds[Math.floor(Math.random() * availablePatternIds.length)];
-        const patternObj = getPatternById(randomPatternId);
-        
-        if (patternObj) {
-          patternId = patternObj.id;
-          patternForSvg = patternObj.name;
-        } else {
-          // Fallback if pattern not found
-          patternId = randomPatternId;
-          patternForSvg = PatternFormatter.formatPatternName(randomPatternId);
-        }
-        
-        console.log(`🎲 Random selection: ${patternForSvg} (ID: ${patternId})`);
+        // No valid pattern for this fabric count and skill level
+        patternId = undefined;
+        patternForSvg = '';
+        console.warn(`❌ No valid pattern found for skill level '${skillLevel}' and fabric count ${fabricCount}`);
       }
-      
-      patternInstruction = `**REQUIRED PATTERN TYPE:** Create a "${patternForSvg}" pattern. This pattern is appropriate for the ${skillLevel} skill level.`;
-      console.log(`   ${availablePatternIds.length} patterns available at ${skillLevel} level`);
+
+      patternInstruction = patternForSvg
+        ? `**REQUIRED PATTERN TYPE:** Create a "${patternForSvg}" pattern. This pattern is appropriate for the ${skillLevel} skill level.`
+        : `**ERROR:** No valid pattern found for your skill level and number of fabrics.`;
+      console.log(`   ${filteredPatterns.length} patterns available at ${skillLevel} level for fabric count ${fabricCount}`);
     }
-    
+
     return { patternForSvg, patternInstruction, patternId };
   }
 
