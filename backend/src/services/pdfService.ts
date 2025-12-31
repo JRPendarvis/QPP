@@ -1,14 +1,7 @@
 import PDFDocument from 'pdfkit';
-
-interface QuiltPattern {
-  patternName: string;
-  description: string;
-  fabricLayout: string;
-  difficulty: string;
-  estimatedSize: string;
-  instructions: string[];
-  visualSvg: string;
-}
+import { QuiltPattern } from '../types/QuiltPattern';
+import { drawSVGPattern } from '../utils/pdfSvgUtils';
+import { renderPatternBlocks } from '../utils/pdfPatternBlocks';
 
 export class PDFService {
   async generatePatternPDF(pattern: QuiltPattern, userName: string): Promise<Buffer> {
@@ -56,26 +49,8 @@ export class PDFService {
 
         doc.moveDown(2);
 
-        // Pattern Visualization Section
-        if (pattern.visualSvg && pattern.visualSvg.includes('svg')) {
-          doc.fontSize(14)
-             .font('Helvetica-Bold')
-             .fillColor('#111827')
-             .text('Pattern Visualization')
-             .moveDown(0.5);
-
-          try {
-            this.drawSVGPattern(doc, pattern.visualSvg);
-            doc.moveDown(1.5);
-          } catch (err) {
-            console.error('Error drawing SVG:', err);
-            doc.fontSize(10)
-               .font('Helvetica')
-               .fillColor('#6B7280')
-               .text('(Pattern visualization available in web app)', { align: 'center' })
-               .moveDown(1);
-          }
-        }
+            // Pattern Visualization & Blank Block Template Sections
+            renderPatternBlocks(doc, pattern.visualSvg);
 
         // Description Section
         doc.fontSize(14)
@@ -152,36 +127,5 @@ export class PDFService {
     });
   }
 
-  private drawSVGPattern(doc: InstanceType<typeof PDFDocument>, svgString: string): void {
-    // Extract rect elements from SVG
-    const rectMatches = svgString.matchAll(/<rect[^>]+>/g);
-    
-    const startX = 200; // Center offset
-    const startY = doc.y;
-    const scale = 0.8;
-
-    for (const match of rectMatches) {
-      const rect = match[0];
-      
-      const xMatch = rect.match(/x=['"]([^'"]+)['"]/);
-      const yMatch = rect.match(/y=['"]([^'"]+)['"]/);
-      const widthMatch = rect.match(/width=['"]([^'"]+)['"]/);
-      const heightMatch = rect.match(/height=['"]([^'"]+)['"]/);
-      const fillMatch = rect.match(/fill=['"]([^'"]+)['"]/);
-
-      if (xMatch && yMatch && widthMatch && heightMatch && fillMatch) {
-        const x = parseFloat(xMatch[1]) * scale + startX;
-        const y = parseFloat(yMatch[1]) * scale + startY;
-        const width = parseFloat(widthMatch[1]) * scale;
-        const height = parseFloat(heightMatch[1]) * scale;
-        const fill = fillMatch[1];
-
-        doc.rect(x, y, width, height)
-           .fillAndStroke(fill, '#000000');
-      }
-    }
-
-    // Move cursor past visualization
-    doc.y = startY + 320;
-  }
+  // drawSVGPattern moved to utils/pdfSvgUtils.ts
 }
