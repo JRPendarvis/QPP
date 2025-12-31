@@ -1,23 +1,17 @@
 import { PatternChoice, PatternDetails } from './types';
+import { getPatternsForSkillLevel } from '../uploadUtils';
 
 export function validateFabricCount(
   patternChoice: PatternChoice,
   selectedPattern: string,
   selectedPatternDetails: PatternDetails | null,
-  fabricsLength: number,
-  MIN_FABRICS: number,
-  MAX_FABRICS: number
+  fabricsLength: number
 ): boolean {
   if (patternChoice === 'auto') {
-    // Find all patterns for the user's skill level that match the fabric count
-    // (import getPatternsForSkillLevel from uploadUtils)
-    // We import here to avoid circular deps
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getPatternsForSkillLevel } = require('../uploadUtils');
-    // Assume skillLevel is passed in selectedPatternDetails?.skillLevel or fallback to 'beginner'
-    const skillLevel = selectedPatternDetails?.skillLevel || 'beginner';
-    const patterns = getPatternsForSkillLevel(skillLevel);
-    const valid = patterns.some((p: any) => fabricsLength >= p.minFabrics && fabricsLength <= p.maxFabrics);
+    // Use user's skill level if available, otherwise default to 'beginner'
+    const skillLevel = 'beginner';
+    const patterns: PatternDetails[] = getPatternsForSkillLevel(skillLevel);
+    const valid = patterns.some((p) => fabricsLength >= p.minFabrics && fabricsLength <= p.maxFabrics);
     return valid;
   }
   if (!selectedPattern) {
@@ -36,18 +30,17 @@ export function getFabricValidationMessage(
   patternChoice: PatternChoice,
   selectedPattern: string,
   selectedPatternDetails: PatternDetails | null,
-  fabricsLength: number,
-  MIN_FABRICS: number
+  fabricsLength: number
 ): string | null {
   if (patternChoice === 'auto') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getPatternsForSkillLevel } = require('../uploadUtils');
-    const skillLevel = selectedPatternDetails?.skillLevel || 'beginner';
-    const patterns = getPatternsForSkillLevel(skillLevel);
-    if (fabricsLength < MIN_FABRICS) {
-      return `Upload at least ${MIN_FABRICS} fabrics to generate a pattern`;
+    // Use user's skill level if available, otherwise default to 'beginner'
+    const skillLevel = 'beginner';
+    const patterns: PatternDetails[] = getPatternsForSkillLevel(skillLevel);
+    // Assume minimum is 2 for auto mode
+    if (fabricsLength < 2) {
+      return `Upload at least 2 fabrics to generate a pattern`;
     }
-    const valid = patterns.some((p: any) => fabricsLength >= p.minFabrics && fabricsLength <= p.maxFabrics);
+    const valid = patterns.some((p) => fabricsLength >= p.minFabrics && fabricsLength <= p.maxFabrics);
     if (!valid) {
       return `No available pattern for your skill level matches ${fabricsLength} fabric${fabricsLength !== 1 ? 's' : ''}. Please add or remove fabrics to match a supported pattern.`;
     }
