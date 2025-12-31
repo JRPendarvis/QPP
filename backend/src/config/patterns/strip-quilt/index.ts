@@ -2,43 +2,46 @@ import { PatternDefinition } from '../types';
 import { STRIP_QUILT_TEMPLATE } from './template';
 import { STRIP_QUILT_PROMPT } from './prompt';
 
-
 const StripQuilt: PatternDefinition = {
   id: 'strip-quilt',
   name: 'Strip Quilt',
-  template: '', // Not used, see getColors and getTemplate
+  template: STRIP_QUILT_TEMPLATE,
   prompt: STRIP_QUILT_PROMPT,
-  minColors: 2,
-  maxColors: 8,
- allowRotation: false,
+  minFabrics: 2,
+  maxFabrics: 8,
+  allowRotation: false,
+  
   /**
-   * Returns the color sequence for the block (all colors in order)
+   * Strip Quilt - vertical strips of equal width
+   * fabricColors[0] = Background (first strip)
+   * fabricColors[1] = Primary (second strip)
+   * fabricColors[2] = Secondary (third strip)
+   * fabricColors[3] = Accent (fourth strip)
+   * fabricColors[4] = Contrast (fifth strip)
+   * fabricColors[5-7] = Additional strips
+   * 
+   * All colors are used in order from left to right
+   * Each strip is equal width, creating a simple striped pattern
+   * 
+   * 2 fabrics: Two equal vertical strips
+   * 3-8 fabrics: Multiple vertical strips, each fabric used once
+   * 
+   * Returns: All fabric colors in order
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    if (fabricColors.length < 2) {
-      return [fabricColors[0], fabricColors[0]];
-    }
-    return fabricColors;
-  },
-
-  /**
-   * Dynamically generates the SVG for a strip quilt block with N strips
-   */
-  getTemplate: (colors: string[]) => {
-    const n = Math.max(2, Math.min(colors.length, 8));
-    const stripWidth = 100 / n;
-    let svg = '';
-    for (let i = 0; i < n; i++) {
-      const x = (i * stripWidth).toFixed(2);
-      const width = (i === n - 1)
-        ? (100 - stripWidth * (n - 1)).toFixed(2) // last strip fills remainder
-        : stripWidth.toFixed(2);
-      svg += `<rect x="${x}" y="0" width="${width}" height="100" fill="COLOR${i + 1}" stroke="#ccc" stroke-width="0.5"/>\n`;
-    }
-    return svg;
+    const background = fabricColors[0];
+    const primary = fabricColors[1] || background;
+    const secondary = fabricColors[2] || primary;
+    const accent = fabricColors[3] || secondary;
+    const contrast = fabricColors[4] || accent;
+    const additional1 = fabricColors[5] || contrast;
+    const additional2 = fabricColors[6] || additional1;
+    const additional3 = fabricColors[7] || additional2;
+    
+    return [background, primary, secondary, accent, contrast, additional1, additional2, additional3];
   }
 };
 

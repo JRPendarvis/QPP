@@ -7,24 +7,41 @@ const DrunkardsPath: PatternDefinition = {
   name: "Drunkard's Path",
   template: DRUNKARDS_PATH_TEMPLATE,
   prompt: DRUNKARDS_PATH_PROMPT,
-  minColors: 2,
-  maxColors: 2,
-   allowRotation: false,
+  minFabrics: 2,
+  maxFabrics: 4,
+  allowRotation: true,
+  
   /**
    * Drunkard's Path has a quarter circle creating curved, winding paths
-   * Colors must stay CONSISTENT - the path effect comes from block rotation
-   * COLOR1 = background, COLOR2 = quarter circle (path)
+   * fabricColors[0] = Background (the square minus the quarter circle)
+   * fabricColors[1] = Primary (the quarter circle "path")
+   * fabricColors[2] = Secondary (optional - alternate path color for variety)
+   * fabricColors[3] = Accent (optional - additional path variation)
+   * 
+   * The winding path effect is created through block rotation at the quilt level.
+   * With 2 fabrics: consistent background + path creates traditional look
+   * With 3-4 fabrics: can create scrappy paths by rotating through Primary, Secondary, Accent
+   * 
+   * Returns: [background, path] for 2 fabrics, or [background, rotated_path] for 3-4 fabrics
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    if (fabricColors.length < 2) {
-      return [fabricColors[0], fabricColors[0]];
+    const blockIndex = opts.blockIndex ?? 0;
+    const background = fabricColors[0];
+    const primary = fabricColors[1] || background;
+    
+    if (fabricColors.length < 3) {
+      // 2 fabrics: traditional consistent path
+      return [background, primary];
     }
     
-    // Consistent colors every block - curves must align for path effect
-    return [fabricColors[0], fabricColors[1]];
+    // 3-4 fabrics: rotate through Primary, Secondary, Accent for scrappy paths
+    const pathOptions = fabricColors.slice(1); // Primary, Secondary, Accent
+    const path = pathOptions[blockIndex % pathOptions.length];
+    
+    return [background, path];
   }
 };
 

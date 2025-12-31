@@ -60,7 +60,7 @@ const patterns: Record<string, PatternDefinition> = {
 console.log('═══════════════════════════════════════════════════');
 console.log('📦 PATTERN REGISTRY INITIALIZATION');
 Object.entries(patterns).forEach(([id, def]) => {
-  console.log(`  ✅ ${id}: allowRotation=${def.allowRotation ?? true}, colors=${def.minColors}-${def.maxColors}`);
+  console.log(`  ✅ ${id}: allowRotation=${def.allowRotation ?? true}, colors=${def.minFabrics}-${def.maxFabrics}`);
 });
 console.log(`📦 Total: ${Object.keys(patterns).length} patterns loaded`);
 console.log('═══════════════════════════════════════════════════');

@@ -4,74 +4,137 @@ export const MARINERS_COMPASS_PROMPT: PatternPrompt = {
   patternName: "Mariner's Compass",
   recommendedFabricCount: 4,
   
-  characteristics: `Mariner's Compass is a dramatic radiating pattern with layered points of varying lengths:
-- 16 points total radiating from a center octagon
-- 4 long cardinal points (N, E, S, W) — most prominent
-- 4 medium ordinal points (NE, SE, SW, NW) — mid-length
-- 8 short intermediate points between the others
-- All pieced from triangular wedges — no appliqué circles
-- Center octagon anchors the design
-- Different point lengths create dramatic depth and visual interest
-- One of the most challenging and impressive traditional patterns
-- Typically a single statement block, not a repeating unit`,
+  characteristics: `Mariner's Compass is a dramatic circular pattern with radiating points like a navigational compass rose:
+- Typically 16-32 pointed wedges radiating from a center circle
+- Points alternate in length creating layered depth effect
+- Long points (cardinal directions: N, E, S, W)
+- Medium points (ordinal directions: NE, SE, SW, NW)
+- Short points (intermediate directions between the above)
+- All pieced from triangular wedges using foundation paper piecing or set-in seams
+- Center circle anchors the entire design
+- Background circle surrounds the compass rose
+- One of the most challenging and impressive traditional quilt patterns
+- Expert-level skill required - precise angles and Y-seams throughout
+- Typically a single large statement block, not a repeating pattern`,
 
-  fabricRoleGuidance: `Mariner's Compass fabric assignments (supports 2-8 fabrics):
-
-WITH 2 FABRICS:
-- COLOR1 (PRIMARY): All 16 points (cardinal, ordinal, and intermediate)
-- COLOR2 (BACKGROUND): Background square and center octagon
-
-WITH 3 FABRICS:
-- COLOR1 (PRIMARY): Long cardinal points — highest visual impact
-- COLOR2 (SECONDARY): Medium ordinal points and short intermediate points
-- COLOR3 (BACKGROUND): Background square and center octagon
+  fabricRoleGuidance: `Mariner's Compass fabric assignments (supports 4-6 fabrics):
 
 WITH 4 FABRICS (recommended):
-- COLOR1 (BACKGROUND): Background square
-- COLOR2 (PRIMARY): Long cardinal points — most prominent
-- COLOR3 (SECONDARY): Medium ordinal points
-- COLOR4 (ACCENT): Short intermediate points and center octagon
+- BACKGROUND (fabricColors[0]): Circular background and corner squares
+- PRIMARY (fabricColors[1]): Long cardinal points (N, E, S, W)
+- SECONDARY (fabricColors[2]): Medium ordinal points (NE, SE, SW, NW)
+- ACCENT (fabricColors[3]): Center circle + short intermediate points
 
-WITH 5-6 FABRICS:
-- COLOR1 (BACKGROUND): Background square
-- COLOR2 (ACCENT): Center octagon — focal anchor
-- COLOR3 (PRIMARY): Long cardinal points
-- COLOR4 (SECONDARY): Medium ordinal points
-- COLOR5-6 (TERTIARY): Short intermediate points, alternating colors
+Creates classic three-tier compass rose with clear visual hierarchy.
 
-WITH 7-8 FABRICS (maximum variety):
-- COLOR1 (BACKGROUND): Background square
-- COLOR2 (ACCENT): Center octagon
-- COLOR3-4 (PRIMARY): Long cardinal points, alternating
-- COLOR5-6 (SECONDARY): Medium ordinal points, alternating
-- COLOR7-8 (TERTIARY): Short intermediate points, alternating
+WITH 5 FABRICS:
+- BACKGROUND (fabricColors[0]): Circular background and corner squares
+- PRIMARY (fabricColors[1]): Long cardinal points (most prominent)
+- SECONDARY (fabricColors[2]): Medium ordinal points
+- ACCENT (fabricColors[3]): Center circle (focal anchor)
+- CONTRAST (fabricColors[4]): Short intermediate points
 
-High contrast between points and background makes the compass pop. Consider value gradation: light points on dark background (or vice versa).
+Separates center circle from short points for more definition.
 
-Note: Mariner's Compass is a radial design — fabric placement is fixed, not rotated block-to-block.`,
+WITH 6 FABRICS (maximum complexity):
+- BACKGROUND (fabricColors[0]): Circular background and corner squares
+- PRIMARY (fabricColors[1]): Long cardinal points
+- SECONDARY (fabricColors[2]): Medium ordinal points
+- ACCENT (fabricColors[3]): Center circle
+- CONTRAST (fabricColors[4]): Half of short intermediate points
+- ADDITIONAL (fabricColors[5]): Other half of short points (alternating)
+
+Creates maximum visual interest with alternating colors on shortest points.
+
+DESIGN TIP: Use high contrast between all point layers and Background. Consider 
+value gradation from center outward (light to dark or dark to light) to enhance 
+the radiating effect. The center circle should be bold to anchor the entire design.`,
 
   cuttingInstructions: `Mariner's Compass cutting specifics:
-- All points are elongated triangles (kite-shaped with pointed ends)
-- Use templates or foundation paper piecing for accuracy
-- Cut center octagon using template
-- Cut background square with center area open for compass
-- CRITICAL: Precise angles — even small errors multiply across 16 points
-- Foundation paper piecing strongly recommended`,
+
+COMPASS POINTS:
+All points are elongated triangular wedges (kite shapes with pointed ends)
+- LONG points (PRIMARY): 4-8 pieces (cardinal directions)
+- MEDIUM points (SECONDARY): 4-8 pieces (ordinal directions)
+- SHORT points (ACCENT/CONTRAST): 8-16 pieces (intermediate directions)
+
+BACKGROUND fabric (fabricColors[0]):
+- Cut circular background piece (or construct from arc segments)
+- Cut 4 corner squares (fill space between circle and square block edges)
+
+ACCENT fabric (fabricColors[3]):
+- Cut center circle or octagon (compass hub)
+
+CUTTING METHODS:
+1. **Foundation paper piecing** (STRONGLY RECOMMENDED):
+   - Print templates with all seam lines and angles marked
+   - Provides most accurate results for complex angles
+   - Essential for expert-level precision
+
+2. **Template method**:
+   - Create acrylic templates for each point length
+   - Trace and cut carefully with rotary cutter
+   - Requires extreme precision - even 1° off multiplies across 16-32 points
+
+CRITICAL: All compass wedges must be cut with EXACT angles. Small errors compound 
+dramatically - a 1° error per wedge creates 16-32° of mismatch at the circle edge.`,
 
   assemblyNotes: `Assembly tips for Mariner's Compass:
-- Foundation paper piece for best accuracy
-- Build in sections: quarter compass units, then halves, then whole
-- Set center octagon into the points (Y-seams required)
-- Set compass into background (more Y-seams)
-- Press carefully — many seams converge at center
-- This is an advanced pattern — patience and precision are essential`,
+
+CONSTRUCTION SEQUENCE:
+1. **Foundation paper piece wedges** (if using FPP):
+   - Follow printed lines precisely
+   - Build each point from center outward
+   - Trim each unit to template edge
+
+2. **Construct compass in quarters**:
+   - Each quarter contains 4-8 points
+   - Join points in pairs, then quarters
+   - Press seams in alternating directions to reduce bulk
+
+3. **Join quarters into halves**:
+   - Pin at center and seam intersections
+   - Sew carefully - all points must meet precisely at center
+
+4. **Join halves to complete compass rose**:
+   - Pin extensively at center and all seam intersections
+   - Many seams converge at center - use very small stitches
+
+5. **Set center circle** (Y-seams):
+   - Pin circle into center opening
+   - Sew using Y-seam technique (partial seams, pivot at corners)
+   - Start and stop stitching 1/4" from each point
+
+6. **Set compass into background**:
+   - More Y-seams to attach circular background
+   - Add corner squares last to complete block square
+
+PRESSING:
+- Press seams away from center to reduce bulk
+- Press center seam allowances open (too many layers converge)
+- Handle all pieces gently - many bias edges
+
+ACCURACY REQUIREMENTS:
+- Foundation paper piecing is STRONGLY RECOMMENDED
+- Every angle must be perfect - errors compound across all wedges
+- Pin at every seam intersection before sewing
+- Use very small stitch length (1.5-2.0) for precision
+- Check compass flatness frequently during construction
+
+This is an EXPERT-LEVEL pattern. Master simpler circular patterns 
+(like New York Beauty) before attempting Mariner's Compass.`,
 
   commonMistakes: `Avoid these Mariner's Compass mistakes:
-- Inaccurate point angles (compass won't lie flat)
-- Stretching bias edges on triangles
-- Inconsistent seam allowances (points won't meet at center)
-- Not using foundation paper piecing (accuracy suffers dramatically)
-- Rushing Y-seams when setting in center and background
-- Low contrast between points and background (pattern loses drama)
-- Adjacent point types with too-similar colors (layered effect disappears)`
+- Inaccurate wedge angles (compass won't lie flat, will ripple or pucker)
+- Not using foundation paper piecing (nearly impossible to achieve accuracy without it)
+- Stretching bias edges on wedges (all edges except block edges are bias)
+- Inconsistent seam allowances (points won't meet precisely at center)
+- Rushing Y-seams when setting center circle and background (causes puckers)
+- Not pressing seams open at center (too much bulk, center won't lie flat)
+- Low contrast between points and background (pattern loses drama and definition)
+- Adjacent point lengths with too-similar colors (layered depth effect disappears)
+- Attempting this pattern without prior experience with set-in seams and precise piecing
+- Not checking that all wedges are identical before assembly (errors multiply)
+- Pulling or stretching at center when sewing (distorts the entire compass)
+- Using directional prints for wedges (pattern orientation gets chaotic)`
 };

@@ -1,4 +1,3 @@
-// index.ts
 import { PatternDefinition } from '../types';
 import { GRANDMOTHERS_FLOWER_GARDEN_TEMPLATE } from './template';
 import { GRANDMOTHERS_FLOWER_GARDEN_PROMPT } from './prompt';
@@ -8,64 +7,35 @@ const GrandmothersFlowerGarden: PatternDefinition = {
   name: "Grandmother's Flower Garden",
   template: GRANDMOTHERS_FLOWER_GARDEN_TEMPLATE,
   prompt: GRANDMOTHERS_FLOWER_GARDEN_PROMPT,
-  minColors: 3,
-  maxColors: 5,
+  minFabrics: 3,
+  maxFabrics: 5,
   allowRotation: false,
+  
   /**
-   * Grandmother's Flower Garden color roles:
-   * COLOR1 = background/pathway
-   * COLOR2 = flower center
-   * COLOR3 = inner petals (positions 1, 3, 5)
-   * COLOR4 = outer petals (positions 2, 4, 6) - falls back to COLOR3 if not provided
-   * COLOR5 = second flower center for variety - falls back to COLOR2 if not provided
+   * Grandmother's Flower Garden color assignments:
+   * fabricColors[0] = Background (pathway hexagons between flowers)
+   * fabricColors[1] = Primary (flower center hexagon)
+   * fabricColors[2] = Secondary (inner ring of petals - 6 hexagons)
+   * fabricColors[3] = Accent (outer ring of petals - optional for more rings)
+   * fabricColors[4] = Contrast (alternate flower centers for variety - optional)
+   * 
+   * 3 fabrics: Background + Primary center + Secondary petals (one ring)
+   * 4 fabrics: Background + Primary center + Secondary inner petals + Accent outer petals
+   * 5 fabrics: Adds Contrast for alternate flower centers (creates variety across flowers)
+   * 
+   * Returns: [background, center, inner_petals, outer_petals, alternate_center]
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    const len = fabricColors.length;
+    const background = fabricColors[0];
+    const primary = fabricColors[1] || background;
+    const secondary = fabricColors[2] || primary;
+    const accent = fabricColors[3] || secondary;
+    const contrast = fabricColors[4] || primary;
     
-    // Minimum 3 colors: background, center, petals
-    if (len < 3) {
-      return [
-        fabricColors[0],
-        fabricColors[1] || fabricColors[0],
-        fabricColors[1] || fabricColors[0],
-        fabricColors[1] || fabricColors[0],
-        fabricColors[1] || fabricColors[0]
-      ];
-    }
-    
-    // 3 colors: background, center, all petals same
-    if (len === 3) {
-      return [
-        fabricColors[0],  // background
-        fabricColors[1],  // center
-        fabricColors[2],  // inner petals
-        fabricColors[2],  // outer petals (same)
-        fabricColors[1]   // alternate center (same)
-      ];
-    }
-    
-    // 4 colors: background, center, inner petals, outer petals
-    if (len === 4) {
-      return [
-        fabricColors[0],  // background
-        fabricColors[1],  // center
-        fabricColors[2],  // inner petals
-        fabricColors[3],  // outer petals
-        fabricColors[1]   // alternate center (same as primary)
-      ];
-    }
-    
-    // 5 colors: full variety
-    return [
-      fabricColors[0],  // background
-      fabricColors[1],  // center
-      fabricColors[2],  // inner petals
-      fabricColors[3],  // outer petals
-      fabricColors[4]   // alternate center for row variation
-    ];
+    return [background, primary, secondary, accent, contrast];
   }
 };
 

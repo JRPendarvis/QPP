@@ -4,69 +4,115 @@ export const STORM_AT_SEA_PROMPT: PatternPrompt = {
   patternName: 'Storm at Sea',
   recommendedFabricCount: 3,
   
-  characteristics: `Storm at Sea creates an optical illusion of rolling waves or interlocking circles:
-- Four small corner diamonds (nested diamond-in-diamond units)
-- Four elongated side connector diamonds linking corners to center
-- One large center diamond as the focal point
-- All diamond units have a smaller diamond nested inside
-- When tiled, creates the illusion of curved, undulating waves despite using only straight lines
-- The "movement" comes from how the diamonds connect across block boundaries
-- Block orientation is critical — the wave illusion requires consistent alignment`,
+  characteristics: `Storm at Sea creates an optical illusion of rolling waves or turbulent water:
+- Complex pattern using square-in-a-square units and precise piecing
+- Multiple diamond shapes nested within each other
+- Corner units, side connector units, and center unit all work together
+- When blocks are tiled, creates the illusion of curved, undulating waves using only straight seams
+- The "movement" comes from careful value placement and how units connect across block boundaries
+- One of the most challenging traditional patterns - requires exceptional accuracy
+- Advanced to expert skill level
+- Block orientation is critical - wave illusion requires consistent alignment across all blocks`,
 
-  fabricRoleGuidance: `Storm at Sea fabric assignments (supports 2-8 fabrics):
+  fabricRoleGuidance: `Storm at Sea fabric assignments (supports 3-4 fabrics):
 
-WITH 2 FABRICS:
-- COLOR1 (PRIMARY): All outer diamonds and inner nested diamonds
-- COLOR2 (BACKGROUND): The "sea" — negative space defining the wave shapes
+WITH 3 FABRICS (traditional - recommended):
+- BACKGROUND (fabricColors[0]): The "sea" - negative space and large squares
+- PRIMARY (fabricColors[1]): Wave/diamond shapes creating the turbulent water effect
+- SECONDARY (fabricColors[2]): Centers of square-in-a-square units (adds depth)
 
-WITH 3 FABRICS (recommended):
-- COLOR1 (PRIMARY): Outer diamonds — creates the main wave structure
-- COLOR2 (BACKGROUND): The "sea" — negative space that defines the wave shapes
-- COLOR3 (ACCENT): Inner nested diamonds — adds depth and dimension to each unit
+Classic approach creates strongest optical illusion with clear value contrast between 
+Background (sea) and Primary (waves).
 
 WITH 4 FABRICS:
-- COLOR1 (BACKGROUND): The sea/negative space
-- COLOR2 (PRIMARY): Large outer diamonds (corners and center)
-- COLOR3 (SECONDARY): Side connector diamonds
-- COLOR4 (ACCENT): All inner nested diamonds
+- BACKGROUND (fabricColors[0]): The sea/negative space (must stay consistent)
+- PRIMARY (fabricColors[1]): Main wave/diamond shapes
+- SECONDARY (fabricColors[2]): Secondary wave/diamond shapes or connectors
+- ACCENT (fabricColors[3]): Centers of square-in-a-square units
 
-WITH 5-6 FABRICS:
-- COLOR1 (BACKGROUND): Consistent sea/negative space
-- COLOR2 (PRIMARY): Corner outer diamonds
-- COLOR3 (SECONDARY): Side connector outer diamonds
-- COLOR4 (TERTIARY): Center outer diamond
-- COLOR5-6 (ACCENT): Inner nested diamonds, varying by position
+Adds more complexity and depth while maintaining the wave illusion.
 
-WITH 7-8 FABRICS (scrappy):
-- COLOR1 (BACKGROUND): Consistent sea — must remain consistent for wave illusion
-- COLOR2-7 (PRIMARY options): Outer diamonds rotate colors across blocks
-- COLOR8 (ACCENT): Inner nested diamonds — consistent or varying
+CRITICAL: 
+- Background MUST remain consistent across all blocks for the wave illusion to work
+- High contrast between Background and Primary creates the strongest wave effect
+- Value placement is more important than color choice
+- The optical illusion only emerges when multiple blocks are tiled together
 
-High contrast between outer diamonds (COLOR1/PRIMARY) and background (COLOR2) strengthens the wave illusion. Inner nested diamonds should contrast with their outer diamonds to remain visible.
-
-Note: Block orientation is fixed — the wave illusion requires consistent diamond alignment across all blocks. Random rotation breaks the optical effect.`,
+DESIGN TIP: Use a light Background (white, cream) with dark Primary (navy, black) 
+for maximum wave effect, or reverse for dramatic negative space. The Secondary 
+centers add dimension - use a medium value between Background and Primary.`,
 
   cuttingInstructions: `Storm at Sea cutting specifics:
-- Cut squares on point for all diamond shapes (or use diamond templates)
-- Corner units: small nested diamond-in-diamond
-- Side connectors: elongated diamond shapes (parallelograms)
-- Center: large diamond with inner diamond
-- Foundation paper piecing recommended for accuracy
-- For scrappy versions: cut outer diamonds from multiple fabrics, keep background consistent`,
+
+This is an ADVANCED pattern - foundation paper piecing is STRONGLY RECOMMENDED 
+for all units to ensure accuracy.
+
+BACKGROUND fabric (fabricColors[0]):
+- Cut squares and pieces for negative space areas
+- Use templates or FPP patterns
+
+PRIMARY fabric (fabricColors[1]):
+- Cut pieces for wave/diamond shapes
+- Use templates or FPP patterns
+
+SECONDARY fabric (fabricColors[2]):
+- Cut pieces for square-in-a-square centers
+- Use templates or FPP patterns
+
+ACCENT fabric (fabricColors[3]) - if using 4 fabrics:
+- Cut additional pieces for unit centers or variety
+
+CONSTRUCTION UNITS:
+- Corner units: Small square-in-a-square diamonds (4 per block)
+- Side connectors: Elongated diamond shapes (4 per block)
+- Center unit: Large square-in-a-square diamond (1 per block)
+
+Each unit contains multiple pieces that must be precisely cut and sewn.
+
+CRITICAL: Use templates or foundation paper piecing - freehand cutting will not 
+provide sufficient accuracy for the wave illusion to work.`,
 
   assemblyNotes: `Assembly tips for Storm at Sea:
-- Build each diamond unit separately first
-- Join corner units to side connectors
-- Attach side connectors to center diamond
-- Press seams toward the background fabric
-- Accuracy is critical — small errors compound and break the wave illusion
-- Always preview multiple blocks tiled together to verify the wave effect`,
+
+CONSTRUCTION SEQUENCE:
+1. **Build all units using FPP or templates**:
+   - 4 corner square-in-a-square units
+   - 4 side connector units
+   - 1 center square-in-a-square unit
+
+2. **Arrange units** to verify correct orientation
+
+3. **Sew units together**:
+   - Join corner units to side connectors
+   - Attach side sections to center unit
+   - Work in sections, then join sections
+
+4. **Press carefully** - follow seam allowances in FPP pattern
+
+ACCURACY REQUIREMENTS:
+- ALL seam allowances must be precise (scant 1/4")
+- Points must meet exactly at all intersections
+- Units must be exactly the same size
+- Even 1/16" error multiplies across the block
+
+TESTING THE ILLUSION:
+- Make at least 4 blocks before judging success
+- Arrange blocks in 2x2 grid
+- The wave pattern should be clearly visible
+- If illusion doesn't work, check value contrast and unit accuracy
+
+This is an EXPERT-LEVEL pattern. Master simpler square-in-a-square patterns 
+before attempting Storm at Sea.`,
 
   commonMistakes: `Avoid these Storm at Sea mistakes:
+- Attempting without foundation paper piecing (accuracy is nearly impossible otherwise)
+- Insufficient value contrast between Background and Primary (illusion disappears)
+- Inconsistent seam allowances (points don't meet, wave pattern breaks)
 - Misaligning diamond points (disrupts the wave flow between blocks)
-- Inconsistent seam allowances (diamonds won't nest properly when tiled)
-- Low contrast between waves and background (illusion disappears)
-- Forgetting that the magic happens when multiple blocks are joined — always preview tiled
-- Rotating blocks randomly (breaks the wave illusion — orientation must be consistent)
-- In scrappy versions: varying the background color (destroys the continuous sea effect)`
+- Varying the Background fabric across blocks (destroys the continuous sea effect)
+- Not making enough blocks to see the full wave pattern (need at least 4 blocks tiled)
+- Rotating blocks randomly (breaks the wave illusion - orientation must be consistent)
+- Pressing seams too hard (distorts bias edges in diamond shapes)
+- Attempting this pattern without prior experience with precise piecing
+- Not using templates or FPP (freehand cutting cannot achieve required accuracy)`
 };

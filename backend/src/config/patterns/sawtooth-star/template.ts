@@ -1,26 +1,43 @@
 export const SAWTOOTH_STAR_TEMPLATE = `
-  <!-- Corner squares -->
-  <rect x="0" y="0" width="25" height="25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <rect x="75" y="0" width="25" height="25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <rect x="0" y="75" width="25" height="25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <rect x="75" y="75" width="25" height="25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <!-- Center square -->
-  <rect x="25" y="25" width="50" height="50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-  <!-- Top flying geese (pointing DOWN) -->
-  <polygon points="25,0 75,0 50,25" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="25,0 25,25 50,25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="75,0 50,25 75,25" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <!-- Right flying geese (pointing LEFT) -->
-  <polygon points="100,25 100,75 75,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="100,25 75,25 75,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="100,75 75,50 75,75" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <!-- Bottom flying geese (pointing UP) -->
-  <polygon points="25,100 75,100 50,75" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="25,100 25,75 50,75" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="75,100 50,75 75,75" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <!-- Left flying geese (pointing RIGHT) -->
-  <polygon points="0,25 0,75 25,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="0,25 25,25 25,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="0,75 25,50 25,75" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`;
+  <!-- Corner squares - BACKGROUND (COLOR1) -->
+  <rect x="0" y="0" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="66.67" y="0" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="0" y="66.67" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="66.67" y="66.67" width="33.33" height="33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- Center square - SECONDARY (COLOR3, falls back to PRIMARY for 2-fabric) -->
+  <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- Top side: 2 HSTs creating 2 star points -->
+  <!-- Top-left HST -->
+  <polygon points="33.33,0 33.33,33.33 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="33.33,0 50,0 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  <!-- Top-right HST -->
+  <polygon points="50,0 66.67,0 50,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="66.67,0 66.67,33.33 50,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- Right side: 2 HSTs creating 2 star points -->
+  <!-- Right-top HST -->
+  <polygon points="66.67,33.33 100,33.33 66.67,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="100,33.33 100,50 66.67,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <!-- Right-bottom HST -->
+  <polygon points="100,50 100,66.67 66.67,66.67" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="66.67,50 100,50 66.67,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- Bottom side: 2 HSTs creating 2 star points -->
+  <!-- Bottom-left HST -->
+  <polygon points="33.33,66.67 33.33,100 50,66.67" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="33.33,100 50,100 50,66.67" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  <!-- Bottom-right HST -->
+  <polygon points="50,66.67 50,100 66.67,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="50,66.67 66.67,66.67 66.67,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- Left side: 2 HSTs creating 2 star points -->
+  <!-- Left-top HST -->
+  <polygon points="0,33.33 33.33,33.33 0,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="0,50 33.33,50 33.33,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  <!-- Left-bottom HST -->
+  <polygon points="0,50 0,66.67 33.33,50" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="0,66.67 33.33,66.67 33.33,50" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>`;
   
 export const SAWTOOTH_STAR = SAWTOOTH_STAR_TEMPLATE;

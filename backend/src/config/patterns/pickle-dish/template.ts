@@ -1,19 +1,19 @@
 // Pickle Dish Template
-// Traditional pattern with curved arcs featuring fan-shaped spike sections
-// The spikes radiate outward creating a sunburst effect - this is what distinguishes it from Double Wedding Ring
+// Traditional pattern with curved arcs featuring radiating wedge/spike sections
+// The wedges radiate outward creating a sunburst effect - distinguishes it from Double Wedding Ring
 
 export const PICKLE_DISH_TEMPLATE = `
-    <!-- Background - COLOR1 -->
+    <!-- Background - BACKGROUND (COLOR1) -->
     <rect x="0" y="0" width="100" height="100" fill="COLOR1"/>
     
     <!-- ============================================ -->
-    <!-- TOP ARC with fan spikes -->
+    <!-- TOP ARC with radiating wedges -->
     <!-- ============================================ -->
     
-    <!-- Top arc base band - COLOR2 -->
+    <!-- Top arc base band - PRIMARY (COLOR2) -->
     <path d="M 20,15 Q 50,35 80,15 L 80,20 Q 50,42 20,20 Z" fill="COLOR2" stroke="#888" stroke-width="0.3"/>
     
-    <!-- Top fan spikes - COLOR3 - radiating wedges -->
+    <!-- Top radiating wedges - SECONDARY (COLOR3) - first ring -->
     <polygon points="22,15 25,3 28,15" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     <polygon points="28,14 31,2 34,13" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     <polygon points="34,12 37,1 40,11" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
@@ -25,13 +25,13 @@ export const PICKLE_DISH_TEMPLATE = `
     <polygon points="72,15 75,3 78,15" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     
     <!-- ============================================ -->
-    <!-- BOTTOM ARC with fan spikes -->
+    <!-- BOTTOM ARC with radiating wedges -->
     <!-- ============================================ -->
     
-    <!-- Bottom arc base band - COLOR2 -->
+    <!-- Bottom arc base band - PRIMARY (COLOR2) -->
     <path d="M 20,85 Q 50,65 80,85 L 80,80 Q 50,58 20,80 Z" fill="COLOR2" stroke="#888" stroke-width="0.3"/>
     
-    <!-- Bottom fan spikes - COLOR3 - radiating wedges -->
+    <!-- Bottom radiating wedges - SECONDARY (COLOR3) -->
     <polygon points="22,85 25,97 28,85" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     <polygon points="28,86 31,98 34,87" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     <polygon points="34,88 37,99 40,89" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
@@ -43,13 +43,13 @@ export const PICKLE_DISH_TEMPLATE = `
     <polygon points="72,85 75,97 78,85" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     
     <!-- ============================================ -->
-    <!-- LEFT ARC with fan spikes -->
+    <!-- LEFT ARC with radiating wedges -->
     <!-- ============================================ -->
     
-    <!-- Left arc base band - COLOR2 -->
+    <!-- Left arc base band - PRIMARY (COLOR2) -->
     <path d="M 15,20 Q 35,50 15,80 L 20,80 Q 42,50 20,20 Z" fill="COLOR2" stroke="#888" stroke-width="0.3"/>
     
-    <!-- Left fan spikes - COLOR3 - radiating wedges -->
+    <!-- Left radiating wedges - SECONDARY (COLOR3) -->
     <polygon points="15,22 3,25 15,28" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     <polygon points="14,28 2,31 13,34" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     <polygon points="12,34 1,37 11,40" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
@@ -61,13 +61,13 @@ export const PICKLE_DISH_TEMPLATE = `
     <polygon points="15,72 3,75 15,78" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     
     <!-- ============================================ -->
-    <!-- RIGHT ARC with fan spikes -->
+    <!-- RIGHT ARC with radiating wedges -->
     <!-- ============================================ -->
     
-    <!-- Right arc base band - COLOR2 -->
+    <!-- Right arc base band - PRIMARY (COLOR2) -->
     <path d="M 85,20 Q 65,50 85,80 L 80,80 Q 58,50 80,20 Z" fill="COLOR2" stroke="#888" stroke-width="0.3"/>
     
-    <!-- Right fan spikes - COLOR3 - radiating wedges -->
+    <!-- Right radiating wedges - SECONDARY (COLOR3) -->
     <polygon points="85,22 97,25 85,28" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     <polygon points="86,28 98,31 87,34" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     <polygon points="88,34 99,37 89,40" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
@@ -79,7 +79,7 @@ export const PICKLE_DISH_TEMPLATE = `
     <polygon points="85,72 97,75 85,78" fill="COLOR3" stroke="#888" stroke-width="0.2"/>
     
     <!-- ============================================ -->
-    <!-- CORNER MELONS - COLOR4 -->
+    <!-- CORNER MELONS - ACCENT (COLOR4) -->
     <!-- These create the distinctive melon shapes where blocks meet -->
     <!-- ============================================ -->
     
@@ -97,7 +97,7 @@ export const PICKLE_DISH_TEMPLATE = `
     
     <!-- ============================================ -->
     <!-- CENTER AREA - left as background COLOR1 -->
-    <!-- This creates the open "melon" center of each block -->
+    <!-- This creates the open center of each block -->
     <!-- ============================================ -->
 `;
 

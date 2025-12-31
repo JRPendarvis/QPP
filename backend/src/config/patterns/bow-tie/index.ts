@@ -7,41 +7,36 @@ const BowTie: PatternDefinition = {
   name: 'Bow Tie',
   template: BOW_TIE_TEMPLATE,
   prompt: BOW_TIE_PROMPT,
-  minColors: 3,
-  maxColors: 8,
+  minFabrics: 2,
+  maxFabrics: 3,
   allowRotation: true,
   
   /**
-   * Bow Tie has tie squares, background squares, and center knot
-   * COLOR1 = tie (diagonal pair), COLOR2 = background (opposite diagonal), COLOR3 = knot
-   * With multiple fabrics, creates "scrappy" look by rotating tie colors
+   * Bow Tie pattern fabric roles:
+   * 2 fabrics: Background (setting squares) + Primary (tie and knot same color)
+   * 3 fabrics: Background (setting squares) + Primary (tie) + Secondary (knot)
+   * 
+   * fabricColors[0] = Background (always the corner squares)
+   * fabricColors[1] = Primary (the bow tie fabric)
+   * fabricColors[2] = Secondary (the knot/center square)
+   * 
+   * Returns: [tie, background, knot]
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    const blockIndex = opts.blockIndex ?? 0;
-
-    if (fabricColors.length < 3) {
-      return [
-        fabricColors[0],
-        fabricColors[1] || fabricColors[0],
-        fabricColors[1] || fabricColors[0]
-      ];
-    }
-    
-    if (fabricColors.length === 3) {
-      // 3 fabrics: tie + background + knot
-      return [fabricColors[0], fabricColors[1], fabricColors[2]];
-    }
-    
-    // 4+ fabrics: background + knot consistent, rotate tie colors for scrappy look
     const background = fabricColors[0];
-    const knot = fabricColors[fabricColors.length - 1];
-    const tieOptions = fabricColors.slice(1, -1);
-    const tie = tieOptions[blockIndex % tieOptions.length];
+    const primary = fabricColors[1] || background;
     
-    return [tie, background, knot];
+    if (fabricColors.length < 3) {
+      // 2 fabrics: tie and knot use the same fabric (primary)
+      return [primary, background, primary];
+    }
+    
+    // 3 fabrics: separate tie and knot colors
+    const secondary = fabricColors[2];
+    return [primary, background, secondary];
   }
 };
 

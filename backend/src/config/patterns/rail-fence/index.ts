@@ -7,29 +7,35 @@ const RailFence: PatternDefinition = {
   name: 'Rail Fence',
   template: RAIL_FENCE_TEMPLATE,
   prompt: RAIL_FENCE_PROMPT,
-  minColors: 3,
-  maxColors: 4,
-   allowRotation: false,
+  minFabrics: 3,
+  maxFabrics: 4,
+  allowRotation: true,
+  
   /**
-   * Rail Fence has 3 horizontal strips (rails) per block
-   * Colors stay CONSISTENT across all blocks - the zigzag effect comes from rotation
-   * COLOR1 = top rail, COLOR2 = middle rail, COLOR3 = bottom rail
+   * Rail Fence - 3 horizontal strips creating zigzag pattern when rotated
+   * fabricColors[0] = Background (top rail)
+   * fabricColors[1] = Primary (middle rail)
+   * fabricColors[2] = Secondary (bottom rail)
+   * fabricColors[3] = Accent (optional - can replace any rail for variety)
+   * 
+   * Colors stay CONSISTENT across all blocks - the zigzag effect comes from 
+   * rotating blocks 90° when tiling (vertical, horizontal, vertical, horizontal...)
+   * 
+   * 3 fabrics: Traditional rail fence (3 rails)
+   * 4 fabrics: Allows for variation (can use 4th fabric in place of any rail)
+   * 
+   * Returns: [top_rail, middle_rail, bottom_rail]
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    if (fabricColors.length < 3) {
-      // Need at least 3 for proper rail fence
-      return [
-        fabricColors[0],
-        fabricColors[1] || fabricColors[0],
-        fabricColors[0]
-      ];
-    }
+    const background = fabricColors[0];
+    const primary = fabricColors[1] || background;
+    const secondary = fabricColors[2] || primary;
     
-    // Consistent colors every block - zigzag comes from block rotation, not color changes
-    return [fabricColors[0], fabricColors[1], fabricColors[2]];
+    // For 3-fabric version, return the three rails
+    return [background, primary, secondary];
   }
 };
 

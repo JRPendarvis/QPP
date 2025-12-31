@@ -11,42 +11,49 @@ export const BOW_TIE_PROMPT: PatternPrompt = {
 - A center square overlays the middle intersection as the "knot"
 - Simple construction with strong graphic impact`,
 
-  fabricRoleGuidance: `Bow Tie fabric assignments (supports 2-8 fabrics):
+  fabricRoleGuidance: `Bow Tie fabric assignments (supports 2-3 fabrics):
 
 WITH 2 FABRICS:
-- COLOR1 (PRIMARY): Tie squares on diagonal corners
-- COLOR2 (BACKGROUND): Background squares AND center knot
+- BACKGROUND (fabricColors[0]): Corner squares - frames the bow tie shape
+- PRIMARY (fabricColors[1]): Tie squares AND center knot - creates the bow tie
 
 WITH 3 FABRICS (recommended):
-- COLOR1 (PRIMARY): Tie squares - the dominant visual element
-- COLOR2 (BACKGROUND): Background squares - frames the tie shape
-- COLOR3 (ACCENT): Center knot - use high contrast to make it pop
+- BACKGROUND (fabricColors[0]): Corner squares - provides negative space
+- PRIMARY (fabricColors[1]): Tie squares - the dominant visual element of the bow
+- SECONDARY (fabricColors[2]): Center knot - use high contrast to make it pop
 
-WITH 4+ FABRICS (scrappy look):
-- COLOR1 (BACKGROUND): Consistent background across all blocks
-- COLOR2-7 (PRIMARY options): Tie colors rotate across blocks for variety
-- COLOR8 (ACCENT): Consistent knot color across all blocks
-
-The scrappy approach keeps background and knot consistent while varying the tie fabric block-to-block.`,
+The background fabric should be a neutral or low-volume print that allows the bow tie to stand out. 
+The primary tie fabric is the star of the show. If using 3 fabrics, choose a contrasting secondary 
+for the knot to create visual interest at the center.`,
 
   cuttingInstructions: `Bow Tie cutting specifics:
-- Cut two large squares for the tie (PRIMARY fabric)
-- Cut two large squares for the background (BACKGROUND fabric)
-- Cut one smaller center square for the knot (ACCENT fabric)
-- The knot is approximately 30% the width of the full block
-- For scrappy quilts: cut tie squares from multiple fabrics`,
+
+FOR 2 FABRICS:
+- Cut two squares for the tie from PRIMARY fabric
+- Cut two squares for the background from BACKGROUND fabric
+- Cut one smaller center square for the knot from PRIMARY fabric
+
+FOR 3 FABRICS:
+- Cut two squares for the tie from PRIMARY fabric
+- Cut two squares for the background from BACKGROUND fabric
+- Cut one smaller center square for the knot from SECONDARY fabric
+
+The knot square is approximately 30% the width of the full block.
+All tie and background squares are equal size (typically 1/2 the block width).`,
 
   assemblyNotes: `Assembly tips for Bow Tie:
-- Arrange as a four-patch with tie squares on opposite diagonal corners
-- Background squares fill the remaining diagonal
-- Center the knot square over the middle intersection
-- Press seams toward darker fabrics
-- For scrappy layouts: vary tie fabric per block while keeping background/knot consistent`,
+- Arrange as a four-patch with PRIMARY tie squares on opposite diagonal corners (top-left and bottom-right)
+- Place BACKGROUND squares on the other diagonal (top-right and bottom-left)
+- Center the knot square over the middle intersection where all four patches meet
+- Press seams toward darker fabrics to reduce bulk
+- Ensure the knot is appliquéd or pieced precisely at the center for a clean look
+- The diagonal placement of matching tie squares creates the characteristic "bow" shape`,
 
   commonMistakes: `Avoid these Bow Tie mistakes:
-- Placing tie squares adjacent instead of diagonally opposite
-- Using triangles instead of full squares (creates gaps)
-- Misaligning the center knot
-- Using low contrast between knot and tie fabrics
-- In scrappy quilts: accidentally varying the background instead of the tie`
+- Placing tie squares adjacent instead of diagonally opposite (breaks the bow illusion)
+- Using triangles instead of full squares (creates gaps and loses the bow shape)
+- Misaligning the center knot off the intersection point
+- Making the knot too large (should be subtle, about 30% of block width)
+- Using low contrast between knot and tie fabrics (knot disappears)
+- Choosing a busy background that competes with the bow tie design`
 };

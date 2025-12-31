@@ -5,53 +5,102 @@ export const DRUNKARDS_PATH_PROMPT: PatternPrompt = {
   recommendedFabricCount: 2,
   
   characteristics: `Drunkard's Path is a classic curved two-piece unit that creates flowing designs:
-- Each unit contains one quarter-circle "pie slice" and one background piece with concave curve
-- Four units combine to form a block with curves in each corner
-- When tiled, creates meandering curved paths across the quilt
+- Each block contains one quarter-circle "pie slice" and one background piece with concave curve
+- Simple two-piece construction, but curves require careful sewing
+- When multiple blocks are arranged and rotated, creates meandering curved paths across the quilt
 - Block rotation creates many secondary patterns: Love Ring, Vine of Friendship, Falling Timbers, Wonder of the World
-- One of the most versatile curved-piecing patterns
-- Simple two-piece construction, but curves require care`,
+- One of the most versatile and beloved curved-piecing patterns
+- Traditional version uses just 2 fabrics for maximum contrast
+- Intermediate skill level - good introduction to curved piecing`,
 
-  fabricRoleGuidance: `Drunkard's Path fabric assignments (supports 2-8 fabrics):
+  fabricRoleGuidance: `Drunkard's Path fabric assignments (supports 2-4 fabrics):
 
-WITH 2 FABRICS (traditional):
-- COLOR1 (PRIMARY): All quarter-circle arcs — forms the curved path
-- COLOR2 (BACKGROUND): All background pieces — defines the negative space
+WITH 2 FABRICS (traditional - recommended):
+- BACKGROUND (fabricColors[0]): Background pieces with concave curves
+- PRIMARY (fabricColors[1]): All quarter-circle arcs - forms the curved path
 
-WITH 3 FABRICS:
-- COLOR1 (PRIMARY): Quarter-circles on one diagonal pair
-- COLOR2 (BACKGROUND): Center and negative space throughout
-- COLOR3 (ACCENT): Quarter-circles on opposite diagonal — creates two-tone path
+The classic high-contrast approach creates the clearest winding path effect.
 
-WITH 4+ FABRICS (scrappy curves):
-- COLOR1 (BACKGROUND): Consistent background across all blocks
-- COLOR2-8 (PRIMARY options): Arc colors rotate across blocks/positions for variety
+WITH 3 FABRICS (scrappy paths):
+- BACKGROUND (fabricColors[0]): Consistent background across all blocks
+- PRIMARY (fabricColors[1]): First quarter-circle color
+- SECONDARY (fabricColors[2]): Second quarter-circle color (rotates with Primary)
 
-High contrast between curves and background emphasizes the wandering path. Using similar values for multiple arc colors creates a unified meandering line.
+Blocks alternate between Primary and Secondary paths for subtle variety.
 
-Note: Block rotation at layout time dramatically changes the overall design — plan curve placement carefully.`,
+WITH 4 FABRICS (maximum scrappy):
+- BACKGROUND (fabricColors[0]): Consistent background across all blocks
+- PRIMARY (fabricColors[1]): First path color
+- SECONDARY (fabricColors[2]): Second path color
+- ACCENT (fabricColors[3]): Third path color
+
+Path colors rotate across blocks (Primary → Secondary → Accent → Primary...) 
+creating a scrappy look while maintaining the overall winding path design.
+
+DESIGN TIP: High contrast between Background and path colors emphasizes the wandering effect.
+For scrappy versions, use path colors with similar values so they read as a unified meandering line.
+
+CRITICAL: Block rotation at layout time dramatically changes the overall design. 
+Plan your layout carefully to create the desired secondary pattern.`,
 
   cuttingInstructions: `Drunkard's Path cutting specifics:
-- Cut squares for the background pieces (with concave curve cut out)
-- Cut quarter-circles using curved templates or specialty rulers
-- Each unit is two pieces: one quarter-circle, one background with concave curve
-- Acrylic templates or Accuquilt dies make cutting accurate curves easier
-- Add seam allowance to both the convex and concave edges
-- For scrappy quilts: cut quarter-circles from multiple fabrics`,
+
+BACKGROUND fabric (fabricColors[0]):
+- Cut squares with concave (inward) curve removed
+- Each piece is approximately 3/4 of a square with one curved edge
+
+PRIMARY fabric (fabricColors[1]):
+- Cut quarter-circle pieces (pie slice shape)
+- Each piece has one curved (convex/outward) edge
+
+SECONDARY/ACCENT fabrics (fabricColors[2-3]) - if using:
+- Cut additional quarter-circle pieces
+- Same dimensions as Primary quarter-circles
+
+CUTTING TECHNIQUES:
+- Use acrylic templates or specialty rulers (highly recommended)
+- Accuquilt dies make cutting accurate curves easier
+- Add 1/4" seam allowance to both convex and concave edges
+- Mark center point on both pieces before sewing
+- Cut on straight grain when possible to minimize bias stretch
+
+For scrappy quilts: Cut quarter-circles from multiple fabrics, but keep background consistent.`,
 
   assemblyNotes: `Assembly tips for Drunkard's Path:
-- Pin at the center and ends of each curve, easing fullness between
-- Sew with the concave (background) piece on top for better control
-- Clip concave seam allowance if needed to reduce bulk
-- Press seams toward the quarter-circle (convex piece)
-- Lay out all units before sewing — rotation creates different patterns
-- For scrappy layouts: plan arc color placement before assembling`,
+- This is an INTERMEDIATE pattern requiring curved piecing skills
+
+CURVED PIECING TECHNIQUE:
+1. Mark the center point on both the quarter-circle and background piece
+2. Pin at the center first, matching center marks
+3. Pin at both ends of the curve
+4. Add 2-3 pins between center and ends, easing fullness evenly
+5. Sew with the concave (background) piece on TOP for better control
+6. Sew slowly, removing pins as you approach them
+7. Check frequently that fabric isn't puckering
+
+PRESSING:
+- Press seam toward the quarter-circle (convex piece)
+- Press following the curve - don't flatten it
+- Consider finger-pressing first before using iron
+
+LAYOUT:
+- Lay out ALL blocks before sewing them together
+- Rotate blocks to create your desired secondary pattern
+- Common arrangements: circles, waves, diagonal paths, or random meandering
+- For scrappy versions: distribute path colors evenly across the layout
+
+ACCURACY TIP: All blocks must be identical size for proper alignment. 
+Measure each block and trim if needed before assembly.`,
 
   commonMistakes: `Avoid these Drunkard's Path mistakes:
-- Stretching the bias edges on curves (causes puckering)
-- Not pinning enough along the curve (creates pleats)
-- Pressing curves flat instead of following the seam direction
-- Random unit rotation without planning (loses the path effect)
-- Inconsistent seam allowances on curves (units won't match in size)
-- In scrappy versions: not stepping back to check overall color flow`
+- Stretching bias edges on curves (causes puckering and distortion)
+- Not pinning enough along the curve (creates pleats and tucks)
+- Sewing with convex piece on top (harder to control the curve)
+- Pressing curves completely flat (loses the dimensional curve)
+- Random block rotation without planning (loses the intended path effect)
+- Inconsistent seam allowances (blocks won't match in size)
+- Clipping the convex seam allowance (only clip concave side if needed)
+- In scrappy versions: placing similar colors adjacent (reduces visual flow)
+- Not testing technique on scrap fabric first (wastes good fabric)
+- Rushing the curved seam (take your time for best results)`
 };

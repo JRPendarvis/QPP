@@ -7,32 +7,37 @@ const Hourglass: PatternDefinition = {
   name: 'Hourglass',
   template: HOURGLASS_TEMPLATE,
   prompt: HOURGLASS_PROMPT,
-  minColors: 2,
-  maxColors: 8,
-   allowRotation: true,
+  minFabrics: 2,
+  maxFabrics: 4,
+  allowRotation: true,
+  
   /**
-   * Hourglass has 4 quarter-square triangles forming an hourglass shape
-   * COLOR1 = background triangles (top-left, bottom-right)
-   * COLOR2 = hourglass triangles (top-right, bottom-left)
-   * With multiple fabrics, creates "scrappy" look by rotating hourglass colors
+   * Hourglass has 4 quarter-square triangles (QST) forming an hourglass shape
+   * fabricColors[0] = Background (top-left and bottom-right triangles)
+   * fabricColors[1] = Primary (top-right and bottom-left triangles - the hourglass)
+   * fabricColors[2] = Secondary (alternate hourglass color for scrappy look)
+   * fabricColors[3] = Accent (additional hourglass variation)
+   * 
+   * 2 fabrics: Traditional consistent hourglass (Background + Primary)
+   * 3-4 fabrics: Scrappy hourglasses - Background stays consistent, hourglass rotates
+   * 
+   * Returns: [background_triangles, hourglass_triangles]
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
     const blockIndex = opts.blockIndex ?? 0;
-
-    if (fabricColors.length < 2) {
-      return [fabricColors[0], fabricColors[0]];
-    }
-    
-    if (fabricColors.length === 2) {
-      return [fabricColors[0], fabricColors[1]];
-    }
-    
-    // 3+ fabrics: background consistent, rotate hourglass colors for scrappy look
     const background = fabricColors[0];
-    const hourglassOptions = fabricColors.slice(1);
+    const primary = fabricColors[1] || background;
+    
+    if (fabricColors.length < 3) {
+      // 2 fabrics: traditional consistent hourglass
+      return [background, primary];
+    }
+    
+    // 3-4 fabrics: Background consistent, rotate through Primary, Secondary, Accent
+    const hourglassOptions = fabricColors.slice(1); // Primary, Secondary, Accent
     const hourglass = hourglassOptions[blockIndex % hourglassOptions.length];
     
     return [background, hourglass];

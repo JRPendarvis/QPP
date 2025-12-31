@@ -9,7 +9,7 @@ export interface QuiltPattern {
   description: string;
   recommendedFabricCount: number;
   minColors: number;
-  maxColors: number;
+  maxFabrics: number;
   allowRotation: boolean;
 }
 
@@ -46,8 +46,8 @@ export function getQuiltPattern(patternId: string): QuiltPattern | undefined {
     recommendedFabricCount: typeof prompt.recommendedFabricCount === 'number' 
       ? prompt.recommendedFabricCount 
       : prompt.recommendedFabricCount?.min || 2,
-    minColors: patternDef.minColors,
-    maxColors: patternDef.maxColors,
+    minColors: patternDef.minFabrics,
+    maxFabrics: patternDef.maxFabrics,
     allowRotation: patternDef.allowRotation ?? true,
   };
 }
@@ -83,13 +83,13 @@ export function getPatternById(patternId: string): QuiltPattern | undefined {
  * Returns a score from 0-100, where 100 is perfect match
  */
 export function calculateFabricCountScore(pattern: QuiltPattern, fabricCount: number): number {
-  const { recommendedFabricCount, minColors, maxColors } = pattern;
+  const { recommendedFabricCount, minColors, maxFabrics } = pattern;
   
   // Perfect match with recommended
   if (fabricCount === recommendedFabricCount) return 100;
   
   // Within supported range
-  if (fabricCount >= minColors && fabricCount <= maxColors) {
+  if (fabricCount >= minColors && fabricCount <= maxFabrics) {
     // Score based on distance from recommended
     const diff = Math.abs(fabricCount - recommendedFabricCount);
     return Math.max(60, 100 - (diff * 15));
@@ -102,7 +102,7 @@ export function calculateFabricCountScore(pattern: QuiltPattern, fabricCount: nu
   }
   
   // Above maximum
-  const diff = fabricCount - maxColors;
+  const diff = fabricCount - maxFabrics;
   return Math.max(0, 50 - (diff * 15));
 }
 

@@ -15,8 +15,8 @@ export interface PatternDefinition {
   name: string;                        // 'Churn Dash'
   template: string;                    // SVG with COLOR1, COLOR2, etc. (optional if getTemplate is used)
   prompt: PatternPrompt;
-  minColors: number;                   // Minimum fabrics needed
-  maxColors: number;                   // Maximum fabrics supported
+  minFabrics: number;                   // Minimum fabrics needed
+  maxFabrics: number;                   // Maximum fabrics supported
   getColors: (fabricColors: string[], opts: { blockIndex?: number; row?: number; col?: number }) => string[];  // blockIndex is optional
   getTemplate?: (colors: string[]) => string; // Optional: dynamic SVG block template generator
   allowRotation?: boolean;  // NEW - defaults to true if undefined

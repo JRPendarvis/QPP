@@ -379,8 +379,8 @@ export class PatternController {
           skillLevel: quiltPattern?.skillLevel || 'intermediate',
           description: quiltPattern?.description || '',
           recommendedFabricCount: quiltPattern?.recommendedFabricCount || null,
-          minColors: patternDef.minColors,
-          maxColors: patternDef.maxColors,
+          minColors: patternDef.minFabrics,
+          maxFabrics: patternDef.maxFabrics,
           allowRotation: patternDef.allowRotation ?? true,
         };
       });

@@ -7,41 +7,30 @@ const SawtoothStar: PatternDefinition = {
   name: 'Sawtooth Star',
   template: SAWTOOTH_STAR_TEMPLATE,
   prompt: SAWTOOTH_STAR_PROMPT,
-  minColors: 2,
-  maxColors: 8,
-   allowRotation: true,
+  minFabrics: 2,
+  maxFabrics: 3,
+  allowRotation: true,
+  
   /**
-   * Sawtooth Star has background, star points, and center
-   * With multiple fabrics, creates "scrappy" stars by rotating point colors
-   * COLOR1 = background (corners + behind points), COLOR2 = star points, COLOR3 = center
+   * Sawtooth Star - 8-pointed star with flying geese units
+   * fabricColors[0] = Background (4 corner squares + sky triangles in flying geese)
+   * fabricColors[1] = Primary (8 star points from flying geese units)
+   * fabricColors[2] = Secondary (center square - optional)
+   * 
+   * 2 fabrics: Background corners/sky + Primary star points and center
+   * 3 fabrics: Background corners/sky + Primary star points + Secondary center
+   * 
+   * Returns: [background, star_points, center]
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    const blockIndex = opts.blockIndex ?? 0;
-
-    if (fabricColors.length < 2) {
-      return [fabricColors[0], fabricColors[0], fabricColors[0]];
-    }
-    
-    if (fabricColors.length === 2) {
-      // 2 fabrics: background + star (center matches star)
-      return [fabricColors[0], fabricColors[1], fabricColors[1]];
-    }
-    
-    if (fabricColors.length === 3) {
-      // 3 fabrics: background + star points + center
-      return [fabricColors[0], fabricColors[1], fabricColors[2]];
-    }
-    
-    // 4+ fabrics: background consistent, rotate star point colors, center from remaining
     const background = fabricColors[0];
-    const pointOptions = fabricColors.slice(1, -1); // All except first and last
-    const center = fabricColors[fabricColors.length - 1]; // Last color for center
-    const points = pointOptions[blockIndex % pointOptions.length];
+    const primary = fabricColors[1] || background;
+    const secondary = fabricColors[2] || primary;
     
-    return [background, points, center];
+    return [background, primary, secondary];
   }
 };
 

@@ -7,29 +7,35 @@ const StormAtSea: PatternDefinition = {
   name: 'Storm at Sea',
   template: STORM_AT_SEA_TEMPLATE,
   prompt: STORM_AT_SEA_PROMPT,
-  minColors: 3,
-  maxColors: 4,
-   allowRotation: false,
+  minFabrics: 3,
+  maxFabrics: 4,
+  allowRotation: false,
+  
   /**
-   * Storm at Sea creates an optical illusion of waves
-   * Colors must stay CONSISTENT across all blocks for the wave effect to work
-   * COLOR1 = background, COLOR2 = waves/diamonds, COLOR3 = accent centers
+   * Storm at Sea - creates optical illusion of turbulent waves
+   * fabricColors[0] = Background (large squares and background areas)
+   * fabricColors[1] = Primary (wave/diamond shapes)
+   * fabricColors[2] = Secondary (square-in-a-square centers)
+   * fabricColors[3] = Accent (optional - additional wave or center variety)
+   * 
+   * Colors must stay CONSISTENT across all blocks - the wave optical illusion
+   * only emerges when blocks are tiled with perfect color alignment
+   * 
+   * 3 fabrics: Traditional Storm at Sea (Background + Primary waves + Secondary centers)
+   * 4 fabrics: Adds Accent for additional variety
+   * 
+   * Returns: [background, waves, centers, accent]
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    if (fabricColors.length < 3) {
-      // Need at least 3 for the wave illusion
-      return [
-        fabricColors[0],
-        fabricColors[1] || fabricColors[0],
-        fabricColors[1] || fabricColors[0]
-      ];
-    }
+    const background = fabricColors[0];
+    const primary = fabricColors[1] || background;
+    const secondary = fabricColors[2] || primary;
+    const accent = fabricColors[3] || secondary;
     
-    // Consistent colors every block - wave illusion requires alignment
-    return [fabricColors[0], fabricColors[1], fabricColors[2]];
+    return [background, primary, secondary, accent];
   }
 };
 

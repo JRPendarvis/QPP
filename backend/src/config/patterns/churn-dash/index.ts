@@ -7,34 +7,30 @@ const ChurnDash: PatternDefinition = {
   name: 'Churn Dash',
   template: CHURN_DASH_TEMPLATE,
   prompt: CHURN_DASH_PROMPT,
-  minColors: 2,
-  maxColors: 8,
-   allowRotation: true,
+  minFabrics: 2,
+  maxFabrics: 3,
+  allowRotation: true,
+  
   /**
-   * Churn Dash uses 2 colors per block: background + feature
-   * With multiple fabrics, creates "scrappy" look by rotating feature colors
-   * Background (COLOR1) stays consistent; feature (COLOR2) rotates per block
+   * Churn Dash has corner squares, rail rectangles, and HST "churn" sections
+   * fabricColors[0] = Background (corner squares)
+   * fabricColors[1] = Primary (one set of rails + half of HSTs)
+   * fabricColors[2] = Secondary (opposite set of rails + other half of HSTs)
+   * 
+   * 2 fabrics: Background + Primary (Primary used for all feature elements)
+   * 3 fabrics: Background + Primary (one blade set) + Secondary (opposite blade set)
+   * 
+   * Returns: [background, primary, secondary]
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    const { blockIndex = 0 } = opts;
-
-    if (fabricColors.length < 2) {
-      return [fabricColors[0], fabricColors[0]];
-    }
-    
-    if (fabricColors.length === 2) {
-      return [fabricColors[0], fabricColors[1]];
-    }
-    
-    // 3+ fabrics: first is always background, rotate through rest for feature
     const background = fabricColors[0];
-    const featureOptions = fabricColors.slice(1);
-    const feature = featureOptions[blockIndex % featureOptions.length];
+    const primary = fabricColors[1] || background;
+    const secondary = fabricColors[2] || primary;
     
-    return [background, feature];
+    return [background, primary, secondary];
   }
 };
 
