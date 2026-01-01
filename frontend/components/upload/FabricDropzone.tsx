@@ -177,13 +177,13 @@ export default function FabricDropzone({
 
   return (
     <div>
-      <Toaster position="top-center" />
+      <Toaster position="bottom-right" />
       <div
         {...getRootProps({
           onClick: (e: React.MouseEvent) => {
             // Only show toast if not disabled
             if (currentCount < maxFiles) {
-              toast('Select your fabric images to upload!');
+              toast('We are opening your file manager. Please be patient!');
             }
           },
         })}
