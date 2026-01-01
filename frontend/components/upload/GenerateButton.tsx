@@ -14,11 +14,11 @@ export default function GenerateButton({
   fabricCount,
 }: GenerateButtonProps) {
   return (
-    <div className="mt-8 flex justify-center">
+    <div className="mt-8 mb-8 flex justify-center w-full">
       <button
         onClick={onClick}
         disabled={disabled}
-        className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-8 py-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
       >
         {generating ? (
           <span className="flex items-center gap-2">
