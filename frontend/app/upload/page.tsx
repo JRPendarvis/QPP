@@ -64,11 +64,9 @@ export default function UploadPage() {
       patternChoice,
       selectedPattern,
       selectedPatternDetails,
-      fabrics.length,
-      MIN_FABRICS,
-      MAX_FABRICS
+      fabrics.length
     ),
-    [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length, MIN_FABRICS, MAX_FABRICS]
+    [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length]
   );
 
   // Generate validation message
@@ -77,10 +75,9 @@ export default function UploadPage() {
       patternChoice,
       selectedPattern,
       selectedPatternDetails,
-      fabrics.length,
-      MIN_FABRICS
+      fabrics.length
     ),
-    [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length, MIN_FABRICS]
+    [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length]
   );
 
   // Handle pattern choice change
