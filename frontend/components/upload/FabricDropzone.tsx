@@ -183,7 +183,7 @@ export default function FabricDropzone({
           onClick: (e: React.MouseEvent) => {
             // Only show toast if not disabled
             if (currentCount < maxFiles) {
-              toast('We are opening your file manager. Please be patient!');
+              toast('We are opening your file manager. /n Please be patient!');
             }
           },
         })}
