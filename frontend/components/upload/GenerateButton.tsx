@@ -14,7 +14,7 @@ export default function GenerateButton({
   fabricCount,
 }: GenerateButtonProps) {
   return (
-    <div className="mt-8 flex justify-end">
+    <div className="mt-8 flex justify-center">
       <button
         onClick={onClick}
         disabled={disabled}
