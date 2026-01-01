@@ -1,10 +1,10 @@
 
 'use client';
+
 import React from 'react';
-
-
 import { useDropzone } from 'react-dropzone';
 import { useRef } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 
 
 export interface FabricDropzoneProps {
@@ -177,8 +177,16 @@ export default function FabricDropzone({
 
   return (
     <div>
+      <Toaster position="top-center" />
       <div
-        {...getRootProps()}
+        {...getRootProps({
+          onClick: (e: React.MouseEvent) => {
+            // Only show toast if not disabled
+            if (currentCount < maxFiles) {
+              toast('Select your fabric images to upload!');
+            }
+          },
+        })}
         className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
           currentCount >= maxFiles
             ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
