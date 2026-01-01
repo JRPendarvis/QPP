@@ -1,11 +1,9 @@
 
 'use client';
 
-import React from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-
 
 export interface FabricDropzoneProps {
   onFilesAdded: (files: File[]) => void;
@@ -13,8 +11,6 @@ export interface FabricDropzoneProps {
   maxFiles: number;
   totalSize: number;
 }
-
-
 
 // --- Utility Functions ---
 
@@ -180,10 +176,10 @@ export default function FabricDropzone({
       <Toaster position="bottom-right" />
       <div
         {...getRootProps({
-          onClick: (e: React.MouseEvent) => {
+          onClick: () => {
             // Only show toast if not disabled
             if (currentCount < maxFiles) {
-              toast('We are opening your file manager. /n Please be patient!');
+              toast('We are opening your file manager. \nPlease be patient!');
             }
           },
         })}

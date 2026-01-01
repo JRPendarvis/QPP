@@ -207,16 +207,16 @@ export default function UploadPage() {
               <ValidationMessage 
                 message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} 
               />
-
-              {/* Generate Button */}
-              <GenerateButton
-                onClick={handleGenerate}
-                disabled={generating || !fabricCountValid || !!fabricValidationMessage}
-                generating={generating}
-                fabricCount={fabrics.length}
-              />
             </>
           )}
+
+          {/* Generate Button - Always visible */}
+          <GenerateButton
+            onClick={handleGenerate}
+            disabled={generating || !fabricCountValid || !!fabricValidationMessage}
+            generating={generating}
+            fabricCount={fabrics.length}
+          />
 
           {generating && (
             <div className="flex justify-center items-center py-8">
