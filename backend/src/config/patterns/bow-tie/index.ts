@@ -7,37 +7,40 @@ const BowTie: PatternDefinition = {
   name: 'Bow Tie',
   template: BOW_TIE_TEMPLATE,
   prompt: BOW_TIE_PROMPT,
+
   minFabrics: 2,
   maxFabrics: 3,
   allowRotation: true,
-  
+  rotationStrategy: 'alternate-180',
+
   /**
-   * Bow Tie pattern fabric roles:
-   * 2 fabrics: Background (setting squares) + Primary (tie and knot same color)
-   * 3 fabrics: Background (setting squares) + Primary (tie) + Secondary (knot)
-   * 
-   * fabricColors[0] = Background (always the corner squares)
-   * fabricColors[1] = Primary (the bow tie fabric)
-   * fabricColors[2] = Secondary (the knot/center square)
-   * 
-   * Returns: [tie, background, knot]
+   * Traditional Bow Tie fabric roles:
+   * - 2 fabrics: Background + Tie (triangles use Tie)
+   * - 3 fabrics: Background + Tie + Accent (triangles use Accent)
+   *
+   * Template contract:
+   * - COLOR1 = Background squares
+   * - COLOR2 = Tie squares
+   * - COLOR3 = Inner-corner triangles (Tie for 2 fabrics; Accent for 3 fabrics)
+   *
+   * Returns colors in this order: [COLOR1, COLOR2, COLOR3]
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
     const background = fabricColors[0];
-    const primary = fabricColors[1] || background;
-    
+    const tie = fabricColors[1] || background;
+
+    // 2 fabrics: triangles use Tie
     if (fabricColors.length < 3) {
-      // 2 fabrics: tie and knot use the same fabric (primary)
-      return [primary, background, primary];
+      return [background, tie, tie];
     }
-    
-    // 3 fabrics: separate tie and knot colors
-    const secondary = fabricColors[2];
-    return [primary, background, secondary];
-  }
+
+    // 3 fabrics: triangles use Accent
+    const accent = fabricColors[2];
+    return [background, tie, accent];
+  },
 };
 
 export default BowTie;

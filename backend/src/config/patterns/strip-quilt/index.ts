@@ -1,3 +1,4 @@
+// index.ts
 import { PatternDefinition } from '../types';
 import { STRIP_QUILT_TEMPLATE } from './template';
 import { STRIP_QUILT_PROMPT } from './prompt';
@@ -7,41 +8,73 @@ const StripQuilt: PatternDefinition = {
   name: 'Strip Quilt',
   template: STRIP_QUILT_TEMPLATE,
   prompt: STRIP_QUILT_PROMPT,
-  minFabrics: 2,
+
+  // Product offering: 3–8 fabrics
+  minFabrics: 3,
   maxFabrics: 8,
+
+  // Current template is vertical-only; keep false until you add a rotated template or transform support
   allowRotation: false,
-  
+  rotationStrategy: 'none',
+
   /**
-   * Strip Quilt - vertical strips of equal width
-   * fabricColors[0] = Background (first strip)
-   * fabricColors[1] = Primary (second strip)
-   * fabricColors[2] = Secondary (third strip)
-   * fabricColors[3] = Accent (fourth strip)
-   * fabricColors[4] = Contrast (fifth strip)
-   * fabricColors[5-7] = Additional strips
-   * 
-   * All colors are used in order from left to right
-   * Each strip is equal width, creating a simple striped pattern
-   * 
-   * 2 fabrics: Two equal vertical strips
-   * 3-8 fabrics: Multiple vertical strips, each fabric used once
-   * 
-   * Returns: All fabric colors in order
+   * Strip Quilt governance (best-results, 4-strip template):
+   *
+   * The SVG template renders exactly FOUR vertical strips (COLOR1–COLOR4).
+   * We map 3–8 user-selected fabrics into these four roles for consistent,
+   * intentional results (especially at higher fabric counts).
+   *
+   * Roles:
+   * - COLOR1: Background (rest/separator)  => fabricColors[0]
+   * - COLOR2: Primary (anchor)             => fabricColors[1]
+   * - COLOR3: Secondary (anchor)           => fabricColors[2]
+   * - COLOR4: Accent (controlled)          => chosen from fabricColors[3+]
+   *
+   * Behavior by count:
+   * - 3 fabrics: Accent falls back to Secondary (clean + bold)
+   * - 4 fabrics: Accent = fabricColors[3] (direct mapping)
+   * - 5–8 fabrics: Accent rotates deterministically using blockIndex (or row/col)
+   *   to showcase extra fabrics without destabilizing the overall rhythm.
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    const background = fabricColors[0];
-    const primary = fabricColors[1] || background;
-    const secondary = fabricColors[2] || primary;
-    const accent = fabricColors[3] || secondary;
-    const contrast = fabricColors[4] || accent;
-    const additional1 = fabricColors[5] || contrast;
-    const additional2 = fabricColors[6] || additional1;
-    const additional3 = fabricColors[7] || additional2;
-    
-    return [background, primary, secondary, accent, contrast, additional1, additional2, additional3];
+    const provided = (fabricColors || []).filter(Boolean);
+
+    const background = provided[0] ?? '#999';
+    const primary = provided[1] ?? background;
+    const secondary = provided[2] ?? primary;
+
+    const extras = provided.slice(3); // 0..5 extras
+
+    // Default accent:
+    // - no extras => secondary
+    // - 1 extra  => that extra
+    // - 2+ extras => rotate based on a stable seed
+    let accent = secondary;
+
+    if (extras.length === 1) {
+      accent = extras[0];
+    } else if (extras.length > 1) {
+      const { blockIndex, row, col } = opts;
+
+      const seed =
+        typeof blockIndex === 'number'
+          ? blockIndex
+          : typeof row === 'number' && typeof col === 'number'
+            ? row * 1000 + col
+            : 0;
+
+      accent = extras[Math.abs(seed) % extras.length];
+
+      // Guardrail: avoid accent matching primary/secondary if possible
+      if ((accent === primary || accent === secondary) && extras.length > 1) {
+        accent = extras[(Math.abs(seed) + 1) % extras.length];
+      }
+    }
+
+    return [background, primary, secondary, accent];
   }
 };
 

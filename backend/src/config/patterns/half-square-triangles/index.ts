@@ -10,6 +10,7 @@ const HalfSquareTriangles: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 6,
   allowRotation: true,
+  rotationStrategy: 'random',
   
   /**
    * Half Square Triangle (HST) - the most versatile quilting unit

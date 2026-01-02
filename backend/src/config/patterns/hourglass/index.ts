@@ -10,7 +10,8 @@ const Hourglass: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 4,
   allowRotation: true,
-  
+  rotationStrategy: 'alternate-180',
+
   /**
    * Hourglass has 4 quarter-square triangles (QST) forming an hourglass shape
    * fabricColors[0] = Background (top-left and bottom-right triangles)

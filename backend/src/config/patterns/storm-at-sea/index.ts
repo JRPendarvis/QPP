@@ -10,6 +10,7 @@ const StormAtSea: PatternDefinition = {
   minFabrics: 3,
   maxFabrics: 4,
   allowRotation: false,
+  rotationStrategy: 'none',
   
   /**
    * Storm at Sea - creates optical illusion of turbulent waves

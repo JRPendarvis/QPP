@@ -10,6 +10,7 @@ const NinePatch: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 5,
   allowRotation: true,
+  rotationStrategy: 'alternate-180',
   
   /**
    * Nine Patch - classic 3x3 grid of squares

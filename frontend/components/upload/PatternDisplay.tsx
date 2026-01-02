@@ -284,29 +284,21 @@ export default function PatternDisplay({
           <p className="text-sm text-indigo-700 mb-3">
             Only the first 2 steps are shown. Download the PDF to see all {instructionsCount} detailed steps.
           </p>
-          <button
-            onClick={handleDownload}
-            disabled={downloading || !pattern.id}
-            className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {downloading ? 'Downloading...' : 'Download PDF'}
-          </button>
+          <div className="flex justify-center">
+            <button
+              onClick={handleDownload}
+              disabled={downloading || !pattern.id}
+              className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {downloading ? 'Downloading...' : 'Download PDF'}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Download Section */}
       <div className="space-y-4">
-        {hasDownloadsRemaining ? (
-          <div className="flex gap-4">
-            <button
-              onClick={handleDownload}
-              disabled={downloading || !pattern.id}
-              className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {downloading ? 'Downloading...' : 'Download PDF'}
-            </button>
-          </div>
-        ) : (
+        {!hasDownloadsRemaining && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <h3 className="font-semibold text-red-900 mb-2">📄 No Downloads Remaining</h3>
             <p className="text-red-800 mb-4">

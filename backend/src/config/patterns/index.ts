@@ -1,4 +1,5 @@
-import { PatternDefinition, PatternPrompt } from './types';
+import { PatternDefinition } from '../../types/PatternDefinition';
+import { PatternPrompt } from '../../types/PatternPrompt';
 
 // Import all pattern definitions explicitly
 import SimpleSquares from './simple-squares';

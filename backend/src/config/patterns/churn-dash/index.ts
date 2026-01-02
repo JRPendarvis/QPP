@@ -10,27 +10,35 @@ const ChurnDash: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 3,
   allowRotation: true,
-  
+  rotationStrategy: 'alternate-90',
+
   /**
-   * Churn Dash has corner squares, rail rectangles, and HST "churn" sections
-   * fabricColors[0] = Background (corner squares)
-   * fabricColors[1] = Primary (one set of rails + half of HSTs)
-   * fabricColors[2] = Secondary (opposite set of rails + other half of HSTs)
-   * 
-   * 2 fabrics: Background + Primary (Primary used for all feature elements)
-   * 3 fabrics: Background + Primary (one blade set) + Secondary (opposite blade set)
-   * 
-   * Returns: [background, primary, secondary]
+   * Churn Dash (classic) color roles for this SVG template:
+   *
+   * COLOR1 = Background (base + half of rail units + half of corner HSTs)
+   * COLOR2 = Rails accent (the "dash" pieces)
+   * COLOR3 = Accent for center square + corner HST accent triangles
+   *
+   * 2 fabrics:
+   * - background + primary
+   * - primary is used for BOTH COLOR2 and COLOR3 so the block still reads correctly
+   *
+   * 3 fabrics:
+   * - background + primary(rails) + secondary(center/HST accent)
+   *
+   * Returns: [background, rails, accent]
    */
   getColors: (
     fabricColors: string[],
-    opts: { blockIndex?: number; row?: number; col?: number } = {}
+    _opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
     const background = fabricColors[0];
-    const primary = fabricColors[1] || background;
-    const secondary = fabricColors[2] || primary;
-    
-    return [background, primary, secondary];
+    const rails = fabricColors[1] ?? background;
+
+    // If no 3rd fabric, use rails for accent too.
+    const accent = fabricColors[2] ?? rails;
+
+    return [background, rails, accent];
   }
 };
 

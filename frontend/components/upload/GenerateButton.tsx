@@ -18,7 +18,7 @@ export default function GenerateButton({
       <button
         onClick={onClick}
         disabled={disabled}
-        className="px-8 py-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+        className="px-8 py-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-lg transition-all"
       >
         {generating ? (
           <span className="flex items-center gap-2">

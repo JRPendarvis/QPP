@@ -10,7 +10,8 @@ const Checkerboard: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 2,
   allowRotation: true,
-  
+  rotationStrategy: 'none',
+
   /**
    * Checkerboard alternates two colors based on position
    * fabricColors[0] = Background (even positions: row + col = even)

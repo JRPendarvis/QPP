@@ -1,6 +1,7 @@
 import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import stripeRoutes from "./routes/stripeRoutes";
@@ -8,6 +9,7 @@ import patternRoutes from "./routes/patternRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import debugRoutes from "./routes/debugRoutes";
+
 import { StripeController } from "./controllers/stripeController";
 import { initializeCronJobs } from "./jobs/cronJobs";
 import { SERVER_CONSTANTS, CORS_ORIGINS } from "./config/constants";
@@ -21,9 +23,9 @@ const port = process.env.PORT || SERVER_CONSTANTS.DEFAULT_PORT;
 
 // Trust proxy only if running behind a trusted proxy (e.g., Railway, Heroku, Vercel)
 // Use environment variable or default to false for local/dev
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 const trustProxySetting = process.env.TRUST_PROXY || (isProduction ? 1 : false);
-app.set('trust proxy', trustProxySetting);
+app.set("trust proxy", trustProxySetting);
 
 // Stripe controller
 const stripeController = new StripeController();
@@ -49,7 +51,11 @@ app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    // Include admin/debug headers for MVP tooling (safe; only matters if you use them)
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-Admin-Key, X-Debug-Key"
+    );
     res.setHeader("Access-Control-Allow-Credentials", "true");
     return res.sendStatus(200);
   }
@@ -97,8 +103,14 @@ app.use("/api/patterns", patternRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/stripe", stripeRoutes);
-// Debug routes (development only)
-app.use("/api/debug", debugRoutes);
+
+// Debug routes (dev only) — DO NOT expose in production
+if (!isProduction) {
+  app.use("/api/debug", debugRoutes);
+  console.log("🧪 Debug routes enabled (non-production)");
+} else {
+  console.log("🔒 Debug routes disabled (production)");
+}
 
 console.log("✅ Routes loaded");
 
@@ -113,12 +125,19 @@ app.use((req: Request, res: Response) => {
 });
 
 // -------------------------------------
-// Error Handler
+// Error Handler (do not leak internals in prod)
 // -------------------------------------
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("❌ GLOBAL ERROR:", err);
 
-  res.status(500).json({
+  if (isProduction) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+
+  return res.status(500).json({
     success: false,
     message: "Internal server error",
     error: err.message,

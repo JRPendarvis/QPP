@@ -10,6 +10,7 @@ const DoubleWeddingRing: PatternDefinition = {
   minFabrics: 3,
   maxFabrics: 6,
   allowRotation: false,
+  rotationStrategy: 'none',
   
   /**
    * Double Wedding Ring color assignments:

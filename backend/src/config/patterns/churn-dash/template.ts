@@ -1,33 +1,48 @@
 export const CHURN_DASH_TEMPLATE = `
-    <!-- Center square - BACKGROUND -->
-    <rect x="33.33" y="33.33" width="33.34" height="33.34" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    
-    <!-- Top dash - PRIMARY -->
-    <rect x="33.33" y="0" width="33.34" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    
-    <!-- Bottom dash - PRIMARY -->
-    <rect x="33.33" y="66.67" width="33.34" height="33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    
-    <!-- Left dash - SECONDARY -->
-    <rect x="0" y="33.33" width="33.33" height="33.34" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    
-    <!-- Right dash - SECONDARY -->
-    <rect x="66.67" y="33.33" width="33.33" height="33.34" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    
-    <!-- Top-left corner HST: outer=PRIMARY, inner=BACKGROUND -->
-    <polygon points="0,0 33.33,0 0,33.33" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="33.33,0 33.33,33.33 0,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    
-    <!-- Top-right corner HST: outer=SECONDARY, inner=BACKGROUND -->
-    <polygon points="66.67,0 100,0 100,33.33" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.67,0 66.67,33.33 100,33.33" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    
-    <!-- Bottom-left corner HST: outer=SECONDARY, inner=BACKGROUND -->
-    <polygon points="0,66.67 0,100 33.33,100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="0,66.67 33.33,66.67 33.33,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-    
-    <!-- Bottom-right corner HST: outer=PRIMARY, inner=BACKGROUND -->
-    <polygon points="100,66.67 100,100 66.67,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
-    <polygon points="66.67,66.67 100,66.67 66.67,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>`;
+  <!-- Base background -->
+  <rect x="0" y="0" width="100" height="100" fill="COLOR1"/>
+
+  <!-- Constants:
+       3x3 grid => each cell ~33.3333
+       rail split => ~16.6667
+  -->
+
+  <!-- Center square (accent) -->
+  <rect x="33.3333" y="33.3333" width="33.3334" height="33.3334" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+
+  <!-- Rail units (each is a square split into two rectangles) -->
+  <!-- Top-middle rail: left COLOR2, right COLOR1 -->
+  <rect x="33.3333" y="0" width="16.6667" height="33.3333" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="50.0000" y="0" width="16.6667" height="33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+
+  <!-- Right-middle rail: top COLOR2, bottom COLOR1 -->
+  <rect x="66.6667" y="33.3333" width="33.3333" height="16.6667" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="66.6667" y="50.0000" width="33.3333" height="16.6667" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+
+  <!-- Bottom-middle rail: left COLOR1, right COLOR2 -->
+  <rect x="33.3333" y="66.6667" width="16.6667" height="33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="50.0000" y="66.6667" width="16.6667" height="33.3333" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+
+  <!-- Left-middle rail: top COLOR1, bottom COLOR2 -->
+  <rect x="0" y="33.3333" width="33.3333" height="16.6667" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="0" y="50.0000" width="33.3333" height="16.6667" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+
+  <!-- Corner HST units (COLOR1 + COLOR3) -->
+  <!-- Top-left -->
+  <polygon points="0,0 33.3333,0 0,33.3333" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="33.3333,0 33.3333,33.3333 0,33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+
+  <!-- Top-right -->
+  <polygon points="66.6667,0 100,0 100,33.3333" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="66.6667,0 100,33.3333 66.6667,33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+
+  <!-- Bottom-right -->
+  <polygon points="100,66.6667 100,100 66.6667,100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="66.6667,66.6667 100,66.6667 66.6667,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+
+  <!-- Bottom-left -->
+  <polygon points="0,66.6667 33.3333,100 0,100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
+  <polygon points="0,66.6667 33.3333,66.6667 33.3333,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+`;
 
 export const CHURN_DASH = CHURN_DASH_TEMPLATE;

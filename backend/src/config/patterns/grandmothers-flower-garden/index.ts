@@ -10,6 +10,7 @@ const GrandmothersFlowerGarden: PatternDefinition = {
   minFabrics: 3,
   maxFabrics: 5,
   allowRotation: false,
+  rotationStrategy: 'none',
   
   /**
    * Grandmother's Flower Garden color assignments:

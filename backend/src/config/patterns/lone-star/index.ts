@@ -10,7 +10,8 @@ const LoneStar: PatternDefinition = {
   minFabrics: 4,
   maxFabrics: 8,
   allowRotation: false,
-  
+  rotationStrategy: 'none',
+
   /**
    * Lone Star (Star of Bethlehem) - 8 diamond points radiating from center
    * fabricColors[0] = Background (corner squares, negative space)

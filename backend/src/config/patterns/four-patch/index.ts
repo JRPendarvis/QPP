@@ -10,6 +10,7 @@ const FourPatch: PatternDefinition = {
   minFabrics: 3,
   maxFabrics: 4,
   allowRotation: true,
+  rotationStrategy: 'alternate-180',
   
   /**
    * Four Patch color assignments:

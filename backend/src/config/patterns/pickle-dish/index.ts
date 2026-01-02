@@ -10,6 +10,7 @@ const PickleDish: PatternDefinition = {
   minFabrics: 4,
   maxFabrics: 6,
   allowRotation: false,
+  rotationStrategy: 'none',
   
   /**
    * Pickle Dish - curved pieced arcs with radiating wedges creating interlocking pattern

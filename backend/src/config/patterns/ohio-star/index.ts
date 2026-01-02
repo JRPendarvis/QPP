@@ -10,6 +10,7 @@ const OhioStar: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 3,
   allowRotation: true,
+  rotationStrategy: 'none',
   
   /**
    * Ohio Star - classic 8-pointed star made from quarter-square triangles

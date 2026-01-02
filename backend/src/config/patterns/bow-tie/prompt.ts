@@ -2,58 +2,35 @@ import { PatternPrompt } from '../types';
 
 export const BOW_TIE_PROMPT: PatternPrompt = {
   patternName: 'Bow Tie',
-  recommendedFabricCount: 3,
-  
-  characteristics: `A Bow Tie block creates the illusion of a knotted bow tie:
-- A 2x2 four-patch base structure
-- Two squares on diagonally opposite corners form the "tie" (top-left and bottom-right)
-- Two squares on the other diagonal form the background (top-right and bottom-left)
-- A center square overlays the middle intersection as the "knot"
-- Simple construction with strong graphic impact`,
+  recommendedFabricCount: 2,
 
-  fabricRoleGuidance: `Bow Tie fabric assignments (supports 2-3 fabrics):
+  characteristics: `A traditional Bow Tie quilt block:
+- Built on a 2×2 four-patch base
+- Two diagonally opposite squares are the Tie fabric
+- The other two squares are Background
+- Small triangles placed at the inner corners of the Background squares create the bow illusion
+- No center square or decorative overlay is used`,
+
+  fabricRoleGuidance: `Fabric usage:
 
 WITH 2 FABRICS:
-- BACKGROUND (fabricColors[0]): Corner squares - frames the bow tie shape
-- PRIMARY (fabricColors[1]): Tie squares AND center knot - creates the bow tie
+- COLOR1 (Background): background squares
+- COLOR2 (Tie): tie squares AND inner-corner triangles
 
-WITH 3 FABRICS (recommended):
-- BACKGROUND (fabricColors[0]): Corner squares - provides negative space
-- PRIMARY (fabricColors[1]): Tie squares - the dominant visual element of the bow
-- SECONDARY (fabricColors[2]): Center knot - use high contrast to make it pop
+WITH 3 FABRICS:
+- COLOR1 (Background): background squares
+- COLOR2 (Tie): tie squares
+- COLOR3 (Accent): inner-corner triangles`,
 
-The background fabric should be a neutral or low-volume print that allows the bow tie to stand out. 
-The primary tie fabric is the star of the show. If using 3 fabrics, choose a contrasting secondary 
-for the knot to create visual interest at the center.`,
+  assemblyNotes: `Arrange tie squares diagonally (top-left & bottom-right).
+Place background squares on the opposite diagonal.
+Add small triangles at the center-facing corners of the background squares.
+Alternate block rotation when tiling for a proper quilt effect.`,
 
-  cuttingInstructions: `Bow Tie cutting specifics:
+  cuttingInstructions: `Cut equal-sized squares for both the tie and background fabrics.
+For the inner-corner triangles, cut small squares from the accent or tie fabric, then cut them in half diagonally to form triangles.`,
 
-FOR 2 FABRICS:
-- Cut two squares for the tie from PRIMARY fabric
-- Cut two squares for the background from BACKGROUND fabric
-- Cut one smaller center square for the knot from PRIMARY fabric
-
-FOR 3 FABRICS:
-- Cut two squares for the tie from PRIMARY fabric
-- Cut two squares for the background from BACKGROUND fabric
-- Cut one smaller center square for the knot from SECONDARY fabric
-
-The knot square is approximately 30% the width of the full block.
-All tie and background squares are equal size (typically 1/2 the block width).`,
-
-  assemblyNotes: `Assembly tips for Bow Tie:
-- Arrange as a four-patch with PRIMARY tie squares on opposite diagonal corners (top-left and bottom-right)
-- Place BACKGROUND squares on the other diagonal (top-right and bottom-left)
-- Center the knot square over the middle intersection where all four patches meet
-- Press seams toward darker fabrics to reduce bulk
-- Ensure the knot is appliquéd or pieced precisely at the center for a clean look
-- The diagonal placement of matching tie squares creates the characteristic "bow" shape`,
-
-  commonMistakes: `Avoid these Bow Tie mistakes:
-- Placing tie squares adjacent instead of diagonally opposite (breaks the bow illusion)
-- Using triangles instead of full squares (creates gaps and loses the bow shape)
-- Misaligning the center knot off the intersection point
-- Making the knot too large (should be subtle, about 30% of block width)
-- Using low contrast between knot and tie fabrics (knot disappears)
-- Choosing a busy background that competes with the bow tie design`
+  commonMistakes: `- Misplacing the tie and background squares, which disrupts the bow illusion.
+- Incorrectly sizing or positioning the inner-corner triangles, causing the bow shape to look uneven.
+- Not alternating block rotation when assembling the quilt, resulting in a less dynamic pattern.`
 };

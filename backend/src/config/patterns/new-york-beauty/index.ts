@@ -10,7 +10,8 @@ const NewYorkBeauty: PatternDefinition = {
   minFabrics: 3,
   maxFabrics: 5,
   allowRotation: false,
-  
+  rotationStrategy: 'none',
+
   /**
    * New York Beauty - curved pieced arc with radiating spikes from corner
    * fabricColors[0] = Background (main block area, negative space)

@@ -10,7 +10,8 @@ const MarinersCompass: PatternDefinition = {
   minFabrics: 4,
   maxFabrics: 6,
   allowRotation: false,
-  
+  rotationStrategy: 'none',
+
   /**
    * Mariner's Compass - radiating points like a navigational compass rose
    * fabricColors[0] = Background (circle background, corner squares)

@@ -10,7 +10,8 @@ const FeatheredStar: PatternDefinition = {
   minFabrics: 3,
   maxFabrics: 5,
   allowRotation: false,
-  
+  rotationStrategy: 'none',
+
   /**
    * Feathered Star color assignments:
    * fabricColors[0] = Background (negative space, setting triangles, corners)

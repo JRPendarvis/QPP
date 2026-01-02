@@ -10,7 +10,8 @@ const Pinwheel: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 4,
   allowRotation: true,
-  
+  rotationStrategy: 'random',
+
   /**
    * Pinwheel - 4 half-square triangles creating a spinning effect
    * fabricColors[0] = Background (4 triangles - one per HST)

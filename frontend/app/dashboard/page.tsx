@@ -109,7 +109,7 @@ export default function DashboardPage() {
           <div className="mt-4 p-4 rounded" style={{backgroundColor: '#88A98E20', borderColor: '#88A98E', borderWidth: '1px'}}>
             <h3 className="font-semibold mb-2" style={{color: '#B85C5C'}}>How it works:</h3>
             <ol className="list-decimal list-inside text-blue-800 space-y-1">
-              <li>Upload 2-8 fabric images</li>
+              <li>Upload 2-9 fabric images</li>
               <li>AI generates a {SKILL_LEVELS[currentSkill]} level quilt pattern</li>
               <li>Download PDF with instructions</li>
             </ol>

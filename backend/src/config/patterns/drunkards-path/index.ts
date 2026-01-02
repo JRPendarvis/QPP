@@ -10,6 +10,7 @@ const DrunkardsPath: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 4,
   allowRotation: true,
+  rotationStrategy: 'random',
   
   /**
    * Drunkard's Path has a quarter circle creating curved, winding paths

@@ -10,7 +10,8 @@ const FlyingGeese: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 6,
   allowRotation: true,
-  
+  rotationStrategy: 'alternate-90',
+
   /**
    * Flying Geese color assignments:
    * fabricColors[0] = Background (the "sky" - corner triangles)

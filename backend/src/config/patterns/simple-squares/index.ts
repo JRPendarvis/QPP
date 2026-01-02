@@ -10,6 +10,7 @@ const SimpleSquares: PatternDefinition = {
   minFabrics: 1,
   maxFabrics: 8,
   allowRotation: true,
+  rotationStrategy: 'random',
   
   /**
    * Simple Squares - each block is a single solid square
