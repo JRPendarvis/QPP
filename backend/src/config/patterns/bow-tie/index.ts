@@ -25,22 +25,17 @@ const BowTie: PatternDefinition = {
    *
    * Returns colors in this order: [COLOR1, COLOR2, COLOR3]
    */
-  getColors: (
-    fabricColors: string[],
-    opts: { blockIndex?: number; row?: number; col?: number } = {}
-  ): string[] => {
-    const background = fabricColors[0];
-    const tie = fabricColors[1] || background;
-
-    // 2 fabrics: triangles use Tie
-    if (fabricColors.length < 3) {
-      return [background, tie, tie];
-    }
-
-    // 3 fabrics: triangles use Accent
-    const accent = fabricColors[2];
-    return [background, tie, accent];
-  },
+getColors: (
+  fabricColors: string[],
+  opts: { blockIndex?: number; row?: number; col?: number } = {}
+): string[] => {
+  const background = fabricColors[0];  
+  const tieEnds = fabricColors[1] || background;  
+  const tieKnot = fabricColors[2] || tieEnds;  // No 3rd fabric, so = Blue
+  
+  return [background, tieEnds, tieKnot];
+  // Returns: [White, Blue, Blue]
+},
 };
 
 export default BowTie;

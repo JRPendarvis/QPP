@@ -7,7 +7,7 @@ const SimpleSquares: PatternDefinition = {
   name: 'Simple Squares',
   template: SIMPLE_SQUARES_TEMPLATE,
   prompt: SIMPLE_SQUARES_PROMPT,
-  minFabrics: 1,
+  minFabrics: 2,
   maxFabrics: 8,
   allowRotation: true,
   rotationStrategy: 'random',

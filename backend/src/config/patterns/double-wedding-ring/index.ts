@@ -5,6 +5,7 @@ import { DOUBLE_WEDDING_RING_PROMPT } from './prompt';
 const DoubleWeddingRing: PatternDefinition = {
   id: 'double-wedding-ring',
   name: 'Double Wedding Ring',
+  enabled: false,
   template: DOUBLE_WEDDING_RING_TEMPLATE,
   prompt: DOUBLE_WEDDING_RING_PROMPT,
   minFabrics: 3,

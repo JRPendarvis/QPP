@@ -26,7 +26,7 @@ export const NEXT_LEVEL: Record<string, string> = {
 
 export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabrics: number; maxFabrics: number }[]> = {
   beginner: [
-    { id: 'simple-squares', name: 'Simple Squares', minFabrics: 1, maxFabrics: 8 },
+    { id: 'simple-squares', name: 'Simple Squares', minFabrics: 2, maxFabrics: 8 },
     { id: 'strip-quilt', name: 'Strip Quilt', minFabrics: 3, maxFabrics: 8 },
     { id: 'checkerboard', name: 'Checkerboard', minFabrics: 2, maxFabrics: 2 },
     { id: 'rail-fence', name: 'Rail Fence', minFabrics: 3, maxFabrics: 5 },
@@ -56,7 +56,7 @@ export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabr
   expert: [
     { id: 'feathered-star', name: 'Feathered Star', minFabrics: 3, maxFabrics: 5 },
     { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden", minFabrics: 3, maxFabrics: 8 },
-    { id: 'double-wedding-ring', name: 'Double Wedding Ring', minFabrics: 3, maxFabrics: 4 },
+    { id: 'double-wedding-ring', name: 'Double Wedding Ring', minFabrics: 3, maxFabrics: 6 },
     { id: 'pickle-dish', name: 'Pickle Dish', minFabrics: 4, maxFabrics: 6 },
     { id: 'complex-medallion', name: 'Complex Medallion', minFabrics: 3, maxFabrics: 8 },
   ],

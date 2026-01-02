@@ -4,6 +4,26 @@
  * Uses pattern IDs for consistency with pattern system
  */
 
+import { getAllPatterns } from './patterns';
+
+/**
+ * Get patterns for a skill level, filtering out disabled patterns
+ * In development, all patterns are shown; in production, only enabled patterns
+ */
+export function getPatternsForSkillLevel(skillLevel: string): string[] {
+  const enabledPatternIds = getAllPatterns()
+    .filter(p => {
+      if (process.env.NODE_ENV !== 'production') {
+        return true;  // Show all patterns in development
+      }
+      return p.enabled !== false;  // Only show enabled patterns in production
+    })
+    .map(p => p.id);
+  
+  return (PATTERNS_BY_SKILL[skillLevel] || [])
+    .filter(id => enabledPatternIds.includes(id));
+}
+
 export const PATTERNS_BY_SKILL: Record<string, string[]> = {
   beginner: [
     'simple-squares',

@@ -22,8 +22,8 @@ export const STORM_AT_SEA_TEMPLATE = `
   <polygon points="90,20 100,50 90,80 80,50" fill="COLOR2" stroke="#ccc" stroke-width="0.3"/>
   <polygon points="90,35 96,50 90,65 84,50" fill="COLOR3" stroke="#ccc" stroke-width="0.3"/>
   
-  <!-- Center diamond - PRIMARY wave (COLOR2) with SECONDARY center (COLOR3) -->
+  <!-- Center diamond - PRIMARY wave (COLOR2) with ACCENT center (COLOR4) -->
   <polygon points="50,20 80,50 50,80 20,50" fill="COLOR2" stroke="#ccc" stroke-width="0.3"/>
-  <polygon points="50,32 68,50 50,68 32,50" fill="COLOR3" stroke="#ccc" stroke-width="0.3"/>`;
+  <polygon points="50,32 68,50 50,68 32,50" fill="COLOR4" stroke="#ccc" stroke-width="0.3"/>`;
 
 export const STORM_AT_SEA = STORM_AT_SEA_TEMPLATE;

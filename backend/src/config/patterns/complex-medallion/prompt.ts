@@ -79,6 +79,6 @@ Consider using a design template for complex center medallion shapes.`,
 - Not planning the color flow from center to outer edge (creates visual confusion)
 - Cutting borders too short (always cut long and trim to fit)
 - Stretching bias edges when adding borders (use walking foot)
-- Misaligning the center medallion (should be perfectly centered)
+- Misaligned the center medallion (should be perfectly centered)
 - Using the same border width for all frames (vary widths for visual interest)`
 };

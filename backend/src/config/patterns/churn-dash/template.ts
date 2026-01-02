@@ -1,13 +1,16 @@
 export const CHURN_DASH_TEMPLATE = `
-  <!-- Base background -->
-  <rect x="0" y="0" width="100" height="100" fill="COLOR1"/>
-
   <!-- Constants:
        3x3 grid => each cell ~33.3333
        rail split => ~16.6667
   -->
 
-  <!-- Center square (accent) -->
+  <!-- Corner squares (full cells - BACKGROUND COLOR1) -->
+  <rect x="0" y="0" width="33.3333" height="33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="66.6667" y="0" width="33.3333" height="33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="0" y="66.6667" width="33.3333" height="33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <rect x="66.6667" y="66.6667" width="33.3333" height="33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+
+  <!-- Center square (COLOR3 - accent/center) -->
   <rect x="33.3333" y="33.3333" width="33.3334" height="33.3334" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
 
   <!-- Rail units (each is a square split into two rectangles) -->
@@ -27,22 +30,19 @@ export const CHURN_DASH_TEMPLATE = `
   <rect x="0" y="33.3333" width="33.3333" height="16.6667" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
   <rect x="0" y="50.0000" width="33.3333" height="16.6667" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
 
-  <!-- Corner HST units (COLOR1 + COLOR3) -->
-  <!-- Top-left -->
-  <polygon points="0,0 33.3333,0 0,33.3333" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="33.3333,0 33.3333,33.3333 0,33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-
-  <!-- Top-right -->
-  <polygon points="66.6667,0 100,0 100,33.3333" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="66.6667,0 100,33.3333 66.6667,33.3333" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-
-  <!-- Bottom-right -->
-  <polygon points="100,66.6667 100,100 66.6667,100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="66.6667,66.6667 100,66.6667 66.6667,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
-
-  <!-- Bottom-left -->
-  <polygon points="0,66.6667 33.3333,100 0,100" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>
-  <polygon points="0,66.6667 33.3333,66.6667 33.3333,100" fill="COLOR1" stroke="#ccc" stroke-width="0.5"/>
+  <!-- Corner HST units - triangles match adjacent rails to create "blades" -->
+  
+  <!-- Top-left corner: COLOR2 triangle on right side (matches left portion of top rail) -->
+  <polygon points="0,0 33.3333,0 33.3333,33.3333" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- Top-right corner: COLOR2 triangle on left side (matches left portion of top rail) -->
+  <polygon points="66.6667,0 66.6667,33.3333 100,0" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- Bottom-right corner: COLOR2 triangle on left side (matches right portion of bottom rail) -->
+  <polygon points="66.6667,66.6667 66.6667,100 100,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
+  
+  <!-- Bottom-left corner: COLOR2 triangle on right side (matches right portion of bottom rail) -->
+  <polygon points="0,66.6667 33.3333,66.6667 0,100" fill="COLOR2" stroke="#ccc" stroke-width="0.5"/>
 `;
 
 export const CHURN_DASH = CHURN_DASH_TEMPLATE;

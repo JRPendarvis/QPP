@@ -20,6 +20,7 @@ export interface PatternDefinition {
   prompt: PatternPrompt;
   minFabrics: number;                  // Minimum fabrics needed
   maxFabrics: number;                  // Maximum fabrics supported
+  enabled?: boolean;                   // If false, pattern is hidden from production users (defaults to true)
 
   /**
    * Returns an array of resolved colors in the order the template expects:

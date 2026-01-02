@@ -113,6 +113,13 @@ export default function UploadPage() {
         patternChoice === 'manual' ? selectedPattern : undefined
       );
       toast.dismiss(loadingToast);
+      
+      // Check if there was an error after generation
+      if (error) {
+        toast.error(error, {
+          duration: 5000,
+        });
+      }
     } catch (error) {
       toast.error('Failed to generate pattern. Please try again.', {
         id: loadingToast,
@@ -199,9 +206,17 @@ export default function UploadPage() {
                 />
               </div>
 
+              {/* Generate Button */}
+              <GenerateButton
+                onClick={handleGenerate}
+                disabled={generating || !fabricCountValid || !!fabricValidationMessage}
+                generating={generating}
+                fabricCount={fabrics.length}
+              />
+
               {/* Fabric Preview Grid */}
               {fabrics.length > 0 && (
-                <div className="mb-6">
+                <div className="my-6">
                   <FabricPreviewGrid
                     previews={previews}
                     fabrics={fabrics}
@@ -219,16 +234,6 @@ export default function UploadPage() {
             </>
           )}
 
-          {/* Generate Button - Show only when no pattern is displayed */}
-          {!pattern && (
-            <GenerateButton
-              onClick={handleGenerate}
-              disabled={generating || !fabricCountValid || !!fabricValidationMessage}
-              generating={generating}
-              fabricCount={fabrics.length}
-            />
-          )}
-
           {pattern && !generating && (
             <PatternDisplay
               pattern={pattern}
@@ -236,8 +241,7 @@ export default function UploadPage() {
               usage={profile.usage}
               onStartOver={() => {
                 resetPattern();
-                setSelectedPattern('');
-                setPatternChoice('auto');
+                // Keep pattern choice, selected pattern, and challenge me settings
               }}
             />
           )}

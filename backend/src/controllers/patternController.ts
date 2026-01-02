@@ -371,19 +371,27 @@ export class PatternController {
   async listPatterns(req: Request, res: Response) {
     try {
       // Get all patterns from the pattern system
-      const allPatterns = getAllPatterns().map(patternDef => {
-        const quiltPattern = getQuiltPattern(patternDef.id);
-        return {
-          id: patternDef.id,
-          name: patternDef.name,
-          skillLevel: quiltPattern?.skillLevel || 'intermediate',
-          description: quiltPattern?.description || '',
-          recommendedFabricCount: quiltPattern?.recommendedFabricCount || null,
-          minColors: patternDef.minFabrics,
-          maxFabrics: patternDef.maxFabrics,
-          allowRotation: patternDef.allowRotation ?? true,
-        };
-      });
+      // In development, show all patterns; in production, filter out disabled ones
+      const allPatterns = getAllPatterns()
+        .filter(patternDef => {
+          if (process.env.NODE_ENV !== 'production') {
+            return true;  // Show all patterns in development
+          }
+          return patternDef.enabled !== false;  // Only show enabled patterns in production
+        })
+        .map(patternDef => {
+          const quiltPattern = getQuiltPattern(patternDef.id);
+          return {
+            id: patternDef.id,
+            name: patternDef.name,
+            skillLevel: quiltPattern?.skillLevel || 'intermediate',
+            description: quiltPattern?.description || '',
+            recommendedFabricCount: quiltPattern?.recommendedFabricCount || null,
+            minColors: patternDef.minFabrics,
+            maxFabrics: patternDef.maxFabrics,
+            allowRotation: patternDef.allowRotation ?? true,
+          };
+        });
 
       res.json({
         success: true,
