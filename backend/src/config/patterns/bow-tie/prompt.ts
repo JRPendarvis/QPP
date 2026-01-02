@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const BOW_TIE_PROMPT: PatternPrompt = {
   patternName: 'Bow Tie',

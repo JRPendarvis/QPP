@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const HOURGLASS_PROMPT: PatternPrompt = {
   patternName: 'Hourglass',

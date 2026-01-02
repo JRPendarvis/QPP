@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { PICKLE_DISH_TEMPLATE } from './template';
 import { PICKLE_DISH_PROMPT } from './prompt';
 

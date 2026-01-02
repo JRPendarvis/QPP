@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const LOG_CABIN_PROMPT: PatternPrompt = {
   patternName: 'Log Cabin',

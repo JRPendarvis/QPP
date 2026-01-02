@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const OHIO_STAR_PROMPT: PatternPrompt = {
   patternName: 'Ohio Star',

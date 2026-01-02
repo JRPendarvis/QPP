@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const DRUNKARDS_PATH_PROMPT: PatternPrompt = {
   patternName: "Drunkard's Path",

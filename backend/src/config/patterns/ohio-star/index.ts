@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { OHIO_STAR_TEMPLATE } from './template';
 import { OHIO_STAR_PROMPT } from './prompt';
 

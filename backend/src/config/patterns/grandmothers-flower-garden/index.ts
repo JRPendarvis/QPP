@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { GRANDMOTHERS_FLOWER_GARDEN_TEMPLATE } from './template';
 import { GRANDMOTHERS_FLOWER_GARDEN_PROMPT } from './prompt';
 

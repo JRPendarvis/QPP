@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const CHURN_DASH_PROMPT: PatternPrompt = {
   patternName: 'Churn Dash',

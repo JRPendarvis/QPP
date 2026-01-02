@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const PICKLE_DISH_PROMPT: PatternPrompt = {
   patternName: 'Pickle Dish',

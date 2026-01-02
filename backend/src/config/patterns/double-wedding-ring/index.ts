@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { DOUBLE_WEDDING_RING_TEMPLATE } from './template';
 import { DOUBLE_WEDDING_RING_PROMPT } from './prompt';
 

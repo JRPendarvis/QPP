@@ -1,5 +1,5 @@
 // index.ts
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { STRIP_QUILT_TEMPLATE } from './template';
 import { STRIP_QUILT_PROMPT } from './prompt';
 

@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const SIMPLE_SQUARES_PROMPT: PatternPrompt = {
   patternName: 'Simple Squares',

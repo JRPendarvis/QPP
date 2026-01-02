@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { FEATHERED_STAR_TEMPLATE } from './template';
 import { FEATHERED_STAR_PROMPT } from './prompt';
 

@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { RAIL_FENCE_TEMPLATE } from './template';
 import { RAIL_FENCE_PROMPT } from './prompt';
 

@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { HALF_SQUARE_TRIANGLES_TEMPLATE } from './template';
 import { HALF_SQUARE_TRIANGLES_PROMPT } from './prompt';
 

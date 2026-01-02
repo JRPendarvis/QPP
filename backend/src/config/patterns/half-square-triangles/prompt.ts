@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const HALF_SQUARE_TRIANGLES_PROMPT: PatternPrompt = {
   patternName: 'Half-Square Triangles',

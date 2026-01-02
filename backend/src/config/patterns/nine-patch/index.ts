@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { NINE_PATCH_TEMPLATE } from './template';
 import { NINE_PATCH_PROMPT } from './prompt';
 

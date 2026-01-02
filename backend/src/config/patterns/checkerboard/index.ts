@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { CHECKERBOARD_TEMPLATE } from './template';
 import { CHECKERBOARD_PROMPT } from './prompt';
 

@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { STORM_AT_SEA_TEMPLATE } from './template';
 import { STORM_AT_SEA_PROMPT } from './prompt';
 

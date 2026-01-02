@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const STORM_AT_SEA_PROMPT: PatternPrompt = {
   patternName: 'Storm at Sea',

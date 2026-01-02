@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { PINWHEEL_TEMPLATE } from './template';
 import { PINWHEEL_PROMPT } from './prompt';
 

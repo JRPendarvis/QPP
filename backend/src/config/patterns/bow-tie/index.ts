@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { BOW_TIE_TEMPLATE } from './template';
 import { BOW_TIE_PROMPT } from './prompt';
 

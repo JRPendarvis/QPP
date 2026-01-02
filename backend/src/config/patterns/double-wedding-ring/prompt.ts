@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const DOUBLE_WEDDING_RING_PROMPT: PatternPrompt = {
   patternName: 'Double Wedding Ring',

@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const RAIL_FENCE_PROMPT: PatternPrompt = {
   patternName: 'Rail Fence',

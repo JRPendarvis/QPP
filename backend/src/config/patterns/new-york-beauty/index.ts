@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { NEW_YORK_BEAUTY_TEMPLATE } from './template';
 import { NEW_YORK_BEAUTY_PROMPT } from './prompt';
 

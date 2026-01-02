@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { COMPLEX_MEDALLION_TEMPLATE } from './template';
 import { COMPLEX_MEDALLION_PROMPT } from './prompt';
 

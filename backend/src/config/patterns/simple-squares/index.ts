@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { SIMPLE_SQUARES_TEMPLATE } from './template';
 import { SIMPLE_SQUARES_PROMPT } from './prompt';
 

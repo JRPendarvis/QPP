@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { DRUNKARDS_PATH_TEMPLATE } from './template';
 import { DRUNKARDS_PATH_PROMPT } from './prompt';
 

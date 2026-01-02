@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { CHURN_DASH_TEMPLATE } from './template';
 import { CHURN_DASH_PROMPT } from './prompt';
 

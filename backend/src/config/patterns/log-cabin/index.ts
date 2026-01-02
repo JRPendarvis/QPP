@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { LOG_CABIN_TEMPLATE } from './template';
 import { LOG_CABIN_PROMPT } from './prompt';
 

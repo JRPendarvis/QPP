@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { FLYING_GEESE_TEMPLATE } from './template';
 import { FLYING_GEESE_PROMPT } from './prompt';
 

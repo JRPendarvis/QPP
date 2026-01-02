@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const COMPLEX_MEDALLION_PROMPT: PatternPrompt = {
   patternName: 'Complex Medallion',

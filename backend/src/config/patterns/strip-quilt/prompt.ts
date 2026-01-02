@@ -1,5 +1,5 @@
 // prompt.ts
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const STRIP_QUILT_PROMPT: PatternPrompt = {
   patternName: 'Strip Quilt',

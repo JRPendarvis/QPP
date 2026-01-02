@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const FOUR_PATCH_PROMPT: PatternPrompt = {
   patternName: 'Four Patch',

@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { MARINERS_COMPASS_TEMPLATE } from './template';
 import { MARINERS_COMPASS_PROMPT } from './prompt';
 

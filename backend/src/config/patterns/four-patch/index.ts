@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { FOUR_PATCH_TEMPLATE } from './template';
 import { FOUR_PATCH_PROMPT } from './prompt';
 

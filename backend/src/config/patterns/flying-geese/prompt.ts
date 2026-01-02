@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const FLYING_GEESE_PROMPT: PatternPrompt = {
   patternName: 'Flying Geese',

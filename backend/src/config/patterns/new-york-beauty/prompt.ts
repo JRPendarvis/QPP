@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const NEW_YORK_BEAUTY_PROMPT: PatternPrompt = {
   patternName: 'New York Beauty',

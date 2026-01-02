@@ -1,4 +1,4 @@
-import { PatternDefinition } from '../types';
+import { PatternDefinition } from '../../../types/PatternDefinition';
 import { HOURGLASS_TEMPLATE } from './template';
 import { HOURGLASS_PROMPT } from './prompt';
 

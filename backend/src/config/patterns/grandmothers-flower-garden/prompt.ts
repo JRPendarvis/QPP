@@ -1,4 +1,4 @@
-import { PatternPrompt } from '../types';
+import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const GRANDMOTHERS_FLOWER_GARDEN_PROMPT: PatternPrompt = {
   patternName: "Grandmother's Flower Garden",
