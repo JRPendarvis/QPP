@@ -56,7 +56,6 @@ export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabr
   expert: [
     { id: 'feathered-star', name: 'Feathered Star', minFabrics: 3, maxFabrics: 5 },
     { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden", minFabrics: 3, maxFabrics: 8 },
-    { id: 'double-wedding-ring', name: 'Double Wedding Ring', minFabrics: 3, maxFabrics: 6 },
     { id: 'pickle-dish', name: 'Pickle Dish', minFabrics: 4, maxFabrics: 6 },
     { id: 'complex-medallion', name: 'Complex Medallion', minFabrics: 3, maxFabrics: 8 },
   ],
