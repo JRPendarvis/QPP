@@ -11,6 +11,14 @@ const FlyingGeese: PatternDefinition = {
   maxFabrics: 6,
   allowRotation: true,
   rotationStrategy: 'parity-2x2',
+  fabricRoles: [
+    'Sky (Background)',
+    'Geese (Primary)',
+    'Geese (Secondary)',
+    'Geese (Accent)',
+    'Geese (Contrast)',
+    'Geese (Additional)',
+  ],
 
   /**
    * Flying Geese color assignments:

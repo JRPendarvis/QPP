@@ -12,6 +12,16 @@ const ComplexMedallion: PatternDefinition = {
   maxFabrics: 8,
   allowRotation: false,
   rotationStrategy: 'none',
+  fabricRoles: [
+    'Outermost Border',
+    'Center Medallion',
+    'Inner Border 1',
+    'Inner Border 2',
+    'Inner Border 3',
+    'Inner Border 4',
+    'Inner Border 5',
+    'Inner Border 6',
+  ],
   
   /**
    * Complex Medallion has a central focal point with radiating borders/frames

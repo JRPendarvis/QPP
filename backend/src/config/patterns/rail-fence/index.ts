@@ -11,6 +11,12 @@ const RailFence: PatternDefinition = {
   maxFabrics: 4,
   allowRotation: true,
   rotationStrategy: 'alternate-90',
+  fabricRoles: [
+    'Top Rail',
+    'Middle Rail',
+    'Bottom Rail',
+    'Accent Rail',
+  ],
   
   /**
    * Rail Fence - 3 horizontal strips creating zigzag pattern when rotated

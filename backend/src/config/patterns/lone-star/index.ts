@@ -13,6 +13,16 @@ const LoneStar: PatternDefinition = {
   maxFabrics: 8,
   allowRotation: false,
   rotationStrategy: 'none',
+  fabricRoles: [
+    'Center Diamond',
+    'Ring 1 (Cardinal)',
+    'Ring 1 (Diagonal)',
+    'Ring 2 (Cardinal)',
+    'Ring 2 (Diagonal)',
+    'Ring 3 (Cardinal)',
+    'Ring 3 (Diagonal)',
+    'Background',
+  ],
 
   /**
    * Lone Star (Star of Bethlehem) - TRUE diamond star with 8 points

@@ -21,6 +21,13 @@ export interface PatternDefinition {
   minFabrics: number;                  // Minimum fabrics needed
   maxFabrics: number;                  // Maximum fabrics supported
   enabled?: boolean;                   // If false, pattern is hidden from production users (defaults to true)
+  
+  /**
+   * Optional: Pattern-specific labels for fabric roles
+   * If not provided, defaults to generic labels (Background, Primary, Secondary, etc.)
+   * Array length should match maxFabrics
+   */
+  fabricRoles?: string[];
 
   /**
    * Returns an array of resolved colors in the order the template expects:

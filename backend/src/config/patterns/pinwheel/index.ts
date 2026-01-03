@@ -11,6 +11,12 @@ const Pinwheel: PatternDefinition = {
   maxFabrics: 4,
   allowRotation: true,
   rotationStrategy: 'random',
+  fabricRoles: [
+    'Background',
+    'Blades (Primary)',
+    'Blades (Secondary)',
+    'Blades (Accent)',
+  ],
 
   /**
    * Pinwheel - 4 half-square triangles creating a spinning effect

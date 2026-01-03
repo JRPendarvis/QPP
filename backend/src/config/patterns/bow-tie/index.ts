@@ -12,6 +12,16 @@ const BowTie: PatternDefinition = {
   maxFabrics: 8,
   allowRotation: true,
   rotationStrategy: 'random',
+  fabricRoles: [
+    'Background Squares',
+    'Bow Squares',
+    'Bow Squares 2',
+    'Bow Squares 3',
+    'Bow Squares 4',
+    'Bow Squares 5',
+    'Bow Squares 6',
+    'Bow Squares 7',
+  ],
 
   /**
    * Bow Tie fabric roles:

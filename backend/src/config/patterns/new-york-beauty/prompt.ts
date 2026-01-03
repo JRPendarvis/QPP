@@ -3,135 +3,111 @@ import { PatternPrompt } from '../../../types/PatternPrompt';
 export const NEW_YORK_BEAUTY_PROMPT: PatternPrompt = {
   patternName: 'New York Beauty',
   recommendedFabricCount: 4,
-  
-  characteristics: `New York Beauty is a dramatic curved pattern with radiating spikes:
-- Quarter-circle design radiating from one corner of the block
-- Curved arc band contains foundation paper-pieced spikes pointing outward
-- Spikes radiate from the corner like a sunrise, crown, or fan
-- Inner quarter-circle anchors the design at the corner (the "sun")
-- Background fills the remaining block area
-- All curved piecing - requires advanced skills
-- Also known as: Rocky Mountain Road, Crown of Thorns
-- Creates stunning secondary patterns when blocks are rotated during layout
-- Advanced to expert skill level - combines foundation piecing with curved seams`,
 
-  fabricRoleGuidance: `New York Beauty fabric assignments (supports 3-5 fabrics):
+  characteristics: `New York Beauty is a dramatic curved, radiating quilt design:
+- Built around a quarter-circle "fan" that grows out from one corner of the block
+- The fan is subdivided into wedge-like slices that create a sunrise / crown / fan effect
+- A smaller inner quarter-circle anchors the corner and strengthens the circular motion
+- Strong contrast makes the fan read clearly against the background
+- Creates beautiful secondary designs when multiple blocks are arranged and rotated in a quilt top
+- Traditional name history includes regional names such as Rocky Mountain Road and Crown of Thorns; the name "New York Beauty" became widely used after early 20th-century publication.`
+  ,
 
-WITH 3 FABRICS (traditional):
-- BACKGROUND (fabricColors[0]): Main block area (outer background square)
-- PRIMARY (fabricColors[1]): Arc band (background behind spikes)
-- SECONDARY (fabricColors[2]): All spikes (radiating points) + corner quarter-circle
+  fabricRoleGuidance: `New York Beauty (Corner Fan) fabric assignments (supports 3–5 fabrics):
 
-Classic approach with maximum clarity and drama.
+WITH 3 FABRICS (simple & bold):
+- BACKGROUND (fabricColors[0]): main block area / negative space
+- FAN BASE (fabricColors[1]): the curved band behind the wedges (the "ring" of the fan)
+- FAN WEDGES (fabricColors[2]): all wedge slices in the fan + (optionally) the corner quarter-circle
+
+This is the cleanest MVP look: strong shapes, easy contrast.
 
 WITH 4 FABRICS (recommended):
-- BACKGROUND (fabricColors[0]): Main block area (outer background square)
-- PRIMARY (fabricColors[1]): Arc band (background behind the spikes)
-- SECONDARY (fabricColors[2]): All spikes (radiating triangular points)
-- ACCENT (fabricColors[3]): Inner corner quarter-circle (the "sun")
+- BACKGROUND (fabricColors[0]): main block area / negative space
+- FAN BASE (fabricColors[1]): the curved band behind the wedges
+- FAN WEDGES (fabricColors[2]): wedge slices in the fan
+- CORNER (fabricColors[3]): inner corner quarter-circle (the “sun” anchor)
 
-Separates the corner piece from the spikes for better definition and focal point.
+This reads most like a true New York Beauty corner fan and gives the best definition.
 
-WITH 5 FABRICS (maximum detail):
-- BACKGROUND (fabricColors[0]): Main block area (outer background square)
-- PRIMARY (fabricColors[1]): Arc band (background behind spikes)
-- SECONDARY (fabricColors[2]): Half of the spikes (alternating)
-- ACCENT (fabricColors[3]): Inner corner quarter-circle
-- CONTRAST (fabricColors[4]): Other half of spikes (alternating with Secondary)
+WITH 5 FABRICS (maximum detail for MVP):
+- BACKGROUND (fabricColors[0]): main block area / negative space
+- FAN BASE (fabricColors[1]): the curved band behind the wedges
+- FAN WEDGES A (fabricColors[2]): alternating wedges
+- CORNER (fabricColors[3]): inner corner quarter-circle
+- FAN WEDGES B (fabricColors[4]): alternating wedges (checker/stripe effect)
 
-Creates checkerboard effect on spikes for maximum visual interest.
+DESIGN TIP:
+- Use high contrast between FAN WEDGES and FAN BASE so the fan slices pop.
+- Make the CORNER bold (or high-value contrast) so it anchors the motion.
+- If using 5 fabrics, keep Wedges A and Wedges B clearly different (value contrast works better than subtle color changes).
 
-DESIGN TIP: Use high contrast between Secondary (spikes) and Primary (arc band) 
-so the radiating points read clearly. The corner Accent piece should be bold to 
-anchor the design. Consider value gradation from corner outward (light to dark 
-or dark to light) to enhance the sunburst effect.
+IMPORTANT:
+- Block orientation is usually fixed during construction.
+- The “magic” happens at layout time: rotating multiple blocks creates circles, pinwheels, crowns, and continuous curves.`
+  ,
 
-IMPORTANT: Block orientation is fixed during construction. Rotation happens at 
-the layout stage to create secondary patterns like pinwheels, stars, or continuous curves.`,
+  cuttingInstructions: `New York Beauty (Corner Fan) cutting specifics for this MVP implementation:
 
-  cuttingInstructions: `New York Beauty cutting specifics:
+THIS MVP VERSION FOCUSES ON CURVED WEDGE PIECES (not mandatory foundation paper piecing).
 
-FOUNDATION PAPER PIECING (REQUIRED):
-The spike section MUST be foundation paper pieced for accuracy
-- Print FPP templates with spike triangles marked
-- Each spike is a small triangle pointing outward from the arc
-- Typically 8-12 spikes per quarter-circle
+BACKGROUND (fabricColors[0]):
+- Cut one block square (unfinished size depends on your chosen block size in your quilt plan)
+- Mark the quarter-circle placement area from the corner where the fan will sit
 
-BACKGROUND fabric (fabricColors[0]):
-- Cut main block square with quarter-circle removed from one corner
-- Use curved template to cut accurate quarter-circle curve
+FAN BASE (fabricColors[1]):
+- Cut a quarter-ring band (a curved strip section) that forms the fan band
+- This is the area between an outer radius and an inner radius (e.g., outer ~50, inner ~25 in the SVG concept)
 
-PRIMARY fabric (fabricColors[1]):
-- Cut curved arc band pieces (background behind spikes)
-- Use curved templates for precision
+FAN WEDGES (fabricColors[2]) and (optional) CONTRAST WEDGES (fabricColors[4]):
+- Cut wedge-shaped slices that fit inside the fan band
+- These slices should be consistent in angle/width so the fan reads evenly
 
-SECONDARY fabric (fabricColors[2]):
-- Cut spike triangles (piece onto foundation paper)
-- For 5-fabric version: cut half of the spikes
+CORNER (fabricColors[3]):
+- Cut an inner quarter-circle that anchors the corner (the “sun”)
 
-ACCENT fabric (fabricColors[3]):
-- Cut inner corner quarter-circle
-- Use curved template
+TEMPLATES:
+- Use template plastic, freezer paper, or printed templates for the curved arcs
+- Consistency matters more than complexity; accurate curves = a clean block.`
+  ,
 
-CONTRAST fabric (fabricColors[4]) - if using 5 fabrics:
-- Cut remaining spike triangles (alternating with Secondary)
+  assemblyNotes: `Assembly tips for New York Beauty (Corner Fan MVP):
 
-CRITICAL: All curved pieces require templates or freezer paper for accuracy. 
-This is an ADVANCED pattern - even small cutting errors are magnified.`,
+CONSTRUCTION SEQUENCE (recommended):
+1) **Piece the fan wedges**:
+   - Sew wedge slices together in order to build the fan section
+   - If using 5 fabrics, alternate Wedges A and Wedges B consistently
+   - Press seams consistently (often toward the darker wedge or in a direction that reduces bulk)
 
-  assemblyNotes: `Assembly tips for New York Beauty:
+2) **Join the fan wedges to the fan base curve**:
+   - If your construction separates wedges and the base band, sew them with a smooth, pinned curve
+   - Pin at both ends and several points along the curve
+   - Sew slowly; do not stretch edges
 
-CONSTRUCTION SEQUENCE:
-1. **Foundation paper piece the spike section**:
-   - Piece spikes onto foundation paper in sequence
-   - Alternate Secondary and Contrast colors if using 5 fabrics
-   - Trim arc to exact curved edge after piecing
+3) **Add the corner quarter-circle**:
+   - Align carefully at the corner and along the inner curve
+   - Press gently following the curve (don’t distort the arc)
 
-2. **Join Primary arc band to spike section** (curved seam):
-   - Pin at center, ends, and several points along curve
-   - Sew with concave piece (arc band) on top for better control
-   - Ease fullness gently along curve
-   - Clip concave seam allowance if needed
-
-3. **Add Accent corner quarter-circle** (curved seam):
-   - Pin carefully at center and edges
-   - Sew with concave piece on top
-   - Press seam toward quarter-circle
-
-4. **Set completed quarter-circle into Background** (curved seam):
-   - Pin extensively along curve
-   - Sew slowly, easing fabric as you go
-   - Clip Background seam allowance to allow curve to lie flat
+4) **Set the completed fan unit into the background**:
+   - Use lots of pins along the outer curve
+   - Sew slowly and keep the arc smooth
 
 CURVED SEAM TECHNIQUE:
-- Pin at center point first, then ends, then intermediate points
-- Use many pins (every 1-2 inches along curve)
-- Sew with concave (inward) curve on top for visibility and control
-- Don't stretch bias edges - let fabric ease naturally
-- Clip concave seam allowances perpendicular to stitching line
-- Press gently following the curve - don't flatten it
+- Pin at endpoints first, then add pins every small interval along the curve
+- Sew with the concave piece on top when possible for visibility/control
+- Clip concave seam allowances if needed so the curve lays flat
+- Press in sections along the curve—don’t “iron” aggressively across it
 
-ACCURACY TIPS:
-- Foundation paper piecing is NON-NEGOTIABLE for spikes
-- Use spray starch before cutting to stabilize all pieces
-- Mark curved seam starting/stopping points clearly
-- Remove paper only after all surrounding seams are sewn
-- Check that curves lie flat after each seam - adjust if puckering
+SKILL NOTE:
+This is an ADVANCED curved-piecing pattern. If you haven’t done curves yet, practice on Drunkard’s Path-style curves first.`
+  ,
 
-This is an ADVANCED to EXPERT pattern. Master simpler curved piecing 
-(like Drunkard's Path) before attempting New York Beauty.`,
-
-  commonMistakes: `Avoid these New York Beauty mistakes:
-- Attempting spikes without foundation paper piecing (accuracy is impossible)
-- Stretching bias edges when sewing curves (causes rippling and distortion)
-- Not clipping concave seam allowances (creates puckers and bulges)
-- Inconsistent spike angles or sizes (breaks the radiating symmetry)
-- Rushing curved seams without adequate pinning (creates pleats and misalignment)
-- Sewing curves with convex piece on top (can't see where you're going)
-- Low contrast between spikes and arc band (pattern loses all impact)
-- Pressing curves completely flat (loses the dimensional curve)
-- Removing foundation paper too early (spikes lose their shape)
-- Not using starch to stabilize fabrics (bias edges stretch too easily)
-- Attempting this pattern without prior curved piecing experience
-- Random block rotation instead of planned layout (misses secondary pattern opportunities)`
+  commonMistakes: `Avoid these New York Beauty mistakes (Corner Fan MVP):
+- Wedges that are inconsistent in width/angle (fan looks uneven and “wobbly”)
+- Low contrast between wedges and fan base (the fan disappears visually)
+- Stretching bias edges while sewing curves (causes ripples and distortion)
+- Not pinning enough along the curve (creates pleats and misalignment)
+- Pressing aggressively across curves (distorts the arc and warps alignment)
+- Mixing up alternating wedge colors mid-fan (breaks the rhythm/pattern)
+- Forgetting that layout rotation creates the secondary designs (block looks “unfinished” alone)`
 };

@@ -16,6 +16,16 @@ const StripQuilt: PatternDefinition = {
   // Current template is vertical-only; keep false until you add a rotated template or transform support
   allowRotation: false,
   rotationStrategy: 'none',
+  fabricRoles: [
+    'Background Strip',
+    'Primary Strip',
+    'Secondary Strip',
+    'Accent Strip',
+    'Contrast Strip',
+    'Additional Strip 1',
+    'Additional Strip 2',
+    'Additional Strip 3',
+  ],
 
   /**
    * Strip Quilt governance (best-results, 4-strip template):

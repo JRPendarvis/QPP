@@ -11,6 +11,11 @@ const SawtoothStar: PatternDefinition = {
   maxFabrics: 3,
   allowRotation: true,
   rotationStrategy: 'none',
+  fabricRoles: [
+    'Background & Sky',
+    'Star Points',
+    'Center Square',
+  ],
   
   /**
    * Sawtooth Star - 8-pointed star with flying geese units

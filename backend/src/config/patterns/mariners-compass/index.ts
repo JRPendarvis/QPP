@@ -11,6 +11,15 @@ const MarinersCompass: PatternDefinition = {
   maxFabrics: 6,
   allowRotation: false,
   rotationStrategy: 'none',
+  enabled: false,
+  fabricRoles: [
+    'Background',
+    'Main Compass Points',
+    'Secondary Points',
+    'Center Circle',
+    'Accent Points',
+    'Additional Details',
+  ],
 
   /**
    * Mariner's Compass - radiating points like a navigational compass rose

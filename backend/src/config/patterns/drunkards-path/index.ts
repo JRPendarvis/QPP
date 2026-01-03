@@ -10,6 +10,10 @@ const DrunkardsPath: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 2,
   allowRotation: true,
+  fabricRoles: [
+    'Background Square',
+    'Curved Quarter-Circle',
+  ],
 
   /**
    * MVP NOTE:

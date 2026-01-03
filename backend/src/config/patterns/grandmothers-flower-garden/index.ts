@@ -11,6 +11,16 @@ const GrandmothersFlowerGarden: PatternDefinition = {
   maxFabrics: 8,
   allowRotation: false,
   rotationStrategy: 'none',
+  fabricRoles: [
+    'Pathways (Background)',
+    'Flower Petal 1',
+    'Flower Petal 2',
+    'Flower Petal 3',
+    'Flower Petal 4',
+    'Flower Petal 5',
+    'Flower Petal 6',
+    'Flower Centers',
+  ],
 
   /**
    * Grandmother's Flower Garden (GFG) color assignments:

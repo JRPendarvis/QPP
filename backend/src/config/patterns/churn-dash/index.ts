@@ -11,6 +11,11 @@ const ChurnDash: PatternDefinition = {
   maxFabrics: 3,
   allowRotation: true,
   rotationStrategy: 'alternate-90',
+  fabricRoles: [
+    'Background',
+    'Rails (Dash Pieces)',
+    'Center & Accents',
+  ],
 
   /**
    * Churn Dash (classic) color roles for this SVG template:

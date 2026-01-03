@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import Navigation from '@/components/Navigation';
 import UploadHeader from '@/components/upload/UploadHeader';
 import PatternDisplay from '@/components/upload/PatternDisplay';
 import toast, { Toaster } from 'react-hot-toast';
+import api from '@/lib/api';
 import {
   FabricPreviewGrid,
   ValidationMessage,
@@ -23,6 +24,7 @@ export default function UploadPage() {
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [fabricRoles, setFabricRoles] = useState<string[]>([]);
 
   const {
     fabrics,
@@ -86,8 +88,27 @@ export default function UploadPage() {
     setPatternChoice(choice);
     if (choice === 'auto') {
       setSelectedPattern('');
+      setFabricRoles([]); // Clear fabric roles when switching to auto
     }
   };
+
+  // Fetch fabric roles when a pattern is manually selected
+  useEffect(() => {
+    if (patternChoice === 'manual' && selectedPattern) {
+      api.get(`/api/patterns/${selectedPattern}/fabric-roles`)
+        .then(response => {
+          if (response.data.success && response.data.data.fabricRoles) {
+            setFabricRoles(response.data.data.fabricRoles);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch fabric roles:', err);
+          setFabricRoles([]); // Fall back to default roles
+        });
+    } else {
+      setFabricRoles([]); // Clear when no pattern is selected
+    }
+  }, [patternChoice, selectedPattern]);
 
   // Handle fabric reorder
   const handleFabricReorder = (fromIdx: number, toIdx: number) => {
@@ -223,6 +244,7 @@ export default function UploadPage() {
                     onRemove={removeFabric}
                     onClearAll={clearAll}
                     onReorder={handleFabricReorder}
+                    fabricRoles={fabricRoles.length > 0 ? fabricRoles : undefined}
                   />
                 </div>
               )}

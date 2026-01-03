@@ -8,6 +8,7 @@ export interface FabricPreviewGridProps {
   onRemove: (index: number) => void;
   onClearAll: () => void;
   onReorder: (fromIdx: number, toIdx: number) => void;
+  fabricRoles?: string[]; // Optional pattern-specific fabric roles
 }
 
 
@@ -104,8 +105,13 @@ export default function FabricPreviewGrid({
   onRemove,
   onClearAll,
   onReorder,
+  fabricRoles,
 }: FabricPreviewGridProps) {
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  
+  // Use pattern-specific roles if provided, otherwise fall back to generic roles
+  const roles = fabricRoles || FABRIC_ROLES;
+  
   return (
     <div className="mt-8">
       <div className="flex justify-between items-center mb-4">
@@ -126,7 +132,7 @@ export default function FabricPreviewGrid({
             key={index}
             preview={preview}
             fabric={fabrics[index]}
-            label={FABRIC_ROLES[index] || `Fabric ${index + 1}`}
+            label={roles[index] || `Fabric ${index + 1}`}
             index={index}
             draggedIdx={draggedIdx}
             setDraggedIdx={setDraggedIdx}

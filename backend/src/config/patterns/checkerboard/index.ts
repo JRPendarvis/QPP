@@ -11,6 +11,10 @@ const Checkerboard: PatternDefinition = {
   maxFabrics: 2,
   allowRotation: true,
   rotationStrategy: 'none',
+  fabricRoles: [
+    'Light Squares',
+    'Dark Squares',
+  ],
 
   /**
    * Checkerboard alternates two colors based on position

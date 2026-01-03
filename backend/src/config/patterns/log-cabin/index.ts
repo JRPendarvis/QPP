@@ -9,7 +9,18 @@ const LogCabin: PatternDefinition = {
   prompt: LOG_CABIN_PROMPT,
   minFabrics: 3,
   maxFabrics: 8,
-  allowRotation: false,  rotationStrategy: 'none',
+  allowRotation: false,  
+  rotationStrategy: 'none',
+  fabricRoles: [
+    'Center (Hearth)',
+    'Light Strip 1',
+    'Dark Strip 1',
+    'Light Strip 2',
+    'Dark Strip 2',
+    'Light Strip 3',
+    'Dark Strip 3',
+    'Light Strip 4',
+  ],
   /**
    * Log Cabin color assignments:
    * fabricColors[0] = Background (center "hearth" square)

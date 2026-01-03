@@ -12,6 +12,11 @@ router.get('/list', (req, res) =>
   patternController.listPatterns(req, res)
 );
 
+// GET /api/patterns/:id/fabric-roles - Get pattern-specific fabric role labels
+router.get('/:id/fabric-roles', (req, res) =>
+  patternController.getFabricRoles(req, res)
+);
+
 // POST /api/patterns/generate - Protected route
 router.post('/generate', authenticate, patternLimiter, (req, res) => 
   patternController.generatePattern(req, res)

@@ -405,4 +405,60 @@ export class PatternController {
       });
     }
   }
+
+  // GET /api/patterns/:id/fabric-roles - Get pattern-specific fabric role labels
+  async getFabricRoles(req: Request, res: Response) {
+    try {
+      const patternId = normalizePatternId(req.params.id);
+      
+      if (patternId === 'auto') {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot get fabric roles for auto pattern selection'
+        });
+      }
+
+      const patterns = getAllPatterns();
+      const pattern = patterns.find(p => p.id === patternId);
+
+      if (!pattern) {
+        return res.status(404).json({
+          success: false,
+          message: 'Pattern not found'
+        });
+      }
+
+      // Default fabric roles if pattern doesn't define custom ones
+      const defaultRoles = [
+        'Background',
+        'Primary',
+        'Secondary',
+        'Accent',
+        'Contrast',
+        'Highlight',
+        'Border',
+        'Binding',
+      ];
+
+      const fabricRoles = pattern.fabricRoles || defaultRoles.slice(0, pattern.maxFabrics);
+
+      res.json({
+        success: true,
+        data: {
+          patternId: pattern.id,
+          patternName: pattern.name,
+          fabricRoles: fabricRoles,
+          minFabrics: pattern.minFabrics,
+          maxFabrics: pattern.maxFabrics,
+        }
+      });
+    } catch (error) {
+      console.error('Get fabric roles error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get fabric roles'
+      });
+    }
+  }
 }
+

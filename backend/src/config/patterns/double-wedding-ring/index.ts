@@ -12,6 +12,14 @@ const DoubleWeddingRing: PatternDefinition = {
   maxFabrics: 6,
   allowRotation: false,
   rotationStrategy: 'none',
+  fabricRoles: [
+    'Background',
+    'Ring Arc 1',
+    'Ring Arc 2',
+    'Melon Connectors',
+    'Arc Variation 1',
+    'Arc Variation 2',
+  ],
   
   /**
    * Double Wedding Ring color assignments:

@@ -11,6 +11,13 @@ const MosaicStar: PatternDefinition = {
   maxFabrics: 5,
   allowRotation: false,
   rotationStrategy: 'none',
+  fabricRoles: [
+    'Background',
+    'Star Points',
+    'Feathers (Tiny Triangles)',
+    'Center Square',
+    'Alternate Feathers',
+  ],
 
   /**
    * Mosaic Star color assignments:
