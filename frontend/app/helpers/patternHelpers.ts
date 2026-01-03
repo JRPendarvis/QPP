@@ -32,7 +32,7 @@ export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabr
     { id: 'rail-fence', name: 'Rail Fence', minFabrics: 3, maxFabrics: 5 },
   ],
   advanced_beginner: [
-    { id: 'four-patch', name: 'Four Patch', minFabrics: 3, maxFabrics: 8 },
+    { id: 'four-patch', name: 'Four Patch', minFabrics: 3, maxFabrics: 4 },
     { id: 'nine-patch', name: 'Nine Patch', minFabrics: 2, maxFabrics: 9 },
     { id: 'half-square-triangles', name: 'Half-Square Triangles', minFabrics: 2, maxFabrics: 8 },
     { id: 'hourglass', name: 'Hourglass', minFabrics: 2, maxFabrics: 4 },

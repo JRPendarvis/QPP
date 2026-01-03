@@ -10,7 +10,7 @@ const FlyingGeese: PatternDefinition = {
   minFabrics: 2,
   maxFabrics: 6,
   allowRotation: true,
-  rotationStrategy: 'alternate-90',
+  rotationStrategy: 'parity-2x2',
 
   /**
    * Flying Geese color assignments:

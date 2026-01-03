@@ -8,35 +8,64 @@ const GrandmothersFlowerGarden: PatternDefinition = {
   template: GRANDMOTHERS_FLOWER_GARDEN_TEMPLATE,
   prompt: GRANDMOTHERS_FLOWER_GARDEN_PROMPT,
   minFabrics: 3,
-  maxFabrics: 5,
+  maxFabrics: 8,
   allowRotation: false,
   rotationStrategy: 'none',
-  
+
   /**
-   * Grandmother's Flower Garden color assignments:
-   * fabricColors[0] = Background (pathway hexagons between flowers)
-   * fabricColors[1] = Primary (flower center hexagon)
-   * fabricColors[2] = Secondary (inner ring of petals - 6 hexagons)
-   * fabricColors[3] = Accent (outer ring of petals - optional for more rings)
-   * fabricColors[4] = Contrast (alternate flower centers for variety - optional)
-   * 
-   * 3 fabrics: Background + Primary center + Secondary petals (one ring)
-   * 4 fabrics: Background + Primary center + Secondary inner petals + Accent outer petals
-   * 5 fabrics: Adds Contrast for alternate flower centers (creates variety across flowers)
-   * 
-   * Returns: [background, center, inner_petals, outer_petals, alternate_center]
+   * Grandmother's Flower Garden (GFG) color assignments:
+   *
+   * fabricColors[0] = Background (pathways/negative space)
+   * fabricColors[1..n] = Flower palette used for center + petals
+   *
+   * MVP behavior (NOW):
+   * - Center and petals are allowed to be multi-colored.
+   * - We deterministically cycle through available flower fabrics per block.
+   *
+   * Future behavior (LATER):
+   * - Add constraints to avoid same-color adjacent petals,
+   *   and improve "scrappy" distribution across the quilt.
+   *
+   * Template expectation:
+   * - COLOR1 = background
+   * - COLOR2 = center
+   * - COLOR3..COLOR8 = petals (6 petals)
+   *
+   * Returns:
+   * [background, center, petal1, petal2, petal3, petal4, petal5, petal6]
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
     const background = fabricColors[0];
-    const primary = fabricColors[1] || background;
-    const secondary = fabricColors[2] || primary;
-    const accent = fabricColors[3] || secondary;
-    const contrast = fabricColors[4] || primary;
-    
-    return [background, primary, secondary, accent, contrast];
+
+    const flowerPalette = fabricColors.slice(1);
+    if (flowerPalette.length === 0) {
+      // Defensive fallback
+      return [background, background, background, background, background, background, background, background];
+    }
+
+    const idx =
+      opts.blockIndex ??
+      (typeof opts.row === 'number' && typeof opts.col === 'number'
+        ? opts.row * 1000 + opts.col
+        : 0);
+
+    // Helper to pull from flowerPalette in a stable, repeatable way
+    const pick = (offset: number) => flowerPalette[(idx + offset) % flowerPalette.length];
+
+    const center = pick(0);
+
+    // 6 petals; offsets keep things varied even with small palettes
+    const petal1 = pick(1);
+    const petal2 = pick(2);
+    const petal3 = pick(3);
+    const petal4 = pick(4);
+    const petal5 = pick(5);
+    const petal6 = pick(6);
+
+    return [background, center, petal1, petal2, petal3, petal4, petal5, petal6];
   }
 };
 

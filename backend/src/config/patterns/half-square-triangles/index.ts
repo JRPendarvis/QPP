@@ -8,7 +8,7 @@ const HalfSquareTriangles: PatternDefinition = {
   template: HALF_SQUARE_TRIANGLES_TEMPLATE,
   prompt: HALF_SQUARE_TRIANGLES_PROMPT,
   minFabrics: 2,
-  maxFabrics: 6,
+  maxFabrics: 8,
   allowRotation: true,
   rotationStrategy: 'random',
   
@@ -20,6 +20,8 @@ const HalfSquareTriangles: PatternDefinition = {
    * fabricColors[3] = Accent (more triangle variety)
    * fabricColors[4] = Contrast (additional variety)
    * fabricColors[5] = Additional (maximum scrappy effect)
+   * fabricColors[6] = Extra1 (even more variety)
+   * fabricColors[7] = Extra2 (maximum scrappy effect)
    * 
    * Each HST block is a square divided diagonally into 2 triangles
    * 
