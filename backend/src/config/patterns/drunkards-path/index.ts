@@ -8,41 +8,44 @@ const DrunkardsPath: PatternDefinition = {
   template: DRUNKARDS_PATH_TEMPLATE,
   prompt: DRUNKARDS_PATH_PROMPT,
   minFabrics: 2,
-  maxFabrics: 4,
+  maxFabrics: 2,
   allowRotation: true,
-  rotationStrategy: 'random',
-  
+
   /**
-   * Drunkard's Path has a quarter circle creating curved, winding paths
-   * fabricColors[0] = Background (the square minus the quarter circle)
-   * fabricColors[1] = Primary (the quarter circle "path")
-   * fabricColors[2] = Secondary (optional - alternate path color for variety)
-   * fabricColors[3] = Accent (optional - additional path variation)
-   * 
-   * The winding path effect is created through block rotation at the quilt level.
-   * With 2 fabrics: consistent background + path creates traditional look
-   * With 3-4 fabrics: can create scrappy paths by rotating through Primary, Secondary, Accent
-   * 
-   * Returns: [background, path] for 2 fabrics, or [background, rotated_path] for 3-4 fabrics
+   * MVP NOTE:
+   * Drunkard's Path looks best with deterministic rotation (not random),
+   * otherwise it can appear chaotic/unintentional.
+   *
+   * Use your deterministic strategy here.
+   * If your engine doesn't support this value yet, tell me what values are allowed
+   * and I’ll align it.
+   */
+  rotationStrategy: 'parity-2x2',
+
+  /**
+   * Template behavior:
+   * - COLOR1 fills the base square (background remainder)
+   * - COLOR2 overlays the quarter-circle (dominant curved piece)
+   *
+   * MVP FIX:
+   * Alternate dominance so the "small remainder" is not always the same fabric.
+   * This is done by swapping [background, path] on a checkerboard.
    */
   getColors: (
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    const blockIndex = opts.blockIndex ?? 0;
     const background = fabricColors[0];
-    const primary = fabricColors[1] || background;
-    
-    if (fabricColors.length < 3) {
-      // 2 fabrics: traditional consistent path
-      return [background, primary];
-    }
-    
-    // 3-4 fabrics: rotate through Primary, Secondary, Accent for scrappy paths
-    const pathOptions = fabricColors.slice(1); // Primary, Secondary, Accent
-    const path = pathOptions[blockIndex % pathOptions.length];
-    
-    return [background, path];
+    const path = fabricColors[1] || background;
+
+    const row = opts.row ?? 0;
+    const col = opts.col ?? 0;
+
+    // Checkerboard inversion for balanced dominance
+    const invert = (row + col) % 2 === 1;
+
+    // Return colors in template order: [COLOR1, COLOR2]
+    return invert ? [path, background] : [background, path];
   }
 };
 

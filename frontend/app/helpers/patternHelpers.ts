@@ -36,15 +36,16 @@ export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabr
     { id: 'nine-patch', name: 'Nine Patch', minFabrics: 2, maxFabrics: 9 },
     { id: 'half-square-triangles', name: 'Half-Square Triangles', minFabrics: 2, maxFabrics: 8 },
     { id: 'hourglass', name: 'Hourglass', minFabrics: 2, maxFabrics: 4 },
-    { id: 'bow-tie', name: 'Bow Tie', minFabrics: 2, maxFabrics: 3 },
+    { id: 'bow-tie', name: 'Bow Tie', minFabrics: 2, maxFabrics: 8 },
   ],
   intermediate: [
     { id: 'flying-geese', name: 'Flying Geese', minFabrics: 2, maxFabrics: 8 },
     { id: 'pinwheel', name: 'Pinwheel', minFabrics: 2, maxFabrics: 4 },
     { id: 'log-cabin', name: 'Log Cabin', minFabrics: 3, maxFabrics: 8 },
     { id: 'sawtooth-star', name: 'Sawtooth Star', minFabrics: 2, maxFabrics: 3 },
-    { id: 'ohio-star', name: 'Ohio Star', minFabrics: 2, maxFabrics: 3 },
+    { id: 'ohio-star', name: 'Ohio Star', minFabrics: 3, maxFabrics: 4 },
     { id: 'churn-dash', name: 'Churn Dash', minFabrics: 2, maxFabrics: 3 },
+    { id: 'mosaic-star', name: 'Mosaic Star', minFabrics: 3, maxFabrics: 5 },
   ],
   advanced: [
     { id: 'lone-star', name: 'Lone Star', minFabrics: 3, maxFabrics: 8 },
@@ -54,10 +55,8 @@ export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabr
     { id: 'drunkards-path', name: "Drunkard's Path", minFabrics: 2, maxFabrics: 2 },
   ],
   expert: [
-    { id: 'feathered-star', name: 'Feathered Star', minFabrics: 3, maxFabrics: 5 },
     { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden", minFabrics: 3, maxFabrics: 8 },
     { id: 'pickle-dish', name: 'Pickle Dish', minFabrics: 4, maxFabrics: 6 },
-    { id: 'complex-medallion', name: 'Complex Medallion', minFabrics: 3, maxFabrics: 8 },
   ],
 };
 

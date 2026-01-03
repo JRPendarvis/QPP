@@ -23,7 +23,7 @@ export class PatternFormatter {
     'new-york-beauty': 'New York Beauty',
     'storm-at-sea': 'Storm at Sea',
     'drunkards-path': "Drunkard's Path",
-    'feathered-star': 'Feathered Star',
+    'mosaic-star': 'Mosaic Star',
     'grandmothers-flower-garden': "Grandmother's Flower Garden",
     'double-wedding-ring': 'Double Wedding Ring',
     'pickle-dish': 'Pickle Dish',

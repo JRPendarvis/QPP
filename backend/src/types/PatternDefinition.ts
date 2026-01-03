@@ -7,7 +7,7 @@ import { PatternPrompt } from './PatternPrompt';
  * - alternate-90: rotate every other block by 90° using (row+col)%2 parity
  * - checkerboard-90: rotate by 0/90/180/270 in a 2×2 repeating grid
  */
-export type RotationStrategy = 'none' | 'alternate-180' | 'alternate-90' | 'checkerboard-90' | 'random';
+export type RotationStrategy = 'none' | 'alternate-180' | 'alternate-90' | 'checkerboard-90' | 'random' | 'parity-2x2';
 
 /**
  * Defines the complete structure of a quilt pattern including its

@@ -28,7 +28,7 @@ import { MARINERS_COMPASS } from './patterns/mariners-compass/template';
 import { STORM_AT_SEA } from './patterns/storm-at-sea/template';
 import { DOUBLE_WEDDING_RING } from './patterns/double-wedding-ring/template';
 import { DRUNKARDS_PATH } from './patterns/drunkards-path/template';
-import { FEATHERED_STAR } from './patterns/feathered-star/template';
+import { FEATHERED_STAR } from './patterns/mosaic-star/template';
 import { GRANDMOTHERS_FLOWER_GARDEN } from './patterns/grandmothers-flower-garden/template';
 import { PICKLE_DISH } from './patterns/pickle-dish/template';
 import { COMPLEX_MEDALLION } from './patterns/complex-medallion/template';
@@ -58,7 +58,7 @@ export const SVG_TEMPLATES_BY_ID: Record<string, string> = {
   'storm-at-sea': STORM_AT_SEA,
   'double-wedding-ring': DOUBLE_WEDDING_RING,
   'drunkards-path': DRUNKARDS_PATH,
-  'feathered-star': FEATHERED_STAR,
+  'mosaic-star': FEATHERED_STAR,
   'grandmothers-flower-garden': GRANDMOTHERS_FLOWER_GARDEN,
   'pickle-dish': PICKLE_DISH,
   'complex-medallion': COMPLEX_MEDALLION,

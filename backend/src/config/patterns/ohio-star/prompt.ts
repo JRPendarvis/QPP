@@ -2,125 +2,89 @@ import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const OHIO_STAR_PROMPT: PatternPrompt = {
   patternName: 'Ohio Star',
-  recommendedFabricCount: 2,
-  
-  characteristics: `Ohio Star is a classic 3x3 grid star pattern using quarter-square triangles:
-- Four corner squares (background)
-- One center square (focal point)
-- Four quarter-square triangle (QST) units forming the 8-pointed star
-- Each QST has two triangles pointing inward (star) and two pointing outward (background)
-- Star points create a dynamic pinwheel effect around the center
-- Also known as: Variable Star, Eastern Star
-- Intermediate skill level - requires accurate QST construction
-- Foundation for many complex star patterns`,
+  recommendedFabricCount: 4,
 
-  fabricRoleGuidance: `Ohio Star fabric assignments (supports 2-3 fabrics):
+  characteristics: `Ohio Star is a classic 8-point star block. This QuiltPlannerPro version uses a 4×4 (16-patch) layout made from triangle units:
+- 4 corner patches are solid corner squares
+- 8 edge patches are split into triangles to form the star points
+- The center is a 2×2 group of triangle units
+- With 4 fabrics, the center accent forms a distinct focal area
+- Intermediate skill level: triangle piecing requires accuracy and consistent pressing`,
 
-WITH 2 FABRICS (traditional):
-- BACKGROUND (fabricColors[0]): 4 corner squares + outer triangles in QST units
-- PRIMARY (fabricColors[1]): 8 star point triangles (in QSTs) + center square
+  fabricRoleGuidance: `Ohio Star fabric assignments (QPP version supports 3–4 fabrics):
 
-Classic two-fabric approach creates clear star with strong visual impact.
+IMPORTANT: In this QPP layout, the CORNER fabric is its own role. The "background/setting" fabric used around the star is a different role.
 
-Layout (3x3 grid):
-[BG] [QST] [BG]
-[QST] [PR] [QST]
-[BG] [QST] [BG]
+WITH 3 FABRICS (minimum):
+- CORNERS (fabricColors[0] / COLOR1): Only the 4 corner squares (cells 1, 4, 13, 16)
+- STAR (fabricColors[1] / COLOR2): Star-point triangles on the edges + star presence in the center
+- SETTING (fabricColors[2] / COLOR3): The non-star triangles on the edges (the fabric the star sits on)
 
-Each QST unit contains:
-- 2 triangles pointing toward center = PRIMARY (star points)
-- 2 triangles pointing outward = BACKGROUND
+In 3-fabric mode, the center accent uses the STAR fabric (COLOR2). The block still reads clearly.
 
-WITH 3 FABRICS (recommended):
-- BACKGROUND (fabricColors[0]): 4 corner squares + outer triangles in QST units
-- PRIMARY (fabricColors[1]): 8 star point triangles (the star itself)
-- SECONDARY (fabricColors[2]): Center square (focal point)
+WITH 4 FABRICS (recommended):
+- CORNERS (fabricColors[0] / COLOR1): Only the 4 corner squares (cells 1, 4, 13, 16)
+- STAR (fabricColors[1] / COLOR2): Star-point triangles on the edges + star presence in the center
+- SETTING (fabricColors[2] / COLOR3): The non-star triangles on the edges (the fabric the star sits on)
+- CENTER ACCENT (fabricColors[3] / COLOR4): Used ONLY in the center 2×2 (cells 6, 7, 10, 11) for a distinct focal
 
-Separates the center from the star points for added visual interest and focal emphasis.
+Design tips:
+- Use strong contrast between SETTING (COLOR3) and STAR (COLOR2) so the star points pop.
+- CORNERS (COLOR1) can match SETTING for a quieter look, or contrast for a framed look.
+- CENTER ACCENT (COLOR4) is a great place for a “special” fabric because it only appears in the center.`,
 
-DESIGN TIP: Use high contrast between Primary star and Background so the star 
-reads clearly. The center (Secondary) can be bold to anchor the design or subtle 
-to let the star dominate.`,
+  cuttingInstructions: `Ohio Star cutting specifics (QPP 4×4 / 16-patch layout):
 
-  cuttingInstructions: `Ohio Star cutting specifics:
+This block is a 4×4 grid of equal patches (16 total). Each patch is either:
+- a solid corner square, or
+- a triangle-unit patch (built from triangles)
 
-All pieces are based on 1/3 of finished block size
-Example: For 9" finished block, each section is 3" finished (3.5" cut with seam allowance)
+PATCH SIZE:
+- Patch finished size = Finished block size ÷ 4
+- Patch cut size = (Finished block size ÷ 4) + 0.5"
 
-BACKGROUND fabric (fabricColors[0]):
-- Cut 4 corner squares (3.5" for 9" block)
-- Cut squares for QST units (see method below)
+Example: For a 12" finished block:
+- Patch finished = 12 ÷ 4 = 3"
+- Patch cut size = 3.5"
 
-PRIMARY fabric (fabricColors[1]):
-- Cut squares for QST units (see method below)
-- For 2-fabric version: also cut 1 center square
+CUTTING BY ROLE:
+CORNERS (COLOR1):
+- Cut 4 squares at patch cut size
 
-SECONDARY fabric (fabricColors[2]) - if using 3 fabrics:
-- Cut 1 center square
+STAR (COLOR2), SETTING (COLOR3), CENTER ACCENT (COLOR4):
+- Cut squares sized appropriately for your preferred triangle construction method (HST/QST)
+- Construct triangle-unit patches so every finished patch is identical size
 
-QST CONSTRUCTION METHODS:
+Triangle construction approach:
+- Use HST-style construction for edge patches (STAR + SETTING triangles).
+- Use consistent triangle units in the center 2×2 so the accent reads cleanly.
+Most important rule: square up your units so every patch finishes the same size.`,
 
-**Method 1: HST to QST** (recommended)
-1. Cut squares from Background and Primary
-2. Make 2 HSTs with opposite color combinations
-3. Place HSTs right sides together, opposite colors touching
-4. Draw diagonal perpendicular to seam
-5. Sew 1/4" on both sides of line
-6. Cut on drawn line
-7. Yields 2 QST units (need 4 total, so make 8 HSTs → 4 QSTs)
+  assemblyNotes: `Assembly notes for Ohio Star (QPP 16-patch):
 
-**Method 2: Direct QST**
-1. Layer two squares right sides together
-2. Draw both diagonals (X pattern)
-3. Sew 1/4" on both sides of BOTH lines
-4. Cut on both drawn lines
-5. Yields 4 identical QST units
+1) Build the triangle-unit patches first:
+   - Edge patches use STAR (COLOR2) + SETTING (COLOR3)
+   - Center 2×2 uses STAR (COLOR2) + CENTER ACCENT (COLOR4) in the 4-fabric version
 
-QST cutting size: Finished block size ÷ 3 + 1.25"
-Example: 9" block → 3" + 1.25" = 4.25" squares for QST method`,
+2) Arrange in a 4×4 layout:
+   Row 1: Corner, Edge, Edge, Corner
+   Row 2: Edge, Center, Center, Edge
+   Row 3: Edge, Center, Center, Edge
+   Row 4: Corner, Edge, Edge, Corner
 
-  assemblyNotes: `Assembly tips for Ohio Star:
+3) Verify orientation before sewing:
+   - Star-point triangles (COLOR2) should visually aim toward the center
+   - The center accent (COLOR4) should appear only in the center area
 
-CONSTRUCTION:
-1. **Build 4 QST units first**:
-   - Each unit has 2 Primary triangles (pointing inward) + 2 Background triangles (pointing outward)
-   - Orient so Primary triangles point toward what will be center
-   - Square up each QST unit to exact size
+4) Sew rows, then join rows:
+   - Pin at intersections
+   - Press consistently to reduce bulk near the center`,
 
-2. **Arrange in 3x3 grid**:
-   - Top row: Background corner, QST, Background corner
-   - Middle row: QST, Center square, QST
-   - Bottom row: Background corner, QST, Background corner
-
-3. **Verify QST orientation**:
-   - ALL star point triangles should point toward the center square
-   - Check orientation before sewing rows
-
-4. **Sew rows together**:
-   - Press seams AWAY from QST units (reduces bulk)
-   - Pin at seam intersections, nesting seams
-   - Join rows carefully - star points should meet at center
-
-ACCURACY TIPS:
-- All QST units must be identical size
-- Star point triangles must all point toward center
-- Handle bias edges carefully (all triangle edges are bias)
-- Use starch to stabilize QST units before assembly
-- Pin at every seam intersection when joining rows
-
-PRESSING:
-- Press QST seams open or consistently to one side
-- Press row seams away from QST units
-- Don't overpress - can distort bias edges`,
-
-  commonMistakes: `Avoid these Ohio Star mistakes:
-- QST orientation wrong (star points must ALL aim toward center, not outward)
-- Stretching bias edges on triangles (all edges in QSTs are bias)
-- Inconsistent QST sizes (star points won't meet cleanly at center)
-- Not enough contrast between star and background (star disappears)
-- Pressing row seams toward QST units (creates bulk at intersections)
-- Not squaring up QST units before assembly (compounds alignment errors)
-- Center point where all 4 QSTs meet not crisp (hallmark of sloppy construction)
-- Using directional prints for triangles (pattern gets chaotic)
-- Not using starch to stabilize bias edges (units stretch and distort)`
+  commonMistakes: `Avoid these Ohio Star mistakes (QPP version):
+- Treating COLOR1 as the full background (in this layout COLOR1 is corners only)
+- Triangle units rotated incorrectly (star points don’t aim inward)
+- Using low contrast between STAR (COLOR2) and SETTING (COLOR3) so the star disappears
+- Inconsistent patch sizing (rows won’t align)
+- Stretching bias edges
+- Center accent appearing outside the center 2×2 (COLOR4 should only be in cells 6,7,10,11)`
 };

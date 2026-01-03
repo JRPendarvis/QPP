@@ -65,7 +65,7 @@ import { MARINERS_COMPASS_PROMPT } from '../patterns/mariners-compass/prompt';
 import { NEW_YORK_BEAUTY_PROMPT } from '../patterns/new-york-beauty/prompt';
 import { STORM_AT_SEA_PROMPT } from '../patterns/storm-at-sea/prompt';
 import { DRUNKARDS_PATH_PROMPT } from '../patterns/drunkards-path/prompt';
-import { FEATHERED_STAR_PROMPT } from '../patterns/feathered-star/prompt';
+import { FEATHERED_STAR_PROMPT } from '../patterns/mosaic-star/prompt';
 import { GRANDMOTHERS_FLOWER_GARDEN_PROMPT } from '../patterns/grandmothers-flower-garden/prompt';
 import { DOUBLE_WEDDING_RING_PROMPT } from '../patterns/double-wedding-ring/prompt';
 import { PICKLE_DISH_PROMPT } from '../patterns/pickle-dish/prompt';
@@ -95,7 +95,7 @@ export const PATTERN_PROMPTS: Record<string, PatternPrompt> = {
   'new-york-beauty': NEW_YORK_BEAUTY_PROMPT,
   'storm-at-sea': STORM_AT_SEA_PROMPT,
   'drunkards-path': DRUNKARDS_PATH_PROMPT,
-  'feathered-star': FEATHERED_STAR_PROMPT,
+  'mosaic-star': FEATHERED_STAR_PROMPT,
   'grandmothers-flower-garden': GRANDMOTHERS_FLOWER_GARDEN_PROMPT,
   'double-wedding-ring': DOUBLE_WEDDING_RING_PROMPT,
   'pickle-dish': PICKLE_DISH_PROMPT,

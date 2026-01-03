@@ -3,8 +3,8 @@ import { FEATHERED_STAR_TEMPLATE } from './template';
 import { FEATHERED_STAR_PROMPT } from './prompt';
 
 const FeatheredStar: PatternDefinition = {
-  id: 'feathered-star',
-  name: 'Feathered Star',
+  id: 'mosaic-star',
+  name: 'Mosaic Star',
   template: FEATHERED_STAR_TEMPLATE,
   prompt: FEATHERED_STAR_PROMPT,
   minFabrics: 3,

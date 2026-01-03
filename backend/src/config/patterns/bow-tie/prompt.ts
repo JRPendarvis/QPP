@@ -2,35 +2,49 @@ import { PatternPrompt } from '../../../types/PatternPrompt';
 
 export const BOW_TIE_PROMPT: PatternPrompt = {
   patternName: 'Bow Tie',
-  recommendedFabricCount: 2,
+  recommendedFabricCount: 3,
 
-  characteristics: `A traditional Bow Tie quilt block:
-- Built on a 2×2 four-patch base
-- Two diagonally opposite squares are the Tie fabric
-- The other two squares are Background
-- Small triangles placed at the inner corners of the Background squares create the bow illusion
-- No center square or decorative overlay is used`,
+  characteristics: `A traditional Bow Tie quilt unit (often shown as a 2×2 unit):
+- Built on a 2×2 four-patch base (four equal squares)
+- Two squares are the Bow/Tie fabric and are placed on one diagonal
+- The other two squares are Background and are placed on the opposite diagonal
+- Small corner patches ("knot" triangles) are placed on the inner-facing corners of the Background squares
+- The bow illusion comes from repetition across the quilt; there is no center square or decorative overlay`,
 
-  fabricRoleGuidance: `Fabric usage:
+  fabricRoleGuidance: `Fabric usage (based on uploaded fabric images):
 
-WITH 2 FABRICS:
-- COLOR1 (Background): background squares
-- COLOR2 (Tie): tie squares AND inner-corner triangles
+ALWAYS:
+- COLOR1 (Background): the two Background squares in the 2×2 unit
 
-WITH 3 FABRICS:
-- COLOR1 (Background): background squares
-- COLOR2 (Tie): tie squares
-- COLOR3 (Accent): inner-corner triangles`,
+WITH 2 FABRICS (2 images uploaded):
+- COLOR2 (Bow/Tie): the two Bow/Tie squares AND the knot corner patches (triangles)
 
-  assemblyNotes: `Arrange tie squares diagonally (top-left & bottom-right).
-Place background squares on the opposite diagonal.
-Add small triangles at the center-facing corners of the background squares.
-Alternate block rotation when tiling for a proper quilt effect.`,
+WITH 3 FABRICS (3 images uploaded) — alternating bow + swapped knot:
+- Even-parity blocks (row+col even):
+  - COLOR2 (Bow/Tie squares)
+  - COLOR3 (Knot corner patches)
+- Odd-parity blocks (row+col odd):
+  - COLOR3 (Bow/Tie squares)
+  - COLOR2 (Knot corner patches)
+This keeps the knot contrasting the bow on every block.
 
-  cuttingInstructions: `Cut equal-sized squares for both the tie and background fabrics.
-For the inner-corner triangles, cut small squares from the accent or tie fabric, then cut them in half diagonally to form triangles.`,
+WITH 4–8 FABRICS (4 to 8 images uploaded):
+- COLOR1 (Background) remains fixed
+- Bow/Tie and Knot colors rotate through the remaining fabrics for a scrappy, varied look`,
 
-  commonMistakes: `- Misplacing the tie and background squares, which disrupts the bow illusion.
-- Incorrectly sizing or positioning the inner-corner triangles, causing the bow shape to look uneven.
-- Not alternating block rotation when assembling the quilt, resulting in a less dynamic pattern.`
+  assemblyNotes: `2×2 unit layout:
+- Place the two Bow/Tie squares on one diagonal of the 2×2 unit
+- Place the two Background squares on the opposite diagonal
+- Add knot corner patches to the inner-facing corners of the Background squares (the corners that point toward the center of the 2×2 unit)
+- When tiling across the quilt, alternate orientation/rotation as needed so the bow ties read cleanly across repeats`,
+
+  cuttingInstructions: `Typical cutting approach (example sizes depend on desired finished block size):
+- Cut 2 background squares and 2 bow/tie squares (same size) per 2×2 unit
+- Cut 1 small square for corner patches (knot), then split to yield two corner triangles/patches
+- Attach the corner patches to the two background squares at the inner-facing corners (stitch-and-flip is common), then assemble the 2×2 unit`,
+
+  commonMistakes: `- Treating the pattern like it needs a center square (it does not).
+- Placing corner patches on the wrong corners of the background squares (they must face inward).
+- Using low contrast between background and bow/tie fabrics, making the bow illusion hard to see.
+- Not alternating orientation when tiling, which can reduce the clarity of the repeating bow-tie effect.`
 };

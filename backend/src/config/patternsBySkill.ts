@@ -43,6 +43,7 @@ export const PATTERNS_BY_SKILL: Record<string, string[]> = {
     'log-cabin',
     'bow-tie',
     'grandmothers-flower-garden',
+    'mosaic-star',
   ],
   advanced: [
     'sawtooth-star',
@@ -56,7 +57,6 @@ export const PATTERNS_BY_SKILL: Record<string, string[]> = {
     'storm-at-sea',
     'double-wedding-ring',
     'drunkards-path',
-    'feathered-star',
     'pickle-dish',
     'complex-medallion',
   ],

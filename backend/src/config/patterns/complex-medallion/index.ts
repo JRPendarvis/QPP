@@ -5,6 +5,7 @@ import { COMPLEX_MEDALLION_PROMPT } from './prompt';
 const ComplexMedallion: PatternDefinition = {
   id: 'complex-medallion',
   name: 'Complex Medallion',
+  enabled: false,
   template: COMPLEX_MEDALLION_TEMPLATE,
   prompt: COMPLEX_MEDALLION_PROMPT,
   minFabrics: 4,
