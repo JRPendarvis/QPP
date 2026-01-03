@@ -1,4 +1,4 @@
-import { PATTERNS_BY_SKILL } from '../config/patternsBySkill';
+import { PATTERNS_BY_SKILL } from '../config/skill-levels';
 
 /**
  * Skill level hierarchy (from beginner to expert)

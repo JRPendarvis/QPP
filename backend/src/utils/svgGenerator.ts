@@ -1,4 +1,4 @@
-import { SVG_TEMPLATES, SVG_TEMPLATES_BY_ID } from '../config/quiltTemplates';
+import { SVG_TEMPLATES, SVG_TEMPLATES_BY_ID } from '../config/templates';
 import { getPattern } from '../config/patterns';
 
 /**

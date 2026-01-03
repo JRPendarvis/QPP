@@ -1,10 +1,10 @@
 import { PatternPrompt } from '../../../types/PatternPrompt';
 
-export const FEATHERED_STAR_PROMPT: PatternPrompt = {
-  patternName: 'Feathered Star',
+export const MOSAIC_STAR_PROMPT: PatternPrompt = {
+  patternName: 'Mosaic Star',
   recommendedFabricCount: 4,
   
-  characteristics: `Feathered Star is an advanced traditional pattern combining a central star with sawtooth "feather" edges:
+  characteristics: `Mosaic Star is an advanced traditional pattern combining a central star with sawtooth "feather" edges:
 - Four corner background squares frame the design
 - An 8-pointed star core radiates from the center
 - Rows of small alternating triangles ("feathers") create a sawtooth edge around the star points
@@ -14,7 +14,7 @@ export const FEATHERED_STAR_PROMPT: PatternPrompt = {
 - Requires precision piecing - many small triangles must align perfectly
 - Expert-level pattern showcasing advanced piecing skills`,
 
-  fabricRoleGuidance: `Feathered Star fabric assignments (supports 3-5 fabrics):
+  fabricRoleGuidance: `Mosaic Star fabric assignments (supports 3-5 fabrics):
 
 WITH 3 FABRICS (minimum):
 - BACKGROUND (fabricColors[0]): Corner squares, setting triangles, negative space

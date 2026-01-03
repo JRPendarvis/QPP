@@ -1,8 +1,8 @@
-// Feathered Star template
+// Mosaic Star template
 // Complex star with "feather" triangles along the edges
 // Supports 3-5 fabrics with proper role mapping
 
-export const FEATHERED_STAR_TEMPLATE = `
+export const MOSAIC_STAR_TEMPLATE = `
     <!-- Background - fills entire block -->
     <rect x="0" y="0" width="100" height="100" fill="COLOR1"/>
     
@@ -63,4 +63,4 @@ export const FEATHERED_STAR_TEMPLATE = `
     <polygon points="80,66 80,73 87,69.5" fill="COLOR5" stroke="#ccc" stroke-width="0.5"/>
     <polygon points="80,73 80,80 87,76.5" fill="COLOR3" stroke="#ccc" stroke-width="0.5"/>`;
 
-export const FEATHERED_STAR = FEATHERED_STAR_TEMPLATE;
+export const MOSAIC_STAR = MOSAIC_STAR_TEMPLATE;

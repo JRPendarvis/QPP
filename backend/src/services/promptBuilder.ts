@@ -1,4 +1,4 @@
-import { SKILL_LEVEL_DESCRIPTIONS } from '../config/skillLevels';
+import { SKILL_LEVEL_DESCRIPTIONS } from '../config/skill-levels';
 import { PatternFormatter } from '../utils/patternFormatter';
 import { ImageTypeDetector } from '../utils/imageTypeDetector';
 import { getPatternsForSkillLevel } from '../utils/skillLevelHelper';

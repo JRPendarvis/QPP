@@ -1,19 +1,19 @@
 import { PatternDefinition } from '../../../types/PatternDefinition';
-import { FEATHERED_STAR_TEMPLATE } from './template';
-import { FEATHERED_STAR_PROMPT } from './prompt';
+import { MOSAIC_STAR_TEMPLATE } from './template';
+import { MOSAIC_STAR_PROMPT } from './prompt';
 
-const FeatheredStar: PatternDefinition = {
+const MosaicStar: PatternDefinition = {
   id: 'mosaic-star',
   name: 'Mosaic Star',
-  template: FEATHERED_STAR_TEMPLATE,
-  prompt: FEATHERED_STAR_PROMPT,
+  template: MOSAIC_STAR_TEMPLATE,
+  prompt: MOSAIC_STAR_PROMPT,
   minFabrics: 3,
   maxFabrics: 5,
   allowRotation: false,
   rotationStrategy: 'none',
 
   /**
-   * Feathered Star color assignments:
+   * Mosaic Star color assignments:
    * fabricColors[0] = Background (negative space, setting triangles, corners)
    * fabricColors[1] = Primary (main star points)
    * fabricColors[2] = Secondary (feathers - tiny triangles around star points)
@@ -54,4 +54,4 @@ const FeatheredStar: PatternDefinition = {
   }
 };
 
-export default FeatheredStar;
+export default MosaicStar;

@@ -1,6 +1,6 @@
 import { getPattern, getAllPatterns, PatternDefinition } from './patterns';
 import { getPatternPrompt } from './prompts';
-import { PATTERNS_BY_SKILL } from './patternsBySkill';
+import { PATTERNS_BY_SKILL } from './skill-levels';
 
 export interface QuiltPattern {
   id: string;
