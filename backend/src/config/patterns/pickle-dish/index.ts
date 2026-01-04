@@ -5,6 +5,7 @@ import { PICKLE_DISH_PROMPT } from './prompt';
 const PickleDish: PatternDefinition = {
   id: 'pickle-dish',
   name: 'Pickle Dish',
+  enabled: false,
   template: PICKLE_DISH_TEMPLATE,
   prompt: PICKLE_DISH_PROMPT,
   minFabrics: 4,

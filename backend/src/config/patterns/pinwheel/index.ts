@@ -7,10 +7,14 @@ const Pinwheel: PatternDefinition = {
   name: 'Pinwheel',
   template: PINWHEEL_TEMPLATE,
   prompt: PINWHEEL_PROMPT,
+
   minFabrics: 2,
   maxFabrics: 4,
+
+  // Pinwheel identity comes from rotation, not color shuffling
   allowRotation: true,
-  rotationStrategy: 'random',
+  rotationStrategy: 'alternate-90',
+
   fabricRoles: [
     'Background',
     'Blades (Primary)',
@@ -19,35 +23,24 @@ const Pinwheel: PatternDefinition = {
   ],
 
   /**
-   * Pinwheel - 4 half-square triangles creating a spinning effect
-   * fabricColors[0] = Background (4 triangles - one per HST)
-   * fabricColors[1] = Primary (4 blade triangles creating the pinwheel)
-   * fabricColors[2] = Secondary (alternate blade color for scrappy look)
-   * fabricColors[3] = Accent (more blade variety)
-   * 
-   * 2 fabrics: Classic pinwheel (Background + Primary blades)
-   * 3-4 fabrics: Scrappy pinwheels - Background consistent, blades rotate
-   * 
-   * Returns: [background, blades]
+   * COLOR CONTRACT (do NOT rotate here):
+   * COLOR1 = Background
+   * COLOR2 = Blade Primary
+   * COLOR3 = Blade Secondary (optional)
+   * COLOR4 = Blade Accent (optional)
+   *
+   * Block rotation handles visual variation.
    */
   getColors: (
-    fabricColors: string[],
-    opts: { blockIndex?: number; row?: number; col?: number } = {}
+    fabricColors: string[]
   ): string[] => {
-    const blockIndex = opts.blockIndex ?? 0;
     const background = fabricColors[0];
-    const primary = fabricColors[1] || background;
-    
-    if (fabricColors.length < 3) {
-      // 2 fabrics: traditional pinwheel
-      return [background, primary];
-    }
-    
-    // 3-4 fabrics: Background consistent, rotate through Primary, Secondary, Accent for blades
-    const bladeOptions = fabricColors.slice(1); // Primary, Secondary, Accent
-    const blade = bladeOptions[blockIndex % bladeOptions.length];
-    
-    return [background, blade];
+    const primary = fabricColors[1] ?? background;
+    const secondary = fabricColors[2] ?? primary;
+    const accent = fabricColors[3] ?? primary;
+
+    // Always return stable positions
+    return [background, primary, secondary, accent];
   }
 };
 

@@ -49,6 +49,7 @@ export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabr
   ],
   advanced: [
     { id: 'lone-star', name: 'Lone Star', minFabrics: 3, maxFabrics: 8 },
+    { id: 'kaleidoscope-star', name: 'Kaleidoscope Star', minFabrics: 3, maxFabrics: 5 },
     { id: 'mariners-compass', name: "Mariner's Compass", minFabrics: 4, maxFabrics: 6 },
     { id: 'new-york-beauty', name: 'New York Beauty', minFabrics: 4, maxFabrics: 8 },
     { id: 'storm-at-sea', name: 'Storm at Sea', minFabrics: 3, maxFabrics: 4 },
