@@ -18,7 +18,7 @@ const NewYorkBeauty: PatternDefinition = {
    */
   minFabrics: 4,
   maxFabrics: 8,
-
+  patternStatus: 'planned',
   allowRotation: false,
   rotationStrategy: 'none',
 

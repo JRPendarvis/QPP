@@ -106,9 +106,16 @@ export function usePatternGeneration() {
         setError(response.data.message || 'Failed to generate pattern');
       }
     } catch (err) {
-      const error = err as AxiosError<{ message?: string }>;
+      const error = err as AxiosError<{ message?: string; currentUsage?: number; limit?: number }>;
       console.error('Pattern generation error:', error);
-      setError(error.response?.data?.message || 'Failed to generate pattern. Please try again.');
+      
+      // Check if it's a subscription/limit error (403)
+      if (error.response?.status === 403) {
+        const errorMsg = error.response?.data?.message || 'Subscription limit reached';
+        setError(`SUBSCRIPTION_ERROR: ${errorMsg}`);
+      } else {
+        setError(error.response?.data?.message || 'Failed to generate pattern. Please try again.');
+      }
     } finally {
       setGenerating(false);
     }

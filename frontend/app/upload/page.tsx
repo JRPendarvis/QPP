@@ -135,17 +135,10 @@ export default function UploadPage() {
       );
       toast.dismiss(loadingToast);
       
-      // Check if there was an error after generation
-      if (error) {
-        toast.error(error, {
-          duration: 5000,
-        });
-      }
+      // Don't show toast for subscription errors - they're displayed inline with upgrade link
     } catch (error) {
-      toast.error('Failed to generate pattern. Please try again.', {
-        id: loadingToast,
-        duration: 3000,
-      });
+      toast.dismiss(loadingToast);
+      // Error is already set in the hook and displayed inline
     } finally {
       setGenerating(false);
     }
@@ -190,8 +183,31 @@ export default function UploadPage() {
         <div className="bg-white rounded-lg shadow p-6">
           
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-              {error}
+            <div className={`mb-6 px-4 py-3 rounded ${
+              error.startsWith('SUBSCRIPTION_ERROR:') 
+                ? 'bg-amber-50 border border-amber-300 text-amber-800'
+                : 'bg-red-50 border border-red-200 text-red-600'
+            }`}>
+              <div className="flex items-start gap-3">
+                <div className="flex-1">
+                  {error.startsWith('SUBSCRIPTION_ERROR:') ? (
+                    <>
+                      <div className="font-semibold mb-1">⚠️ Subscription Limit Reached</div>
+                      <div className="text-sm">{error.replace('SUBSCRIPTION_ERROR: ', '')}</div>
+                      <div className="mt-3">
+                        <a 
+                          href="/pricing" 
+                          className="inline-block bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2 rounded transition-colors"
+                        >
+                          View Upgrade Options
+                        </a>
+                      </div>
+                    </>
+                  ) : (
+                    <div>{error}</div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 

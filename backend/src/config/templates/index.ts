@@ -20,6 +20,7 @@ import { STRIP_QUILT } from '../patterns/strip-quilt/template';
 import { LOG_CABIN } from '../patterns/log-cabin/template';
 import { BOW_TIE } from '../patterns/bow-tie/template';
 import { OHIO_STAR } from '../patterns/ohio-star/template';
+import { KALEIDOSCOPE_STAR } from '../patterns/kaleidoscope-star/template';
 import { SAWTOOTH_STAR } from '../patterns/sawtooth-star/template';
 import { CHURN_DASH } from '../patterns/churn-dash/template';
 import { LONE_STAR } from '../patterns/lone-star/template';
@@ -50,6 +51,7 @@ export const SVG_TEMPLATES_BY_ID: Record<string, string> = {
   'log-cabin': LOG_CABIN,
   'bow-tie': BOW_TIE,
   'ohio-star': OHIO_STAR,
+  'kaleidoscope-star': KALEIDOSCOPE_STAR,
   'sawtooth-star': SAWTOOTH_STAR,
   'churn-dash': CHURN_DASH,
   'lone-star': LONE_STAR,
@@ -82,6 +84,7 @@ export const SVG_TEMPLATES: Record<string, string> = {
   'Log Cabin': LOG_CABIN,
   'Bow Tie': BOW_TIE,
   'Ohio Star': OHIO_STAR,
+  'Kaleidoscope Star': KALEIDOSCOPE_STAR,
   'Sawtooth Star': SAWTOOTH_STAR,
   'Churn Dash': CHURN_DASH,
   'Lone Star': LONE_STAR,

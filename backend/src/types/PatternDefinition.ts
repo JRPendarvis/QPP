@@ -8,6 +8,8 @@ import { PatternPrompt } from './PatternPrompt';
  * - checkerboard-90: rotate by 0/90/180/270 in a 2×2 repeating grid
  */
 export type RotationStrategy = 'none' | 'alternate-180' | 'alternate-90' | 'checkerboard-90' | 'random' | 'parity-2x2';
+export type PatternStatus = 'ready' | 'in-progress' | 'planned';
+
 
 /**
  * Defines the complete structure of a quilt pattern including its
@@ -58,4 +60,6 @@ export interface PatternDefinition {
    * - rotationStrategy specifies the required/desired tiling behavior
    */
   rotationStrategy?: RotationStrategy;
+
+  patternStatus?: PatternStatus;  // 'ready' | 'in-progress' | 'planned'
 }

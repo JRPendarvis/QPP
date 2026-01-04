@@ -47,6 +47,7 @@ export const PATTERNS_BY_SKILL: Record<string, string[]> = {
     'ohio-star',
     'churn-dash',
     'lone-star',
+    'kaleidoscope-star',
   ],
   expert: [
     'mariners-compass',

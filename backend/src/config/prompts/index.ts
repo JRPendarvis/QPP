@@ -59,6 +59,7 @@ import { PINWHEEL_PROMPT } from '../patterns/pinwheel/prompt';
 import { LOG_CABIN_PROMPT } from '../patterns/log-cabin/prompt';
 import { SAWTOOTH_STAR_PROMPT } from '../patterns/sawtooth-star/prompt';
 import { OHIO_STAR_PROMPT } from '../patterns/ohio-star/prompt';
+import { KALEIDOSCOPE_STAR_PROMPT } from '../patterns/kaleidoscope-star/prompt';
 import { CHURN_DASH_PROMPT } from '../patterns/churn-dash/prompt';
 import { LONE_STAR_PROMPT } from '../patterns/lone-star/prompt';
 import { MARINERS_COMPASS_PROMPT } from '../patterns/mariners-compass/prompt';
@@ -89,6 +90,7 @@ export const PATTERN_PROMPTS: Record<string, PatternPrompt> = {
   'log-cabin': LOG_CABIN_PROMPT,
   'sawtooth-star': SAWTOOTH_STAR_PROMPT,
   'ohio-star': OHIO_STAR_PROMPT,
+  'kaleidoscope-star': KALEIDOSCOPE_STAR_PROMPT,
   'churn-dash': CHURN_DASH_PROMPT,
   'lone-star': LONE_STAR_PROMPT,
   'mariners-compass': MARINERS_COMPASS_PROMPT,

@@ -16,6 +16,7 @@ import Pinwheel from './pinwheel';
 import LogCabin from './log-cabin';
 import SawtoothStar from './sawtooth-star';
 import OhioStar from './ohio-star';
+import KaleidoscopeStar from './kaleidoscope-star';
 import ChurnDash from './churn-dash';
 import LoneStar from './lone-star';
 import MarinersCompass from './mariners-compass';
@@ -44,6 +45,7 @@ const patterns: Record<string, PatternDefinition> = {
   'log-cabin': LogCabin,
   'sawtooth-star': SawtoothStar,
   'ohio-star': OhioStar,
+  'kaleidoscope-star': KaleidoscopeStar,
   'churn-dash': ChurnDash,
   'lone-star': LoneStar,
   'mariners-compass': MarinersCompass,
