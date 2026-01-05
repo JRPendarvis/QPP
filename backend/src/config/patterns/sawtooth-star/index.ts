@@ -9,7 +9,7 @@ const SawtoothStar: PatternDefinition = {
   prompt: SAWTOOTH_STAR_PROMPT,
   minFabrics: 2,
   maxFabrics: 3,
-  allowRotation: true,
+  allowRotation: false,
   rotationStrategy: 'none',
   fabricRoles: [
     'Background & Sky',
