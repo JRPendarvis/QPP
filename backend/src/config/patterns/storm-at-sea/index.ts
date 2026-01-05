@@ -5,12 +5,13 @@ import { STORM_AT_SEA_PROMPT } from './prompt';
 const StormAtSea: PatternDefinition = {
   id: 'storm-at-sea',
   name: 'Storm at Sea',
+  enabled: false,
   template: STORM_AT_SEA_TEMPLATE,
   prompt: STORM_AT_SEA_PROMPT,
-  minFabrics: 3,
-  maxFabrics: 4,
+  minFabrics: 2,
+  maxFabrics: 3,
   allowRotation: false,
-  rotationStrategy: 'none',
+  rotationStrategy: 'parity-2x2',
   fabricRoles: [
     'Background',
     'Waves/Diamonds',
