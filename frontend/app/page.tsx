@@ -78,7 +78,7 @@ export default function HomePage() {
               <div className="text-3xl mb-3">🎨</div>
               <h3 className="font-bold text-lg text-gray-900 mb-2">Color Confusion</h3>
               <p className="text-gray-600">
-                You bought fabrics you love, but can't visualize how they'll look together in a finished quilt.
+                You bought fabrics you love, but can&apos;t visualize how they&apos;ll look together in a finished quilt.
               </p>
             </div>
             
@@ -86,7 +86,7 @@ export default function HomePage() {
               <div className="text-3xl mb-3">📏</div>
               <h3 className="font-bold text-lg text-gray-900 mb-2">Wasted Time & Money</h3>
               <p className="text-gray-600">
-                Hours spent planning, only to realize the pattern doesn't suit your fabrics or abilities.
+                Hours spent planning, only to realize the pattern doesn&apos;t suit your fabrics or abilities.
               </p>
             </div>
           </div>
@@ -146,17 +146,17 @@ export default function HomePage() {
             From beginner-friendly Simple Squares to expert-level Double Wedding Ring, our AI selects the perfect pattern for your skill level and fabric count.
           </p>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-lg">
+            <div className="bg-linear-to-br from-red-50 to-red-100 p-6 rounded-lg">
               <h4 className="font-bold text-red-900 mb-2">Beginner</h4>
               <p className="text-gray-700 text-sm">Simple Squares, Strip Quilts, Rail Fence</p>
             </div>
-            <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-6 rounded-lg">
+            <div className="bg-linear-to-br from-teal-50 to-teal-100 p-6 rounded-lg">
               <h4 className="font-bold text-teal-900 mb-2">Intermediate</h4>
               <p className="text-gray-700 text-sm">Log Cabin, Flying Geese, Ohio Star</p>
             </div>
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-lg">
+            <div className="bg-linear-to-br from-yellow-50 to-yellow-100 p-6 rounded-lg">
               <h4 className="font-bold text-yellow-900 mb-2">Expert</h4>
-              <p className="text-gray-700 text-sm">Feathered Star, Pickle Dish, Storm at Sea</p>
+              <p className="text-gray-700 text-sm">Lone Star, New York Beauty, Kaleidoscope Star</p>
             </div>
           </div>
         </div>
