@@ -22,8 +22,8 @@ export interface FabricAnalysis {
   value: FabricValue;
   printScale: PrintScale;
   dominantColor: string;
-  recommendedRole: FabricRole;
-  roleReason: string;
+  recommendedRole?: FabricRole;
+  roleReason?: string;
 }
 
 export interface RoleAssignment {
