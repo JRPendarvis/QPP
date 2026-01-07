@@ -9,6 +9,8 @@ export interface FabricAnalysis {
   printScale: 'solid' | 'small' | 'medium' | 'large';
   dominantColor: string;
   role?: string;
+  recommendedRole?: 'background' | 'primary' | 'secondary' | 'accent';
+  roleReason?: string;
 }
 
 /**
