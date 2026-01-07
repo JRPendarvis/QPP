@@ -1,44 +1,19 @@
 /**
- * Check if the number of fabric images meets the minimum required for a pattern
- * @param patternId - The pattern ID (e.g., 'grandmothers-flower-garden')
- * @param imageCount - Number of uploaded fabric images
- * @returns { minRequired: number, isValid: boolean, error?: string }
+ * Image Compression Utility
+ * Orchestrates image compression to meet Claude API limits
  */
-export function validateMinFabricImages(patternId: string, imageCount: number) {
-  // Import pattern registry and normalization
-  const { getPattern } = require('../config/patterns');
-  const { normalizePatternId } = require('../controllers/patternController');
-  const normalizedId = normalizePatternId(patternId);
-  const patternDef = getPattern(normalizedId);
-  let minRequired = 2;
-  if (patternDef) {
-    if (patternDef.prompt && patternDef.prompt.recommendedFabricCount) {
-      if (typeof patternDef.prompt.recommendedFabricCount === 'number') {
-        minRequired = patternDef.prompt.recommendedFabricCount;
-      } else if (patternDef.prompt.recommendedFabricCount.min) {
-        minRequired = patternDef.prompt.recommendedFabricCount.min;
-      }
-    } else if (patternDef.minColors) {
-      minRequired = patternDef.minColors;
-    }
-  }
-  const isValid = imageCount >= minRequired;
-  return {
-    minRequired,
-    isValid,
-    error: isValid ? undefined : `This pattern requires at least ${minRequired} fabric images.`
-  };
-}
-import sharp from 'sharp';
+
+import { FabricImageValidator } from '../services/fabricImageValidator';
+import { ImageMetricsCalculator } from '../services/imageMetricsCalculator';
+import { CompressionRetryHandler } from '../services/compressionRetryHandler';
+import { IMAGE_COMPRESSION_CONFIG } from '../config/imageCompressionConfig';
 
 /**
- * Image compression utility to ensure images meet Claude API limits
- * Claude has a 5MB per image limit for base64 encoded images
+ * Check if the number of fabric images meets the minimum required for a pattern
  */
-
-const MAX_IMAGE_SIZE_BYTES = 4.5 * 1024 * 1024; // 4.5MB to leave buffer (5MB limit)
-const MAX_DIMENSION = 2048; // Max width or height
-const JPEG_QUALITY = 85;
+export function validateMinFabricImages(patternId: string, imageCount: number) {
+  return FabricImageValidator.validate(patternId, imageCount);
+}
 
 export interface CompressedImage {
   base64: string;
@@ -50,22 +25,16 @@ export interface CompressedImage {
 
 /**
  * Compress an image if it exceeds the size limit
- * @param base64Image - Base64 encoded image (with or without data URI prefix)
- * @param mimeType - Original MIME type (image/jpeg, image/png, etc.)
- * @returns Compressed image data
  */
 export async function compressImageIfNeeded(
   base64Image: string,
   mimeType: string = 'image/jpeg'
 ): Promise<CompressedImage> {
-  // Remove data URI prefix if present
   const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
-  
-  // Calculate original size
   const originalSize = Buffer.byteLength(base64Data, 'base64');
   
   // If under limit, return as-is
-  if (originalSize <= MAX_IMAGE_SIZE_BYTES) {
+  if (originalSize <= IMAGE_COMPRESSION_CONFIG.MAX_IMAGE_SIZE_BYTES) {
     return {
       base64: base64Data,
       mimeType,
@@ -75,99 +44,21 @@ export async function compressImageIfNeeded(
     };
   }
   
-  // Decode base64 to buffer
+  // Decode and compress
   const imageBuffer = Buffer.from(base64Data, 'base64');
+  const metrics = await ImageMetricsCalculator.calculate(imageBuffer, mimeType);
   
-  // Get image metadata
-  const metadata = await sharp(imageBuffer).metadata();
-  const { width = 0, height = 0 } = metadata;
-  
-  // Calculate resize dimensions if needed
-  let resizeOptions: sharp.ResizeOptions | undefined;
-  if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-    const scale = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-    resizeOptions = {
-      width: Math.round(width * scale),
-      height: Math.round(height * scale),
-      fit: 'inside',
-      withoutEnlargement: true
-    };
-  }
-  
-  // Compress the image
-  let compressedBuffer: Buffer;
-  let outputMimeType: string;
-  
-  // Always convert to JPEG for better compression (unless it's a PNG with transparency)
-  const hasAlpha = metadata.hasAlpha && mimeType === 'image/png';
-  
-  if (hasAlpha) {
-    // Keep as PNG but optimize
-    let pipeline = sharp(imageBuffer);
-    if (resizeOptions) {
-      pipeline = pipeline.resize(resizeOptions);
-    }
-    compressedBuffer = await pipeline
-      .png({ quality: 80, compressionLevel: 9 })
-      .toBuffer();
-    outputMimeType = 'image/png';
-  } else {
-    // Convert to JPEG for maximum compression
-    let pipeline = sharp(imageBuffer);
-    if (resizeOptions) {
-      pipeline = pipeline.resize(resizeOptions);
-    }
-    compressedBuffer = await pipeline
-      .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
-      .toBuffer();
-    outputMimeType = 'image/jpeg';
-  }
-  
-  // If still too large, reduce quality further
-  let quality = JPEG_QUALITY;
-  while (compressedBuffer.length > MAX_IMAGE_SIZE_BYTES && quality > 30) {
-    quality -= 10;
-    
-    let pipeline = sharp(imageBuffer);
-    if (resizeOptions) {
-      pipeline = pipeline.resize(resizeOptions);
-    }
-    
-    if (hasAlpha) {
-      compressedBuffer = await pipeline
-        .png({ quality: Math.max(quality, 50), compressionLevel: 9 })
-        .toBuffer();
-    } else {
-      compressedBuffer = await pipeline
-        .jpeg({ quality, mozjpeg: true })
-        .toBuffer();
-    }
-  }
-  
-  // If STILL too large, force more aggressive resize
-  if (compressedBuffer.length > MAX_IMAGE_SIZE_BYTES) {
-    const aggressiveResize: sharp.ResizeOptions = {
-      width: 1024,
-      height: 1024,
-      fit: 'inside',
-      withoutEnlargement: true
-    };
-    
-    compressedBuffer = await sharp(imageBuffer)
-      .resize(aggressiveResize)
-      .jpeg({ quality: 70, mozjpeg: true })
-      .toBuffer();
-    outputMimeType = 'image/jpeg';
-  }
-  
-  const compressedBase64 = compressedBuffer.toString('base64');
-  const compressedSize = compressedBuffer.length;
+  const result = await CompressionRetryHandler.retryWithLowerQuality(imageBuffer, {
+    hasAlpha: metrics.hasAlpha,
+    quality: IMAGE_COMPRESSION_CONFIG.INITIAL_JPEG_QUALITY,
+    resizeOptions: metrics.resizeOptions
+  });
   
   return {
-    base64: compressedBase64,
-    mimeType: outputMimeType,
+    base64: result.buffer.toString('base64'),
+    mimeType: result.mimeType,
     originalSize,
-    compressedSize,
+    compressedSize: result.buffer.length,
     wasCompressed: true
   };
 }
