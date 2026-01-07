@@ -1,8 +1,8 @@
 /**
  * Central export for all pattern-related types
  */
-export { QuiltPattern } from './QuiltPattern';
-export { PatternGenerationRequest } from './PatternGenerationRequest';
-export { PatternGenerationResponse } from './PatternGenerationResponse';
-export { PatternGenerationError, PatternErrorType } from './PatternGenerationError';
-export { UsePatternGenerationReturn } from './UsePatternGenerationReturn';
+export type { QuiltPattern } from './QuiltPattern';
+export type { PatternGenerationRequest } from './PatternGenerationRequest';
+export type { PatternGenerationResponse } from './PatternGenerationResponse';
+export type { PatternGenerationError, PatternErrorType } from './PatternGenerationError';
+export type { UsePatternGenerationReturn } from './UsePatternGenerationReturn';
