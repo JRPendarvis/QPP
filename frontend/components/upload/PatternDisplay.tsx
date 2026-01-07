@@ -274,7 +274,7 @@ export default function PatternDisplay({
             const important = pattern.instructions[0]?.startsWith('IMPORTANT:');
             const visibleInstructions = pattern.instructions.slice(important ? 1 : 0).slice(0, 2);
             return visibleInstructions.map((instruction, index) => (
-              <li key={index}>{instruction.replace(/^[0-9]+[).]\s*/, '')}</li>
+              <li key={index}>{instruction.replace(/^\d+[).)]\s*/, '')}</li>
             ));
           })()}
         </ol>

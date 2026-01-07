@@ -91,6 +91,8 @@ export class PDFService {
 
         pattern.instructions.forEach((instruction, index) => {
           const stepNumber = `${index + 1}.`;
+          // Strip any existing numbering from Claude's response
+          const cleanInstruction = instruction.replace(/^\d+[).)]\s*/, '');
           
           // Check if we need a new page
           if (doc.y > 700) {
@@ -100,7 +102,7 @@ export class PDFService {
           doc.font('Helvetica-Bold')
              .text(stepNumber, { continued: true })
              .font('Helvetica')
-             .text(` ${instruction}`, { align: 'justify' })
+             .text(` ${cleanInstruction}`, { align: 'justify' })
              .moveDown(0.5);
         });
 
