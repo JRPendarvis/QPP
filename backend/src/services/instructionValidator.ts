@@ -16,7 +16,7 @@ export class InstructionValidator {
 
   /** Disclaimer added to all instruction sets */
   private static readonly DISCLAIMER = 
-    '📋 IMPORTANT: This is only a recommendation. You are free to design this quilt however you wish - rearrange blocks, change colors, or modify the layout to suit your creative vision!';
+    'IMPORTANT: This is only a recommendation. You are free to design this quilt however you wish - rearrange blocks, change colors, or modify the layout to suit your creative vision!';
 
   /**
    * Validates instructions and adds disclaimer

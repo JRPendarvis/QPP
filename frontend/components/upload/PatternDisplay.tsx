@@ -261,9 +261,9 @@ export default function PatternDisplay({
       <div className="bg-linear-to-b from-white to-gray-100 border border-gray-200 rounded-lg p-6 relative">
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-white pointer-events-none rounded-lg"></div>
 
-        {pattern.instructions[0]?.startsWith('📋 IMPORTANT:') && (
+        {pattern.instructions[0]?.startsWith('IMPORTANT:') && (
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg relative z-10">
-            <p className="text-sm text-blue-900">{pattern.instructions[0]}</p>
+            <p className="text-sm text-blue-900">📋 {pattern.instructions[0]}</p>
           </div>
         )}
 
@@ -271,7 +271,7 @@ export default function PatternDisplay({
 
         <ol className="list-decimal list-inside space-y-2 text-gray-600">
           {(() => {
-            const important = pattern.instructions[0]?.startsWith('📋 IMPORTANT:');
+            const important = pattern.instructions[0]?.startsWith('IMPORTANT:');
             const visibleInstructions = pattern.instructions.slice(important ? 1 : 0).slice(0, 2);
             return visibleInstructions.map((instruction, index) => (
               <li key={index}>{instruction.replace(/^[0-9]+[).]\s*/, '')}</li>
