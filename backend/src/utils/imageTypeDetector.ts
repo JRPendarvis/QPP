@@ -20,7 +20,6 @@ export class ImageTypeDetector {
       return 'image/webp';
     }
     
-    console.warn('⚠️  Could not detect image type, defaulting to png');
     return 'image/png';
   }
 
@@ -41,11 +40,9 @@ export class ImageTypeDetector {
     
     if (!mimeType) {
       mimeType = this.detectFromBase64(base64Data);
-      console.log(`🔍 Auto-detected image ${index + 1}: ${mimeType}`);
     }
     
     const validType = this.validateMimeType(mimeType);
-    console.log(`📸 Image ${index + 1}: ${validType}`);
     
     return validType;
   }

@@ -71,7 +71,6 @@ export class PromptBuilder {
       patternId = selectedPattern;
       patternForSvg = PatternFormatter.formatPatternName(selectedPattern);
       patternInstruction = `**REQUIRED PATTERN TYPE:** You MUST create a "${patternForSvg}" pattern. This is the user's specific choice.`;
-      console.log(`📋 User selected pattern: ${patternForSvg} (ID: ${patternId})`);
     } else {
       // Auto mode - pick best pattern based on fabric count if provided
       let filteredPatterns = availablePatternIds
@@ -98,18 +97,15 @@ export class PromptBuilder {
         patternId = selected.pattern.id;
         patternForSvg = selected.pattern.name;
 
-        console.log(`🎯 Auto mode: selected pattern '${patternForSvg}' (ID: ${patternId}) for fabric count ${fabricCount}`);
       } else {
         // No valid pattern for this fabric count and skill level
         patternId = undefined;
         patternForSvg = '';
-        console.warn(`❌ No valid pattern found for skill level '${skillLevel}' and fabric count ${fabricCount}`);
       }
 
       patternInstruction = patternForSvg
         ? `**REQUIRED PATTERN TYPE:** Create a "${patternForSvg}" pattern. This pattern is appropriate for the ${skillLevel} skill level.`
         : `**ERROR:** No valid pattern found for your skill level and number of fabrics.`;
-      console.log(`   ${filteredPatterns.length} patterns available at ${skillLevel} level for fabric count ${fabricCount}`);
     }
 
     return { patternForSvg, patternInstruction, patternId };

@@ -75,8 +75,6 @@ export async function compressImageIfNeeded(
     };
   }
   
-  console.log(`🖼️ Image exceeds limit: ${(originalSize / 1024 / 1024).toFixed(2)}MB - compressing...`);
-  
   // Decode base64 to buffer
   const imageBuffer = Buffer.from(base64Data, 'base64');
   
@@ -94,7 +92,6 @@ export async function compressImageIfNeeded(
       fit: 'inside',
       withoutEnlargement: true
     };
-    console.log(`   Resizing from ${width}x${height} to ${resizeOptions.width}x${resizeOptions.height}`);
   }
   
   // Compress the image
@@ -130,7 +127,6 @@ export async function compressImageIfNeeded(
   let quality = JPEG_QUALITY;
   while (compressedBuffer.length > MAX_IMAGE_SIZE_BYTES && quality > 30) {
     quality -= 10;
-    console.log(`   Still too large (${(compressedBuffer.length / 1024 / 1024).toFixed(2)}MB), reducing quality to ${quality}%`);
     
     let pipeline = sharp(imageBuffer);
     if (resizeOptions) {
@@ -150,7 +146,6 @@ export async function compressImageIfNeeded(
   
   // If STILL too large, force more aggressive resize
   if (compressedBuffer.length > MAX_IMAGE_SIZE_BYTES) {
-    console.log(`   Applying aggressive resize...`);
     const aggressiveResize: sharp.ResizeOptions = {
       width: 1024,
       height: 1024,
@@ -167,8 +162,6 @@ export async function compressImageIfNeeded(
   
   const compressedBase64 = compressedBuffer.toString('base64');
   const compressedSize = compressedBuffer.length;
-  
-  console.log(`   Compressed: ${(originalSize / 1024 / 1024).toFixed(2)}MB → ${(compressedSize / 1024 / 1024).toFixed(2)}MB (${Math.round((1 - compressedSize / originalSize) * 100)}% reduction)`);
   
   return {
     base64: compressedBase64,

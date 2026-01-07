@@ -1,140 +1,116 @@
 "use client";
 import { useState, useCallback } from 'react';
-import { AxiosError } from 'axios';
-import api from '@/lib/api';
+import { useFabricState, MAX_FABRICS, MIN_FABRICS } from './useFabricState';
+import { QuiltPattern, UsePatternGenerationReturn } from '@/types';
+import { PatternStateManager } from '@/utils/patternStateManager';
+import { PatternGenerationWorkflow } from '@/services/patternGenerationWorkflow';
+import { WorkflowCallbackFactory } from '@/utils/workflowCallbackFactory';
 
-interface QuiltPattern {
-  id?: string;
-  patternName: string;
-  description: string;
-  fabricLayout: string;
-  difficulty: string;
-  estimatedSize: string;
-  instructions: string[];
-  visualSvg: string;
-}
-
-export function usePatternGeneration() {
-  const [fabrics, setFabrics] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+/**
+ * Pattern Generation Hook
+ * 
+ * Manages the complete workflow for generating quilt patterns from fabric images,
+ * including fabric upload, validation, API communication, and state management.
+ * 
+ * @returns {UsePatternGenerationReturn} Pattern generation state and actions
+ * 
+ * @example
+ * ```tsx
+ * const {
+ *   fabrics,
+ *   handleFilesAdded,
+ *   generatePattern,
+ *   pattern,
+ *   generating,
+ *   error
+ * } = usePatternGeneration();
+ * 
+ * // Upload fabrics
+ * handleFilesAdded(files);
+ * 
+ * // Generate pattern
+ * await generatePattern('intermediate', false, 'strip-quilt');
+ * ```
+ * 
+ * SOLID Principles Applied:
+ * - Single Responsibility: State management and coordination only
+ * - Dependency Inversion: Depends on workflow and service abstractions
+ * - Open/Closed: Extend by modifying services, not this hook
+ */
+export function usePatternGeneration(): UsePatternGenerationReturn {
+  const fabricState = useFabricState();
   const [generating, setGenerating] = useState(false);
   const [pattern, setPattern] = useState<QuiltPattern | null>(null);
   const [error, setError] = useState('');
 
-  const MAX_FABRICS = 9;
-  const MIN_FABRICS = 2;
-
-  // Handle file addition
-  const handleFilesAdded = useCallback((acceptedFiles: File[]) => {
-    const imageFiles = acceptedFiles.filter(file => file.type.startsWith('image/'));
-    const remainingSlots = MAX_FABRICS - fabrics.length;
-    const filesToAdd = imageFiles.slice(0, remainingSlots);
-
-    setFabrics(prev => [...prev, ...filesToAdd]);
-    const newPreviews = filesToAdd.map(file => URL.createObjectURL(file));
-    setPreviews(prev => [...prev, ...newPreviews]);
-  }, [fabrics.length]);
-
-  // Remove a fabric
-  const removeFabric = (index: number) => {
-    setFabrics(prev => prev.filter((_, i) => i !== index));
-    setPreviews(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // Clear all
-  const clearAll = () => {
-    setFabrics([]);
-    setPreviews([]);
+  /**
+   * Clear all state (fabrics and pattern)
+   */
+  const clearAll = useCallback(() => {
+    fabricState.clearAll();
     setPattern(null);
     setError('');
-  };
+  }, [fabricState]);
 
-  // Reset pattern only (keep fabrics for "Start Over")
+  /**
+   * Reset pattern only while keeping fabrics for regeneration
+   */
   const resetPattern = useCallback(() => {
-    console.log('🔄 Reset pattern - keeping', fabrics.length, 'fabrics');
-    setPattern(null);
-    setError('');
-    setGenerating(false); // Also reset generating state
-    // Scroll to top to show the fabric preview
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
-  }, [fabrics.length]);
+    PatternStateManager.resetWithScroll(
+      fabricState.fabrics.length,
+      setPattern,
+      setError,
+      setGenerating
+    );
+  }, [fabricState.fabrics.length]);
 
-  // Convert file to base64 with mime type
-  const fileToBase64 = (file: File): Promise<{data: string, type: string}> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        const base64Data = base64.split(',')[1];
-        resolve({
-          data: base64Data,
-          type: file.type
-        });
-      };
-      reader.onerror = error => reject(error);
-    });
-  };
-
-  // Generate pattern - accepts selectedPattern as third parameter
-  const generatePattern = async (
-    userSkillLevel: string, 
-    challengeMe: boolean,
-    selectedPattern?: string
-  ) => {
-    setGenerating(true);
-    setError('');
-    setPattern(null);
-
-    try {
-      const fabricsWithTypes = await Promise.all(fabrics.map(file => fileToBase64(file)));
-      const response = await api.post('/api/patterns/generate', { 
-        fabrics: fabricsWithTypes.map(f => f.data),
-        fabricTypes: fabricsWithTypes.map(f => f.type),
-        skillLevel: userSkillLevel,
-        challengeMe: challengeMe,
-        selectedPattern: selectedPattern || 'auto',
-      });
-
-      if (response.data.success) {
-        setPattern(response.data.data.pattern);
-        console.log('✅ Pattern received:', response.data.data.pattern.patternName);
-        console.log('✅ Pattern ID:', response.data.data.pattern.id);
-      } else {
-        setError(response.data.message || 'Failed to generate pattern');
-      }
-    } catch (err) {
-      const error = err as AxiosError<{ message?: string; currentUsage?: number; limit?: number }>;
-      console.error('Pattern generation error:', error);
+  /**
+   * Generate a quilt pattern from uploaded fabrics
+   * 
+   * @param userSkillLevel - Target skill level for the pattern
+   * @param challengeMe - Whether to increase difficulty by one level
+   * @param selectedPattern - Optional specific pattern ID to generate
+   */
+  const generatePattern = useCallback(
+    async (userSkillLevel: string, challengeMe: boolean, selectedPattern?: string) => {
+      const callbacks = WorkflowCallbackFactory.createPatternCallbacks(
+        setGenerating,
+        setError,
+        setPattern
+      );
       
-      // Check if it's a subscription/limit error (403)
-      if (error.response?.status === 403) {
-        const errorMsg = error.response?.data?.message || 'Subscription limit reached';
-        setError(`SUBSCRIPTION_ERROR: ${errorMsg}`);
-      } else {
-        setError(error.response?.data?.message || 'Failed to generate pattern. Please try again.');
-      }
-    } finally {
-      setGenerating(false);
-    }
-  };
+      await PatternGenerationWorkflow.execute(
+        fabricState.fabrics,
+        userSkillLevel,
+        challengeMe,
+        selectedPattern,
+        callbacks
+      );
+    },
+    [fabricState.fabrics]
+  );
 
   return {
-    fabrics,
-    previews,
+    // Fabric state
+    fabrics: fabricState.fabrics,
+    previews: fabricState.previews,
+    handleFilesAdded: fabricState.handleFilesAdded,
+    removeFabric: fabricState.removeFabric,
+    setFabrics: fabricState.setFabrics,
+    setPreviews: fabricState.setPreviews,
+    
+    // Pattern state
     generating,
     pattern,
     error,
+    
+    // Constants
     MAX_FABRICS,
     MIN_FABRICS,
-    handleFilesAdded,
-    removeFabric,
+    
+    // Actions
     clearAll,
     resetPattern,
     generatePattern,
-    setFabrics,
-    setPreviews,
   };
 }

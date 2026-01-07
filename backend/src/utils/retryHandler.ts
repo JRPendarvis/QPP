@@ -14,7 +14,6 @@ export class RetryHandler {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`🔄 ${operationName} attempt ${attempt}/${maxRetries}`);
         return await operation();
       } catch (error: any) {
         lastError = error;
@@ -25,10 +24,8 @@ export class RetryHandler {
         if (isOverloaded && attempt < maxRetries) {
           // Exponential backoff: 2s, 4s, 8s
           const waitTime = Math.pow(2, attempt) * 1000;
-          console.log(`⏳ API overloaded, retrying in ${waitTime/1000}s (attempt ${attempt + 1}/${maxRetries})...`);
           await this.sleep(waitTime);
         } else if (attempt === maxRetries) {
-          console.error(`❌ Failed after ${maxRetries} attempts`);
           if (isOverloaded) {
             throw new Error('API is currently experiencing high demand. Please try again in a few moments.');
           }

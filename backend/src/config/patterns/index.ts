@@ -59,15 +59,6 @@ const patterns: Record<string, PatternDefinition> = {
   'complex-medallion': ComplexMedallion,
 };
 
-// Log loaded patterns on startup
-console.log('═══════════════════════════════════════════════════');
-console.log('📦 PATTERN REGISTRY INITIALIZATION');
-Object.entries(patterns).forEach(([id, def]) => {
-  console.log(`  ✅ ${id}: allowRotation=${def.allowRotation ?? true}, colors=${def.minFabrics}-${def.maxFabrics}`);
-});
-console.log(`📦 Total: ${Object.keys(patterns).length} patterns loaded`);
-console.log('═══════════════════════════════════════════════════');
-
 /**
  * Get a pattern definition by ID
  */
