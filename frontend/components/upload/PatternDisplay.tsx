@@ -261,6 +261,26 @@ export default function PatternDisplay({
       <div className="bg-linear-to-b from-white to-gray-100 border border-gray-200 rounded-lg p-6 relative">
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-white pointer-events-none rounded-lg"></div>
 
+        {/* DEBUG: Show all cleaned instructions */}
+        <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg relative z-10">
+          <h3 className="font-bold text-yellow-900 mb-2">🔍 DEBUG: PDF Instructions Preview</h3>
+          <p className="text-xs text-yellow-700 mb-3">This shows exactly how instructions will appear in the PDF (with numbering):</p>
+          <ol className="list-decimal list-inside space-y-2 text-sm text-yellow-900">
+            {pattern.instructions.map((instruction, index) => {
+              const cleanInstruction = instruction.replace(/^\d+[).]\s*/, '');
+              const isDisclaimer = instruction.startsWith('IMPORTANT:');
+              if (isDisclaimer) {
+                return (
+                  <div key={index} className="p-2 bg-blue-100 rounded mb-2 -ml-6">
+                    <span className="font-semibold">📋 {cleanInstruction}</span>
+                  </div>
+                );
+              }
+              return <li key={index} className="ml-4">{cleanInstruction}</li>;
+            })}
+          </ol>
+        </div>
+
         {pattern.instructions[0]?.startsWith('IMPORTANT:') && (
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg relative z-10">
             <p className="text-sm text-blue-900">📋 {pattern.instructions[0]}</p>
