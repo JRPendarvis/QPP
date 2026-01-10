@@ -1,25 +1,11 @@
 // src/config/patterns/pinwheel/instructionCapability.ts
 
-import type { InstructionCapability } from '../../../services/instructions/types';
-import buildPinwheelPlan, { type PinwheelPlan } from './plan';
-import { renderPinwheelInstructions } from './renderPinwheelInstructions';
+import type { InstructionCapability } from '../../../services/instructions/instructionCapability';
 
-export const pinwheelInstructionCapability: InstructionCapability<PinwheelPlan> = {
+export const pinwheelInstructionCapability: InstructionCapability = {
   patternId: 'pinwheel',
-
-  buildPlan: buildPinwheelPlan,
-
-  renderInstructions: (plan, fabricsByRole) => {
-    const background = fabricsByRole.background ?? 'Background fabric';
-    const primary = fabricsByRole.primary ?? 'Primary fabric';
-    const secondary = fabricsByRole.secondary ?? primary;
-    const accent = fabricsByRole.accent ?? primary;
-
-    return renderPinwheelInstructions(plan, {
-      background,
-      primary,
-      secondary,
-      accent,
-    });
-  },
+  supported: true,
+  minFabrics: 2,
+  maxFabrics: 4,
+  notes: 'Deterministic Pinwheel instructions generated from pinwheel plan.',
 };

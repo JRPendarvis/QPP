@@ -1,13 +1,20 @@
 // src/services/instructions/registry.ts
 
-import type { InstructionCapability } from './types';
+import type { InstructionPlan } from './types';
 
-const registry = new Map<string, InstructionCapability>();
+// Plans
+import { pinwheelPlan } from '../../config/patterns/pinwheel/plan';
+import { bowTiePlan } from '../../config/patterns/bow-tie/plan';
 
-export function registerInstructionCapability(capability: InstructionCapability): void {
-  registry.set(capability.patternId, capability);
+const plans: Record<string, InstructionPlan<any>> = {
+  pinwheel: pinwheelPlan,
+  'bow-tie': bowTiePlan,
+};
+
+export function getInstructionPlan(patternId: string): InstructionPlan<any> | undefined {
+  return plans[patternId];
 }
 
-export function getInstructionCapability(patternId: string): InstructionCapability | undefined {
-  return registry.get(patternId);
+export function listSupportedInstructionPatternIds(): string[] {
+  return Object.keys(plans);
 }

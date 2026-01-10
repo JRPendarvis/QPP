@@ -1,14 +1,22 @@
-// services/instructions/types.ts
+// src/services/instructions/types.ts
 
-export type QuiltSizeIn = { width: number; height: number };
+export type QuiltSizeIn = {
+  widthIn: number;
+  heightIn: number;
+};
 
-export type FabricsByRole = Record<string, string>;
+export type InstructionResult =
+  | { kind: 'generated'; instructions: string[] }
+  | { kind: 'unsupported'; reason: string };
 
-export interface InstructionCapability<Plan = unknown> {
+/**
+ * Generic deterministic instruction plan contract.
+ * Each pattern registers an InstructionPlan keyed by patternId.
+ *
+ * TFabrics is pattern-specific input describing fabric usage.
+ * (Example: Bow Tie uses slot-based inputs; Pinwheel can adapt.)
+ */
+export type InstructionPlan<TFabrics = unknown> = {
   patternId: string;
-
-  buildPlan: (quiltSize: QuiltSizeIn) => Plan;
-
-  // Given a computed plan + resolved fabric names, produce printable step strings.
-  renderInstructions: (plan: Plan, fabricsByRole: FabricsByRole) => string[];
-}
+  render: (quiltSize: QuiltSizeIn, fabrics: TFabrics) => string[];
+};

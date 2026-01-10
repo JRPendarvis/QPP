@@ -6,6 +6,7 @@ import { renderPatternBlocks } from '../utils/pdfPatternBlocks';
 
 import { generateInstructions } from './instructions/generateInstructions';
 import { parseQuiltSizeIn } from '../utils/parseQuiltSize';
+import type { FabricAssignments } from './instructions/fabricAssignments';
 
 export class PDFService {
   async generatePatternPDF(pattern: QuiltPattern, userName: string): Promise<Buffer> {
@@ -16,7 +17,6 @@ export class PDFService {
           margins: { top: 50, bottom: 50, left: 50, right: 50 },
         });
 
-        // Collect PDF chunks
         const chunks: Buffer[] = [];
         doc.on('data', (chunk) => chunks.push(chunk));
         doc.on('end', () => resolve(Buffer.concat(chunks)));
@@ -94,14 +94,13 @@ export class PDFService {
           .moveDown(0.25);
 
         // ---------------------------------------
-        // Deterministic instructions (if supported)
+        // Deterministic instructions (MVP: REQUIRED)
         // ---------------------------------------
-        let instructionsToPrint: string[] = pattern.instructions ?? [];
-        let instructionSource: 'deterministic' | 'fallback' = 'fallback';
+        let resolvedPatternId = 'unknown';
+        let instructionsToPrint: string[] = [];
 
         try {
-          // Prefer explicit patternId; fall back to id/name if needed.
-          const patternId =
+          resolvedPatternId =
             (pattern as any).patternId ??
             (pattern as any).id ??
             String(pattern.patternName || '')
@@ -111,8 +110,7 @@ export class PDFService {
 
           const quiltSize = parseQuiltSizeIn(pattern.estimatedSize);
 
-          // Fabrics must be structured. Do NOT parse prose.
-          // Best: provide this on the pattern object when calling PDFService.
+          // MUST be structured. Do NOT parse prose.
           const fabricsByRole =
             (pattern as any).fabricsByRole ?? {
               background: 'Background fabric',
@@ -121,29 +119,73 @@ export class PDFService {
               accent: 'Accent fabric',
             };
 
-          const res = generateInstructions(patternId, quiltSize, fabricsByRole);
-          if (res.kind === 'generated') {
-            instructionsToPrint = res.instructions;
-            instructionSource = 'deterministic';
+          console.log('[PDF DEBUG] resolvedPatternId =', resolvedPatternId);
+          console.log('[PDF DEBUG] estimatedSize =', pattern.estimatedSize);
+          console.log('[PDF DEBUG] fabricsByRole =', fabricsByRole);
+
+          // Convert types for generateInstructions
+          const fabricAssignments: FabricAssignments = {
+            namesBySlot: [
+              fabricsByRole.background || 'Background fabric',
+              fabricsByRole.primary || 'Primary fabric',
+              fabricsByRole.secondary || 'Secondary fabric',
+              fabricsByRole.accent || 'Accent fabric',
+            ],
+          };
+
+          const res = generateInstructions(
+            resolvedPatternId,
+            { widthIn: quiltSize.width, heightIn: quiltSize.height },
+            fabricAssignments
+          );
+
+          if (res.kind !== 'generated') {
+            throw new Error(
+              `Deterministic instructions not available for patternId="${resolvedPatternId}". ` +
+                `Refusing to fall back to LLM instructions.`
+            );
           }
-        } catch {
-          // If deterministic generation fails for any reason,
-          // fall back to pattern.instructions (existing behavior).
+
+          instructionsToPrint = res.instructions;
+
+          console.log(
+            `[PDF] patternId=${resolvedPatternId} instructionSource=deterministic steps=${instructionsToPrint.length}`
+          );
+        } catch (err) {
+          // Big visible badge AND fail request
+          const badgeY = doc.y;
+
+          doc.rect(50, badgeY, 495, 28).stroke('#FCA5A5');
+
+          doc
+            .fontSize(10)
+            .font('Helvetica-Bold')
+            .fillColor('#B91C1C')
+            .text(
+              `ERROR: Deterministic instructions missing for "${resolvedPatternId}". PDF generation blocked for MVP.`,
+              60,
+              badgeY + 8,
+              { width: 475 }
+            );
+
+          console.error('[PDF ERROR] Deterministic instructions required but unavailable.', err);
+
+          reject(err);
+          return;
         }
 
-        // Source marker (small, subtle)
+        // Green badge: deterministic used
+        const okBadgeY = doc.y;
+        doc.rect(50, okBadgeY, 495, 22).stroke('#A7F3D0');
         doc
-          .fontSize(9)
-          .font('Helvetica-Oblique')
-          .fillColor('#6B7280')
-          .text(
-            instructionSource === 'deterministic'
-              ? '(Generated from pattern plan — deterministic)'
-              : '(Generated from pattern description — fallback)',
-            { align: 'left' }
-          )
-          .moveDown(0.5);
+          .fontSize(10)
+          .font('Helvetica-Bold')
+          .fillColor('#065F46')
+          .text('INSTRUCTIONS: DETERMINISTIC (PLAN-BASED)', 60, okBadgeY + 6);
 
+        doc.moveDown(1);
+
+        // Instructions body
         doc.fontSize(10).font('Helvetica').fillColor('#374151');
 
         instructionsToPrint.forEach((instruction, index) => {
@@ -181,14 +223,12 @@ export class PDFService {
                   750,
                   { align: 'center', width: 495 }
                 );
-            } catch (err) {
-              // Prevent crash if page is not available
-              console.error(`Footer: switchToPage(${i}) failed:`, err);
+            } catch (footerErr) {
+              console.error(`Footer: switchToPage(${i}) failed:`, footerErr);
             }
           }
         }
 
-        // Finalize PDF
         doc.end();
       } catch (error) {
         reject(error);

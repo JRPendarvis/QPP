@@ -16,6 +16,10 @@
 // - This plan intentionally refuses to "guess" borders/sashing. If the size doesn't tile cleanly, it throws.
 //
 
+import type { InstructionPlan, QuiltSizeIn as QuiltSizeInImported } from '../../../services/instructions/types';
+import { renderPinwheelInstructions, type PinwheelFabricNames } from './renderPinwheelInstructions';
+
+// Local type alias for internal use (uses width/height instead of widthIn/heightIn)
 export type QuiltSizeIn = { width: number; height: number };
 
 export type CutRole = 'BACKGROUND' | 'PRIMARY' | 'SECONDARY' | 'ACCENT';
@@ -224,3 +228,17 @@ function roundToQuarter(value: number): number {
 
 // default export for convenience
 export default buildPinwheelPlan;
+
+// InstructionPlan export for registry
+export const pinwheelPlan: InstructionPlan<PinwheelFabricNames> = {
+  patternId: 'pinwheel',
+  render: (quiltSize: QuiltSizeInImported, fabrics: PinwheelFabricNames) => {
+    // Convert from QuiltSizeInImported (widthIn/heightIn) to local QuiltSizeIn (width/height)
+    const localQuiltSize: QuiltSizeIn = {
+      width: quiltSize.widthIn,
+      height: quiltSize.heightIn,
+    };
+    const plan = buildPinwheelPlan(localQuiltSize);
+    return renderPinwheelInstructions(plan, fabrics);
+  },
+};

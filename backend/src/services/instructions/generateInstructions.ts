@@ -1,37 +1,29 @@
 // src/services/instructions/generateInstructions.ts
 
-import type { QuiltSizeIn, FabricsByRole } from './types';
-import { getInstructionCapability, registerInstructionCapability } from './registry';
-
-// ✅ NOTE: we are now importing from src/config/patterns
-import { instructionCapabilities } from '../../config/patterns/instructionCapabilities';
+import type { QuiltSizeIn } from './types';
+import type { FabricAssignments } from './fabricAssignments';
+import { getInstructionPlan } from './registry';
 
 export type GenerateInstructionsResult =
   | { kind: 'generated'; instructions: string[] }
   | { kind: 'not-supported' };
 
-// One-time registration (module init)
-let isRegistered = false;
-function ensureRegistered(): void {
-  if (isRegistered) return;
-  for (const cap of instructionCapabilities) {
-    registerInstructionCapability(cap);
-  }
-  isRegistered = true;
-}
-
 export function generateInstructions(
   patternId: string,
   quiltSize: QuiltSizeIn,
-  fabricsByRole: FabricsByRole
+  fabricsByRole: FabricAssignments
 ): GenerateInstructionsResult {
-  ensureRegistered();
+  const plan = getInstructionPlan(patternId);
+  
+  if (!plan) {
+    return { kind: 'not-supported' };
+  }
 
-  const capability = getInstructionCapability(patternId);
-  if (!capability) return { kind: 'not-supported' };
-
-  const plan = capability.buildPlan(quiltSize);
-  const instructions = capability.renderInstructions(plan, fabricsByRole);
-
-  return { kind: 'generated', instructions };
+  try {
+    const instructions = plan.render(quiltSize, fabricsByRole);
+    return { kind: 'generated', instructions };
+  } catch (error) {
+    console.error(`[INSTRUCTIONS] Error generating instructions for ${patternId}:`, error);
+    return { kind: 'not-supported' };
+  }
 }
