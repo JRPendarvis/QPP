@@ -10,6 +10,25 @@ import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
 
 const prisma = new PrismaClient();
 
+function safeCount(v: unknown): number | 'n/a' {
+  return Array.isArray(v) ? v.length : 'n/a';
+}
+
+function isDev(): boolean {
+  return process.env.NODE_ENV !== 'production';
+}
+
+function toErrDebug(error: unknown) {
+  if (!isDev()) return undefined;
+
+  const e = error as any;
+  return {
+    name: e?.name,
+    message: e?.message,
+    stack: e?.stack,
+  };
+}
+
 export class PatternController {
   private pdfService: PDFService;
   private generationService: PatternGenerationService;
@@ -22,12 +41,27 @@ export class PatternController {
   async generatePattern(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
-      const { fabricImages, fabrics, fabricTypes, skillLevel, challengeMe, selectedPattern, roleAssignments } = req.body;
+
+      // Safely handle missing body
+      const body = req.body ?? {};
+      const {
+        fabricImages,
+        fabrics,
+        fabricTypes,
+        skillLevel,
+        challengeMe,
+        selectedPattern,
+        roleAssignments,
+      } = body as any;
+
       const images = fabricImages || fabrics;
       const imageTypes = fabricTypes || [];
 
-      console.log('📸 Images count:', images?.length, 'Types count:', imageTypes.length);
+      // Safe, actionable logging
+      console.log('🧾 /api/patterns/generate keys:', Object.keys(body));
+      console.log('📸 Images count:', safeCount(images), 'Types count:', safeCount(imageTypes));
       console.log('📋 Raw selectedPattern:', selectedPattern);
+      console.log('🧩 roleAssignments present:', roleAssignments ? 'yes' : 'no');
 
       // Validation
       const validationError =
@@ -37,8 +71,25 @@ export class PatternController {
         PatternValidators.validateSkillLevel(skillLevel);
 
       if (validationError) {
-        return res.status(validationError.statusCode).json(validationError);
+        return res.status(validationError.statusCode).json({
+          ...validationError,
+          ...(isDev()
+            ? {
+                debug: {
+                  userIdPresent: !!userId,
+                  imagesCount: safeCount(images),
+                  typesCount: safeCount(imageTypes),
+                  selectedPattern,
+                  skillLevel,
+                },
+              }
+            : {}),
+        });
       }
+
+      // If PatternGenerationService expects normalized IDs, normalize here once and pass it through.
+      // (Safe even if it already normalizes internally.)
+      const normalizedPattern = normalizePatternId(selectedPattern);
 
       const result = await this.generationService.generate({
         userId: userId!,
@@ -46,7 +97,7 @@ export class PatternController {
         imageTypes,
         skillLevel,
         challengeMe,
-        selectedPattern,
+        selectedPattern: normalizedPattern,
         roleAssignments,
       });
 
@@ -54,24 +105,32 @@ export class PatternController {
     } catch (error) {
       console.error('Pattern generation error:', error);
 
+      // Known “semantic” errors
       if (error instanceof Error) {
         if (error.message === 'USER_NOT_FOUND') {
-          return res.status(404).json({ success: false, message: 'User not found' });
+          return res.status(404).json({
+            success: false,
+            message: 'User not found',
+            ...(isDev() ? { debug: toErrDebug(error) } : {}),
+          });
         }
         if (error.message === 'SUBSCRIPTION_EXPIRED') {
           return res.status(403).json({
             success: false,
             message: 'Your subscription has expired. Please renew to generate patterns.',
+            ...(isDev() ? { debug: toErrDebug(error) } : {}),
           });
         }
         if (error.message === 'GENERATION_LIMIT_REACHED') {
           return res.status(403).json({
             success: false,
             message: "You've reached your monthly generation limit. Upgrade your plan for more!",
+            ...(isDev() ? { debug: toErrDebug(error) } : {}),
           });
         }
       }
 
+      // Friendly fallback mapping
       let message = 'Failed to generate quilt pattern. Please try again.';
       if (error instanceof Error) {
         if (error.message.includes('high demand') || error.message.includes('experiencing')) {
@@ -83,7 +142,11 @@ export class PatternController {
         }
       }
 
-      res.status(500).json({ success: false, message });
+      res.status(500).json({
+        success: false,
+        message,
+        ...(isDev() ? { debug: toErrDebug(error) } : {}),
+      });
     }
   }
 
@@ -113,7 +176,10 @@ export class PatternController {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
 
-      if (user.subscriptionStatus === 'canceled' || (user.currentPeriodEnd && new Date(user.currentPeriodEnd) < new Date())) {
+      if (
+        user.subscriptionStatus === 'canceled' ||
+        (user.currentPeriodEnd && new Date(user.currentPeriodEnd) < new Date())
+      ) {
         return res.status(403).json({
           success: false,
           message: 'Your subscription has expired. Please renew to download patterns.',
@@ -170,9 +236,11 @@ export class PatternController {
       res.send(pdfBuffer);
     } catch (error) {
       console.error('Download pattern error:', error);
+
       res.status(500).json({
         success: false,
         message: 'Failed to download pattern. Please try again.',
+        ...(isDev() ? { debug: toErrDebug(error) } : {}),
       });
     }
   }
@@ -203,7 +271,11 @@ export class PatternController {
       res.json({ success: true, data: allPatterns });
     } catch (error) {
       console.error('List patterns error:', error);
-      res.status(500).json({ success: false, message: 'Failed to list patterns' });
+      res.status(500).json({
+        success: false,
+        message: 'Failed to list patterns',
+        ...(isDev() ? { debug: toErrDebug(error) } : {}),
+      });
     }
   }
 
@@ -225,7 +297,16 @@ export class PatternController {
         return res.status(404).json({ success: false, message: 'Pattern not found' });
       }
 
-      const defaultRoles = ['Background', 'Primary', 'Secondary', 'Accent', 'Contrast', 'Highlight', 'Border', 'Binding'];
+      const defaultRoles = [
+        'Background',
+        'Primary',
+        'Secondary',
+        'Accent',
+        'Contrast',
+        'Highlight',
+        'Border',
+        'Binding',
+      ];
       const fabricRoles = pattern.fabricRoles || defaultRoles.slice(0, pattern.maxFabrics);
 
       res.json({
@@ -240,7 +321,11 @@ export class PatternController {
       });
     } catch (error) {
       console.error('Get fabric roles error:', error);
-      res.status(500).json({ success: false, message: 'Failed to get fabric roles' });
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get fabric roles',
+        ...(isDev() ? { debug: toErrDebug(error) } : {}),
+      });
     }
   }
 }

@@ -1,6 +1,9 @@
+// src/config/quiltPatterns.ts
+
 import { getPattern, getAllPatterns, PatternDefinition } from './patterns';
 import { getPatternPrompt } from './prompts';
 import { PATTERNS_BY_SKILL } from './skill-levels';
+import { normalizePatternId } from '../utils/patternNormalization';
 
 export interface QuiltPattern {
   id: string;
@@ -18,9 +21,7 @@ export interface QuiltPattern {
  */
 export function getPatternSkillLevel(patternId: string): string | undefined {
   for (const [level, patterns] of Object.entries(PATTERNS_BY_SKILL)) {
-    if (patterns.includes(patternId)) {
-      return level;
-    }
+    if (patterns.includes(patternId)) return level;
   }
   return undefined;
 }
@@ -29,23 +30,23 @@ export function getPatternSkillLevel(patternId: string): string | undefined {
  * Build QuiltPattern from the new pattern system
  */
 export function getQuiltPattern(patternId: string): QuiltPattern | undefined {
-  // Always normalize patternId before lookup
-  const { normalizePatternId } = require('../controllers/patternController');
   const normalizedId = normalizePatternId(patternId);
+
   const patternDef = getPattern(normalizedId);
   const prompt = getPatternPrompt(normalizedId);
   const skillLevel = getPatternSkillLevel(normalizedId);
-  
+
   if (!patternDef) return undefined;
-  
+
   return {
     id: patternDef.id,
     name: patternDef.name,
     skillLevel: skillLevel || 'intermediate',
-    description: prompt.characteristics.split('\n')[0], // First line as short description
-    recommendedFabricCount: typeof prompt.recommendedFabricCount === 'number' 
-      ? prompt.recommendedFabricCount 
-      : prompt.recommendedFabricCount?.min || 2,
+    description: prompt?.characteristics?.split('\n')[0] || patternDef.name,
+    recommendedFabricCount:
+      typeof prompt?.recommendedFabricCount === 'number'
+        ? prompt.recommendedFabricCount
+        : prompt?.recommendedFabricCount?.min || 2,
     minColors: patternDef.minFabrics,
     maxFabrics: patternDef.maxFabrics,
     allowRotation: patternDef.allowRotation ?? true,
@@ -57,9 +58,7 @@ export function getQuiltPattern(patternId: string): QuiltPattern | undefined {
  */
 export function getPatternsForSkillLevel(skillLevel: string): QuiltPattern[] {
   const patternIds = PATTERNS_BY_SKILL[skillLevel] || PATTERNS_BY_SKILL['beginner'];
-  return patternIds
-    .map((id: string) => getQuiltPattern(id))
-    .filter((p): p is QuiltPattern => p !== undefined);
+  return patternIds.map((id: string) => getQuiltPattern(id)).filter((p): p is QuiltPattern => p !== undefined);
 }
 
 /**
@@ -84,26 +83,21 @@ export function getPatternById(patternId: string): QuiltPattern | undefined {
  */
 export function calculateFabricCountScore(pattern: QuiltPattern, fabricCount: number): number {
   const { recommendedFabricCount, minColors, maxFabrics } = pattern;
-  
-  // Perfect match with recommended
+
   if (fabricCount === recommendedFabricCount) return 100;
-  
-  // Within supported range
+
   if (fabricCount >= minColors && fabricCount <= maxFabrics) {
-    // Score based on distance from recommended
     const diff = Math.abs(fabricCount - recommendedFabricCount);
-    return Math.max(60, 100 - (diff * 15));
+    return Math.max(60, 100 - diff * 15);
   }
-  
-  // Below minimum
+
   if (fabricCount < minColors) {
     const diff = minColors - fabricCount;
-    return Math.max(0, 50 - (diff * 20));
+    return Math.max(0, 50 - diff * 20);
   }
-  
-  // Above maximum
+
   const diff = fabricCount - maxFabrics;
-  return Math.max(0, 50 - (diff * 15));
+  return Math.max(0, 50 - diff * 15);
 }
 
 /**
@@ -113,8 +107,6 @@ export function getPatternsSortedByFabricCount(fabricCount: number): QuiltPatter
   const allPatterns = getAllPatterns()
     .map((p: PatternDefinition) => getQuiltPattern(p.id))
     .filter((p): p is QuiltPattern => p !== undefined);
-  
-  return allPatterns.sort((a: QuiltPattern, b: QuiltPattern) => 
-    calculateFabricCountScore(b, fabricCount) - calculateFabricCountScore(a, fabricCount)
-  );
+
+  return allPatterns.sort((a: QuiltPattern, b: QuiltPattern) => calculateFabricCountScore(b, fabricCount) - calculateFabricCountScore(a, fabricCount));
 }

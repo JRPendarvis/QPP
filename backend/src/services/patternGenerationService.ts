@@ -5,7 +5,7 @@ import { ClaudeService } from './claudeService';
 import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
 import { generateInstructions } from './instructions/generateInstructions';
 import { parseQuiltSizeIn } from '../utils/parseQuiltSize';
-import { normalizePatternId, resolvePatternIdForDeterministic } from '../utils/patternNormalization';
+import { normalizePatternId } from '../utils/patternNormalization';
 import { buildFabricsByRole, convertToFabricAssignments } from '../utils/fabricMapping';
 
 const prisma = new PrismaClient();
@@ -86,7 +86,7 @@ export class PatternGenerationService {
   }
 
   async generateInstructions(pattern: any, patternToUse: string, roleAssignments: any) {
-    const resolvedPatternId = resolvePatternIdForDeterministic(patternToUse, pattern);
+    const resolvedPatternId = patternToUse;
     const fabricsByRole = buildFabricsByRole(roleAssignments, pattern);
 
     pattern.patternId = resolvedPatternId;

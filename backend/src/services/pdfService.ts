@@ -7,6 +7,7 @@ import { renderPatternBlocks } from '../utils/pdfPatternBlocks';
 import { generateInstructions } from './instructions/generateInstructions';
 import { parseQuiltSizeIn } from '../utils/parseQuiltSize';
 import type { FabricAssignments } from './instructions/fabricAssignments';
+import { normalizePatternId } from '../utils/patternNormalization';
 
 export class PDFService {
   async generatePatternPDF(pattern: QuiltPattern, userName: string): Promise<Buffer> {
@@ -100,13 +101,15 @@ export class PDFService {
         let instructionsToPrint: string[] = [];
 
         try {
-          resolvedPatternId =
+          const rawPatternId =
             (pattern as any).patternId ??
             (pattern as any).id ??
             String(pattern.patternName || '')
               .trim()
               .toLowerCase()
               .replace(/\s+/g, '-');
+
+          resolvedPatternId = normalizePatternId(rawPatternId);
 
           const quiltSize = parseQuiltSizeIn(pattern.estimatedSize);
 
@@ -123,7 +126,6 @@ export class PDFService {
           console.log('[PDF DEBUG] estimatedSize =', pattern.estimatedSize);
           console.log('[PDF DEBUG] fabricsByRole =', fabricsByRole);
 
-          // Convert types for generateInstructions
           const fabricAssignments: FabricAssignments = {
             namesBySlot: [
               fabricsByRole.background || 'Background fabric',
@@ -146,10 +148,14 @@ export class PDFService {
             );
           }
 
-          instructionsToPrint = res.instructions;
+          // ✅ Unambiguous proof inside the PDF body (prints as Step 1)
+          instructionsToPrint = [
+            `Instruction source: DETERMINISTIC (patternId=${resolvedPatternId})`,
+            ...res.instructions,
+          ];
 
           console.log(
-            `[PDF] patternId=${resolvedPatternId} instructionSource=deterministic steps=${instructionsToPrint.length}`
+            `[PDF] patternId=${resolvedPatternId} instructionSource=deterministic steps=${res.instructions.length}`
           );
         } catch (err) {
           // Big visible badge AND fail request
@@ -181,7 +187,7 @@ export class PDFService {
           .fontSize(10)
           .font('Helvetica-Bold')
           .fillColor('#065F46')
-          .text('INSTRUCTIONS: DETERMINISTIC (PLAN-BASED)', 60, okBadgeY + 6);
+          .text(`INSTRUCTIONS: DETERMINISTIC (patternId=${resolvedPatternId})`, 60, okBadgeY + 6);
 
         doc.moveDown(1);
 

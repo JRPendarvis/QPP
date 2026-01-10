@@ -3,29 +3,28 @@
 import { getAllPatterns } from '../config/patterns';
 
 /**
- * Get valid pattern IDs from the pattern registry
- */
-export function getValidPatternIds(): string[] {
-  return ['auto', ...getAllPatterns().map((p) => p.id)];
-}
-
-/**
- * Normalize pattern input to ID format
+ * Normalize pattern input to ID format.
  * Handles both IDs ('strip-quilt') and display names ('Strip Quilt')
+ *
+ * IMPORTANT:
+ * - This MUST be the single source of truth.
+ * - Export BOTH named + default to avoid import mismatches.
  */
 export function normalizePatternId(input: string | undefined): string {
   if (!input || input === 'auto') return 'auto';
 
-  const validIds = getValidPatternIds();
-  if (validIds.includes(input)) {
-    return input;
-  }
+  const validIds = ['auto', ...getAllPatterns().map((p) => p.id)];
 
-  const normalizedId = input
+  // Already in ID format?
+  if (validIds.includes(input)) return input;
+
+  // Convert display name -> id
+  // "Drunkard's Path" -> 'drunkards-path'
+  const normalizedId = String(input)
     .toLowerCase()
-    .replace(/['']/g, '') // Remove apostrophes
-    .replace(/\s+/g, '-') // Spaces to dashes
-    .replace(/--+/g, '-'); // Collapse multiple dashes
+    .replace(/['’]/g, '')   // remove apostrophes (both types)
+    .replace(/\s+/g, '-')   // spaces -> dash
+    .replace(/--+/g, '-');  // collapse repeated dashes
 
   if (validIds.includes(normalizedId)) {
     console.log(`📋 Normalized pattern: "${input}" -> "${normalizedId}"`);
@@ -36,24 +35,5 @@ export function normalizePatternId(input: string | undefined): string {
   return 'auto';
 }
 
-/**
- * Resolve patternId for deterministic instruction generation
- * Maps user-friendly pattern names to their canonical IDs
- */
-export function resolvePatternIdForDeterministic(patternToUse: string, claudePattern: any): string {
-  // If user explicitly chose a known pattern, use it
-  if (patternToUse && patternToUse !== 'auto') {
-    return patternToUse;
-  }
-
-  // Otherwise extract from Claude's LLM output
-  const llmName = String(claudePattern?.patternName || '')
-    .trim()
-    .toLowerCase();
-
-  if (llmName.includes('bow') && llmName.includes('tie')) return 'bow-tie';
-  if (llmName.includes('pinwheel')) return 'pinwheel';
-
-  // Default fallback
-  return patternToUse || 'auto';
-}
+// Also provide default export to prevent runtime mismatches.
+export default normalizePatternId;
