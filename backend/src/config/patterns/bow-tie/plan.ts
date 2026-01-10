@@ -2,7 +2,7 @@
 
 import type { InstructionPlan, QuiltSizeIn } from '../../../services/instructions/types';
 import type { FabricAssignments } from '../../../services/instructions/fabricAssignments';
-import { renderBowTieInstructions } from './renderBowTieInstructions';
+import { renderBowTieInstructions } from './renderInstructions';
 
 export const bowTiePlan: InstructionPlan<FabricAssignments> = {
   patternId: 'bow-tie',

@@ -17,7 +17,7 @@
 //
 
 import type { InstructionPlan, QuiltSizeIn as QuiltSizeInImported } from '../../../services/instructions/types';
-import { renderPinwheelInstructions, type PinwheelFabricNames } from './renderPinwheelInstructions';
+import { renderPinwheelInstructions, type PinwheelFabricNames } from './renderInstructions';
 
 // Local type alias for internal use (uses width/height instead of widthIn/heightIn)
 export type QuiltSizeIn = { width: number; height: number };

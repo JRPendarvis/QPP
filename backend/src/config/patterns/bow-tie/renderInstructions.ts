@@ -1,4 +1,4 @@
-// src/config/patterns/bow-tie/renderBowTieInstructions.ts
+// src/config/patterns/bow-tie/renderInstructions.ts
 
 import type { QuiltSizeIn } from '../../../services/instructions/types';
 import type { FabricAssignments } from '../../../services/instructions/fabricAssignments';
