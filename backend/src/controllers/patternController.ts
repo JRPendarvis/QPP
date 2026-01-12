@@ -1,33 +1,15 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { PDFService } from '../services/pdfService';
 import { PatternGenerationService } from '../services/patternGenerationService';
+import { PatternDownloadService } from '../services/patternDownloadService';
+import { PatternListService } from '../services/patternListService';
 import { PatternValidators } from '../validators/patternValidators';
-import { getAllPatterns } from '../config/patterns';
-import { getQuiltPattern } from '../config/quiltPatterns';
 import { normalizePatternId } from '../utils/patternNormalization';
-import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
-
-const prisma = new PrismaClient();
-
-function safeCount(v: unknown): number | 'n/a' {
-  return Array.isArray(v) ? v.length : 'n/a';
-}
-
-function isDev(): boolean {
-  return process.env.NODE_ENV !== 'production';
-}
-
-function toErrDebug(error: unknown) {
-  if (!isDev()) return undefined;
-
-  const e = error as any;
-  return {
-    name: e?.name,
-    message: e?.message,
-    stack: e?.stack,
-  };
-}
+import { PatternErrorHandler } from './helpers/patternErrorHandler';
+import {
+  logPatternGenerationRequest,
+  buildDebugInfo,
+} from './helpers/patternControllerUtils';
 
 export class PatternController {
   private pdfService: PDFService;
@@ -41,8 +23,6 @@ export class PatternController {
   async generatePattern(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
-
-      // Safely handle missing body
       const body = req.body ?? {};
       const {
         fabricImages,
@@ -57,11 +37,7 @@ export class PatternController {
       const images = fabricImages || fabrics;
       const imageTypes = fabricTypes || [];
 
-      // Safe, actionable logging
-      console.log('🧾 /api/patterns/generate keys:', Object.keys(body));
-      console.log('📸 Images count:', safeCount(images), 'Types count:', safeCount(imageTypes));
-      console.log('📋 Raw selectedPattern:', selectedPattern);
-      console.log('🧩 roleAssignments present:', roleAssignments ? 'yes' : 'no');
+      logPatternGenerationRequest(body);
 
       // Validation
       const validationError =
@@ -73,22 +49,10 @@ export class PatternController {
       if (validationError) {
         return res.status(validationError.statusCode).json({
           ...validationError,
-          ...(isDev()
-            ? {
-                debug: {
-                  userIdPresent: !!userId,
-                  imagesCount: safeCount(images),
-                  typesCount: safeCount(imageTypes),
-                  selectedPattern,
-                  skillLevel,
-                },
-              }
-            : {}),
+          debug: buildDebugInfo(userId, images, imageTypes, selectedPattern, skillLevel),
         });
       }
 
-      // If PatternGenerationService expects normalized IDs, normalize here once and pass it through.
-      // (Safe even if it already normalizes internally.)
       const normalizedPattern = normalizePatternId(selectedPattern);
 
       const result = await this.generationService.generate({
@@ -103,50 +67,7 @@ export class PatternController {
 
       res.status(200).json({ success: true, data: result });
     } catch (error) {
-      console.error('Pattern generation error:', error);
-
-      // Known “semantic” errors
-      if (error instanceof Error) {
-        if (error.message === 'USER_NOT_FOUND') {
-          return res.status(404).json({
-            success: false,
-            message: 'User not found',
-            ...(isDev() ? { debug: toErrDebug(error) } : {}),
-          });
-        }
-        if (error.message === 'SUBSCRIPTION_EXPIRED') {
-          return res.status(403).json({
-            success: false,
-            message: 'Your subscription has expired. Please renew to generate patterns.',
-            ...(isDev() ? { debug: toErrDebug(error) } : {}),
-          });
-        }
-        if (error.message === 'GENERATION_LIMIT_REACHED') {
-          return res.status(403).json({
-            success: false,
-            message: "You've reached your monthly generation limit. Upgrade your plan for more!",
-            ...(isDev() ? { debug: toErrDebug(error) } : {}),
-          });
-        }
-      }
-
-      // Friendly fallback mapping
-      let message = 'Failed to generate quilt pattern. Please try again.';
-      if (error instanceof Error) {
-        if (error.message.includes('high demand') || error.message.includes('experiencing')) {
-          message = error.message;
-        } else if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
-          message = 'Pattern generation timed out. Please try again with fewer images.';
-        } else if (error.message.includes('rate limit')) {
-          message = 'Service is busy. Please wait a moment and try again.';
-        }
-      }
-
-      res.status(500).json({
-        success: false,
-        message,
-        ...(isDev() ? { debug: toErrDebug(error) } : {}),
-      });
+      return PatternErrorHandler.handleGenerationError(error, res);
     }
   }
 
@@ -159,173 +80,63 @@ export class PatternController {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          subscriptionTier: true,
-          subscriptionStatus: true,
-          currentPeriodEnd: true,
-          downloadsThisMonth: true,
-        },
-      });
+      const { user, pattern, validation } = await PatternDownloadService.validateDownload(userId, patternId);
 
-      if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found' });
-      }
-
-      if (
-        user.subscriptionStatus === 'canceled' ||
-        (user.currentPeriodEnd && new Date(user.currentPeriodEnd) < new Date())
-      ) {
-        return res.status(403).json({
+      if (!validation.canDownload && validation.error) {
+        return res.status(validation.error.statusCode).json({
           success: false,
-          message: 'Your subscription has expired. Please renew to download patterns.',
-        });
-      }
-
-      const pattern = await prisma.pattern.findFirst({
-        where: { id: patternId, userId: userId },
-      });
-
-      if (!pattern) {
-        return res.status(404).json({
-          success: false,
-          message: 'Pattern not found or you do not have permission to download it',
+          ...validation.error,
         });
       }
 
       const isFirstDownload = !pattern.downloaded;
-
-      if (isFirstDownload) {
-        const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
-
-        if (user.downloadsThisMonth >= tierConfig.downloadsPerMonth) {
-          return res.status(403).json({
-            success: false,
-            message: `You've reached your monthly download limit of ${tierConfig.downloadsPerMonth}. Upgrade your plan for more downloads!`,
-            currentUsage: user.downloadsThisMonth,
-            limit: tierConfig.downloadsPerMonth,
-          });
-        }
-      }
-
       const pdfBuffer = await this.pdfService.generatePatternPDF(pattern.patternData as any, user.name || user.email);
 
-      if (isFirstDownload) {
-        await prisma.$transaction(async (tx) => {
-          await tx.user.update({
-            where: { id: userId },
-            data: { downloadsThisMonth: { increment: 1 } },
-          });
+      await PatternDownloadService.recordDownload(userId, patternId, isFirstDownload);
 
-          await tx.pattern.update({
-            where: { id: patternId },
-            data: { downloaded: true, downloadedAt: new Date() },
-          });
-        });
-      }
-
-      const fileName = `${(pattern.patternData as any).patternName.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      const fileName = PatternDownloadService.generateFileName(pattern.patternData);
 
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
       res.setHeader('Content-Length', pdfBuffer.length);
       res.send(pdfBuffer);
     } catch (error) {
-      console.error('Download pattern error:', error);
-
-      res.status(500).json({
-        success: false,
-        message: 'Failed to download pattern. Please try again.',
-        ...(isDev() ? { debug: toErrDebug(error) } : {}),
-      });
+      return PatternErrorHandler.handleDownloadError(error, res);
     }
   }
 
   async listPatterns(req: Request, res: Response) {
     try {
-      const allPatterns = getAllPatterns()
-        .filter((patternDef) => {
-          if (process.env.NODE_ENV !== 'production') {
-            return true;
-          }
-          return patternDef.enabled !== false;
-        })
-        .map((patternDef) => {
-          const quiltPattern = getQuiltPattern(patternDef.id);
-          return {
-            id: patternDef.id,
-            name: patternDef.name,
-            skillLevel: quiltPattern?.skillLevel || 'intermediate',
-            description: quiltPattern?.description || '',
-            recommendedFabricCount: quiltPattern?.recommendedFabricCount || null,
-            minColors: patternDef.minFabrics,
-            maxFabrics: patternDef.maxFabrics,
-            allowRotation: patternDef.allowRotation ?? true,
-          };
-        });
-
-      res.json({ success: true, data: allPatterns });
+      const patterns = PatternListService.getAvailablePatterns();
+      res.json({ success: true, data: patterns });
     } catch (error) {
-      console.error('List patterns error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to list patterns',
-        ...(isDev() ? { debug: toErrDebug(error) } : {}),
-      });
+      return PatternErrorHandler.handleGenericError(error, res, 'List patterns');
     }
   }
 
   async getFabricRoles(req: Request, res: Response) {
     try {
-      const patternId = normalizePatternId(req.params.id);
+      const patternId = req.params.id;
 
-      if (patternId === 'auto') {
+      if (normalizePatternId(patternId) === 'auto') {
         return res.status(400).json({
           success: false,
           message: 'Cannot get fabric roles for auto pattern selection',
         });
       }
 
-      const patterns = getAllPatterns();
-      const pattern = patterns.find((p) => p.id === patternId);
+      const fabricRoles = PatternListService.getFabricRolesForPattern(patternId);
 
-      if (!pattern) {
+      if (!fabricRoles) {
         return res.status(404).json({ success: false, message: 'Pattern not found' });
       }
 
-      const defaultRoles = [
-        'Background',
-        'Primary',
-        'Secondary',
-        'Accent',
-        'Contrast',
-        'Highlight',
-        'Border',
-        'Binding',
-      ];
-      const fabricRoles = pattern.fabricRoles || defaultRoles.slice(0, pattern.maxFabrics);
-
       res.json({
         success: true,
-        data: {
-          patternId: pattern.id,
-          patternName: pattern.name,
-          fabricRoles: fabricRoles,
-          minFabrics: pattern.minFabrics,
-          maxFabrics: pattern.maxFabrics,
-        },
+        data: fabricRoles,
       });
     } catch (error) {
-      console.error('Get fabric roles error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to get fabric roles',
-        ...(isDev() ? { debug: toErrDebug(error) } : {}),
-      });
+      return PatternErrorHandler.handleGenericError(error, res, 'Get fabric roles');
     }
   }
 }
