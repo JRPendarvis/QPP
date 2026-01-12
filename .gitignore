@@ -7,6 +7,10 @@ dist/
 *.log
 .DS_Store
 
+# Backup files from refactoring
+*.bak
+*.backup
+
 # Optional common extras
 coverage/
 .nyc_output/
