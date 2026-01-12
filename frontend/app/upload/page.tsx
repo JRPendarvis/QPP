@@ -5,6 +5,7 @@ import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import Navigation from '@/components/Navigation';
 import UploadHeader from '@/components/upload/UploadHeader';
 import PatternDisplay from '@/components/upload/PatternDisplay';
+import ErrorDisplay from '@/components/upload/ErrorDisplay';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '@/lib/api';
 import {
@@ -42,15 +43,12 @@ export default function UploadPage() {
     generatePattern,
   } = usePatternGeneration();
 
-  // Compute total uploaded image size
   const totalImageSize = fabrics && fabrics.length > 0
     ? fabrics.reduce((sum, f) => sum + (f.size || 0), 0)
     : 0;
 
-  // Get available patterns based on skill level
   const { currentSkill, targetSkill, availablePatterns } = usePatternSelection(profile, challengeMe);
 
-  // Get selected pattern details
   const selectedPatternDetails = useMemo(() => {
     if (patternChoice === 'manual' && selectedPattern) {
       return availablePatterns.find((p: PatternDetails) => p.id === selectedPattern) || null;
@@ -58,10 +56,8 @@ export default function UploadPage() {
     return null;
   }, [patternChoice, selectedPattern, availablePatterns]);
 
-  // Determine effective max fabrics
   const effectiveMaxFabrics = selectedPatternDetails?.maxFabrics ?? MAX_FABRICS;
 
-  // Validate fabric count
   const fabricCountValid = useMemo(
     () => validateFabricCount(
       patternChoice,
@@ -72,7 +68,6 @@ export default function UploadPage() {
     [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length]
   );
 
-  // Generate validation message
   const fabricValidationMessage = useMemo(
     () => getFabricValidationMessage(
       patternChoice,
@@ -83,16 +78,14 @@ export default function UploadPage() {
     [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length]
   );
 
-  // Handle pattern choice change
   const handlePatternChoiceChange = (choice: PatternChoice) => {
     setPatternChoice(choice);
     if (choice === 'auto') {
       setSelectedPattern('');
-      setFabricRoles([]); // Clear fabric roles when switching to auto
+      setFabricRoles([]);
     }
   };
 
-  // Fetch fabric roles when a pattern is manually selected
   useEffect(() => {
     if (patternChoice === 'manual' && selectedPattern) {
       api.get(`/api/patterns/${selectedPattern}/fabric-roles`)
@@ -103,14 +96,13 @@ export default function UploadPage() {
         })
         .catch(err => {
           console.error('Failed to fetch fabric roles:', err);
-          setFabricRoles([]); // Fall back to default roles
+          setFabricRoles([]);
         });
     } else {
-      setFabricRoles([]); // Clear when no pattern is selected
+      setFabricRoles([]);
     }
   }, [patternChoice, selectedPattern]);
 
-  // Handle fabric reorder
   const handleFabricReorder = (fromIdx: number, toIdx: number) => {
     if (fromIdx === toIdx) return;
     const newFabrics = [...fabrics];
@@ -123,7 +115,6 @@ export default function UploadPage() {
     setPreviews(newPreviews);
   };
 
-  // Handle generate pattern
   const handleGenerate = async () => {
     const loadingToast = toast.loading('Generating your quilt pattern! This may take a moment...');
     setGenerating(true);
@@ -134,17 +125,13 @@ export default function UploadPage() {
         patternChoice === 'manual' ? selectedPattern : undefined
       );
       toast.dismiss(loadingToast);
-      
-      // Don't show toast for subscription errors - they're displayed inline with upgrade link
     } catch (error) {
       toast.dismiss(loadingToast);
-      // Error is already set in the hook and displayed inline
     } finally {
       setGenerating(false);
     }
   };
 
-  // Handle files added - convert FileList to File[] if needed
   const handleFilesAddedWrapper = (files: FileList | File[]) => {
     if (files instanceof FileList) {
       handleFilesAdded(Array.from(files));
@@ -153,7 +140,6 @@ export default function UploadPage() {
     }
   };
 
-  // Loading state
   if (loading || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -162,7 +148,6 @@ export default function UploadPage() {
     );
   }
 
-  // Not authenticated
   if (!user) {
     return null;
   }
@@ -172,7 +157,6 @@ export default function UploadPage() {
       <Toaster position="bottom-right" />
       <Navigation />
 
-      {/* Hero Section */}
       <div className="py-8 px-4" style={{backgroundColor: '#B91C1C'}}>
         <div className="max-w-7xl mx-auto">
           <UploadHeader />
@@ -182,38 +166,10 @@ export default function UploadPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
           
-          {error && (
-            <div className={`mb-6 px-4 py-3 rounded ${
-              error.startsWith('SUBSCRIPTION_ERROR:') 
-                ? 'bg-amber-50 border border-amber-300 text-amber-800'
-                : 'bg-red-50 border border-red-200 text-red-600'
-            }`}>
-              <div className="flex items-start gap-3">
-                <div className="flex-1">
-                  {error.startsWith('SUBSCRIPTION_ERROR:') ? (
-                    <>
-                      <div className="font-semibold mb-1">⚠️ Subscription Limit Reached</div>
-                      <div className="text-sm">{error.replace('SUBSCRIPTION_ERROR: ', '')}</div>
-                      <div className="mt-3">
-                        <a 
-                          href="/pricing" 
-                          className="inline-block bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2 rounded transition-colors"
-                        >
-                          View Upgrade Options
-                        </a>
-                      </div>
-                    </>
-                  ) : (
-                    <div>{error}</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          <ErrorDisplay error={error} />
 
           {!pattern && (
             <>
-              {/* Side-by-side layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <PatternSelectionSection
                   patternChoice={patternChoice}
@@ -243,7 +199,6 @@ export default function UploadPage() {
                 />
               </div>
 
-              {/* Generate Button */}
               <GenerateButton
                 onClick={handleGenerate}
                 disabled={generating || !fabricCountValid || !!fabricValidationMessage}
@@ -251,7 +206,6 @@ export default function UploadPage() {
                 fabricCount={fabrics.length}
               />
 
-              {/* Fabric Preview Grid */}
               {fabrics.length > 0 && (
                 <div className="my-6">
                   <FabricPreviewGrid
@@ -265,7 +219,6 @@ export default function UploadPage() {
                 </div>
               )}
 
-              {/* Validation Message */}
               <ValidationMessage 
                 message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} 
               />
@@ -277,10 +230,7 @@ export default function UploadPage() {
               pattern={pattern}
               userTier={profile.subscriptionTier}
               usage={profile.usage}
-              onStartOver={() => {
-                resetPattern();
-                // Keep pattern choice, selected pattern, and challenge me settings
-              }}
+              onStartOver={resetPattern}
             />
           )}
         </div>
