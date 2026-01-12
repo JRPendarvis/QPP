@@ -1,6 +1,6 @@
-import { getAllPatterns } from '../../config/patterns';
-import { getQuiltPattern } from '../../config/quiltPatterns';
-import { normalizePatternId } from '../../utils/patternNormalization';
+import { getAllPatterns, PatternDefinition } from '../config/patterns';
+import { getQuiltPattern } from '../config/quiltPatterns';
+import { normalizePatternId } from '../utils/patternNormalization';
 
 export interface PatternListItem {
   id: string;
@@ -29,11 +29,11 @@ export class PatternListService {
     const isProduction = process.env.NODE_ENV === 'production';
 
     return getAllPatterns()
-      .filter((patternDef) => {
+      .filter((patternDef: PatternDefinition) => {
         if (!isProduction) return true;
         return patternDef.enabled !== false;
       })
-      .map((patternDef) => {
+      .map((patternDef: PatternDefinition) => {
         const quiltPattern = getQuiltPattern(patternDef.id);
         return {
           id: patternDef.id,
@@ -59,7 +59,7 @@ export class PatternListService {
     }
 
     const patterns = getAllPatterns();
-    const pattern = patterns.find((p) => p.id === normalizedId);
+    const pattern = patterns.find((p: PatternDefinition) => p.id === normalizedId);
 
     if (!pattern) {
       return null;

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { SUBSCRIPTION_TIERS } from '../../config/stripe.config';
+import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
 
 const prisma = new PrismaClient();
 
