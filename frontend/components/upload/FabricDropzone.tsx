@@ -183,17 +183,17 @@ export default function FabricDropzone({
             }
           },
         })}
-        className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-lg p-8 sm:p-12 text-center cursor-pointer transition-colors min-h-[200px] flex flex-col items-center justify-center ${
           currentCount >= maxFiles
             ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
             : isDragActive
             ? 'border-indigo-500 bg-indigo-50'
-            : 'border-gray-300 hover:border-indigo-400'
+            : 'border-gray-300 hover:border-indigo-400 active:border-indigo-500'
         }`}
       >
         <input {...getInputProps()} />
         <svg
-          className="mx-auto h-12 w-12 text-gray-400"
+          className="mx-auto h-16 w-16 sm:h-12 sm:w-12 text-gray-400"
           stroke="currentColor"
           fill="none"
           viewBox="0 0 48 48"
@@ -206,15 +206,15 @@ export default function FabricDropzone({
           />
         </svg>
         {currentCount >= maxFiles ? (
-          <p className="mt-2 text-sm text-gray-500">Maximum {maxFiles} images reached</p>
+          <p className="mt-4 text-base sm:text-sm text-gray-500">Maximum {maxFiles} images reached</p>
         ) : isDragActive ? (
-          <p className="mt-2 text-sm text-indigo-600">Drop the images here...</p>
+          <p className="mt-4 text-base sm:text-sm text-indigo-600 font-medium">Drop the images here...</p>
         ) : (
           <div>
-            <p className="mt-2 text-sm text-gray-600">
-              Drag and drop fabric images here, or click to select files
+            <p className="mt-4 text-base sm:text-sm text-gray-600 font-medium">
+              Drag and drop fabric images here, or tap to select files
             </p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-2 text-sm sm:text-xs text-gray-500">
               Max 5MB per image • {currentCount}/{maxFiles} uploaded
             </p>
           </div>
@@ -227,10 +227,10 @@ export default function FabricDropzone({
           <button
             onClick={handleCameraClick}
             type="button"
-            className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors shadow-md"
+            className="flex items-center justify-center gap-3 px-8 py-4 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 active:bg-teal-800 transition-colors shadow-lg min-h-[48px] min-w-[200px]"
           >
             <svg
-              className="h-5 w-5"
+              className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -248,7 +248,7 @@ export default function FabricDropzone({
                 d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-            Take Photo with Camera
+            <span className="text-base">Take Photo</span>
           </button>
           <input
             ref={cameraInputRef}
@@ -261,7 +261,7 @@ export default function FabricDropzone({
           />
         </div>
       )}
-      <div className="mt-2 text-xs text-gray-500">
+      <div className="mt-2 text-xs text-gray-500 text-center">
         Total uploaded image size: {formatMB(totalSize)}
       </div>
     </div>

@@ -12,6 +12,7 @@ interface UserProfile {
 export default function Navigation() {
   const { user, logout } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -43,6 +44,9 @@ export default function Navigation() {
 
     fetchProfile();
   }, [user]);
+
+  // Close mobile menu when clicking a link
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
     <nav className="bg-white shadow-sm">
@@ -79,17 +83,21 @@ export default function Navigation() {
                 <circle cx="50" cy="50" r="13" fill="#FBBF24" filter="url(#shadow)"/>
                 <text x="50" y="54" fontSize="10" fill="#7C2D12" textAnchor="middle" fontWeight="bold" fontFamily="sans-serif" letterSpacing="0.5">QPP</text>
               </svg>
-              <h1 className="text-2xl font-bold text-gray-900">{UI_CONSTANTS.BRAND_NAME}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{UI_CONSTANTS.BRAND_NAME}</h1>
             </Link>
             {profile?.badge && (
               <img 
                 src={profile.badge === 'tester' ? '/QPPTester.png' : '/QPPFounder.png'}
                 alt={profile.badge === 'tester' ? 'QPP Tester' : 'QPP Founder'}
-                className="h-10 w-auto ml-2"
+                className="h-8 sm:h-10 w-auto ml-2"
               />
             )}
           </div>
-          <div className="flex gap-4">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex gap-4">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex gap-4">
             <Link
               href="/about"
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
@@ -158,7 +166,106 @@ export default function Navigation() {
               </>
             )}
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-700"
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? (
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 py-2">
+            <div className="flex flex-col space-y-1">
+              <Link
+                href="/about"
+                onClick={closeMobileMenu}
+                className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+              >
+                About
+              </Link>
+              <Link
+                href="/faq"
+                onClick={closeMobileMenu}
+                className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+              >
+                FAQ
+              </Link>
+              <Link
+                href={ROUTES.PRICING}
+                onClick={closeMobileMenu}
+                className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+              >
+                Pricing
+              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href={ROUTES.DASHBOARD}
+                    onClick={closeMobileMenu}
+                    className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/feedback"
+                    onClick={closeMobileMenu}
+                    className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                  >
+                    Feedback
+                  </Link>
+                  <Link
+                    href="/profile"
+                    onClick={closeMobileMenu}
+                    className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      closeMobileMenu();
+                    }}
+                    className="px-4 py-3 text-base font-medium text-white rounded-md mx-4 my-2"
+                    style={{backgroundColor: '#B91C1C'}}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href={ROUTES.LOGIN}
+                    onClick={closeMobileMenu}
+                    className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href={ROUTES.REGISTER}
+                    onClick={closeMobileMenu}
+                    className="px-4 py-3 text-base font-medium text-white rounded-md mx-4 my-2 text-center"
+                    style={{backgroundColor: '#B91C1C'}}
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

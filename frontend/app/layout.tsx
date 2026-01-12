@@ -38,6 +38,12 @@ export const metadata: Metadata = {
     "pattern design",
   ],
   authors: [{ name: "QuiltPlannerPro" }],
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
   openGraph: {
     title: "QuiltPlannerPro - AI-Powered Quilt Design & Pattern Generator",
     description: "Create stunning custom quilt patterns with AI. Upload your fabrics and get personalized quilt designs instantly.",
