@@ -1,9 +1,10 @@
-
 'use client';
 
 import { useDropzone } from 'react-dropzone';
 import { useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import { processImageFiles, formatMB } from '@/utils/imageCompression';
+import { alertTooLarge, alertSkipped } from '@/utils/fabricValidation';
 
 export interface FabricDropzoneProps {
   onFilesAdded: (files: File[]) => void;
@@ -11,86 +12,6 @@ export interface FabricDropzoneProps {
   maxFiles: number;
   totalSize: number;
 }
-
-// --- Utility Functions ---
-
-/**
- * Compress an image file to fit under 5MB and max 2048px dimension.
- * Returns a new File or null if compression fails.
- */
-const compressImage = async (file: File): Promise<File | null> => {
-  const MAX_SIZE = 5 * 1024 * 1024;
-  const MIN_QUALITY = 0.3;
-  const MAX_DIM = 2048;
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (e) => {
-      const img = new window.Image();
-      img.src = e.target?.result as string;
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-        if (width > MAX_DIM || height > MAX_DIM) {
-          if (width > height) {
-            height = (height / width) * MAX_DIM;
-            width = MAX_DIM;
-          } else {
-            width = (width / height) * MAX_DIM;
-            height = MAX_DIM;
-          }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-        let quality = 0.8;
-        function tryCompress() {
-          canvas.toBlob((blob) => {
-            if (!blob) return resolve(null);
-            if (blob.size <= MAX_SIZE || quality <= MIN_QUALITY) {
-              if (blob.size > MAX_SIZE) {
-                // Can't compress enough
-                resolve(null);
-              } else {
-                resolve(new File([blob], file.name, {
-                  type: 'image/jpeg',
-                  lastModified: Date.now(),
-                }));
-              }
-            } else {
-              quality -= 0.1;
-              tryCompress();
-            }
-          }, 'image/jpeg', quality);
-        }
-        tryCompress();
-      };
-      img.onerror = () => resolve(null);
-    };
-    reader.onerror = () => resolve(null);
-  });
-};
-
-/**
- * Format bytes as a string in MB.
- */
-const formatMB = (bytes: number) => (bytes / 1024 / 1024).toFixed(2) + ' MB';
-
-/**
- * Show an alert for files that are too large.
- */
-const alertTooLarge = (files: File[], formatMB: (bytes: number) => string) => {
-  alert(`Some images are over 5MB and may take longer to upload or may be rejected. Please upload smaller images.\nFiles: ${files.map(f => f.name + ' (' + formatMB(f.size) + ')').join(', ')}`);
-};
-
-/**
- * Show an alert for files that could not be compressed under 5MB.
- */
-const alertSkipped = () => {
-  alert('Some images could not be compressed under 5MB and were skipped. Please upload smaller or lower-resolution images.');
-};
 
 export default function FabricDropzone({
   onFilesAdded,
@@ -100,25 +21,17 @@ export default function FabricDropzone({
 }: FabricDropzoneProps) {
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-
-  // --- Handlers ---
-
-  /**
-   * Handle files dropped via drag-and-drop or file picker.
-   */
   const handleDrop = async (acceptedFiles: File[]) => {
-    const tooLarge = acceptedFiles.filter(f => f.size > 5 * 1024 * 1024);
-    if (tooLarge.length > 0) {
-      alertTooLarge(tooLarge, formatMB);
+    const { validFiles, skippedCount, tooLargeFiles } = await processImageFiles(acceptedFiles);
+
+    if (tooLargeFiles.length > 0) {
+      alertTooLarge(tooLargeFiles);
     }
-    const compressedResults = await Promise.all(
-      acceptedFiles.map(file => compressImage(file))
-    );
-    const validFiles: File[] = compressedResults.filter((f): f is File => f instanceof File);
-    const skipped = acceptedFiles.length - validFiles.length;
-    if (skipped > 0) {
+
+    if (skippedCount > 0) {
       alertSkipped();
     }
+
     if (validFiles.length > 0) {
       onFilesAdded(validFiles);
     }
@@ -133,34 +46,25 @@ export default function FabricDropzone({
     disabled: currentCount >= maxFiles,
   });
 
-
-  /**
-   * Handle camera button click (mobile/tablet only).
-   */
   const handleCameraClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     cameraInputRef.current?.click();
   };
 
-  /**
-   * Handle files captured from camera input.
-   */
   const handleCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const tooLarge = Array.from(files).filter(f => f.size > 5 * 1024 * 1024);
-      if (tooLarge.length > 0) {
-        alertTooLarge(tooLarge, formatMB);
-      }
       try {
-        const compressedResults = await Promise.all(
-          Array.from(files).map(file => compressImage(file))
-        );
-        const validFiles: File[] = compressedResults.filter((f): f is File => f instanceof File);
-        const skipped = files.length - validFiles.length;
-        if (skipped > 0) {
+        const { validFiles, skippedCount, tooLargeFiles } = await processImageFiles(Array.from(files));
+
+        if (tooLargeFiles.length > 0) {
+          alertTooLarge(tooLargeFiles);
+        }
+
+        if (skippedCount > 0) {
           alertSkipped();
         }
+
         if (validFiles.length > 0) {
           onFilesAdded(validFiles);
         }
@@ -177,7 +81,6 @@ export default function FabricDropzone({
       <div
         {...getRootProps({
           onClick: () => {
-            // Only show toast if not disabled
             if (currentCount < maxFiles) {
               toast('We are opening your file manager. \nPlease be patient!');
             }
@@ -227,7 +130,7 @@ export default function FabricDropzone({
           <button
             onClick={handleCameraClick}
             type="button"
-            className="flex items-center justify-center gap-3 px-8 py-4 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 active:bg-teal-800 transition-colors shadow-lg min-h-[48px] min-w-[200px]"
+            className="flex items-center justify-center gap-3 px-8 py-4 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 active:bg-teal-800 transition-colors shadow-lg min-h-12 min-w-[200px]"
           >
             <svg
               className="h-6 w-6"
