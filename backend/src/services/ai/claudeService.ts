@@ -8,6 +8,7 @@ import { PatternGenerationLogger } from '../pattern/patternGenerationLogger';
 import { ClaudeApiClient } from './claudeApiClient';
 import { PromptOrchestrator } from '../pattern/promptOrchestrator';
 import { QuiltPattern } from '../../types/QuiltPattern';
+import { getPatternById } from '../../config/quiltPatterns';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -73,7 +74,12 @@ export class ClaudeService {
       this._fabricImages = base64s;
 
       const parsedResponse = ResponseParser.parse(responseText);
-      const pattern = PatternBuilder.build(parsedResponse, patternForSvg, skillLevel, this._fabricImages);
+      
+      // Get pattern difficulty from pattern definition (not user's skill level)
+      const patternDefinition = patternId ? getPatternById(patternId) : null;
+      const patternDifficulty = patternDefinition?.skillLevel || skillLevel;
+      
+      const pattern = PatternBuilder.build(parsedResponse, patternForSvg, patternDifficulty, this._fabricImages);
 
       PatternGenerationLogger.logPatternSuccess(pattern, patternForSvg, parsedResponse);
 

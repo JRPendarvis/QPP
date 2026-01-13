@@ -13,7 +13,7 @@ export class PatternBuilder {
    * 
    * @param parsedResponse - Parsed response from Claude API
    * @param patternForSvg - Pattern type for SVG generation
-   * @param skillLevel - User's skill level
+   * @param patternDifficulty - The pattern's difficulty level (beginner/intermediate/advanced)
    * @param fabricImages - Array of base64 fabric images
    * @returns Complete QuiltPattern object
    * 
@@ -22,7 +22,7 @@ export class PatternBuilder {
    * const pattern = PatternBuilder.build(
    *   parsedResponse,
    *   'nine-patch',
-   *   'beginner',
+   *   'beginner',  // Pattern difficulty, not user skill level
    *   ['base64...', 'base64...']
    * );
    * ```
@@ -30,7 +30,7 @@ export class PatternBuilder {
   static build(
     parsedResponse: ClaudeResponse,
     patternForSvg: string,
-    skillLevel: string,
+    patternDifficulty: string,
     fabricImages: string[]
   ): QuiltPattern {
     const fabrics = this.buildFabrics(parsedResponse, fabricImages);
@@ -44,7 +44,7 @@ export class PatternBuilder {
     });
     
     const displayPatternName = this.extractPatternName(parsedResponse.patternName, patternForSvg);
-    const formattedDifficulty = this.formatDifficulty(skillLevel);
+    const formattedDifficulty = this.formatDifficulty(patternDifficulty);
     const validatedInstructions = InstructionValidator.validate(parsedResponse.instructions);
 
     const pattern = {
