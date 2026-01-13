@@ -14,10 +14,12 @@ import {
 export class PatternController {
   private pdfService: PDFService;
   private generationService: PatternGenerationService;
+  private downloadService: PatternDownloadService;
 
   constructor() {
     this.pdfService = new PDFService();
     this.generationService = new PatternGenerationService();
+    this.downloadService = new PatternDownloadService();
   }
 
   async generatePattern(req: Request, res: Response) {
@@ -80,7 +82,7 @@ export class PatternController {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
 
-      const { user, pattern, validation } = await PatternDownloadService.validateDownload(userId, patternId);
+      const { user, pattern, validation } = await this.downloadService.validateDownload(userId, patternId);
 
       if (!validation.canDownload && validation.error) {
         return res.status(validation.error.statusCode).json({
@@ -92,9 +94,9 @@ export class PatternController {
       const isFirstDownload = !pattern.downloaded;
       const pdfBuffer = await this.pdfService.generatePatternPDF(pattern.patternData as any, user.name || user.email);
 
-      await PatternDownloadService.recordDownload(userId, patternId, isFirstDownload);
+      await this.downloadService.recordDownload(userId, patternId, isFirstDownload);
 
-      const fileName = PatternDownloadService.generateFileName(pattern.patternData);
+      const fileName = this.downloadService.generateFileName(pattern.patternData);
 
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
