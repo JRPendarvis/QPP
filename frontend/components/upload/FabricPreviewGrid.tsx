@@ -78,7 +78,7 @@ const FabricCard: React.FC<FabricCardProps> = ({
     {/* Larger touch target for remove button on mobile */}
     <button
       onClick={() => onRemove(index)}
-      className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-full p-2 sm:p-1 shadow-md transition-colors min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
+      className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-full p-2 sm:p-1 shadow-md transition-colors min-w-11 min-h-11 sm:min-w-0 sm:min-h-0 flex items-center justify-center"
       aria-label={`Remove ${fabric?.name || `Fabric ${index + 1}`}`}
     >
       <svg
@@ -124,7 +124,7 @@ export default function FabricPreviewGrid({
         {/* Larger touch target for Clear All on mobile */}
         <button
           onClick={onClearAll}
-          className="px-6 py-3 sm:px-4 sm:py-2 text-base sm:text-sm font-medium text-red-600 hover:text-red-700 active:text-red-800 bg-red-50 sm:bg-transparent rounded-lg sm:rounded-none min-h-[48px] sm:min-h-0 transition-colors"
+          className="px-6 py-3 sm:px-4 sm:py-2 text-base sm:text-sm font-medium text-red-600 hover:text-red-700 active:text-red-800 bg-red-50 sm:bg-transparent rounded-lg sm:rounded-none min-h-12 sm:min-h-0 transition-colors"
         >
           Clear All
         </button>

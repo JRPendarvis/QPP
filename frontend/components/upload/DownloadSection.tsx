@@ -26,7 +26,7 @@ export default function DownloadSection({
 
   if (!canDownload) {
     return (
-      <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-lg p-6 text-center">
+      <div className="bg-linear-to-br from-red-50 to-orange-50 border border-red-200 rounded-lg p-6 text-center">
         <div className="mb-4">
           <svg
             className="w-16 h-16 mx-auto text-red-400"
@@ -54,7 +54,7 @@ export default function DownloadSection({
         </p>
         <a
           href="/pricing"
-          className="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all"
+          className="inline-block bg-linear-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all"
         >
           Upgrade Your Plan
         </a>
@@ -67,7 +67,7 @@ export default function DownloadSection({
       <button
         onClick={onDownload}
         disabled={downloading || !patternId}
-        className="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold px-8 py-4 rounded-lg hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+        className="bg-linear-to-r from-green-500 to-emerald-600 text-white font-semibold px-8 py-4 rounded-lg hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
       >
         {downloading ? (
           <span className="flex items-center gap-2">
