@@ -35,11 +35,19 @@ export class PatternBuilder {
   ): QuiltPattern {
     const fabrics = this.buildFabrics(parsedResponse, fabricImages);
     const visualSvg = SvgGenerator.generateFromTemplate(patternForSvg, fabrics);
+    
+    console.log('🎨 [PatternBuilder] SVG Generated:', {
+      patternForSvg,
+      svgLength: visualSvg?.length || 0,
+      svgPreview: visualSvg?.substring(0, 100) || 'EMPTY',
+      fabricCount: fabrics.length
+    });
+    
     const displayPatternName = this.extractPatternName(parsedResponse.patternName, patternForSvg);
     const formattedDifficulty = this.formatDifficulty(skillLevel);
     const validatedInstructions = InstructionValidator.validate(parsedResponse.instructions);
 
-    return {
+    const pattern = {
       patternName: displayPatternName,
       description: parsedResponse.description || `A beautiful ${patternForSvg} pattern`,
       fabricLayout: parsedResponse.fabricLayout || 'Arranged in a 4x4 grid',
@@ -48,6 +56,14 @@ export class PatternBuilder {
       instructions: validatedInstructions,
       visualSvg: visualSvg,
     };
+    
+    console.log('📦 [PatternBuilder] Pattern Object:', {
+      hasVisualSvg: !!pattern.visualSvg,
+      visualSvgLength: pattern.visualSvg?.length || 0,
+      keys: Object.keys(pattern)
+    });
+    
+    return pattern;
   }
 
   /**

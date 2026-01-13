@@ -67,6 +67,13 @@ export class PatternController {
         roleAssignments,
       });
 
+      console.log('🎯 [PatternController] Result to send to client:', {
+        hasPattern: !!result.pattern,
+        hasVisualSvg: !!result.pattern?.visualSvg,
+        visualSvgLength: result.pattern?.visualSvg?.length || 0,
+        patternKeys: result.pattern ? Object.keys(result.pattern) : []
+      });
+
       res.status(200).json({ success: true, data: result });
     } catch (error) {
       return PatternErrorHandler.handleGenerationError(error, res);

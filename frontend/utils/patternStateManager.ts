@@ -14,6 +14,14 @@ export class PatternStateManager {
     setPattern: (pattern: QuiltPattern) => void
   ): void {
     if (response.success && response.data) {
+      console.log('🎨 [Frontend] Pattern data received:', {
+        hasPattern: !!response.data.pattern,
+        hasVisualSvg: !!response.data.pattern?.visualSvg,
+        visualSvgLength: response.data.pattern?.visualSvg?.length || 0,
+        visualSvgPreview: response.data.pattern?.visualSvg?.substring(0, 100) || 'EMPTY',
+        patternKeys: response.data.pattern ? Object.keys(response.data.pattern) : []
+      });
+      
       setPattern(response.data.pattern);
       this.logPatternReceived(response.data.pattern);
     }

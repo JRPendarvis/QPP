@@ -128,7 +128,7 @@ export default function PatternDisplay({
       {/* Pattern Visualization */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h3 className="text-2xl font-bold text-gray-800 mb-4">{pattern.patternName}</h3>
-        <PatternVisualization svg={pattern.visualSvg} patternName={pattern.patternName} />
+        <PatternVisualization visualSvg={pattern.visualSvg} patternName={pattern.patternName} />
       </div>
 
       {/* Pattern Metadata */}
