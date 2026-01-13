@@ -1,14 +1,11 @@
 // src/services/patternGenerationService.ts
 
-import { PrismaClient } from '@prisma/client';
 import { ClaudeService } from './claudeService';
-import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
-import { generateInstructions } from './instructions/generateInstructions';
-import { parseQuiltSizeIn } from '../utils/parseQuiltSize';
+import { SubscriptionValidator, ValidatedUser } from './subscriptionValidator';
+import { SkillLevelService } from './skillLevelService';
+import { InstructionGenerationService } from './instructionGenerationService';
+import { PatternRepository } from '../repositories/patternRepository';
 import { normalizePatternId } from '../utils/patternNormalization';
-import { buildFabricsByRole, convertToFabricAssignments } from '../utils/fabricMapping';
-
-const prisma = new PrismaClient();
 
 export interface GeneratePatternRequest {
   userId: string;
@@ -29,97 +26,24 @@ export interface GeneratePatternResult {
   };
 }
 
+/**
+ * Orchestrates quilt pattern generation workflow
+ * Single Responsibility: Coordinates pattern generation using injected services
+ * Follows Dependency Inversion: Depends on abstractions (services) not concrete implementations
+ */
 export class PatternGenerationService {
   private claudeService: ClaudeService;
+  private subscriptionValidator: SubscriptionValidator;
+  private skillLevelService: SkillLevelService;
+  private instructionService: InstructionGenerationService;
+  private patternRepository: PatternRepository;
 
   constructor() {
     this.claudeService = new ClaudeService();
-  }
-
-  async validateUser(userId: string) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        skillLevel: true,
-        subscriptionTier: true,
-        subscriptionStatus: true,
-        currentPeriodEnd: true,
-        generationsThisMonth: true,
-      },
-    });
-
-    if (!user) {
-      throw new Error('USER_NOT_FOUND');
-    }
-
-    if (
-      user.subscriptionStatus === 'canceled' ||
-      (user.currentPeriodEnd && new Date(user.currentPeriodEnd) < new Date())
-    ) {
-      throw new Error('SUBSCRIPTION_EXPIRED');
-    }
-
-    const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
-
-    if (user.generationsThisMonth >= tierConfig.generationsPerMonth) {
-      throw new Error('GENERATION_LIMIT_REACHED');
-    }
-
-    return { user, tierConfig };
-  }
-
-  determineSkillLevel(skillLevel?: string, userSkillLevel?: string, challengeMe?: boolean): string {
-    let targetSkillLevel = skillLevel || userSkillLevel || 'beginner';
-
-    if (challengeMe) {
-      const skillProgression = ['beginner', 'advanced_beginner', 'intermediate', 'advanced', 'expert'];
-      const currentIndex = skillProgression.indexOf(targetSkillLevel);
-      if (currentIndex < skillProgression.length - 1) {
-        targetSkillLevel = skillProgression[currentIndex + 1];
-      }
-    }
-
-    return targetSkillLevel;
-  }
-
-  async generateInstructions(pattern: any, patternToUse: string, roleAssignments: any) {
-    const resolvedPatternId = patternToUse;
-    const fabricsByRole = buildFabricsByRole(roleAssignments, pattern);
-
-    pattern.patternId = resolvedPatternId;
-    pattern.fabricsByRole = fabricsByRole;
-
-    try {
-      const quiltSize = parseQuiltSizeIn(pattern.estimatedSize);
-      const fabricAssignments = convertToFabricAssignments(fabricsByRole);
-      const det = generateInstructions(
-        resolvedPatternId,
-        { widthIn: quiltSize.width, heightIn: quiltSize.height },
-        fabricAssignments
-      );
-
-      if (det.kind === 'generated') {
-        pattern.instructions = det.instructions;
-        pattern.instructionsSource = 'deterministic';
-        console.log(
-          `[INSTRUCTIONS] Deterministic used patternId="${resolvedPatternId}" steps=${det.instructions.length}`
-        );
-      } else {
-        pattern.instructionsSource = 'llm';
-        console.warn(`[INSTRUCTIONS] Deterministic not supported patternId="${resolvedPatternId}"`);
-      }
-    } catch (e) {
-      pattern.instructionsSource = 'llm';
-      console.warn(
-        `[INSTRUCTIONS] Deterministic generation failed patternId="${resolvedPatternId}". Using LLM instructions.`,
-        e
-      );
-    }
-
-    return pattern;
+    this.subscriptionValidator = new SubscriptionValidator();
+    this.skillLevelService = new SkillLevelService();
+    this.instructionService = new InstructionGenerationService();
+    this.patternRepository = new PatternRepository();
   }
 
   async generate(request: GeneratePatternRequest): Promise<GeneratePatternResult> {
@@ -128,9 +52,11 @@ export class PatternGenerationService {
     const patternToUse = normalizePatternId(selectedPattern);
     console.log(`📋 Pattern to use: "${patternToUse}" (from: "${selectedPattern}")`);
 
-    const { user, tierConfig } = await this.validateUser(userId);
+    // Validate user subscription and limits
+    const { user, tierConfig } = await this.subscriptionValidator.validateUser(userId);
 
-    const targetSkillLevel = this.determineSkillLevel(skillLevel, user.skillLevel, challengeMe);
+    // Determine target skill level (with optional challenge mode)
+    const targetSkillLevel = this.skillLevelService.determineSkillLevel(skillLevel, user.skillLevel, challengeMe);
 
     // Claude generates visual/design + metadata
     let pattern: any = await this.claudeService.generateQuiltPattern(
@@ -142,25 +68,12 @@ export class PatternGenerationService {
     );
 
     // Generate deterministic instructions when supported
-    pattern = await this.generateInstructions(pattern, patternToUse, roleAssignments);
+    pattern = await this.instructionService.generateInstructions(pattern, patternToUse, roleAssignments);
 
-    const savedPattern = await prisma.$transaction(async (tx) => {
-      const newPattern = await tx.pattern.create({
-        data: {
-          userId: user.id,
-          patternData: pattern as any,
-          downloaded: false,
-        },
-      });
-
-      await tx.user.update({
-        where: { id: userId },
-        data: {
-          generationsThisMonth: { increment: 1 },
-        },
-      });
-
-      return newPattern;
+    // Save pattern and increment usage count
+    const savedPattern = await this.patternRepository.savePattern({
+      userId: user.id,
+      patternData: pattern,
     });
 
     const remainingGenerations = tierConfig.generationsPerMonth - (user.generationsThisMonth + 1);
