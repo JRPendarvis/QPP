@@ -1,15 +1,27 @@
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
-import { PrismaClient } from '@prisma/client';
-import { STRIPE_PRICE_IDS } from '../config/stripe.config';
+import { StripeWebhookService } from '../services/stripeWebhookService';
+import { SubscriptionService } from '../services/subscriptionService';
+import { CheckoutSessionFactory } from '../services/checkoutSessionFactory';
+import { StripeRepository } from '../repositories/stripeRepository';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-11-17.clover'
-});
-
-const prisma = new PrismaClient();
-
+/**
+ * HTTP controller for Stripe payment operations
+ * Single Responsibility: HTTP request/response handling only
+ * Delegates business logic to services following Dependency Inversion
+ */
 export class StripeController {
+  private webhookService: StripeWebhookService;
+  private subscriptionService: SubscriptionService;
+  private checkoutFactory: CheckoutSessionFactory;
+  private stripeRepository: StripeRepository;
+
+  constructor() {
+    this.webhookService = new StripeWebhookService();
+    this.subscriptionService = new SubscriptionService();
+    this.checkoutFactory = new CheckoutSessionFactory();
+    this.stripeRepository = new StripeRepository();
+  }
   
   async createCheckoutSession(req: Request, res: Response) {
     try {
@@ -20,33 +32,26 @@ export class StripeController {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
 
-      if (!['basic', 'intermediate', 'advanced'].includes(tier)) {
+      if (!this.checkoutFactory.isValidTier(tier)) {
         return res.status(400).json({ success: false, message: 'Invalid tier' });
       }
       
-      if (!['monthly', 'yearly'].includes(interval)) {
+      if (!this.checkoutFactory.isValidInterval(interval)) {
         return res.status(400).json({ success: false, message: 'Invalid interval' });
       }
 
-      const user = await prisma.user.findUnique({ where: { id: userId } });
+      const user = await this.stripeRepository.getUserById(userId);
       
       if (!user) {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
 
-      const priceId = STRIPE_PRICE_IDS[tier as keyof typeof STRIPE_PRICE_IDS][interval as 'monthly' | 'yearly'];
-
-  const session = await stripe.checkout.sessions.create({
-    customer_email: user.email,
-    client_reference_id: userId,
-    mode: 'subscription',
-    payment_method_types: ['card'],
-    line_items: [{ price: priceId, quantity: 1 }],
-    allow_promotion_codes: true,
-    success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.FRONTEND_URL}/pricing`,
-    metadata: { userId, tier, interval }
-  });
+      const session = await this.checkoutFactory.createSession({
+        userId,
+        userEmail: user.email,
+        tier,
+        interval
+      });
 
       res.json({ success: true, sessionId: session.id, url: session.url });
     } catch (error) {
@@ -57,19 +62,18 @@ export class StripeController {
 
   async handleWebhook(req: Request, res: Response) {
     const sig = req.headers['stripe-signature'] as string;
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    if (!webhookSecret) {
+    if (!this.webhookService.isConfigured()) {
       return res.status(400).send('Webhook secret not configured');
     }
 
     let event: Stripe.Event;
 
     try {
-      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+      event = this.webhookService.verifyAndConstructEvent(req.body, sig);
     } catch (err) {
-      console.error('Webhook signature verification failed:', err);
-      return res.status(400).send('Webhook signature verification failed');
+      const error = err as Error;
+      return res.status(400).send(error.message);
     }
 
     try {
@@ -94,70 +98,27 @@ export class StripeController {
   }
 
 private async handleCheckoutComplete(session: Stripe.Checkout.Session) {
-  const userId = session.client_reference_id;
-  const subscriptionId = session.subscription as string;
-  const customerId = session.customer as string;
-  if (!userId) return;
+  const result = await this.subscriptionService.processCheckoutComplete(session);
+  if (!result) return;
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  const tier = session.metadata?.tier || 'basic';
-  const interval = session.metadata?.interval || 'monthly';
-  
-  // Safely get current_period_end
-  const subData = subscription as unknown as { current_period_end?: number };
-  const periodEnd = subData.current_period_end 
-    ? new Date(subData.current_period_end * 1000)
-    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscriptionId,
-      subscriptionTier: tier,
-      subscriptionStatus: subscription.status,
-      billingInterval: interval,
-      currentPeriodEnd: periodEnd
-   }
-  });
-
-  console.log(`Subscription activated for user ${userId}: ${tier} ${interval}`);
+  const { userId, data } = result;
+  await this.stripeRepository.updateSubscription(userId, data);
 }
 
   private async handleSubscriptionUpdate(subscription: Stripe.Subscription) {
-    const user = await prisma.user.findUnique({
-      where: { stripeSubscriptionId: subscription.id }
-    });
+    const user = await this.stripeRepository.getUserBySubscriptionId(subscription.id);
     if (!user) return;
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        subscriptionStatus: subscription.status,
-        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
-      }
-    });
-
-    console.log(`Subscription updated for user ${user.id}: ${subscription.status}`);
+    const data = this.subscriptionService.processSubscriptionUpdate(subscription);
+    await this.stripeRepository.updateSubscriptionStatus(user.id, data);
   }
 
   private async handleSubscriptionCanceled(subscription: Stripe.Subscription) {
-    const user = await prisma.user.findUnique({
-      where: { stripeSubscriptionId: subscription.id }
-    });
+    const user = await this.stripeRepository.getUserBySubscriptionId(subscription.id);
     if (!user) return;
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        subscriptionTier: 'free',
-        subscriptionStatus: 'canceled',
-        stripeSubscriptionId: null,
-        billingInterval: null
-      }
-    });
-
-    console.log(`Subscription canceled for user ${user.id}`);
+    const data = this.subscriptionService.processSubscriptionCancellation();
+    await this.stripeRepository.cancelSubscription(user.id, data);
   }
 
   async createPortalSession(req: Request, res: Response) {
@@ -167,15 +128,13 @@ private async handleCheckoutComplete(session: Stripe.Checkout.Session) {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
 
-      const user = await prisma.user.findUnique({ where: { id: userId } });
+      const user = await this.stripeRepository.getUserById(userId);
       if (!user || !user.stripeCustomerId) {
         return res.status(400).json({ success: false, message: 'No active subscription' });
       }
 
-      const session = await stripe.billingPortal.sessions.create({
-        customer: user.stripeCustomerId,
-        return_url: `${process.env.FRONTEND_URL}/account`
-      });
+      const returnUrl = `${process.env.FRONTEND_URL}/account`;
+      const session = await this.subscriptionService.createPortalSession(user.stripeCustomerId, returnUrl);
 
       res.json({ success: true, url: session.url });
     } catch (error) {
@@ -191,25 +150,17 @@ private async handleCheckoutComplete(session: Stripe.Checkout.Session) {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
       }
 
-      const user = await prisma.user.findUnique({ where: { id: userId } });
+      const user = await this.stripeRepository.getUserById(userId);
       if (!user || !user.stripeSubscriptionId) {
         return res.status(400).json({ success: false, message: 'No active subscription to cancel' });
       }
 
       // Cancel subscription at the end of the billing period
-      await stripe.subscriptions.update(user.stripeSubscriptionId, {
-        cancel_at_period_end: true
-      });
+      await this.subscriptionService.cancelAtPeriodEnd(user.stripeSubscriptionId);
 
       // Update user record
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          subscriptionStatus: 'cancel_at_period_end'
-        }
-      });
+      await this.stripeRepository.markCancelAtPeriodEnd(userId);
 
-      console.log(`Subscription scheduled for cancellation for user ${userId}`);
       res.json({ success: true, message: 'Subscription will be canceled at the end of your billing period' });
     } catch (error) {
       console.error('Cancel subscription error:', error);
