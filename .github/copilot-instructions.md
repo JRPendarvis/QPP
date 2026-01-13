@@ -44,11 +44,11 @@ npm start                # Production server
 Core flow orchestrated across multiple services:
 
 1. **Controller:** [patternController.ts](backend/src/controllers/patternController.ts) validates request, enforces subscription limits
-2. **Service:** [patternGenerationService.ts](backend/src/services/patternGenerationService.ts) coordinates:
+2. **Service:** [patternGenerationService.ts](backend/src/services/pattern/patternGenerationService.ts) coordinates:
    - User validation (subscription status, usage limits from [stripe.config.ts](backend/src/config/stripe.config.ts))
    - Skill level determination (supports `challengeMe` mode for next-level patterns)
    - Pattern selection from [patterns/](backend/src/config/patterns/) registry
-3. **AI Integration:** [claudeService.ts](backend/src/services/claudeService.ts) streams responses from Anthropic
+3. **AI Integration:** [claudeService.ts](backend/src/services/ai/claudeService.ts) streams responses from Anthropic
 4. **Frontend:** [patternGenerationWorkflow.ts](frontend/services/patternGenerationWorkflow.ts) executes client-side flow with callbacks
 
 **Pattern Registry:** Each pattern in [backend/src/config/patterns/](backend/src/config/patterns/) exports:
@@ -61,7 +61,7 @@ Core flow orchestrated across multiple services:
 
 - **Tiers:** Defined in [stripe.config.ts](backend/src/config/stripe.config.ts) (free: 3 gen/month, basic: 5, intermediate: 15, advanced: 50)
 - **Tracking:** `generationsThisMonth` field in User model reset monthly by cron job ([jobs/cronJobs.ts](backend/src/jobs/cronJobs.ts))
-- **Enforcement:** [patternGenerationService.ts](backend/src/services/patternGenerationService.ts) validates limits before generation
+- **Enforcement:** [patternGenerationService.ts](backend/src/services/pattern/patternGenerationService.ts) validates limits before generation
 - **Webhooks:** [stripeController.ts](backend/src/controllers/stripeController.ts) handles subscription updates
 
 ### 4. Fabric Role Assignment
@@ -107,11 +107,24 @@ ADMIN_API_KEY         # For /api/admin/* routes
 NEXT_PUBLIC_API_URL   # Backend URL (defaults to localhost:3001)
 ```
 
+## Backend Service Organization
+
+Services are organized into domain-specific folders for improved maintainability:
+
+- **`services/pattern/`** - Pattern generation, selection, building, downloading (15 files)
+- **`services/ai/`** - Claude/OpenAI integration, fabric analysis (5 files)
+- **`services/subscription/`** - Stripe checkout, webhooks, validation (4 files)
+- **`services/user/`** - Profile, usage tracking, skill level, feedback (5 files)
+- **`services/image/`** - Compression, validation, preparation (6 files)
+- **`services/auth/`** - Authentication, password reset, email (3 files)
+- **`services/pdf/`** - PDF generation with specialized renderers (6 files)
+- **`services/sanitization/`** - Input sanitization utilities (3 files)
+
 ## Conventions & Patterns
 
 ### TypeScript Patterns
 
-- **Service Classes:** Instantiated in controllers, single responsibility ([patternGenerationService.ts](backend/src/services/patternGenerationService.ts), [claudeService.ts](backend/src/services/claudeService.ts))
+- **Service Classes:** Instantiated in controllers, single responsibility (organized by domain in `services/pattern/`, `services/ai/`, `services/subscription/`, etc.)
 - **Static Utilities:** Pure functions in `/utils` (no state)
 - **Type Definitions:** Exported from `/types` (e.g., [QuiltPattern.ts](backend/src/types/QuiltPattern.ts), [PatternDefinition.ts](backend/src/types/PatternDefinition.ts))
 - **Validators:** Return `ValidationError | null` pattern ([patternValidators.ts](backend/src/validators/patternValidators.ts))

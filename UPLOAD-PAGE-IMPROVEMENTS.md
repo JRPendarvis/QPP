@@ -143,7 +143,7 @@ calculateFabricCountScore(pattern, fabricCount):
 - `src/config/patterns/churn-dash/prompt.ts` - Added fabric count
 - `src/config/prompts/simple-squares.prompt.ts` - Added fabric count
 - `src/services/promptBuilder.ts` - Updated selectPattern() to use fabric-count scoring
-- `src/services/claudeService.ts` - Pass fabricCount to selectPattern()
+- `src/services/ai/claudeService.ts` - Pass fabricCount to selectPattern()
 - `src/controllers/patternController.ts` - Added listPatterns() endpoint
 - `src/routes/patternRoutes.ts` - Added GET /api/patterns/list route
 

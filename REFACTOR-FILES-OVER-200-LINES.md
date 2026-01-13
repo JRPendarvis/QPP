@@ -40,7 +40,7 @@ These files are candidates for refactoring to improve maintainability by breakin
 - [ ] **211 lines** - [backend/src/config/patterns/pinwheel/plan.ts](backend/src/config/patterns/pinwheel/plan.ts)
   - Pattern configuration - review if can simplify or extract common patterns
 
-- [ ] **204 lines** - [backend/src/services/pdfService.ts](backend/src/services/pdfService.ts)
+- [x] **204 lines** - ~~[backend/src/services/pdfService.ts](backend/src/services/pdfService.ts)~~ → **REFACTORED** to `services/pdf/` (81 lines + 5 specialized renderers)
   - PDF generation service - extract PDF sections into separate methods/modules
 
 ## Refactoring Strategy

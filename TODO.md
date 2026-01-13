@@ -30,9 +30,9 @@
 - Audit and refactor `getColors` logic in `backend/src/config/patterns/*/index.ts` (many patterns repeat similar color assignment logic).
 - Remove unnecessary template/prompt alias exports in pattern modules if not needed.
 - Centralize and synchronize constants between `frontend/lib/constants.ts` and `backend/src/config/constants.ts`.
-- Ensure formatting logic (e.g., pattern name formatting, PDF generation) is not duplicated between `backend/src/services/pdfService.ts` and `backend/src/utils/patternFormatter.ts`.
+- Ensure formatting logic (e.g., pattern name formatting, PDF generation) is not duplicated between `backend/src/services/pdf/pdfService.ts` and `backend/src/utils/patternFormatter.ts`.
 - Check for repeated response helper logic in backend controllers and `backend/src/utils/responseHelper.ts`.
-- Move instruction validation/disclaimer logic in `backend/src/services/claudeService.ts` to a shared utility if used elsewhere.
+- Move instruction validation/disclaimer logic in `backend/src/services/ai/claudeService.ts` to a shared utility if used elsewhere.
 - Consider a generator/schema for pattern prompt files to avoid copy-paste blocks.
 
 ---
