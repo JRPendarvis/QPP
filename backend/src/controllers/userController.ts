@@ -1,10 +1,23 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { SUBSCRIPTION_TIERS } from '../config/stripe.config';
+import { UserRepository } from '../repositories/userRepository';
+import { UsageCalculator } from '../services/usageCalculator';
+import { ProfileTransformer } from '../services/profileTransformer';
 
-const prisma = new PrismaClient();
-
+/**
+ * HTTP controller for user profile operations
+ * Single Responsibility: HTTP request/response handling only
+ * Delegates business logic to services following Dependency Inversion
+ */
 export class UserController {
+  private userRepository: UserRepository;
+  private usageCalculator: UsageCalculator;
+  private profileTransformer: ProfileTransformer;
+
+  constructor() {
+    this.userRepository = new UserRepository();
+    this.usageCalculator = new UsageCalculator();
+    this.profileTransformer = new ProfileTransformer();
+  }
   // GET /api/user/profile
   async getProfile(req: Request, res: Response) {
     try {
@@ -17,23 +30,7 @@ export class UserController {
         });
       }
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          subscriptionTier: true,
-          billingInterval: true,
-          subscriptionStatus: true,
-          skillLevel: true,
-          generationsThisMonth: true,
-          downloadsThisMonth: true,
-          lastResetDate: true,
-          createdAt: true,
-          badge: true,
-        },
-      });
+      const user = await this.userRepository.getUserProfile(userId);
 
       if (!user) {
         return res.status(404).json({
@@ -42,39 +39,23 @@ export class UserController {
         });
       }
 
-      // Calculate usage limits based on tier
-      const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
-      
-      // Calculate days until reset (30 days from lastResetDate)
-      const nextResetDate = new Date(user.lastResetDate);
-      nextResetDate.setDate(nextResetDate.getDate() + 30);
-      const daysUntilReset = Math.max(0, Math.ceil((nextResetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+      // Calculate usage statistics
+      const usage = this.usageCalculator.calculateUsage(
+        user.subscriptionTier,
+        user.generationsThisMonth,
+        user.downloadsThisMonth,
+        user.lastResetDate
+      );
+
+      // Get tier configuration
+      const tierConfig = this.usageCalculator.getTierConfig(user.subscriptionTier);
+
+      // Transform to API response format
+      const profileData = this.profileTransformer.transformProfile(user, usage, tierConfig);
 
       res.status(200).json({
         success: true,
-        data: {
-          ...user,
-          usage: {
-            generations: {
-              used: user.generationsThisMonth,
-              limit: tierConfig.generationsPerMonth,
-              remaining: Math.max(0, tierConfig.generationsPerMonth - user.generationsThisMonth),
-            },
-            downloads: {
-              used: user.downloadsThisMonth,
-              limit: tierConfig.downloadsPerMonth,
-              remaining: Math.max(0, tierConfig.downloadsPerMonth - user.downloadsThisMonth),
-            },
-            resetDate: nextResetDate.toISOString(),
-            daysUntilReset,
-          },
-          tierInfo: {
-            name: tierConfig.name,
-            price: user.billingInterval 
-              ? tierConfig.price[user.billingInterval as 'monthly' | 'yearly']
-              : 0,
-          }
-        },
+        data: profileData,
       });
     } catch (error) {
       console.error('Get profile error:', error);
@@ -99,8 +80,7 @@ export class UserController {
       }
 
       // Validate skillLevel if provided
-      const validSkillLevels = ['beginner', 'advanced_beginner', 'intermediate', 'advanced', 'expert'];
-      if (skillLevel && !validSkillLevels.includes(skillLevel)) {
+      if (skillLevel && !this.profileTransformer.isValidSkillLevel(skillLevel)) {
         return res.status(400).json({
           success: false,
           message: 'Invalid skill level',
@@ -112,56 +92,26 @@ export class UserController {
       if (name !== undefined) updateData.name = name;
       if (skillLevel !== undefined) updateData.skillLevel = skillLevel;
 
-      const user = await prisma.user.update({
-        where: { id: userId },
-        data: updateData,
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          subscriptionTier: true,
-          billingInterval: true,
-          subscriptionStatus: true,
-          skillLevel: true,
-          generationsThisMonth: true,
-          downloadsThisMonth: true,
-          lastResetDate: true,
-          createdAt: true,
-        },
-      });
+      const user = await this.userRepository.updateUserProfile(userId, updateData);
 
-      // Calculate usage stats for response
-      const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
-      const nextResetDate = new Date(user.lastResetDate);
-      nextResetDate.setDate(nextResetDate.getDate() + 30);
-      const daysUntilReset = Math.max(0, Math.ceil((nextResetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+      // Calculate usage statistics
+      const usage = this.usageCalculator.calculateUsage(
+        user.subscriptionTier,
+        user.generationsThisMonth,
+        user.downloadsThisMonth,
+        user.lastResetDate
+      );
+
+      // Get tier configuration
+      const tierConfig = this.usageCalculator.getTierConfig(user.subscriptionTier);
+
+      // Transform to API response format
+      const profileData = this.profileTransformer.transformProfile(user, usage, tierConfig);
 
       res.status(200).json({
         success: true,
         message: 'Profile updated successfully',
-        data: {
-          ...user,
-          usage: {
-            generations: {
-              used: user.generationsThisMonth,
-              limit: tierConfig.generationsPerMonth,
-              remaining: Math.max(0, tierConfig.generationsPerMonth - user.generationsThisMonth),
-            },
-            downloads: {
-              used: user.downloadsThisMonth,
-              limit: tierConfig.downloadsPerMonth,
-              remaining: Math.max(0, tierConfig.downloadsPerMonth - user.downloadsThisMonth),
-            },
-            resetDate: nextResetDate.toISOString(),
-            daysUntilReset,
-          },
-          tierInfo: {
-            name: tierConfig.name,
-            price: user.billingInterval 
-              ? tierConfig.price[user.billingInterval as 'monthly' | 'yearly']
-              : 0,
-          }
-        },
+        data: profileData,
       });
     } catch (error) {
       console.error('Update profile error:', error);
