@@ -17,6 +17,7 @@ export interface PatternDownloadData {
   userId: string;
   downloaded: boolean;
   downloadedAt: Date | null;
+  patternData: any;
 }
 
 /**
@@ -53,6 +54,7 @@ export class DownloadRepository {
         userId: true,
         downloaded: true,
         downloadedAt: true,
+        patternData: true,
       },
     });
   }

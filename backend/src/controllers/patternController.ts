@@ -98,6 +98,10 @@ export class PatternController {
         });
       }
 
+      if (!pattern || !user) {
+        return res.status(404).json({ success: false, message: 'Pattern or user not found' });
+      }
+
       const isFirstDownload = !pattern.downloaded;
       const pdfBuffer = await this.pdfService.generatePatternPDF(pattern.patternData as any, user.name || user.email);
 
