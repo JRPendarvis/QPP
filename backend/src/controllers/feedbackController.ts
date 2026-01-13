@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { emailService } from '../services/emailService';
-import { FeedbackService } from '../services/feedbackService';
+import { emailService } from '../services/auth/emailService';
+import { FeedbackService } from '../services/user/feedbackService';
 import { FeedbackValidator } from '../validators/feedbackValidator';
 import { ResponseHelper } from '../utils/responseHelper';
 

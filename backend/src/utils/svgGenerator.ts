@@ -1,7 +1,7 @@
-import { TemplateFinder } from '../services/templateFinder';
-import { BlockGenerator } from '../services/blockGenerator';
-import { ImagePatternBuilder } from '../services/imagePatternBuilder';
-import { SvgWrapper } from '../services/svgWrapper';
+import { TemplateFinder } from '../services/pattern/templateFinder';
+import { BlockGenerator } from '../services/pattern/blockGenerator';
+import { ImagePatternBuilder } from '../services/image/imagePatternBuilder';
+import { SvgWrapper } from '../services/pattern/svgWrapper';
 import { Fabric } from '../types/Fabric';
 
 // Re-export Fabric type for backward compatibility

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
-import { StripeWebhookService } from '../services/stripeWebhookService';
-import { SubscriptionService } from '../services/subscriptionService';
-import { CheckoutSessionFactory } from '../services/checkoutSessionFactory';
+import { StripeWebhookService } from '../services/subscription/stripeWebhookService';
+import { SubscriptionService } from '../services/subscription/subscriptionService';
+import { CheckoutSessionFactory } from '../services/subscription/checkoutSessionFactory';
 import { StripeRepository } from '../repositories/stripeRepository';
 
 /**

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { UserRepository } from '../repositories/userRepository';
-import { UsageCalculator } from '../services/usageCalculator';
-import { ProfileTransformer } from '../services/profileTransformer';
+import { UsageCalculator } from '../services/user/usageCalculator';
+import { ProfileTransformer } from '../services/user/profileTransformer';
 
 /**
  * HTTP controller for user profile operations

@@ -1,0 +1,98 @@
+import { SvgGenerator } from '../../utils/svgGenerator';
+import { PatternFormatter } from '../../utils/patternFormatter';
+import { InstructionValidator } from './instructionValidator';
+import { QuiltPattern } from '../../types/QuiltPattern';
+import { ClaudeResponse, Fabric } from '../../types/ClaudeResponse';
+
+/**
+ * Service for building QuiltPattern objects from Claude API responses
+ */
+export class PatternBuilder {
+  /**
+   * Builds a complete QuiltPattern from parsed Claude response
+   * 
+   * @param parsedResponse - Parsed response from Claude API
+   * @param patternForSvg - Pattern type for SVG generation
+   * @param skillLevel - User's skill level
+   * @param fabricImages - Array of base64 fabric images
+   * @returns Complete QuiltPattern object
+   * 
+   * @example
+   * ```typescript
+   * const pattern = PatternBuilder.build(
+   *   parsedResponse,
+   *   'nine-patch',
+   *   'beginner',
+   *   ['base64...', 'base64...']
+   * );
+   * ```
+   */
+  static build(
+    parsedResponse: ClaudeResponse,
+    patternForSvg: string,
+    skillLevel: string,
+    fabricImages: string[]
+  ): QuiltPattern {
+    const fabrics = this.buildFabrics(parsedResponse, fabricImages);
+    const visualSvg = SvgGenerator.generateFromTemplate(patternForSvg, fabrics);
+    const displayPatternName = this.extractPatternName(parsedResponse.patternName, patternForSvg);
+    const formattedDifficulty = this.formatDifficulty(skillLevel);
+    const validatedInstructions = InstructionValidator.validate(parsedResponse.instructions);
+
+    return {
+      patternName: displayPatternName,
+      description: parsedResponse.description || `A beautiful ${patternForSvg} pattern`,
+      fabricLayout: parsedResponse.fabricLayout || 'Arranged in a 4x4 grid',
+      difficulty: formattedDifficulty,
+      estimatedSize: parsedResponse.estimatedSize || '60x72 inches',
+      instructions: validatedInstructions,
+      visualSvg: visualSvg,
+    };
+  }
+
+  /**
+   * Builds fabric array with color, type, and image data
+   */
+  private static buildFabrics(
+    parsedResponse: ClaudeResponse,
+    fabricImages: string[]
+  ): Fabric[] {
+    const fabricAnalysis = parsedResponse.fabricAnalysis || [];
+    const fabricColors = parsedResponse.fabricColors || [];
+
+    // Build fabrics from analysis
+    if (fabricAnalysis.length > 0) {
+      return fabricAnalysis.map((fa, idx) => ({
+        color: fa.dominantColor || fabricColors[idx] || '#CCCCCC',
+        type: fa.type || 'solid',
+        image: fabricImages[idx] || '',
+      }));
+    }
+
+    // Fallback to colors only
+    if (fabricColors.length > 0) {
+      return fabricColors.map((color, idx) => ({
+        color: color,
+        type: 'solid' as const,
+        image: fabricImages[idx] || '',
+      }));
+    }
+
+    return [];
+  }
+
+  /**
+   * Extracts display name from Claude's pattern name
+   */
+  private static extractPatternName(claudeName: string, patternForSvg: string): string {
+    const displayName = PatternFormatter.extractDisplayName(claudeName, patternForSvg);
+    return displayName;
+  }
+
+  /**
+   * Formats difficulty level for display
+   */
+  private static formatDifficulty(skillLevel: string): string {
+    return skillLevel.replace('_', ' ');
+  }
+}

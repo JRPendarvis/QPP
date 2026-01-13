@@ -1,7 +1,7 @@
 // src/repositories/stripeRepository.ts
 
 import { PrismaClient } from '@prisma/client';
-import type { SubscriptionUpdateData, SubscriptionStatusUpdate, SubscriptionCancellationData } from '../services/subscriptionService';
+import type { SubscriptionUpdateData, SubscriptionStatusUpdate, SubscriptionCancellationData } from '../services/subscription/subscriptionService';
 
 const prisma = new PrismaClient();
 

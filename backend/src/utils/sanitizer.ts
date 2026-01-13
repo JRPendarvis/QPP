@@ -3,9 +3,9 @@
  * Orchestrates sanitization of strings and objects to prevent XSS attacks
  */
 
-import { StringSanitizer } from '../services/stringSanitizer';
-import { ObjectSanitizer } from '../services/objectSanitizer';
-import { ConditionalSanitizer } from '../services/conditionalSanitizer';
+import { StringSanitizer } from '../services/sanitization/stringSanitizer';
+import { ObjectSanitizer } from '../services/sanitization/objectSanitizer';
+import { ConditionalSanitizer } from '../services/sanitization/conditionalSanitizer';
 import type { Sanitizable } from '../types/Sanitizable';
 
 /**

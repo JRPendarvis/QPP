@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { AuthService } from '../services/authService';
-import { PasswordResetService } from '../services/passwordResetService';
-import { emailService } from '../services/emailService';
+import { AuthService } from '../services/auth/authService';
+import { PasswordResetService } from '../services/auth/passwordResetService';
+import { emailService } from '../services/auth/emailService';
 import { AuthValidator } from '../validators/authValidator';
 import { ResponseHelper } from '../utils/responseHelper';
 import { CookieHelper } from '../utils/cookieHelper';

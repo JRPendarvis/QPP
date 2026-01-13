@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { UsageResetService } from '../services/usageResetService';
+import { UsageResetService } from '../services/user/usageResetService';
 
 const usageResetService = new UsageResetService();
 

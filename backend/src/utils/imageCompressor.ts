@@ -3,9 +3,9 @@
  * Orchestrates image compression to meet Claude API limits
  */
 
-import { FabricImageValidator } from '../services/fabricImageValidator';
-import { ImageMetricsCalculator } from '../services/imageMetricsCalculator';
-import { CompressionRetryHandler } from '../services/compressionRetryHandler';
+import { FabricImageValidator } from '../services/image/fabricImageValidator';
+import { ImageMetricsCalculator } from '../services/image/imageMetricsCalculator';
+import { CompressionRetryHandler } from '../services/image/compressionRetryHandler';
 import { IMAGE_COMPRESSION_CONFIG } from '../config/imageCompressionConfig';
 
 /**

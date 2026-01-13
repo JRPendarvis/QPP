@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { UsageResetService } from "../services/usageResetService";
+import { UsageResetService } from "../services/user/usageResetService";
 import { authenticate } from "../middleware/authMiddleware";
 import { requireAdmin } from "../middleware/requireAdmin";
 

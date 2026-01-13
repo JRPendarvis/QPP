@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { PDFService } from '../services/pdfService';
-import { PatternGenerationService } from '../services/patternGenerationService';
-import { PatternDownloadService } from '../services/patternDownloadService';
-import { PatternListService } from '../services/patternListService';
+import { PDFService } from '../services/pdf/pdfService';
+import { PatternGenerationService } from '../services/pattern/patternGenerationService';
+import { PatternDownloadService } from '../services/pattern/patternDownloadService';
+import { PatternListService } from '../services/pattern/patternListService';
 import { PatternValidators } from '../validators/patternValidators';
 import { normalizePatternId } from '../utils/patternNormalization';
 import { PatternErrorHandler } from './helpers/patternErrorHandler';
