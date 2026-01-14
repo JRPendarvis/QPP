@@ -28,6 +28,7 @@ export interface UsePatternGenerationReturn {
   generatePattern: (
     userSkillLevel: string,
     challengeMe: boolean,
-    selectedPattern?: string
+    selectedPattern?: string,
+    quiltSize?: string
   ) => Promise<void>;
 }
