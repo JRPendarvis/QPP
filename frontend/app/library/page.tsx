@@ -176,7 +176,7 @@ export default function PatternLibraryPage() {
           </div>
         )}
       </div>
-      </div>
+    </div>
     </>
   );
 }

@@ -143,6 +143,8 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     success: false,
     message: "Internal server error",
     error: err.message,
+    stack: err.stack,
+    details: err,
   });
 });
 

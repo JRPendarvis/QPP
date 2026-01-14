@@ -76,7 +76,7 @@ export default function PatternDisplay({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/patterns/download/${pattern.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/patterns/${pattern.id}/download`,
         {
           method: 'GET',
           headers: {
