@@ -45,10 +45,26 @@ export class PatternDownloadService {
   /**
    * Record pattern download
    */
-  async recordDownload(userId: string, patternId: string, isFirstDownload: boolean): Promise<void> {
+  async recordDownload(
+    userId: string,
+    patternId: string,
+    isFirstDownload: boolean,
+    patternData?: any
+  ): Promise<void> {
     if (!isFirstDownload) return;
 
-    await this.downloadRepository.recordDownload(userId, patternId);
+    // Extract metadata from pattern data
+    const patternType = patternData?.patternType;
+    const patternName = patternData?.patternName;
+    const fabricColors = patternData?.fabrics || patternData?.fabricColors;
+
+    await this.downloadRepository.recordDownload(
+      userId,
+      patternId,
+      patternType,
+      patternName,
+      fabricColors
+    );
   }
 
   /**

@@ -50,12 +50,17 @@ model Pattern {
     id           String    @id @default(cuid())
     userId       String
     patternData  Json // Stores the AI-generated pattern
+    patternType  String? // e.g., "nine-patch", "log-cabin"
+    patternName  String? // Display name like "Nine Patch"
+    fabricColors Json? // Store fabric color info for thumbnails
     downloaded   Boolean   @default(false)
     downloadedAt DateTime?
     createdAt    DateTime  @default(now())
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+    @@index([userId, downloaded])
+    @@index([downloaded, createdAt])
     @@map("patterns")
 }
 
@@ -66,6 +71,7 @@ model Feedback {
     description String?
     authorId    String? // Optional link to User
     votesCount  Int      @default(0)
+    resolved    Boolean  @default(false)
     createdAt   DateTime @default(now())
 
     author User?          @relation(fields: [authorId], references: [id], onDelete: SetNull)

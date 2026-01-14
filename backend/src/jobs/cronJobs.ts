@@ -1,7 +1,9 @@
 import cron from 'node-cron';
 import { UsageResetService } from '../services/user/usageResetService';
+import { PatternCleanupService } from '../services/pattern/patternCleanupService';
 
 const usageResetService = new UsageResetService();
+const patternCleanupService = new PatternCleanupService();
 
 /**
  * Initialize all cron jobs
@@ -19,8 +21,19 @@ export function initializeCronJobs(): void {
     }
   });
 
+  // Pattern cleanup - runs every 6 hours
+  cron.schedule('0 */6 * * *', async () => {
+    console.log('🕐 [Cron] Running pattern cleanup...');
+    try {
+      await patternCleanupService.cleanupOldPatterns();
+    } catch (error) {
+      console.error('❌ [Cron] Pattern cleanup failed:', error);
+    }
+  });
+
   console.log('✅ [Cron] Scheduled jobs initialized');
   console.log('   - Usage reset: Daily at 2:00 AM');
+  console.log('   - Pattern cleanup: Every 6 hours');
 }
 
 /**

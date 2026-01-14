@@ -107,7 +107,7 @@ export class PatternController {
       const isFirstDownload = !pattern.downloaded;
       const pdfBuffer = await this.pdfService.generatePatternPDF(pattern.patternData as any, user.name || user.email);
 
-      await this.downloadService.recordDownload(userId, patternId, isFirstDownload);
+      await this.downloadService.recordDownload(userId, patternId, isFirstDownload, pattern.patternData);
 
       const fileName = this.downloadService.generateFileName(pattern.patternData);
 

@@ -48,6 +48,9 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
           <Link href={ROUTES.DASHBOARD} onClick={handleClick} className={linkClass}>
             Dashboard
           </Link>
+          <Link href="/library" onClick={handleClick} className={linkClass}>
+            My Patterns
+          </Link>
           <Link href="/feedback" onClick={handleClick} className={linkClass}>
             Feedback
           </Link>

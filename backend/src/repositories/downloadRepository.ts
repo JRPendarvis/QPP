@@ -62,8 +62,15 @@ export class DownloadRepository {
   /**
    * Record pattern download (increment user counter + mark pattern downloaded)
    * Only executes if this is the first download
+   * Also saves pattern metadata for library display
    */
-  async recordDownload(userId: string, patternId: string): Promise<void> {
+  async recordDownload(
+    userId: string,
+    patternId: string,
+    patternType?: string,
+    patternName?: string,
+    fabricColors?: any
+  ): Promise<void> {
     await prisma.$transaction(async (tx) => {
       await tx.user.update({
         where: { id: userId },
@@ -72,7 +79,13 @@ export class DownloadRepository {
 
       await tx.pattern.update({
         where: { id: patternId },
-        data: { downloaded: true, downloadedAt: new Date() },
+        data: {
+          downloaded: true,
+          downloadedAt: new Date(),
+          patternType,
+          patternName,
+          fabricColors,
+        },
       });
     });
   }
