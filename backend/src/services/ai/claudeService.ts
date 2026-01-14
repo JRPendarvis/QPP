@@ -22,10 +22,11 @@ export class ClaudeService {
     imageTypes: string[] = [],
     skillLevel: string = 'beginner',
     selectedPattern?: string,
-    roleAssignments?: any
+    roleAssignments?: any,
+    quiltSize?: string
   ): Promise<QuiltPattern> {
     return RetryHandler.withRetry(
-      () => this.attemptPatternGeneration(fabricImages, imageTypes, skillLevel, selectedPattern, roleAssignments),
+      () => this.attemptPatternGeneration(fabricImages, imageTypes, skillLevel, selectedPattern, roleAssignments, quiltSize),
       3,
       'Pattern generation'
     );
@@ -36,7 +37,8 @@ export class ClaudeService {
     imageTypes: string[] = [],
     skillLevel: string = 'beginner',
     selectedPattern?: string,
-    roleAssignments?: any
+    roleAssignments?: any,
+    quiltSize?: string
   ): Promise<QuiltPattern> {
     try {
       const { patternForSvg, patternInstruction, patternId } = PromptBuilder.selectPattern(
@@ -65,7 +67,8 @@ export class ClaudeService {
         patternInstruction,
         skillLevel,
         patternId,
-        roleAssignments
+        roleAssignments,
+        quiltSize
       );
 
       const imageContent = PromptBuilder.buildImageContent(base64s, mimeTypes);
@@ -79,7 +82,7 @@ export class ClaudeService {
       const patternDefinition = patternId ? getPatternById(patternId) : null;
       const patternDifficulty = patternDefinition?.skillLevel || skillLevel;
       
-      const pattern = PatternBuilder.build(parsedResponse, patternForSvg, patternDifficulty, this._fabricImages);
+      const pattern = PatternBuilder.build(parsedResponse, patternForSvg, patternDifficulty, this._fabricImages, quiltSize);
 
       PatternGenerationLogger.logPatternSuccess(pattern, patternForSvg, parsedResponse);
 

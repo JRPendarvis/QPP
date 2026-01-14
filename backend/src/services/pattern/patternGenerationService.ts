@@ -15,6 +15,7 @@ export interface GeneratePatternRequest {
   challengeMe?: boolean;
   selectedPattern?: string;
   roleAssignments?: any;
+  quiltSize?: string;
 }
 
 export interface GeneratePatternResult {
@@ -47,7 +48,7 @@ export class PatternGenerationService {
   }
 
   async generate(request: GeneratePatternRequest): Promise<GeneratePatternResult> {
-    const { userId, images, imageTypes, skillLevel, challengeMe, selectedPattern, roleAssignments } = request;
+    const { userId, images, imageTypes, skillLevel, challengeMe, selectedPattern, roleAssignments, quiltSize } = request;
 
     const patternToUse = normalizePatternId(selectedPattern);
     console.log(`📋 Pattern to use: "${patternToUse}" (from: "${selectedPattern}")`);
@@ -64,7 +65,8 @@ export class PatternGenerationService {
       imageTypes,
       targetSkillLevel,
       patternToUse,
-      roleAssignments
+      roleAssignments,
+      quiltSize
     );
 
     // Generate deterministic instructions when supported

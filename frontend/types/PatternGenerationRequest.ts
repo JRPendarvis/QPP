@@ -7,4 +7,5 @@ export interface PatternGenerationRequest {
   skillLevel: string;
   challengeMe: boolean;
   selectedPattern?: string;
+  quiltSize?: string;
 }

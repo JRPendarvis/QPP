@@ -24,6 +24,7 @@ export class PatternService {
       skillLevel: request.skillLevel,
       challengeMe: request.challengeMe,
       selectedPattern: request.selectedPattern || 'auto',
+      quiltSize: request.quiltSize,
     });
 
     return response.data;

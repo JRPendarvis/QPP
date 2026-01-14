@@ -18,6 +18,7 @@ export class PromptOrchestrator {
    * @param skillLevel - User's skill level
    * @param patternId - Optional pattern ID
    * @param roleAssignments - Optional role assignments for fabrics
+   * @param quiltSize - Optional desired quilt size
    * @returns Prompt text for Claude API
    * 
    * @example
@@ -31,7 +32,8 @@ export class PromptOrchestrator {
    *   'Create a...',
    *   'beginner',
    *   'np-001',
-   *   roleAssignments
+   *   roleAssignments,
+   *   'queen'
    * );
    * ```
    */
@@ -44,7 +46,8 @@ export class PromptOrchestrator {
     patternInstruction: string,
     skillLevel: string,
     patternId: string | undefined,
-    roleAssignments?: any
+    roleAssignments?: any,
+    quiltSize?: string
   ): Promise<string> {
     if (!roleAssignments) {
       return PromptBuilder.buildPrompt(
@@ -52,7 +55,8 @@ export class PromptOrchestrator {
         patternForSvg,
         patternInstruction,
         skillLevel,
-        patternId
+        patternId,
+        quiltSize
       );
     }
 
@@ -65,7 +69,8 @@ export class PromptOrchestrator {
         roleAssignments,
         patternForSvg,
         skillLevel,
-        patternId
+        patternId,
+        quiltSize
       );
     }
 
@@ -74,7 +79,8 @@ export class PromptOrchestrator {
       patternForSvg,
       patternInstruction,
       skillLevel,
-      patternId
+      patternId,
+      quiltSize
     );
   }
 }

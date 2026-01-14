@@ -47,9 +47,10 @@ export class PromptBuilder {
     patternForSvg: string,
     patternInstruction: string,
     skillLevel: string,
-    patternId?: string
+    patternId?: string,
+    quiltSize?: string
   ): string {
-    return this.promptFormatter.buildPrompt(fabricCount, patternForSvg, patternInstruction, skillLevel, patternId);
+    return this.promptFormatter.buildPrompt(fabricCount, patternForSvg, patternInstruction, skillLevel, patternId, quiltSize);
   }
 
   /**
@@ -60,9 +61,10 @@ export class PromptBuilder {
     newRoleAssignments: RoleAssignments,
     patternForSvg: string,
     skillLevel: string,
-    patternId?: string
+    patternId?: string,
+    quiltSize?: string
   ): string {
-    return this.promptFormatter.buildRoleSwapPrompt(fabricAnalysis, newRoleAssignments, patternForSvg, skillLevel, patternId);
+    return this.promptFormatter.buildRoleSwapPrompt(fabricAnalysis, newRoleAssignments, patternForSvg, skillLevel, patternId, quiltSize);
   }
 
   /**

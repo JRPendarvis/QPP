@@ -26,6 +26,7 @@ export default function UploadPage() {
   const [challengeMe, setChallengeMe] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
+  const [quiltSize, setQuiltSize] = useState<string>('');
 
   const {
     fabrics,
@@ -122,7 +123,8 @@ export default function UploadPage() {
       await generatePattern(
         currentSkill,
         challengeMe,
-        patternChoice === 'manual' ? selectedPattern : undefined
+        patternChoice === 'manual' ? selectedPattern : undefined,
+        quiltSize || undefined
       );
       toast.dismiss(loadingToast);
     } catch (error) {
@@ -185,6 +187,33 @@ export default function UploadPage() {
                   targetSkill={targetSkill}
                   currentSkill={currentSkill}
                 />
+
+                <div className="border-2 border-gray-200 rounded-lg p-4">
+                  <h2 className="text-lg font-semibold mb-3 text-gray-800">Quilt Size</h2>
+                  <div className="space-y-2">
+                    <label className="block text-sm text-gray-600">
+                      Choose your desired quilt size (optional)
+                    </label>
+                    <select
+                      value={quiltSize}
+                      onChange={(e) => setQuiltSize(e.target.value)}
+                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-red-700 transition-colors"
+                    >
+                      <option value="">Default (60×72 inches)</option>
+                      <option value="baby">Baby (36×52 inches)</option>
+                      <option value="lap">Lap/Throw (50×65 inches)</option>
+                      <option value="twin">Twin (66×90 inches)</option>
+                      <option value="full">Full/Double (80×90 inches)</option>
+                      <option value="queen">Queen (90×95 inches)</option>
+                      <option value="king">King (105×95 inches)</option>
+                    </select>
+                    {quiltSize && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        Selected: {quiltSize.charAt(0).toUpperCase() + quiltSize.slice(1)} size
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 <UploadSectionContainer
                   patternChoice={patternChoice}

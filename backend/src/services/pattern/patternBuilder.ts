@@ -15,6 +15,7 @@ export class PatternBuilder {
    * @param patternForSvg - Pattern type for SVG generation
    * @param patternDifficulty - The pattern's difficulty level (beginner/intermediate/advanced)
    * @param fabricImages - Array of base64 fabric images
+   * @param quiltSize - Optional desired quilt size (baby, lap, twin, full, queen, king)
    * @returns Complete QuiltPattern object
    * 
    * @example
@@ -23,7 +24,8 @@ export class PatternBuilder {
    *   parsedResponse,
    *   'nine-patch',
    *   'beginner',  // Pattern difficulty, not user skill level
-   *   ['base64...', 'base64...']
+   *   ['base64...', 'base64...'],
+   *   'queen'  // Optional size
    * );
    * ```
    */
@@ -31,7 +33,8 @@ export class PatternBuilder {
     parsedResponse: ClaudeResponse,
     patternForSvg: string,
     patternDifficulty: string,
-    fabricImages: string[]
+    fabricImages: string[],
+    quiltSize?: string
   ): QuiltPattern {
     const fabrics = this.buildFabrics(parsedResponse, fabricImages);
     const visualSvg = SvgGenerator.generateFromTemplate(patternForSvg, fabrics);
@@ -46,13 +49,14 @@ export class PatternBuilder {
     const displayPatternName = this.extractPatternName(parsedResponse.patternName, patternForSvg);
     const formattedDifficulty = this.formatDifficulty(patternDifficulty);
     const validatedInstructions = InstructionValidator.validate(parsedResponse.instructions);
+    const finalSize = this.getQuiltSize(quiltSize, parsedResponse.estimatedSize);
 
     const pattern = {
       patternName: displayPatternName,
       description: parsedResponse.description || `A beautiful ${patternForSvg} pattern`,
       fabricLayout: parsedResponse.fabricLayout || 'Arranged in a 4x4 grid',
       difficulty: formattedDifficulty,
-      estimatedSize: parsedResponse.estimatedSize || '60x72 inches',
+      estimatedSize: finalSize,
       instructions: validatedInstructions,
       visualSvg: visualSvg,
     };
@@ -110,5 +114,27 @@ export class PatternBuilder {
    */
   private static formatDifficulty(skillLevel: string): string {
     return skillLevel.replace('_', ' ');
+  }
+
+  /**
+   * Gets the appropriate quilt size based on user selection or defaults
+   */
+  private static getQuiltSize(quiltSize?: string, claudeSize?: string): string {
+    // If user specified a size, use the corresponding dimensions
+    if (quiltSize) {
+      const sizeMap: Record<string, string> = {
+        'baby': '36×52 inches',
+        'lap': '50×65 inches',
+        'twin': '66×90 inches',
+        'full': '80×90 inches',
+        'queen': '90×95 inches',
+        'king': '105×95 inches',
+      };
+      
+      return sizeMap[quiltSize] || claudeSize || '60×72 inches';
+    }
+    
+    // Otherwise use Claude's suggested size or default
+    return claudeSize || '60×72 inches';
   }
 }

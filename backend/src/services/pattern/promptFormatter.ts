@@ -40,6 +40,7 @@ export class PromptFormatter {
    * @param patternInstruction - Pattern-specific instruction text
    * @param skillLevel - User's skill level
    * @param patternId - Optional pattern ID for detailed prompts
+   * @param quiltSize - Optional desired quilt size
    * @returns Complete formatted prompt
    */
   buildPrompt(
@@ -47,12 +48,14 @@ export class PromptFormatter {
     patternForSvg: string,
     patternInstruction: string,
     skillLevel: string,
-    patternId?: string
+    patternId?: string,
+    quiltSize?: string
   ): string {
     const skillDescription = this.getSkillDescription(skillLevel);
     const patternPrompt = patternId ? getPatternPrompt(normalizePatternId(patternId)) : null;
     const patternDescription = this.getPatternDescription(patternForSvg, patternPrompt);
     const patternGuidance = this.buildPatternGuidance(patternForSvg, patternPrompt);
+    const targetSize = this.getTargetSize(quiltSize);
 
     return `You are an expert quilter with deep knowledge of fabric selection and color theory. I'm providing you with ${fabricCount} fabric images.
 
@@ -91,7 +94,7 @@ Provide this JSON response:
   "roleAssignments": { "background": null, "primary": null, "secondary": null, "accent": null },
   "fabricLayout": "",
   "difficulty": "${skillLevel.replace('_', ' ')}",
-  "estimatedSize": "60x72 inches throw quilt",
+  "estimatedSize": "${targetSize}",
   "instructions": [],
   "fabricColors": [],
   "fabricDescriptions": []
@@ -100,7 +103,8 @@ Provide this JSON response:
 **IMPORTANT REQUIREMENTS:**
 - Return ONLY valid JSON
 - fabricAnalysis / fabricColors / fabricDescriptions MUST each have exactly ${fabricCount} entries
-- difficulty MUST be "${skillLevel.replace('_', ' ')}"`;
+- difficulty MUST be "${skillLevel.replace('_', ' ')}"
+- estimatedSize MUST be "${targetSize}" and instructions should be for this size`;
   }
 
   /**
@@ -110,6 +114,7 @@ Provide this JSON response:
    * @param patternForSvg - Pattern name
    * @param skillLevel - Skill level
    * @param patternId - Optional pattern ID
+   * @param quiltSize - Optional desired quilt size
    * @returns Formatted role swap prompt
    */
   buildRoleSwapPrompt(
@@ -117,7 +122,8 @@ Provide this JSON response:
     newRoleAssignments: RoleAssignments,
     patternForSvg: string,
     skillLevel: string,
-    patternId?: string
+    patternId?: string,
+    quiltSize?: string
   ): string {
     const skillDescription = this.getSkillDescription(skillLevel);
     const patternPrompt = patternId ? getPatternPrompt(normalizePatternId(patternId)) : null;
@@ -125,6 +131,7 @@ Provide this JSON response:
     const fabricSummary = this.buildFabricSummary(fabricAnalysis);
     const rolesSummary = this.buildRolesSummary(newRoleAssignments);
     const patternGuidance = this.buildRoleSwapGuidance(patternPrompt);
+    const targetSize = this.getTargetSize(quiltSize);
 
     return `You are an expert quilter. The user has selected custom fabric role assignments for a "${patternForSvg}" pattern.
 
@@ -141,7 +148,9 @@ ${patternGuidance}
 
 **SKILL LEVEL:** ${skillDescription}
 
-Generate updated instructions that use these specific role assignments.
+**TARGET SIZE:** ${targetSize}
+
+Generate updated instructions that use these specific role assignments for a ${targetSize} quilt.
 
 Provide this JSON response:
 
@@ -220,5 +229,21 @@ ${patternPrompt.commonMistakes}
 ${patternPrompt.fabricRoleGuidance}
 ${patternPrompt.assemblyNotes}
 `;
+  }
+
+  /**
+   * Get target quilt size based on user selection or default
+   */
+  private getTargetSize(quiltSize?: string): string {
+    const sizeMap: Record<string, string> = {
+      'baby': '36×52 inches baby quilt',
+      'lap': '50×65 inches lap/throw quilt',
+      'twin': '66×90 inches twin quilt',
+      'full': '80×90 inches full/double quilt',
+      'queen': '90×95 inches queen quilt',
+      'king': '105×95 inches king quilt',
+    };
+    
+    return quiltSize && sizeMap[quiltSize] ? sizeMap[quiltSize] : '60×72 inches throw quilt';
   }
 }

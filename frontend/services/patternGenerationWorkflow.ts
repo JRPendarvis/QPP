@@ -17,6 +17,7 @@ export class PatternGenerationWorkflow {
     userSkillLevel: string,
     challengeMe: boolean,
     selectedPattern: string | undefined,
+    quiltSize: string | undefined,
     callbacks: {
       onStart: () => void;
       onSuccess: (pattern: QuiltPattern) => void;
@@ -32,6 +33,7 @@ export class PatternGenerationWorkflow {
         skillLevel: userSkillLevel,
         challengeMe,
         selectedPattern,
+        quiltSize,
       });
 
       this.handleResponse(response, callbacks);
