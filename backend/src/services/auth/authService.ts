@@ -9,6 +9,8 @@ interface RegisterInput {
   email: string;
   password: string;
   name?: string;
+  acceptTerms?: boolean;
+  acceptPrivacy?: boolean;
 }
 
 interface LoginInput {
@@ -19,7 +21,7 @@ interface LoginInput {
 export class AuthService {
   // Register a new user
   async register(input: RegisterInput) {
-    const { email, password, name } = input;
+    const { email, password, name, acceptTerms, acceptPrivacy } = input;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -37,6 +39,11 @@ export class AuthService {
     const cutoffDate = new Date('2026-02-28T23:59:59Z');
     const badge = new Date() < cutoffDate ? 'tester' : undefined;
 
+    // Prepare legal acceptance timestamps
+    const now = new Date();
+    const termsAcceptedAt = acceptTerms ? now : null;
+    const privacyAcceptedAt = acceptPrivacy ? now : null;
+
     // Create user
     const user = await prisma.user.create({
       data: {
@@ -45,7 +52,9 @@ export class AuthService {
         name,
         subscriptionTier: 'free',
         subscriptionStatus: 'active',
-        badge
+        badge,
+        termsAcceptedAt,
+        privacyAcceptedAt
       }
     });
 

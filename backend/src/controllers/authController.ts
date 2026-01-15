@@ -13,15 +13,15 @@ export class AuthController {
   // POST /api/auth/register
   async register(req: Request, res: Response) {
     try {
-      const { email, password, name } = req.body;
+      const { email, password, name, acceptTerms, acceptPrivacy } = req.body;
 
       // Validate input
-      const validation = AuthValidator.validateRegistrationInput(email, password);
+      const validation = AuthValidator.validateRegistrationInput(email, password, acceptTerms, acceptPrivacy);
       if (!validation.valid) {
         return ResponseHelper.validationError(res, validation.message!);
       }
 
-      const result = await authService.register({ email, password, name });
+      const result = await authService.register({ email, password, name, acceptTerms, acceptPrivacy });
 
       // Send welcome email (don't await - send in background)
       emailService.sendWelcomeEmail(email, name).catch(err => 

@@ -37,7 +37,12 @@ export class AuthValidator {
   /**
    * Validate registration input
    */
-  static validateRegistrationInput(email: string, password: string): { valid: boolean; message?: string } {
+  static validateRegistrationInput(
+    email: string, 
+    password: string, 
+    acceptTerms?: boolean, 
+    acceptPrivacy?: boolean
+  ): { valid: boolean; message?: string } {
     const emailValidation = this.validateEmail(email);
     if (!emailValidation.valid) {
       return emailValidation;
@@ -46,6 +51,15 @@ export class AuthValidator {
     const passwordValidation = this.validatePassword(password);
     if (!passwordValidation.valid) {
       return passwordValidation;
+    }
+
+    // Validate legal acceptance
+    if (!acceptTerms) {
+      return { valid: false, message: 'You must accept the Terms of Service' };
+    }
+
+    if (!acceptPrivacy) {
+      return { valid: false, message: 'You must accept the Privacy Policy' };
     }
 
     return { valid: true };
