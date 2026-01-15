@@ -54,9 +54,9 @@ export class PatternDownloadService {
     if (!isFirstDownload) return;
 
     // Extract metadata from pattern data
-    const patternType = patternData?.patternType;
-    const patternName = patternData?.patternName;
-    const fabricColors = patternData?.fabrics || patternData?.fabricColors;
+    const patternType = patternData?.patternId || 'unknown';
+    const patternName = patternData?.patternName || 'Untitled Pattern';
+    const fabricColors = patternData?.fabricsByRole || null;
 
     await this.downloadRepository.recordDownload(
       userId,

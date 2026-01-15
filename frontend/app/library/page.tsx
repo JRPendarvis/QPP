@@ -28,7 +28,7 @@ export default function PatternLibraryPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/patterns/library');
+      const response = await api.get('/api/patterns/library');
       if (response.data.success) {
         setPatterns(response.data.data.patterns);
       }
@@ -45,7 +45,7 @@ export default function PatternLibraryPage() {
 
   const handleRedownload = async (patternId: string, patternName: string) => {
     try {
-      const response = await api.get(`/patterns/library/${patternId}/download`, {
+      const response = await api.get(`/api/patterns/library/${patternId}/download`, {
         responseType: 'blob',
       });
 
@@ -68,7 +68,7 @@ export default function PatternLibraryPage() {
     }
 
     try {
-      await api.delete(`/patterns/library/${patternId}`);
+      await api.delete(`/api/patterns/library/${patternId}`);
       setPatterns(patterns.filter((p) => p.id !== patternId));
     } catch {
       alert('Failed to delete pattern');
