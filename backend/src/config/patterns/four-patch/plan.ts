@@ -1,5 +1,6 @@
 import type { InstructionPlan, QuiltSizeIn } from '../../../services/instructions/types';
 import type { FabricAssignments } from '../../../services/instructions/fabricAssignments';
+import { renderInstructions } from './renderInstructions';
 
 type FourPatchComputedPlan = {
   patternId: 'four-patch';
@@ -25,7 +26,7 @@ type FourPatchComputedPlan = {
   unitCutSquareIn: number; // 2.5"
 };
 
-function computePlan(size?: QuiltSizeIn): FourPatchComputedPlan {
+function computePlan(quiltSize: QuiltSizeIn): FourPatchComputedPlan {
   const finishedBlockIn = 4;
   const seamAllowanceIn = 0.25;
 
@@ -33,8 +34,8 @@ function computePlan(size?: QuiltSizeIn): FourPatchComputedPlan {
   const defaultWidthIn = 60;
   const defaultHeightIn = 72;
 
-  const widthIn = size?.widthIn ?? defaultWidthIn;
-  const heightIn = size?.heightIn ?? defaultHeightIn;
+  const widthIn = quiltSize.widthIn ?? defaultWidthIn;
+  const heightIn = quiltSize.heightIn ?? defaultHeightIn;
 
   const blocksAcross = Math.floor(widthIn / finishedBlockIn);
   const blocksDown = Math.floor(heightIn / finishedBlockIn);
@@ -69,11 +70,10 @@ function computePlan(size?: QuiltSizeIn): FourPatchComputedPlan {
   };
 }
 
-/**
- * IMPORTANT:
- * InstructionPlan<T> generic is the FABRICS type (known system quirk).
- * This export is intentionally shaped to match the existing InstructionPlan contract in this repo.
- */
-export const fourPatchPlan: InstructionPlan<FabricAssignments> = ((size?: QuiltSizeIn) => {
-  return computePlan(size);
-}) as any;
+export const fourPatchPlan: InstructionPlan<FabricAssignments> = {
+  patternId: 'four-patch',
+  render: (quiltSize: QuiltSizeIn, fabrics: FabricAssignments) => {
+    const plan = computePlan(quiltSize);
+    return renderInstructions(plan, fabrics);
+  },
+};
