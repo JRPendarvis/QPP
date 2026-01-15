@@ -15,41 +15,43 @@
 - [x] Update email sender domain if needed (currently `noreply@quiltplannerpro.com`)
 
 ### Legal Compliance
-- [ ] Add terms of service acceptance checkbox to registration form
-- [ ] Add privacy policy acceptance checkbox to registration form
-- [ ] Store acceptance timestamp in User model
-- [ ] Activate CookieConsent component (exists but not shown)
-- [ ] Test cookie consent banner appears on first visit
+- [x] Add terms of service acceptance checkbox to registration form
+- [x] Add privacy policy acceptance checkbox to registration form
+- [x] Store acceptance timestamp in User model
+- [x] Activate CookieConsent component (exists but not shown)
+- [x] Test cookie consent banner appears on first visit
 
 ### Payment Processing
-- [ ] Test Stripe checkout flow (all tiers: Basic, Intermediate, Advanced)
-- [ ] Test subscription upgrade flow
-- [ ] Test subscription downgrade flow
-- [ ] Test subscription cancellation
-- [ ] Verify webhook signature validation works
-- [ ] Test generation limits enforcement for each tier
-- [ ] Test download limits enforcement for each tier
+- [x] Test Stripe checkout flow (all tiers: Basic, Intermediate, Advanced)
+- [x] Test subscription upgrade flow
+- [x] Test subscription downgrade flow
+- [x] Test subscription cancellation
+- [x] Verify webhook signature validation works
+- [x] Test generation limits enforcement for each tier
+- [x] Test download limits enforcement for each tier
 - [ ] Update Stripe webhook URL to Railway production URL after deploy
-- [ ] Test failed payment handling
+- [x] Test failed payment handling
 
 ### Error Monitoring
-- [ ] Create Sentry account
-- [ ] Add `SENTRY_DSN` to backend environment variables
-- [ ] Add `NEXT_PUBLIC_SENTRY_DSN` to frontend environment variables
-- [ ] Configure Sentry error tracking (see MONITORING-SETUP.md)
-- [ ] Test error reporting with intentional error
+- [x] ~~Create Sentry account~~ (Sentry removed from project)
+- [x] ~~Add `SENTRY_DSN` to backend environment variables~~ (Not using Sentry)
+- [x] ~~Add `NEXT_PUBLIC_SENTRY_DSN` to frontend environment variables~~ (Not using Sentry)
+- [x] ~~Configure Sentry error tracking (see MONITORING-SETUP.md)~~ (Not using Sentry)
+- [x] ~~Test error reporting with intentional error~~ (Not using Sentry)
+- [x] Backend error logging with detailed stack traces (already implemented)
+- [x] Frontend error handling with try/catch blocks (already implemented)
 - [ ] Set up error alerting (email/Slack)
 
 ### Production Deployment
-- [ ] Audit all environment variables needed for production
-- [ ] Add production URLs to CORS whitelist in `backend/src/config/constants.ts`
-- [ ] Deploy backend to Railway
-- [ ] Deploy frontend to Railway (or Vercel)
-- [ ] Verify DATABASE_URL points to production PostgreSQL
-- [ ] Run database migrations on production
-- [ ] Test health endpoint (`/health`)
-- [ ] Configure Railway PostgreSQL automated backups
-- [ ] Test full user flow in production environment
+- [x] Audit all environment variables needed for production
+- [x] Add production URLs to CORS whitelist in `backend/src/config/constants.ts`
+- [x] Deploy backend to Railway
+- [x] Deploy frontend to Railway (or Vercel)
+- [x] Verify DATABASE_URL points to production PostgreSQL
+- [x] Run database migrations on production
+- [x] Test health endpoint (`/health`)
+- [x] Configure Railway PostgreSQL automated backups
+- [x] Test full user flow in production environment
 
 ---
 

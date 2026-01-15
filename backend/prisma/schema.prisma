@@ -43,6 +43,10 @@ model User {
     resetToken       String?
     resetTokenExpiry DateTime?
 
+    // Legal compliance
+    termsAcceptedAt   DateTime?
+    privacyAcceptedAt DateTime?
+
     @@map("users")
 }
 
