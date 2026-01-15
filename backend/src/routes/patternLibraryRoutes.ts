@@ -4,6 +4,7 @@ import {
   getPatternById,
   redownloadPattern,
   deletePattern,
+  renamePattern,
 } from '../controllers/patternLibraryController';
 import { authenticate } from '../middleware/authMiddleware';
 
@@ -39,5 +40,12 @@ router.get('/:patternId/download', redownloadPattern);
  * @access  Private
  */
 router.delete('/:patternId', deletePattern);
+
+/**
+ * @route   PATCH /api/patterns/library/:patternId/rename
+ * @desc    Rename a pattern in library
+ * @access  Private
+ */
+router.patch('/:patternId/rename', renamePattern);
 
 export default router;
