@@ -78,9 +78,9 @@ export class ClaudeService {
       const patternDefinition = patternId ? getPatternById(patternId) : null;
       const patternDifficulty = patternDefinition?.skillLevel || skillLevel;
       
-      const pattern = PatternBuilder.build(parsedResponse, patternForSvg, patternDifficulty, this._fabricImages, quiltSize);
+      const pattern = PatternBuilder.build(parsedResponse, patternForSvg, patternDifficulty, base64s, quiltSize);
 
-      PatternGenerationLogger.logPatternSuccess(pattern, patternForSvg, parsedResponse);base64
+      PatternGenerationLogger.logPatternSuccess(pattern, patternForSvg, parsedResponse);
 
       return pattern;
     } catch (error) {
