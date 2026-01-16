@@ -96,7 +96,7 @@ export class PatternBuilder {
       const fabrics = fabricAnalysis.map((fa: any, idx) => {
         // Claude may return 'type' or 'fabricType' field, and may be uppercase
         const rawType = fa.type || fa.fabricType || 'solid';
-        const normalizedType = rawType.toLowerCase() === 'printed' ? 'printed' : 'solid';
+        const normalizedType: 'printed' | 'solid' = rawType.toLowerCase() === 'printed' ? 'printed' : 'solid';
         
         return {
           color: fa.dominantColor || fabricColors[idx] || '#CCCCCC',
