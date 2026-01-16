@@ -53,11 +53,12 @@ export default function PatternVisualization({ visualSvg, patternName }: Pattern
       USE_PROFILES: { svg: true },
       ADD_TAGS: [
         'filter', 'feGaussianBlur', 'feOffset', 'feComponentTransfer', 'feFuncA', 'feMerge', 'feMergeNode',
-        'pattern', 'circle'
+        'pattern', 'circle', 'image', 'defs'
       ],
       ADD_ATTR: [
         'stdDeviation', 'dx', 'dy', 'slope', 'in', 'result', 'type', 'id', 'patternUnits',
-        'x', 'y', 'width', 'height', 'cx', 'cy', 'r', 'opacity', 'filter', 'fill', 'viewBox'
+        'x', 'y', 'width', 'height', 'cx', 'cy', 'r', 'opacity', 'filter', 'fill', 'viewBox',
+        'href', 'xlink:href', 'preserveAspectRatio'
       ],
     });
   }, [visualSvg]);

@@ -109,7 +109,9 @@ export class BlockGenerator {
    */
   private static getFillValue(fabric: Fabric, allFabrics: Fabric[]): string {
     if (fabric.type === 'printed' && fabric.image) {
-      return `url(#fabricImage${allFabrics.indexOf(fabric)})`;
+      const fabricIndex = allFabrics.indexOf(fabric);
+      console.log(`🎨 [BlockGenerator] Using fabric pattern: fabricImage${fabricIndex} for printed fabric`);
+      return `url(#fabricImage${fabricIndex})`;
     }
     return fabric.color;
   }

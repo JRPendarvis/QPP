@@ -20,11 +20,21 @@ export class ImagePatternBuilder {
   static build(fabrics: Fabric[]): string {
     let defs = '';
     
+    console.log('🖼️ [ImagePatternBuilder] Building patterns for fabrics:', fabrics.map((f, i) => ({
+      index: i,
+      type: f.type,
+      hasImage: !!f.image,
+      imageLength: f.image?.length || 0
+    })));
+    
     fabrics.forEach((fabric, idx) => {
       if (fabric.type === 'printed' && fabric.image) {
         defs += this.createPatternDefinition(fabric.image, idx);
+        console.log(`🖼️ [ImagePatternBuilder] Created pattern definition for fabricImage${idx}`);
       }
     });
+    
+    console.log(`🖼️ [ImagePatternBuilder] Total pattern definitions: ${defs ? 'YES' : 'NONE'}, length: ${defs.length}`);
     
     return defs;
   }

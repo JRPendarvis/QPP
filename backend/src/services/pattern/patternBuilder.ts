@@ -80,13 +80,40 @@ export class PatternBuilder {
     const fabricAnalysis = parsedResponse.fabricAnalysis || [];
     const fabricColors = parsedResponse.fabricColors || [];
 
+    console.log('🧵 [PatternBuilder] Building fabrics:', {
+      fabricAnalysisCount: fabricAnalysis.length,
+      fabricColorsCount: fabricColors.length,
+      fabricImagesCount: fabricImages.length,
+      analysis: fabricAnalysis.map((fa: any) => ({ 
+        type: fa.type, 
+        fabricType: fa.fabricType,
+        hasImage: !!fabricImages[fabricAnalysis.indexOf(fa)] 
+      }))
+    });
+
     // Build fabrics from analysis
     if (fabricAnalysis.length > 0) {
-      return fabricAnalysis.map((fa, idx) => ({
-        color: fa.dominantColor || fabricColors[idx] || '#CCCCCC',
-        type: fa.type || 'solid',
-        image: fabricImages[idx] || '',
-      }));
+      const fabrics = fabricAnalysis.map((fa: any, idx) => {
+        // Claude may return 'type' or 'fabricType' field, and may be uppercase
+        const rawType = fa.type || fa.fabricType || 'solid';
+        const normalizedType = rawType.toLowerCase() === 'printed' ? 'printed' : 'solid';
+        
+        return {
+          color: fa.dominantColor || fabricColors[idx] || '#CCCCCC',
+          type: normalizedType,
+          image: fabricImages[idx] || '',
+        };
+      });
+      
+      console.log('🧵 [PatternBuilder] Built fabrics from analysis:', fabrics.map((f, i) => ({
+        index: i,
+        type: f.type,
+        color: f.color,
+        hasImage: !!f.image,
+        imageLength: f.image?.length || 0
+      })));
+      
+      return fabrics;
     }
 
     // Fallback to colors only

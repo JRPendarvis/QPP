@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "nodemon --exec tsx src/index.ts",
     "build": "prisma generate && tsc",
-    "start": "npx prisma migrate resolve --rolled-back 20260114163851_add_pattern_library_and_feedback_resolved || true && npx prisma migrate deploy && node dist/index.js",
-    "postinstall": "prisma generate"
+    "start": "node scripts/production-safety-check.js && npx prisma migrate resolve --rolled-back 20260114163851_add_pattern_library_and_feedback_resolved || true && npx prisma migrate deploy && node dist/index.js",
+    "postinstall": "prisma generate",
+    "db:backup": "pg_dump $DATABASE_URL > backup-$(date +%Y%m%d-%H%M%S).sql",
+    "db:status": "npx prisma migrate status"
   },
   "engines": {
     "node": "20.x"
