@@ -15,8 +15,6 @@ const anthropic = new Anthropic({
 });
 
 export class ClaudeService {
-  private _fabricImages: string[] = [];
-
   async generateQuiltPattern(
     fabricImages: string[],
     imageTypes: string[] = [],
@@ -74,8 +72,6 @@ export class ClaudeService {
       const imageContent = PromptBuilder.buildImageContent(base64s, mimeTypes);
       const responseText = await ClaudeApiClient.generatePattern(anthropic, promptText, imageContent);
 
-      this._fabricImages = base64s;
-
       const parsedResponse = ResponseParser.parse(responseText);
       
       // Get pattern difficulty from pattern definition (not user's skill level)
@@ -84,7 +80,7 @@ export class ClaudeService {
       
       const pattern = PatternBuilder.build(parsedResponse, patternForSvg, patternDifficulty, this._fabricImages, quiltSize);
 
-      PatternGenerationLogger.logPatternSuccess(pattern, patternForSvg, parsedResponse);
+      PatternGenerationLogger.logPatternSuccess(pattern, patternForSvg, parsedResponse);base64
 
       return pattern;
     } catch (error) {
