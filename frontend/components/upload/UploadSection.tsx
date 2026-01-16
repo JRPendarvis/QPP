@@ -19,10 +19,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   formatFabricRange,
   fabricCountValid,
 }) => (
-  <div className="bg-white border border-gray-200 rounded-lg p-6">
-    <h2 className="text-xl font-semibold text-gray-900 mb-4">
-      Step 2: Upload Your Fabric Images
-    </h2>
+  <>
     <p className="text-gray-600 mb-4">
       {patternChoice === 'manual' && selectedPatternDetails ? (
         <>
@@ -48,7 +45,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
         } fabrics uploaded
       </div>
     )}
-  </div>
+  </>
 );
 
 export default UploadSection;

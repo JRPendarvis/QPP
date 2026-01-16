@@ -172,7 +172,7 @@ export default function UploadPage() {
 
           {!pattern && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <PatternSelectionSection
                   patternChoice={patternChoice}
                   onPatternChoiceChange={handlePatternChoiceChange}
@@ -199,32 +199,32 @@ export default function UploadPage() {
                   effectiveMaxFabrics={effectiveMaxFabrics}
                   totalImageSize={totalImageSize}
                 />
-              </div>
 
-              <div className="border-2 border-gray-200 rounded-lg p-4 mb-6">
-                <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 3: Choose Quilt Size</h2>
-                <div className="space-y-2">
-                  <label className="block text-sm text-gray-600">
-                    Choose your desired quilt size (optional)
-                  </label>
-                  <select
-                    value={quiltSize}
-                    onChange={(e) => setQuiltSize(e.target.value)}
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-red-700 transition-colors"
-                  >
-                    <option value="">Default (60×72 inches)</option>
-                    <option value="baby">Baby (36×52 inches)</option>
-                    <option value="lap">Lap/Throw (50×65 inches)</option>
-                    <option value="twin">Twin (66×90 inches)</option>
-                    <option value="full">Full/Double (80×90 inches)</option>
-                    <option value="queen">Queen (90×95 inches)</option>
-                    <option value="king">King (105×95 inches)</option>
-                  </select>
-                  {quiltSize && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Selected: {quiltSize.charAt(0).toUpperCase() + quiltSize.slice(1)} size
-                    </p>
-                  )}
+                <div className="border-2 border-gray-200 rounded-lg p-4">
+                  <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 3: Choose Quilt Size</h2>
+                  <div className="space-y-2">
+                    <label className="block text-sm text-gray-600">
+                      Choose your desired quilt size (optional)
+                    </label>
+                    <select
+                      value={quiltSize}
+                      onChange={(e) => setQuiltSize(e.target.value)}
+                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-red-700 transition-colors"
+                    >
+                      <option value="">Default (60×72 inches)</option>
+                      <option value="baby">Baby (36×52 inches)</option>
+                      <option value="lap">Lap/Throw (50×65 inches)</option>
+                      <option value="twin">Twin (66×90 inches)</option>
+                      <option value="full">Full/Double (80×90 inches)</option>
+                      <option value="queen">Queen (90×95 inches)</option>
+                      <option value="king">King (105×95 inches)</option>
+                    </select>
+                    {quiltSize && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        Selected: {quiltSize.charAt(0).toUpperCase() + quiltSize.slice(1)} size
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 

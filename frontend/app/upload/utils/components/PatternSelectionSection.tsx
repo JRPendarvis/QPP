@@ -31,8 +31,8 @@ export function PatternSelectionSection({
   currentSkill,
 }: PatternSelectionSectionProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+    <div className="border-2 border-gray-200 rounded-lg p-4">
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">
         Step 1: Choose Your Pattern Style
       </h2>
 
