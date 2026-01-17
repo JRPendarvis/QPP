@@ -19,6 +19,7 @@ import { useUserProfile, usePatternSelection } from './utils/hooks';
 import { validateFabricCount, getFabricValidationMessage } from './utils/validation';
 import { PatternSelectionSection, UploadSectionContainer } from './utils/components';
 import { PatternChoice, PatternDetails } from './utils/types';
+import { getBorderName } from '@/utils/borderNaming';
 
 export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
@@ -253,10 +254,13 @@ export default function UploadPage() {
                       {borderConfiguration.enabled && (
                         <div className="space-y-3 mt-3">
                           {/* Border list */}
-                          {borderConfiguration.borders.sort((a, b) => a.order - b.order).map((border, index) => (
-                            <div key={border.id} className="p-3 bg-gray-50 rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-semibold text-gray-700">Border {border.order}</span>
+                          {borderConfiguration.borders.sort((a, b) => a.order - b.order).map((border, index) => {
+                            const borderName = getBorderName(border.order, borderConfiguration.borders.length);
+                            
+                            return (
+                              <div key={border.id} className="p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-semibold text-gray-700">{borderName}</span>
                                 <div className="flex items-center gap-2">
                                   <button
                                     onClick={() => reorderBorder(border.id, 'up')}
@@ -296,7 +300,7 @@ export default function UploadPage() {
                                 />
                               </div>
                             </div>
-                          ))}
+                          );})}
 
                           {/* Add border button */}
                           {borderConfiguration.borders.length < 3 && (
@@ -327,36 +331,6 @@ export default function UploadPage() {
                 />
               </div>
 
-              {/* Border Fabric Assignment (appears after fabrics uploaded) */}
-              {fabrics.length > 0 && borderConfiguration.enabled && borderConfiguration.borders.length > 0 && (
-                <div className="mb-6 border-2 border-indigo-200 rounded-lg p-4 bg-indigo-50">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Assign Fabrics to Borders</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Select which fabric to use for each border
-                  </p>
-                  <div className="space-y-3">
-                    {borderConfiguration.borders.sort((a, b) => a.order - b.order).map((border) => (
-                      <div key={border.id} className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                        <span className="text-sm font-medium text-gray-700 w-24">
-                          Border {border.order}:
-                        </span>
-                        <select
-                          value={border.fabricIndex}
-                          onChange={(e) => updateBorder(border.id, { fabricIndex: parseInt(e.target.value) })}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                          {fabrics.map((fabric, idx) => (
-                            <option key={idx} value={idx}>
-                              {fabric.name || `Fabric ${idx + 1}`}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <GenerateButton
                 onClick={handleGenerate}
                 disabled={generating || !fabricCountValid || !!fabricValidationMessage}
@@ -374,6 +348,54 @@ export default function UploadPage() {
                     onReorder={handleFabricReorder}
                     fabricRoles={fabricRoles.length > 0 ? fabricRoles : undefined}
                   />
+                  
+                  {/* Border Fabric Assignment within uploaded fabrics section */}
+                  {borderConfiguration.enabled && borderConfiguration.borders.length > 0 && (
+                    <div className="mt-4 p-4 bg-indigo-50 border-2 border-indigo-200 rounded-lg">
+                      <h3 className="text-md font-semibold text-gray-900 mb-3">Assign Fabrics to Borders</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Select which fabric to use for each border
+                      </p>
+                      <div className="space-y-3">
+                        {borderConfiguration.borders.sort((a, b) => a.order - b.order).map((border) => {
+                          const selectedFabric = fabrics[border.fabricIndex];
+                          const selectedPreview = previews[border.fabricIndex];
+                          const borderName = getBorderName(border.order, borderConfiguration.borders.length);
+                          
+                          return (
+                            <div key={border.id} className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                              <span className="text-sm font-medium text-gray-700 min-w-[120px]">
+                                {borderName}:
+                              </span>
+                              
+                              {/* Fabric preview thumbnail */}
+                              {selectedPreview && (
+                                <div className="w-16 h-16 rounded border-2 border-gray-300 overflow-hidden flex-shrink-0">
+                                  <img 
+                                    src={selectedPreview} 
+                                    alt={selectedFabric?.name || `Fabric ${border.fabricIndex + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              
+                              <select
+                                value={border.fabricIndex}
+                                onChange={(e) => updateBorder(border.id, { fabricIndex: parseInt(e.target.value) })}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                              >
+                                {fabrics.map((fabric, idx) => (
+                                  <option key={idx} value={idx}>
+                                    {fabric.name || `Fabric ${idx + 1}`}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
