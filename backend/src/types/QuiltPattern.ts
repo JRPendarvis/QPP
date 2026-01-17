@@ -1,4 +1,5 @@
 // types/QuiltPattern.ts
+import { Border, BorderConfiguration, BorderDimensions } from './Border';
 
 export type FabricsByRole = {
   background?: string;
@@ -34,4 +35,8 @@ export interface QuiltPattern {
   
   // Fabric yardage requirements
   fabricRequirements?: FabricRequirement[];
+
+  // Border configuration and dimensions
+  borderConfiguration?: BorderConfiguration;
+  borderDimensions?: BorderDimensions;
 }

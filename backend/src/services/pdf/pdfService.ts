@@ -7,6 +7,7 @@ import { PDFHeaderRenderer } from './pdfHeaderRenderer';
 import { PDFContentRenderer } from './pdfContentRenderer';
 import { PDFInstructionRenderer } from './pdfInstructionRenderer';
 import { PDFFooterRenderer } from './pdfFooterRenderer';
+import { PDFBorderRenderer } from './pdfBorderRenderer';
 
 /**
  * Service for generating pattern PDFs
@@ -19,6 +20,7 @@ export class PDFService {
   private contentRenderer: PDFContentRenderer;
   private instructionRenderer: PDFInstructionRenderer;
   private footerRenderer: PDFFooterRenderer;
+  private borderRenderer: PDFBorderRenderer;
 
   constructor() {
     this.instructionPreparation = new InstructionPreparationService();
@@ -26,6 +28,7 @@ export class PDFService {
     this.contentRenderer = new PDFContentRenderer();
     this.instructionRenderer = new PDFInstructionRenderer();
     this.footerRenderer = new PDFFooterRenderer();
+    this.borderRenderer = new PDFBorderRenderer();
   }
 
   async generatePatternPDF(pattern: QuiltPattern, userName: string): Promise<Buffer> {
@@ -46,6 +49,9 @@ export class PDFService {
 
         // Render content sections (visualization, description, fabric layout)
         this.contentRenderer.renderAllContentSections(doc, pattern);
+
+        // Render border information if borders are enabled
+        this.borderRenderer.renderBorderSection(doc, pattern);
 
         // Prepare and render instructions
         try {
