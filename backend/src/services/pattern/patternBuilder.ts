@@ -45,7 +45,13 @@ export class PatternBuilder {
     quiltSize?: string,
     borderConfiguration?: BorderConfiguration
   ): QuiltPattern {
-    const fabrics = this.buildFabrics(parsedResponse, fabricImages);
+    // Separate pattern fabrics from border fabrics
+    const borderCount = borderConfiguration?.enabled ? borderConfiguration.borders.length : 0;
+    const patternFabricImages = borderCount > 0 
+      ? fabricImages.slice(0, fabricImages.length - borderCount)
+      : fabricImages;
+    
+    const fabrics = this.buildFabrics(parsedResponse, patternFabricImages);
     const visualSvg = SvgGenerator.generateFromTemplate(patternForSvg, fabrics);
     
     console.log('🎨 [PatternBuilder] SVG Generated:', {
