@@ -39,4 +39,7 @@ export interface QuiltPattern {
   // Border configuration and dimensions
   borderConfiguration?: BorderConfiguration;
   borderDimensions?: BorderDimensions;
+  
+  // All fabric images (base64) - includes pattern fabrics AND border fabrics
+  fabricImages?: string[];
 }

@@ -41,16 +41,26 @@ export class PatternBuilder {
     parsedResponse: ClaudeResponse,
     patternForSvg: string,
     patternDifficulty: string,
-    fabricImages: string[],
+    fabricImages: string[],  // ALL fabric images (pattern + border)
     quiltSize?: string,
     borderConfiguration?: BorderConfiguration
   ): QuiltPattern {
     // Separate pattern fabrics from border fabrics
+    // parsedResponse only has pattern fabrics analyzed (Claude only saw pattern fabrics)
+    // but fabricImages has ALL fabrics (pattern + border)
     const borderCount = borderConfiguration?.enabled ? borderConfiguration.borders.length : 0;
     const patternFabricImages = borderCount > 0 
       ? fabricImages.slice(0, fabricImages.length - borderCount)
       : fabricImages;
     
+    console.log('📦 [PatternBuilder] Fabric allocation:', {
+      totalFabrics: fabricImages.length,
+      patternFabrics: patternFabricImages.length,
+      borderFabrics: borderCount,
+      borderConfiguration: borderConfiguration?.enabled ? 'enabled' : 'disabled'
+    });
+    
+    // Build fabrics using pattern fabrics only (Claude analyzed these)
     const fabrics = this.buildFabrics(parsedResponse, patternFabricImages);
     const visualSvg = SvgGenerator.generateFromTemplate(patternForSvg, fabrics);
     
@@ -120,6 +130,7 @@ export class PatternBuilder {
       instructions: validatedInstructions,
       visualSvg: visualSvg,
       fabricRequirements: fabricRequirements,
+      fabricImages: fabricImages,  // ALL fabric images (pattern + border)
       ...(borderConfiguration && { borderConfiguration }),
       ...(borderDimensions && { borderDimensions }),
     };
