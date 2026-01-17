@@ -3,7 +3,7 @@
  * Calculates fabric requirements for quilt borders
  */
 
-import { Border, BorderFabricRequirement } from '../../types/Border';
+import { Border, BorderFabricRequirement } from '../types/Border';
 
 export class BorderFabricCalculator {
   /**

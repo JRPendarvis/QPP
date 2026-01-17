@@ -3,7 +3,7 @@
  * Utilities for calculating quilt dimensions with borders
  */
 
-import { Border, BorderDimensions } from '../../types/Border';
+import { Border, BorderDimensions } from '../types/Border';
 
 export class BorderSizeCalculator {
   /**
