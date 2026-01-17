@@ -11,4 +11,12 @@ export interface QuiltPattern {
   estimatedSize: string;
   instructions: string[];
   visualSvg: string;
+  fabricRequirements?: FabricRequirement[];
+}
+
+export interface FabricRequirement {
+  role: string;
+  yards: number;
+  description: string;
+  inches?: number; // For binding - total inches needed
 }

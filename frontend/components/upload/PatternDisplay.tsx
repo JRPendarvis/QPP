@@ -17,6 +17,12 @@ interface QuiltPattern {
   estimatedSize: string;
   instructions: string[];
   visualSvg: string;
+  fabricRequirements?: Array<{
+    role: string;
+    yards: number;
+    description: string;
+    inches?: number;
+  }>;
 }
 
 interface Usage {
@@ -138,6 +144,35 @@ export default function PatternDisplay({
         description={pattern.description}
         fabricLayout={pattern.fabricLayout}
       />
+
+      {/* Fabric Requirements */}
+      {pattern.fabricRequirements && pattern.fabricRequirements.length > 0 && (
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4">🧵 Fabric Requirements</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Fabric amounts based on 42" usable width with 15% extra for seam allowances
+          </p>
+          <div className="space-y-3">
+            {pattern.fabricRequirements.map((req, idx) => (
+              <div key={idx} className="flex justify-between items-center border-b border-gray-200 pb-2">
+                <div className="flex-1">
+                  <span className="font-semibold text-gray-800">{req.role}:</span>
+                  <span className="text-gray-600 ml-2 text-sm">{req.description}</span>
+                </div>
+                <span className="font-bold text-indigo-600 ml-4 whitespace-nowrap">
+                  {req.inches ? `${req.inches}"` : `${req.yards} yards`}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 p-3 bg-blue-50 rounded-md">
+            <p className="text-sm text-blue-800">
+              💡 <strong>Shopping Tip:</strong> These amounts include extra fabric for mistakes and seam allowances. 
+              Always verify fabric availability before cutting!
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Pattern Instructions */}
       <PatternInstructions

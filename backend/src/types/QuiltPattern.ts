@@ -8,6 +8,13 @@ export type FabricsByRole = {
   [key: string]: string | undefined;
 };
 
+export interface FabricRequirement {
+  role: string;
+  yards: number;
+  description: string;
+  inches?: number; // For binding - total inches needed
+}
+
 export interface QuiltPattern {
   // Existing fields (used by PDFService)
   patternName: string;
@@ -24,4 +31,7 @@ export interface QuiltPattern {
   // New (recommended) structured fabric names by role
   // Avoid parsing fabricLayout prose.
   fabricsByRole?: FabricsByRole;
+  
+  // Fabric yardage requirements
+  fabricRequirements?: FabricRequirement[];
 }

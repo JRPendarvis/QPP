@@ -47,13 +47,29 @@ export class InstructionPreparationService {
     console.log('[PDF DEBUG] estimatedSize =', pattern.estimatedSize);
     console.log('[PDF DEBUG] fabricsByRole =', fabricsByRole);
 
+    // Extract fabric assignments from fabricRequirements if available
+    const fabricRequirements = (pattern as any).fabricRequirements || [];
+    
+    console.log('[PDF DEBUG] Full pattern object keys:', Object.keys(pattern));
+    console.log('[PDF DEBUG] fabricRequirements =', JSON.stringify(fabricRequirements, null, 2));
+    
+    // Use actual fabric names from requirements, filtering out backing/batting/binding
+    const actualFabricNames = fabricRequirements
+      .filter((req: any) => !['Backing', 'Batting', 'Binding'].includes(req.role))
+      .map((req: any) => req.role);
+    
+    console.log('[PDF DEBUG] actualFabricNames from requirements =', actualFabricNames);
+    console.log('[PDF DEBUG] actualFabricNames.length =', actualFabricNames.length);
+
     const fabricAssignments: FabricAssignments = {
-      namesBySlot: [
-        fabricsByRole.background || 'Background fabric',
-        fabricsByRole.primary || 'Primary fabric',
-        fabricsByRole.secondary || 'Secondary fabric',
-        fabricsByRole.accent || 'Accent fabric',
-      ],
+      namesBySlot: actualFabricNames.length > 0 
+        ? actualFabricNames
+        : [
+            fabricsByRole.background || 'Background fabric',
+            fabricsByRole.primary || 'Primary fabric',
+            fabricsByRole.secondary || 'Secondary fabric',
+            fabricsByRole.accent || 'Accent fabric',
+          ],
     };
 
     // Generate deterministic instructions

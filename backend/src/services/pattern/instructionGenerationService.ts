@@ -27,7 +27,20 @@ export class InstructionGenerationService {
 
     try {
       const quiltSize = parseQuiltSizeIn(pattern.estimatedSize);
-      const fabricAssignments = convertToFabricAssignments(fabricsByRole);
+      
+      // Use actual fabric names from fabricRequirements if available
+      const fabricRequirements = pattern.fabricRequirements || [];
+      const actualFabricNames = fabricRequirements
+        .filter((req: any) => !['Backing', 'Batting', 'Binding'].includes(req.role))
+        .map((req: any) => req.role);
+      
+      console.log('[INSTRUCTIONS] actualFabricNames from requirements =', actualFabricNames);
+      
+      // Create fabric assignments with actual names or fall back to fabricsByRole
+      const fabricAssignments = actualFabricNames.length > 0
+        ? { namesBySlot: actualFabricNames }
+        : convertToFabricAssignments(fabricsByRole);
+      
       const det = generateInstructions(
         resolvedPatternId,
         { widthIn: quiltSize.width, heightIn: quiltSize.height },
