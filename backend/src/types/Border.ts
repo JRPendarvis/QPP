@@ -36,5 +36,5 @@ export const BORDER_CONSTRAINTS = {
   MIN_WIDTH: 0.5,
   MAX_WIDTH: 12,
   STEP: 0.5,
-  MAX_BORDERS: 4
+  MAX_BORDERS: 3
 } as const;

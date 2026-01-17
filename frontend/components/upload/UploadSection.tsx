@@ -8,6 +8,7 @@ export interface UploadSectionProps {
   fabricsLength: number;
   formatFabricRange: (min: number, max: number) => string;
   fabricCountValid: boolean;
+  borderFabricsNeeded: number;
 }
 
 const UploadSection: React.FC<UploadSectionProps> = ({
@@ -18,6 +19,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   fabricsLength,
   formatFabricRange,
   fabricCountValid,
+  borderFabricsNeeded,
 }) => (
   <>
     <p className="text-gray-600 mb-4">
@@ -27,9 +29,27 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           <span className="font-medium text-indigo-600">
             {formatFabricRange(selectedPatternDetails.minFabrics, selectedPatternDetails.maxFabrics)}
           </span>
+          {borderFabricsNeeded > 0 && (
+            <>
+              {' + '}
+              <span className="font-medium text-purple-600">
+                {borderFabricsNeeded} for borders
+              </span>
+            </>
+          )}
         </>
       ) : (
-        <>Upload {MIN_FABRICS}-{MAX_FABRICS} fabric images to generate your quilt pattern</>
+        <>
+          Upload {MIN_FABRICS}-{MAX_FABRICS} fabric images to generate your quilt pattern
+          {borderFabricsNeeded > 0 && (
+            <>
+              {' + '}
+              <span className="font-medium text-purple-600">
+                {borderFabricsNeeded} for borders
+              </span>
+            </>
+          )}
+        </>
       )}
     </p>
     <p className="text-sm text-gray-500 mb-6">

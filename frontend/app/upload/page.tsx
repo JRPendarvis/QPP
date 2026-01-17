@@ -68,7 +68,9 @@ export default function UploadPage() {
     return null;
   }, [patternChoice, selectedPattern, availablePatterns]);
 
-  const effectiveMaxFabrics = selectedPatternDetails?.maxFabrics ?? MAX_FABRICS;
+  // Calculate effective max fabrics including border fabrics
+  const borderFabricsNeeded = borderConfiguration.enabled ? borderConfiguration.borders.length : 0;
+  const effectiveMaxFabrics = (selectedPatternDetails?.maxFabrics ?? MAX_FABRICS) + borderFabricsNeeded;
 
   const fabricCountValid = useMemo(
     () => validateFabricCount(
@@ -297,12 +299,12 @@ export default function UploadPage() {
                           ))}
 
                           {/* Add border button */}
-                          {borderConfiguration.borders.length < 4 && (
+                          {borderConfiguration.borders.length < 3 && (
                             <button
                               onClick={() => addBorder(0)}
                               className="w-full py-2 px-3 text-sm border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-colors"
                             >
-                              + Add Border ({borderConfiguration.borders.length}/4)
+                              + Add Border ({borderConfiguration.borders.length}/3)
                             </button>
                           )}
                         </div>
@@ -321,6 +323,7 @@ export default function UploadPage() {
                   onFilesAdded={handleFilesAddedWrapper}
                   effectiveMaxFabrics={effectiveMaxFabrics}
                   totalImageSize={totalImageSize}
+                  borderFabricsNeeded={borderFabricsNeeded}
                 />
               </div>
 

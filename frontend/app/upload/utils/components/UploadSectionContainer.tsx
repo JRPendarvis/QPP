@@ -12,6 +12,7 @@ interface UploadSectionContainerProps {
   onFilesAdded: (files: FileList | File[]) => void;
   effectiveMaxFabrics: number;
   totalImageSize: number;
+  borderFabricsNeeded: number;
 }
 
 export function UploadSectionContainer({
@@ -24,6 +25,7 @@ export function UploadSectionContainer({
   onFilesAdded,
   effectiveMaxFabrics,
   totalImageSize,
+  borderFabricsNeeded,
 }: UploadSectionContainerProps) {
   return (
     <div className="border-2 border-gray-200 rounded-lg p-4">
@@ -38,6 +40,7 @@ export function UploadSectionContainer({
         fabricsLength={fabricsLength}
         formatFabricRange={formatFabricRange}
         fabricCountValid={fabricCountValid}
+        borderFabricsNeeded={borderFabricsNeeded}
       />
 
       <FabricDropzone
