@@ -9,6 +9,7 @@ import { ClaudeApiClient } from './claudeApiClient';
 import { PromptOrchestrator } from '../pattern/promptOrchestrator';
 import { QuiltPattern } from '../../types/QuiltPattern';
 import { getPatternById } from '../../config/quiltPatterns';
+import { BorderConfiguration } from '../../types/Border';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -21,10 +22,11 @@ export class ClaudeService {
     skillLevel: string = 'beginner',
     selectedPattern?: string,
     roleAssignments?: any,
-    quiltSize?: string
+    quiltSize?: string,
+    borderConfiguration?: BorderConfiguration
   ): Promise<QuiltPattern> {
     return RetryHandler.withRetry(
-      () => this.attemptPatternGeneration(fabricImages, imageTypes, skillLevel, selectedPattern, roleAssignments, quiltSize),
+      () => this.attemptPatternGeneration(fabricImages, imageTypes, skillLevel, selectedPattern, roleAssignments, quiltSize, borderConfiguration),
       3,
       'Pattern generation'
     );
@@ -36,7 +38,8 @@ export class ClaudeService {
     skillLevel: string = 'beginner',
     selectedPattern?: string,
     roleAssignments?: any,
-    quiltSize?: string
+    quiltSize?: string,
+    borderConfiguration?: BorderConfiguration
   ): Promise<QuiltPattern> {
     try {
       const { patternForSvg, patternInstruction, patternId } = PromptBuilder.selectPattern(
@@ -78,7 +81,7 @@ export class ClaudeService {
       const patternDefinition = patternId ? getPatternById(patternId) : null;
       const patternDifficulty = patternDefinition?.skillLevel || skillLevel;
       
-      const pattern = PatternBuilder.build(parsedResponse, patternForSvg, patternDifficulty, base64s, quiltSize);
+      const pattern = PatternBuilder.build(parsedResponse, patternForSvg, patternDifficulty, base64s, quiltSize, borderConfiguration);
 
       PatternGenerationLogger.logPatternSuccess(pattern, patternForSvg, parsedResponse);
 

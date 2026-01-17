@@ -7,6 +7,8 @@ import { FabricYardageCalculator } from '../../utils/fabric';
 import { renderInstructions as renderCheckerboardInstructions } from '../../config/patterns/checkerboard/renderInstructions';
 import { renderInstructions as renderFourPatchInstructions } from '../../config/patterns/four-patch/renderInstructions';
 import { renderInstructions as renderNinePatchInstructions } from '../../config/patterns/nine-patch/renderInstructions';
+import { BorderConfiguration } from '../../types/Border';
+import { BorderSizeCalculator } from '../../utils/borderSizeCalculator';
 
 /**
  * Service for building QuiltPattern objects from Claude API responses
@@ -20,6 +22,7 @@ export class PatternBuilder {
    * @param patternDifficulty - The pattern's difficulty level (beginner/intermediate/advanced)
    * @param fabricImages - Array of base64 fabric images
    * @param quiltSize - Optional desired quilt size (baby, lap, twin, full, queen, king)
+   * @param borderConfiguration - Optional border configuration
    * @returns Complete QuiltPattern object
    * 
    * @example
@@ -29,7 +32,8 @@ export class PatternBuilder {
    *   'nine-patch',
    *   'beginner',  // Pattern difficulty, not user skill level
    *   ['base64...', 'base64...'],
-   *   'queen'  // Optional size
+   *   'queen',  // Optional size
+   *   borderConfiguration  // Optional borders
    * );
    * ```
    */
@@ -38,7 +42,8 @@ export class PatternBuilder {
     patternForSvg: string,
     patternDifficulty: string,
     fabricImages: string[],
-    quiltSize?: string
+    quiltSize?: string,
+    borderConfiguration?: BorderConfiguration
   ): QuiltPattern {
     const fabrics = this.buildFabrics(parsedResponse, fabricImages);
     const visualSvg = SvgGenerator.generateFromTemplate(patternForSvg, fabrics);
@@ -89,6 +94,17 @@ export class PatternBuilder {
       fabricNames
     );
 
+    // Calculate border dimensions if borders are configured
+    let borderDimensions;
+    if (borderConfiguration?.enabled && borderConfiguration.borders.length > 0) {
+      const quiltSize = this.parseQuiltSize(finalSize);
+      borderDimensions = BorderSizeCalculator.calculateBorderDimensions(
+        borderConfiguration.borders,
+        quiltSize.widthIn,
+        quiltSize.heightIn
+      );
+    }
+
     const pattern = {
       patternName: displayPatternName,
       description: parsedResponse.description || `A beautiful ${patternForSvg} pattern`,
@@ -98,11 +114,15 @@ export class PatternBuilder {
       instructions: validatedInstructions,
       visualSvg: visualSvg,
       fabricRequirements: fabricRequirements,
+      ...(borderConfiguration && { borderConfiguration }),
+      ...(borderDimensions && { borderDimensions }),
     };
     
     console.log('📦 [PatternBuilder] Pattern Object:', {
       hasVisualSvg: !!pattern.visualSvg,
       visualSvgLength: pattern.visualSvg?.length || 0,
+      hasBorders: !!borderConfiguration?.enabled,
+      borderCount: borderConfiguration?.borders.length || 0,
       keys: Object.keys(pattern)
     });
     
@@ -343,5 +363,23 @@ export class PatternBuilder {
     
     // Otherwise use Claude's suggested size or default
     return claudeSize || '60×72 inches';
+  }
+
+  /**
+   * Parse quilt size string into width/height dimensions
+   * @param sizeString - Size string like "90×95 inches"
+   * @returns Object with widthIn and heightIn
+   */
+  private static parseQuiltSize(sizeString: string): { widthIn: number; heightIn: number } {
+    // Extract numbers from string like "90×95 inches"
+    const match = sizeString.match(/(\d+)[×x](\d+)/);
+    if (match) {
+      return {
+        widthIn: parseInt(match[1], 10),
+        heightIn: parseInt(match[2], 10)
+      };
+    }
+    // Default to throw size
+    return { widthIn: 60, heightIn: 72 };
   }
 }

@@ -35,6 +35,7 @@ export class PatternController {
         selectedPattern,
         roleAssignments,
         quiltSize,
+        borderConfiguration,
       } = body as any;
 
       const images = fabricImages || fabrics;
@@ -67,6 +68,7 @@ export class PatternController {
         selectedPattern: normalizedPattern,
         roleAssignments,
         quiltSize,
+        borderConfiguration,
       });
 
       console.log('🎯 [PatternController] Result to send to client:', {

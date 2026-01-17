@@ -6,6 +6,7 @@ import { SkillLevelService } from '../user/skillLevelService';
 import { InstructionGenerationService } from './instructionGenerationService';
 import { PatternRepository } from '../../repositories/patternRepository';
 import { normalizePatternId } from '../../utils/patternNormalization';
+import { BorderConfiguration } from '../../types/Border';
 
 export interface GeneratePatternRequest {
   userId: string;
@@ -16,6 +17,7 @@ export interface GeneratePatternRequest {
   selectedPattern?: string;
   roleAssignments?: any;
   quiltSize?: string;
+  borderConfiguration?: BorderConfiguration;
 }
 
 export interface GeneratePatternResult {
@@ -48,7 +50,7 @@ export class PatternGenerationService {
   }
 
   async generate(request: GeneratePatternRequest): Promise<GeneratePatternResult> {
-    const { userId, images, imageTypes, skillLevel, challengeMe, selectedPattern, roleAssignments, quiltSize } = request;
+    const { userId, images, imageTypes, skillLevel, challengeMe, selectedPattern, roleAssignments, quiltSize, borderConfiguration } = request;
 
     const patternToUse = normalizePatternId(selectedPattern);
     console.log(`📋 Pattern to use: "${patternToUse}" (from: "${selectedPattern}")`);
@@ -66,7 +68,8 @@ export class PatternGenerationService {
       targetSkillLevel,
       patternToUse,
       roleAssignments,
-      quiltSize
+      quiltSize,
+      borderConfiguration
     );
 
     // Generate deterministic instructions when supported
