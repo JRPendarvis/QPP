@@ -38,26 +38,28 @@ export default function BorderPreview({
   const scaledQuiltHeight = quiltTopHeight * scale;
   
   // Calculate nested border dimensions
-  let currentWidth = scaledQuiltWidth;
-  let currentHeight = scaledQuiltHeight;
-  
-  const borderLayers = sortedBorders.map((border) => {
+  const borderLayers = sortedBorders.map((border, index) => {
     const scaledBorderWidth = border.width * scale;
     const color = fabricColors[border.fabricIndex] || '#cccccc';
     
+    // Calculate cumulative dimensions up to this border
+    const previousBorders = sortedBorders.slice(0, index);
+    const cumulativeWidth = previousBorders.reduce((sum, b) => sum + (2 * b.width * scale), 0);
+    const cumulativeHeight = previousBorders.reduce((sum, b) => sum + (2 * b.width * scale), 0);
+    
     const layer = {
-      width: currentWidth + (2 * scaledBorderWidth),
-      height: currentHeight + (2 * scaledBorderWidth),
+      width: scaledQuiltWidth + cumulativeWidth + (2 * scaledBorderWidth),
+      height: scaledQuiltHeight + cumulativeHeight + (2 * scaledBorderWidth),
       borderWidth: scaledBorderWidth,
       color,
       order: border.order
     };
     
-    currentWidth = layer.width;
-    currentHeight = layer.height;
-    
     return layer;
   });
+  
+  const currentWidth = borderLayers.length > 0 ? borderLayers[borderLayers.length - 1].width : scaledQuiltWidth;
+  const currentHeight = borderLayers.length > 0 ? borderLayers[borderLayers.length - 1].height : scaledQuiltHeight;
 
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200">
@@ -96,7 +98,7 @@ export default function BorderPreview({
           
           {/* Quilt top (innermost) */}
           <div
-            className="absolute bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-gray-400"
+            className="absolute bg-linear-to-br from-gray-100 to-gray-200 border-2 border-gray-400"
             style={{
               width: `${scaledQuiltWidth}px`,
               height: `${scaledQuiltHeight}px`,
@@ -124,7 +126,7 @@ export default function BorderPreview({
                   style={{ backgroundColor: color, opacity: 0.8 }}
                 />
                 <span className="text-gray-700">
-                  Border {border.order} - {border.width}" width
+                  Border {border.order} - {border.width}&quot; width
                 </span>
               </div>
             );

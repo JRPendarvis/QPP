@@ -18,7 +18,7 @@ export default function BorderSizeDisplay({
   showDifference = false 
 }: BorderSizeDisplayProps) {
   return (
-    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
+    <div className="bg-linear-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
       <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
         <span className="text-lg">📏</span>
         Size Calculations
@@ -38,7 +38,7 @@ export default function BorderSizeDisplay({
           <div className="flex justify-between items-center">
             <span className="text-gray-700">Total Border Width:</span>
             <span className="font-medium text-indigo-600">
-              +{dimensions.totalBorderWidth}" (all sides)
+              +{dimensions.totalBorderWidth}&quot; (all sides)
             </span>
           </div>
         )}

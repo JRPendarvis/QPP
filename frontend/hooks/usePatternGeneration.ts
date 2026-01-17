@@ -71,9 +71,10 @@ export function usePatternGeneration(): UsePatternGenerationReturn {
    * @param challengeMe - Whether to increase difficulty by one level
    * @param selectedPattern - Optional specific pattern ID to generate
    * @param quiltSize - Optional desired quilt size
+   * @param borders - Optional border configuration
    */
   const generatePattern = useCallback(
-    async (userSkillLevel: string, challengeMe: boolean, selectedPattern?: string, quiltSize?: string) => {
+    async (userSkillLevel: string, challengeMe: boolean, selectedPattern?: string, quiltSize?: string, borders?: any) => {
       const callbacks = WorkflowCallbackFactory.createPatternCallbacks(
         setGenerating,
         setError,
@@ -86,6 +87,7 @@ export function usePatternGeneration(): UsePatternGenerationReturn {
         challengeMe,
         selectedPattern,
         quiltSize,
+        borders,
         callbacks
       );
     },

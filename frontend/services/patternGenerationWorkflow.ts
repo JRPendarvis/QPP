@@ -18,6 +18,7 @@ export class PatternGenerationWorkflow {
     challengeMe: boolean,
     selectedPattern: string | undefined,
     quiltSize: string | undefined,
+    borders: any | undefined,
     callbacks: {
       onStart: () => void;
       onSuccess: (pattern: QuiltPattern) => void;
@@ -34,6 +35,8 @@ export class PatternGenerationWorkflow {
         challengeMe,
         selectedPattern,
         quiltSize,
+        bordersEnabled: borders && borders.length > 0,
+        borders,
       });
 
       this.handleResponse(response, callbacks);

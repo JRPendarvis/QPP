@@ -2,10 +2,12 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
+import { useBorderState } from '@/hooks/useBorderState';
 import Navigation from '@/components/Navigation';
 import UploadHeader from '@/components/upload/UploadHeader';
 import PatternDisplay from '@/components/upload/PatternDisplay';
 import ErrorDisplay from '@/components/upload/ErrorDisplay';
+import BorderControl from '@/components/upload/BorderControl';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '@/lib/api';
 import {
@@ -27,6 +29,16 @@ export default function UploadPage() {
   const [generating, setGenerating] = useState(false);
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
   const [quiltSize, setQuiltSize] = useState<string>('');
+
+  // Border state management
+  const {
+    borderConfiguration,
+    toggleBorders,
+    addBorder,
+    removeBorder,
+    updateBorder,
+    reorderBorder,
+  } = useBorderState(0);
 
   const {
     fabrics,
@@ -124,7 +136,8 @@ export default function UploadPage() {
         currentSkill,
         challengeMe,
         patternChoice === 'manual' ? selectedPattern : undefined,
-        quiltSize || undefined
+        quiltSize || undefined,
+        borderConfiguration.enabled ? borderConfiguration.borders : undefined
       );
       toast.dismiss(loadingToast);
     } catch (error) {
@@ -188,20 +201,8 @@ export default function UploadPage() {
                   currentSkill={currentSkill}
                 />
 
-                <UploadSectionContainer
-                  patternChoice={patternChoice}
-                  selectedPatternDetails={selectedPatternDetails}
-                  MIN_FABRICS={MIN_FABRICS}
-                  MAX_FABRICS={MAX_FABRICS}
-                  fabricsLength={fabrics.length}
-                  fabricCountValid={fabricCountValid}
-                  onFilesAdded={handleFilesAddedWrapper}
-                  effectiveMaxFabrics={effectiveMaxFabrics}
-                  totalImageSize={totalImageSize}
-                />
-
                 <div className="border-2 border-gray-200 rounded-lg p-4">
-                  <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 3: Choose Quilt Size</h2>
+                  <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 2: Choose Quilt Size</h2>
                   <div className="space-y-2">
                     <label className="block text-sm text-gray-600">
                       Choose your desired quilt size (optional)
@@ -226,7 +227,34 @@ export default function UploadPage() {
                     )}
                   </div>
                 </div>
+
+                <UploadSectionContainer
+                  patternChoice={patternChoice}
+                  selectedPatternDetails={selectedPatternDetails}
+                  MIN_FABRICS={MIN_FABRICS}
+                  MAX_FABRICS={MAX_FABRICS}
+                  fabricsLength={fabrics.length}
+                  fabricCountValid={fabricCountValid}
+                  onFilesAdded={handleFilesAddedWrapper}
+                  effectiveMaxFabrics={effectiveMaxFabrics}
+                  totalImageSize={totalImageSize}
+                />
               </div>
+
+              {fabrics.length > 0 && (
+                <div className="mb-6 border-2 border-gray-200 rounded-lg p-4">
+                  <BorderControl
+                    enabled={borderConfiguration.enabled}
+                    borders={borderConfiguration.borders}
+                    fabricNames={fabrics.map((f, idx) => f.name || `Fabric ${idx + 1}`)}
+                    onToggle={toggleBorders}
+                    onAdd={addBorder}
+                    onRemove={removeBorder}
+                    onUpdate={updateBorder}
+                    onReorder={reorderBorder}
+                  />
+                </div>
+              )}
 
               <GenerateButton
                 onClick={handleGenerate}

@@ -28,7 +28,7 @@ export function UploadSectionContainer({
   return (
     <div className="border-2 border-gray-200 rounded-lg p-4">
       <h2 className="text-lg font-semibold text-gray-800 mb-3">
-        Step 2: Upload Your Fabric Images
+        Step 3: Upload Your Fabric Images
       </h2>
       <UploadSection
         patternChoice={patternChoice}
