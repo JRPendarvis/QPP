@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { getBorderName } from '@/utils/borderNaming';
 export interface FabricPreviewGridProps {
   previews: string[];
   fabrics: File[];
@@ -9,6 +10,10 @@ export interface FabricPreviewGridProps {
   onClearAll: () => void;
   onReorder: (fromIdx: number, toIdx: number) => void;
   fabricRoles?: string[]; // Optional pattern-specific fabric roles
+  borderConfiguration?: {
+    enabled: boolean;
+    borders: Array<{ id: string; width: number; fabricIndex: number; order: number }>;
+  };
 }
 
 
@@ -109,11 +114,18 @@ export default function FabricPreviewGrid({
   onClearAll,
   onReorder,
   fabricRoles,
+  borderConfiguration,
 }: FabricPreviewGridProps) {
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   
   // Use pattern-specific roles if provided, otherwise fall back to generic roles
   const roles = fabricRoles || FABRIC_ROLES;
+  
+  // Calculate how many border fabrics we have
+  const borderFabricCount = borderConfiguration?.enabled ? borderConfiguration.borders.length : 0;
+  
+  // Calculate how many fabrics are for the pattern (total - borders)
+  const patternFabricCount = fabrics.length - borderFabricCount;
   
   return (
     <div className="mt-8">
@@ -132,19 +144,32 @@ export default function FabricPreviewGrid({
 
       {/* Mobile: single column, Tablet+: 2-4 columns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-4">
-        {previews.map((preview, index) => (
-          <FabricCard
-            key={index}
-            preview={preview}
-            fabric={fabrics[index]}
-            label={roles[index] || `Fabric ${index + 1}`}
-            index={index}
-            draggedIdx={draggedIdx}
-            setDraggedIdx={setDraggedIdx}
-            onRemove={onRemove}
-            onReorder={onReorder}
-          />
-        ))}
+        {previews.map((preview, index) => {
+          let label: string;
+          
+          // If this fabric is beyond the pattern fabric count, it's a border fabric
+          if (index >= patternFabricCount && borderFabricCount > 0) {
+            const borderOrder = index - patternFabricCount + 1; // 1-based order
+            label = getBorderName(borderOrder, borderFabricCount);
+          } else {
+            // Pattern fabric - use role or fallback
+            label = roles[index] || `Fabric ${index + 1}`;
+          }
+          
+          return (
+            <FabricCard
+              key={index}
+              preview={preview}
+              fabric={fabrics[index]}
+              label={label}
+              index={index}
+              draggedIdx={draggedIdx}
+              setDraggedIdx={setDraggedIdx}
+              onRemove={onRemove}
+              onReorder={onReorder}
+            />
+          );
+        })}
       </div>
       {/* Larger, more readable hint text on mobile */}
       <p className="mt-4 sm:mt-2 text-sm sm:text-xs text-gray-500 text-center sm:text-left">

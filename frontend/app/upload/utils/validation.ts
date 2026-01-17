@@ -5,13 +5,16 @@ export function validateFabricCount(
   patternChoice: PatternChoice,
   selectedPattern: string,
   selectedPatternDetails: PatternDetails | null,
-  fabricsLength: number
+  fabricsLength: number,
+  borderCount: number = 0
 ): boolean {
+  // Subtract border fabrics to get pattern fabric count
+  const patternFabricCount = Math.max(0, fabricsLength - borderCount);
   if (patternChoice === 'auto') {
     // Use user's skill level if available, otherwise default to 'beginner'
     const skillLevel = 'beginner';
     const patterns: PatternDetails[] = getPatternsForSkillLevel(skillLevel);
-    const valid = patterns.some((p) => fabricsLength >= p.minFabrics && fabricsLength <= p.maxFabrics);
+    const valid = patterns.some((p) => patternFabricCount >= p.minFabrics && patternFabricCount <= p.maxFabrics);
     return valid;
   }
   if (!selectedPattern) {
@@ -21,8 +24,8 @@ export function validateFabricCount(
     return false;
   }
   return (
-    fabricsLength >= selectedPatternDetails.minFabrics &&
-    fabricsLength <= selectedPatternDetails.maxFabrics
+    patternFabricCount >= selectedPatternDetails.minFabrics &&
+    patternFabricCount <= selectedPatternDetails.maxFabrics
   );
 }
 
@@ -30,19 +33,24 @@ export function getFabricValidationMessage(
   patternChoice: PatternChoice,
   selectedPattern: string,
   selectedPatternDetails: PatternDetails | null,
-  fabricsLength: number
+  fabricsLength: number,
+  borderCount: number = 0
 ): string | null {
+  // Subtract border fabrics to get pattern fabric count
+  const patternFabricCount = Math.max(0, fabricsLength - borderCount);
   if (patternChoice === 'auto') {
     // Use user's skill level if available, otherwise default to 'beginner'
     const skillLevel = 'beginner';
     const patterns: PatternDetails[] = getPatternsForSkillLevel(skillLevel);
     // Assume minimum is 2 for auto mode
-    if (fabricsLength < 2) {
-      return `Upload at least 2 fabrics to generate a pattern`;
+    if (patternFabricCount < 2) {
+      const borderSuffix = borderCount > 0 ? ` (plus ${borderCount} for borders)` : '';
+      return `Upload at least 2 fabrics for the pattern${borderSuffix}`;
     }
-    const valid = patterns.some((p) => fabricsLength >= p.minFabrics && fabricsLength <= p.maxFabrics);
+    const valid = patterns.some((p) => patternFabricCount >= p.minFabrics && patternFabricCount <= p.maxFabrics);
     if (!valid) {
-      return `No available pattern for your skill level matches ${fabricsLength} fabric${fabricsLength !== 1 ? 's' : ''}. Please add or remove fabrics to match a supported pattern.`;
+      const borderSuffix = borderCount > 0 ? ` for the pattern (plus ${borderCount} for borders)` : '';
+      return `No available pattern for your skill level matches ${patternFabricCount} fabric${patternFabricCount !== 1 ? 's' : ''}${borderSuffix}. Please add or remove fabrics to match a supported pattern.`;
     }
     return null;
   }
@@ -53,14 +61,16 @@ export function getFabricValidationMessage(
 
   if (!selectedPatternDetails) return null;
 
-  if (fabricsLength < selectedPatternDetails.minFabrics) {
-    const needed = selectedPatternDetails.minFabrics - fabricsLength;
-    return `${selectedPatternDetails.name} requires at least ${selectedPatternDetails.minFabrics} fabrics. Please add ${needed} more.`;
+  if (patternFabricCount < selectedPatternDetails.minFabrics) {
+    const needed = selectedPatternDetails.minFabrics - patternFabricCount;
+    const borderSuffix = borderCount > 0 ? ` (plus ${borderCount} for borders)` : '';
+    return `${selectedPatternDetails.name} requires at least ${selectedPatternDetails.minFabrics} pattern fabrics${borderSuffix}. Please add ${needed} more.`;
   }
 
-  if (fabricsLength > selectedPatternDetails.maxFabrics) {
-    const excess = fabricsLength - selectedPatternDetails.maxFabrics;
-    return `${selectedPatternDetails.name} uses at most ${selectedPatternDetails.maxFabrics} fabrics. Please remove ${excess} or choose a different pattern.`;
+  if (patternFabricCount > selectedPatternDetails.maxFabrics) {
+    const excess = patternFabricCount - selectedPatternDetails.maxFabrics;
+    const borderSuffix = borderCount > 0 ? `. You have ${borderCount} border fabric${borderCount !== 1 ? 's' : ''}` : '';
+    return `${selectedPatternDetails.name} uses at most ${selectedPatternDetails.maxFabrics} pattern fabrics${borderSuffix}. Please remove ${excess} pattern fabric${excess !== 1 ? 's' : ''} or choose a different pattern.`;
   }
 
   return null;

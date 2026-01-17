@@ -78,9 +78,10 @@ export default function UploadPage() {
       patternChoice,
       selectedPattern,
       selectedPatternDetails,
-      fabrics.length
+      fabrics.length,
+      borderFabricsNeeded
     ),
-    [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length]
+    [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length, borderFabricsNeeded]
   );
 
   const fabricValidationMessage = useMemo(
@@ -88,9 +89,10 @@ export default function UploadPage() {
       patternChoice,
       selectedPattern,
       selectedPatternDetails,
-      fabrics.length
+      fabrics.length,
+      borderFabricsNeeded
     ),
-    [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length]
+    [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length, borderFabricsNeeded]
   );
 
   const handlePatternChoiceChange = (choice: PatternChoice) => {
@@ -347,55 +349,8 @@ export default function UploadPage() {
                     onClearAll={clearAll}
                     onReorder={handleFabricReorder}
                     fabricRoles={fabricRoles.length > 0 ? fabricRoles : undefined}
+                    borderConfiguration={borderConfiguration}
                   />
-                  
-                  {/* Border Fabric Assignment within uploaded fabrics section */}
-                  {borderConfiguration.enabled && borderConfiguration.borders.length > 0 && (
-                    <div className="mt-4 p-4 bg-indigo-50 border-2 border-indigo-200 rounded-lg">
-                      <h3 className="text-md font-semibold text-gray-900 mb-3">Assign Fabrics to Borders</h3>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Select which fabric to use for each border
-                      </p>
-                      <div className="space-y-3">
-                        {borderConfiguration.borders.sort((a, b) => a.order - b.order).map((border) => {
-                          const selectedFabric = fabrics[border.fabricIndex];
-                          const selectedPreview = previews[border.fabricIndex];
-                          const borderName = getBorderName(border.order, borderConfiguration.borders.length);
-                          
-                          return (
-                            <div key={border.id} className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                              <span className="text-sm font-medium text-gray-700 min-w-[120px]">
-                                {borderName}:
-                              </span>
-                              
-                              {/* Fabric preview thumbnail */}
-                              {selectedPreview && (
-                                <div className="w-16 h-16 rounded border-2 border-gray-300 overflow-hidden flex-shrink-0">
-                                  <img 
-                                    src={selectedPreview} 
-                                    alt={selectedFabric?.name || `Fabric ${border.fabricIndex + 1}`}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
-                              
-                              <select
-                                value={border.fabricIndex}
-                                onChange={(e) => updateBorder(border.id, { fabricIndex: parseInt(e.target.value) })}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                              >
-                                {fabrics.map((fabric, idx) => (
-                                  <option key={idx} value={idx}>
-                                    {fabric.name || `Fabric ${idx + 1}`}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
