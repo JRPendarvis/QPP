@@ -3,7 +3,7 @@ import { PatternFormatter } from '../../utils/patternFormatter';
 import { InstructionValidator } from './instructionValidator';
 import { QuiltPattern } from '../../types/QuiltPattern';
 import { ClaudeResponse, Fabric } from '../../types/ClaudeResponse';
-import { FabricYardageCalculator } from '../../utils/fabricYardageCalculator';
+import { FabricYardageCalculator } from '../../utils/fabric';
 import { renderInstructions as renderCheckerboardInstructions } from '../../config/patterns/checkerboard/renderInstructions';
 import { renderInstructions as renderFourPatchInstructions } from '../../config/patterns/four-patch/renderInstructions';
 import { renderInstructions as renderNinePatchInstructions } from '../../config/patterns/nine-patch/renderInstructions';
