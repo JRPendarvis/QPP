@@ -61,14 +61,41 @@ export class PatternBuilder {
     });
     
     // Build fabrics using pattern fabrics only (Claude analyzed these)
-    const fabrics = this.buildFabrics(parsedResponse, patternFabricImages);
-    const visualSvg = SvgGenerator.generateFromTemplate(patternForSvg, fabrics);
+    const patternFabrics = this.buildFabrics(parsedResponse, patternFabricImages);
+    
+    // Build ALL fabrics (pattern + border) for SVG border rendering
+    // Border fabrics weren't analyzed by Claude, so we build them separately
+    let allFabrics = patternFabrics;
+    if (borderCount > 0) {
+      const borderFabricImages = fabricImages.slice(fabricImages.length - borderCount);
+      const borderFabrics = borderFabricImages.map((image, idx) => ({
+        color: '#CCCCCC',  // Default color, will be overridden by fabric pattern
+        type: 'printed' as const,
+        image: image
+      }));
+      allFabrics = [...patternFabrics, ...borderFabrics];
+    }
+    
+    console.log('🎨 [PatternBuilder] All fabrics:', {
+      patternFabricCount: patternFabrics.length,
+      borderFabricCount: borderCount,
+      totalFabricCount: allFabrics.length
+    });
+    
+    // Generate SVG with borders if configured
+    const visualSvg = SvgGenerator.generateFromTemplate(
+      patternForSvg, 
+      patternFabrics,
+      borderConfiguration,
+      allFabrics
+    );
     
     console.log('🎨 [PatternBuilder] SVG Generated:', {
       patternForSvg,
       svgLength: visualSvg?.length || 0,
       svgPreview: visualSvg?.substring(0, 100) || 'EMPTY',
-      fabricCount: fabrics.length
+      fabricCount: patternFabrics.length,
+      hasBorders: !!borderConfiguration?.enabled
     });
     
     const displayPatternName = this.extractPatternName(parsedResponse.patternName, patternForSvg);
@@ -77,7 +104,7 @@ export class PatternBuilder {
     const finalSize = this.getQuiltSize(quiltSize, parsedResponse.estimatedSize);
     
     // Calculate fabric requirements with actual fabric info
-    const fabricInfo = fabrics.map((fabric, idx) => {
+    const fabricInfo = patternFabrics.map((fabric, idx) => {
       const fabricAnalysis = parsedResponse.fabricAnalysis?.[idx];
       return {
         color: fabric.color,

@@ -2,7 +2,9 @@ import { TemplateFinder } from '../services/pattern/templateFinder';
 import { BlockGenerator } from '../services/pattern/blockGenerator';
 import { ImagePatternBuilder } from '../services/image/imagePatternBuilder';
 import { SvgWrapper } from '../services/pattern/svgWrapper';
+import { SvgBorderRenderer } from '../services/pattern/svgBorderRenderer';
 import { Fabric } from '../types/Fabric';
+import { BorderConfiguration } from '../types/Border';
 
 // Re-export Fabric type for backward compatibility
 export type { Fabric };
@@ -15,7 +17,9 @@ export class SvgGenerator {
    * Generates an SVG string for a given pattern type and fabrics.
    * 
    * @param patternType - The name of the quilt pattern
-   * @param fabrics - Array of fabric objects
+   * @param fabrics - Array of fabric objects (pattern fabrics only)
+   * @param borderConfiguration - Optional border configuration
+   * @param allFabrics - All fabrics including border fabrics (if borders enabled)
    * @returns Complete SVG string
    * 
    * @example
@@ -27,7 +31,12 @@ export class SvgGenerator {
    * const svg = SvgGenerator.generateFromTemplate('nine-patch', fabrics);
    * ```
    */
-  static generateFromTemplate(patternType: string, fabrics: Fabric[]): string {
+  static generateFromTemplate(
+    patternType: string, 
+    fabrics: Fabric[],
+    borderConfiguration?: BorderConfiguration,
+    allFabrics?: Fabric[]
+  ): string {
     // Validate inputs
     this.validateInputs(patternType, fabrics);
 
@@ -40,10 +49,16 @@ export class SvgGenerator {
 
     // Generate components
     const blocks = BlockGenerator.generate(template, fabrics, patternDef);
-    const imageDefs = ImagePatternBuilder.build(fabrics);
+    const fabricsForDefs = allFabrics || fabrics;
+    const imageDefs = ImagePatternBuilder.build(fabricsForDefs);
+    
+    // Generate border SVG if configured
+    const borderSvg = borderConfiguration && allFabrics
+      ? SvgBorderRenderer.renderBorders(borderConfiguration, allFabrics)
+      : '';
     
     // Wrap and return
-    return SvgWrapper.wrap(blocks, imageDefs);
+    return SvgWrapper.wrap(blocks, imageDefs, borderSvg);
   }
 
   /**

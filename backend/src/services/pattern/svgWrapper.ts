@@ -7,15 +7,16 @@ export class SvgWrapper {
    * 
    * @param blocks - SVG block elements as a string
    * @param extraDefs - Additional SVG definitions (patterns, filters, etc.)
+   * @param borderSvg - Optional border SVG elements
    * @returns Complete SVG markup
    * 
    * @example
    * ```typescript
-   * const svg = SvgWrapper.wrap('<g>...</g>', '<pattern>...</pattern>');
+   * const svg = SvgWrapper.wrap('<g>...</g>', '<pattern>...</pattern>', '<rect>...</rect>');
    * // Returns: '<svg viewBox="0 0 300 400">...</svg>'
    * ```
    */
-  static wrap(blocks: string, extraDefs: string = ''): string {
+  static wrap(blocks: string, extraDefs: string = '', borderSvg: string = ''): string {
     return `<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
     ${this.getDefaultPatterns()}
@@ -23,6 +24,7 @@ export class SvgWrapper {
     ${this.getDefaultFilters()}
   </defs>
   <rect width="300" height="400" fill="#ffffff"/>
+  ${borderSvg}
   <g filter="url(#quilting)">
 ${blocks}  </g>
 </svg>`;
