@@ -16,7 +16,7 @@ function flattenNestedSvg(rawSvg: string): string {
 function ensureSvgSizing(flattened: string): string {
   let ensured = flattened;
   if (ensured.startsWith('<svg')) {
-    // Inject style/width/height if missing
+    // Inject style/width/height if missing (preserve existing viewBox from backend)
     ensured = ensured.replace(
       /<svg\b([^>]*)>/i,
       (match, attrs) => {
@@ -32,8 +32,8 @@ function ensureSvgSizing(flattened: string): string {
       }
     );
   } else {
-    // If somehow not an svg root, wrap it
-    ensured = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="100%" height="100%" style="display:block">${flattened}</svg>`;
+    // If somehow not an svg root, wrap it (keep generous viewBox for borders)
+    ensured = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-120 -120 540 640" width="100%" height="100%" style="display:block">${flattened}</svg>`;
   }
   return ensured;
 }

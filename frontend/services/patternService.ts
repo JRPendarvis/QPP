@@ -25,6 +25,10 @@ export class PatternService {
       challengeMe: request.challengeMe,
       selectedPattern: request.selectedPattern || 'auto',
       quiltSize: request.quiltSize,
+      borderConfiguration: request.borders && request.borders.length > 0 ? {
+        enabled: true,
+        borders: request.borders
+      } : undefined,
     });
 
     return response.data;

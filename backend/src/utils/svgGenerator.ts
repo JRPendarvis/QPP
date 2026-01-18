@@ -37,6 +37,16 @@ export class SvgGenerator {
     borderConfiguration?: BorderConfiguration,
     allFabrics?: Fabric[]
   ): string {
+    console.log('🎨 [SvgGenerator] Called with:', {
+      patternType,
+      fabricCount: fabrics.length,
+      allFabricsCount: allFabrics?.length || 0,
+      borderEnabled: borderConfiguration?.enabled || false,
+      borderCount: borderConfiguration?.borders?.length || 0,
+      fabricColors: fabrics.map(f => f.color),
+      allFabricColors: allFabrics?.map(f => f.color) || []
+    });
+    
     // Validate inputs
     this.validateInputs(patternType, fabrics);
 
@@ -47,18 +57,22 @@ export class SvgGenerator {
       throw new Error(`SVG template not found for pattern type: ${patternType}`);
     }
 
+    // Base SVG dimensions (quilt blocks only)
+    const baseWidth = 300;
+    const baseHeight = 400;
+
     // Generate components
     const blocks = BlockGenerator.generate(template, fabrics, patternDef);
     const fabricsForDefs = allFabrics || fabrics;
     const imageDefs = ImagePatternBuilder.build(fabricsForDefs);
     
-    // Generate border SVG if configured
+    // Generate border SVG if configured (borders extend around blocks at negative coords)
     const borderSvg = borderConfiguration && allFabrics
-      ? SvgBorderRenderer.renderBorders(borderConfiguration, allFabrics)
+      ? SvgBorderRenderer.renderBorders(borderConfiguration, allFabrics, baseWidth, baseHeight)
       : '';
     
-    // Wrap and return
-    return SvgWrapper.wrap(blocks, imageDefs, borderSvg);
+    // Wrap and return (viewBox is generous enough for max borders)
+    return SvgWrapper.wrap(blocks, imageDefs, borderSvg, baseWidth, baseHeight);
   }
 
   /**
