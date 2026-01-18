@@ -140,6 +140,9 @@ export class PatternBuilder {
       visualSvgLength: pattern.visualSvg?.length || 0,
       hasBorders: !!borderConfiguration?.enabled,
       borderCount: borderConfiguration?.borders.length || 0,
+      borderConfiguration: borderConfiguration,
+      borderDimensions: borderDimensions,
+      fabricImagesCount: fabricImages.length,
       keys: Object.keys(pattern)
     });
     

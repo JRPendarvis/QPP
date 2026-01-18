@@ -11,10 +11,19 @@ export class PDFBorderRenderer {
    * Render border information section
    */
   renderBorderSection(doc: InstanceType<typeof PDFDocument>, pattern: QuiltPattern): void {
+    console.log('🎨 [PDFBorderRenderer] Checking borders:', {
+      hasBorderConfiguration: !!pattern.borderConfiguration,
+      borderEnabled: pattern.borderConfiguration?.enabled,
+      borderCount: pattern.borderConfiguration?.borders?.length || 0,
+      borders: pattern.borderConfiguration?.borders
+    });
+    
     if (!pattern.borderConfiguration?.enabled || !pattern.borderConfiguration.borders.length) {
+      console.log('⚠️ [PDFBorderRenderer] Skipping border rendering - not enabled or no borders');
       return;
     }
 
+    console.log('✅ [PDFBorderRenderer] Rendering border section');
     const { borderConfiguration, borderDimensions } = pattern;
     
     // Section title
