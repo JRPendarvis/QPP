@@ -54,7 +54,7 @@ describe('BorderSizeCalculator', () => {
   });
 
   describe('calculateDifferenceFromTarget', () => {
-    it('should calculate positive difference when finished size is smaller', () => {
+    it('should calculate difference when finished size differs from target', () => {
       const result = BorderSizeCalculator.calculateDifferenceFromTarget(
         65, // finishedWidth
         77, // finishedHeight
@@ -62,11 +62,11 @@ describe('BorderSizeCalculator', () => {
         82  // targetHeight
       );
 
-      expect(result.widthDiff).toBe(5); // Need 5 more inches
-      expect(result.heightDiff).toBe(5); // Need 5 more inches
+      expect(result.width).toBe(-5); // 5 inches smaller than target
+      expect(result.height).toBe(-5); // 5 inches smaller than target
     });
 
-    it('should calculate negative difference when finished size is larger', () => {
+    it('should calculate positive difference when finished size is larger', () => {
       const result = BorderSizeCalculator.calculateDifferenceFromTarget(
         75, // finishedWidth
         87, // finishedHeight
@@ -74,8 +74,8 @@ describe('BorderSizeCalculator', () => {
         82  // targetHeight
       );
 
-      expect(result.widthDiff).toBe(-5); // 5 inches too wide
-      expect(result.heightDiff).toBe(-5); // 5 inches too tall
+      expect(result.width).toBe(5); // 5 inches too wide
+      expect(result.height).toBe(5); // 5 inches too tall
     });
 
     it('should return zero when dimensions match exactly', () => {
@@ -86,49 +86,71 @@ describe('BorderSizeCalculator', () => {
         82
       );
 
-      expect(result.widthDiff).toBe(0);
-      expect(result.heightDiff).toBe(0);
+      expect(result.width).toBe(0);
+      expect(result.height).toBe(0);
     });
   });
 
-  describe('suggestBorderAdjustment', () => {
-    it('should suggest wider borders when quilt is too small', () => {
-      const result = BorderSizeCalculator.suggestBorderAdjustment(
-        60, // currentWidth
-        72, // currentHeight
-        70, // targetWidth
-        82, // targetHeight
-        2.5 // currentBorderWidth
+  describe('getDimensionsAtEachBorderLevel', () => {
+    it('should track dimensions as each border is added', () => {
+      const borders: Border[] = [
+        { id: '1', order: 1, width: 2.5, fabricIndex: 0 },
+        { id: '2', order: 2, width: 3.0, fabricIndex: 1 }
+      ];
+
+      const result = BorderSizeCalculator.getDimensionsAtEachBorderLevel(
+        borders,
+        60,
+        72
       );
 
-      expect(result.suggestedBorderWidth).toBeGreaterThan(2.5);
-      expect(result.message).toContain('increase');
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        width: 65,  // 60 + (2 * 2.5)
+        height: 77, // 72 + (2 * 2.5)
+        borderNumber: 1
+      });
+      expect(result[1]).toEqual({
+        width: 71,  // 65 + (2 * 3.0)
+        height: 83, // 77 + (2 * 3.0)
+        borderNumber: 2
+      });
     });
 
-    it('should suggest narrower borders when quilt is too large', () => {
-      const result = BorderSizeCalculator.suggestBorderAdjustment(
-        80, // currentWidth (too wide)
-        92, // currentHeight (too tall)
-        70, // targetWidth
-        82, // targetHeight
-        5.0 // currentBorderWidth
+    it('should handle single border', () => {
+      const borders: Border[] = [
+        { id: '1', order: 1, width: 3.0, fabricIndex: 0 }
+      ];
+
+      const result = BorderSizeCalculator.getDimensionsAtEachBorderLevel(
+        borders,
+        60,
+        72
       );
 
-      expect(result.suggestedBorderWidth).toBeLessThan(5.0);
-      expect(result.message).toContain('decrease');
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        width: 66,  // 60 + 6
+        height: 78, // 72 + 6
+        borderNumber: 1
+      });
     });
 
-    it('should suggest no change when dimensions are close enough', () => {
-      const result = BorderSizeCalculator.suggestBorderAdjustment(
-        70,
-        82,
-        70,
-        82,
-        2.5
+    it('should return empty array for no borders', () => {
+      const result = BorderSizeCalculator.getDimensionsAtEachBorderLevel(
+        [],
+        60,
+        72
       );
 
-      expect(result.suggestedBorderWidth).toBe(2.5);
-      expect(result.message).toContain('perfect');
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('formatSize', () => {
+    it('should format dimensions correctly', () => {
+      expect(BorderSizeCalculator.formatSize(60, 72)).toBe('60" × 72"');
+      expect(BorderSizeCalculator.formatSize(70.5, 82.5)).toBe('70.5" × 82.5"');
     });
   });
 });
