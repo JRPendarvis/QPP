@@ -65,7 +65,7 @@ export default function PatternVisualization({ visualSvg, patternName }: Pattern
 
   return (
     <div className="bg-gray-50 rounded-lg p-6 flex justify-center">
-      <div className="w-full max-w-md aspect-3/4 border border-gray-200 rounded bg-white overflow-hidden">
+      <div className="w-full max-w-2xl aspect-3/4 border border-gray-200 rounded bg-white overflow-hidden">
         {sanitizedSvg ? (
           <div
             className="w-full h-full"

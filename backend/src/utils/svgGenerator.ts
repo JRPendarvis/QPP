@@ -71,8 +71,13 @@ export class SvgGenerator {
       ? SvgBorderRenderer.renderBorders(borderConfiguration, allFabrics, baseWidth, baseHeight)
       : '';
     
-    // Wrap and return (viewBox is generous enough for max borders)
-    return SvgWrapper.wrap(blocks, imageDefs, borderSvg, baseWidth, baseHeight);
+    // Calculate total border width for viewBox sizing
+    const totalBorderWidth = borderConfiguration?.enabled 
+      ? borderConfiguration.borders.reduce((sum, b) => sum + b.width, 0)
+      : 0;
+    
+    // Wrap and return with calculated viewBox
+    return SvgWrapper.wrap(blocks, imageDefs, borderSvg, baseWidth, baseHeight, totalBorderWidth);
   }
 
   /**

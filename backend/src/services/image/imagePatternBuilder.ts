@@ -43,8 +43,8 @@ export class ImagePatternBuilder {
    * Creates a single pattern definition for a fabric image
    */
   private static createPatternDefinition(imageData: string, index: number): string {
-    return `\n<pattern id="fabricImage${index}" patternUnits="objectBoundingBox" width="1" height="1">` +
-      `<image href="data:image/png;base64,${imageData}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" />` +
+    return `\n<pattern id="fabricImage${index}" patternUnits="userSpaceOnUse" width="50" height="50">` +
+      `<image href="data:image/png;base64,${imageData}" x="0" y="0" width="50" height="50" preserveAspectRatio="xMidYMid slice" />` +
       `</pattern>`;
   }
 }

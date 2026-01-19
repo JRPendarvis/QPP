@@ -9,6 +9,7 @@ import { renderInstructions as renderFourPatchInstructions } from '../../config/
 import { renderInstructions as renderNinePatchInstructions } from '../../config/patterns/nine-patch/renderInstructions';
 import { BorderConfiguration } from '../../types/Border';
 import { BorderSizeCalculator } from '../../utils/borderSizeCalculator';
+import { BorderFabricCalculator } from '../../utils/borderFabricCalculator';
 
 /**
  * Service for building QuiltPattern objects from Claude API responses
@@ -117,6 +118,39 @@ export class PatternBuilder {
       fabricInfo,
       patternForSvg
     );
+    
+    // Add border fabric requirements if borders are configured
+    if (borderConfiguration?.enabled && borderConfiguration.borders.length > 0 && borderCount > 0) {
+      const quiltSizeObj = this.parseQuiltSize(finalSize);
+      const borderFabricImages = fabricImages.slice(fabricImages.length - borderCount);
+      const borderFabrics = borderFabricImages.map((image: string, idx: number) => ({
+        color: '#CCCCCC',
+        type: 'printed' as const,
+        image: image
+      }));
+      
+      const borderFabricNames = borderFabrics.map((fabric: any, idx: number) => {
+        const borderIndex = idx;
+        const border = borderConfiguration.borders[borderIndex];
+        return border ? this.getBorderFabricName(borderIndex, borderConfiguration.borders.length, fabric) : `Border Fabric ${idx + 1}`;
+      });
+      
+      const borderRequirements = BorderFabricCalculator.calculateBorderRequirements(
+        borderConfiguration.borders,
+        quiltSizeObj.widthIn,
+        quiltSizeObj.heightIn,
+        borderFabricNames
+      );
+      
+      // Convert border requirements to FabricRequirement format and append
+      borderRequirements.forEach(borderReq => {
+        fabricRequirements.push({
+          role: borderReq.fabricName,
+          yards: borderReq.totalYards,
+          description: `Border fabric - ${borderReq.cutInstructions}`
+        });
+      });
+    }
     
     // Get accurate fabricLayout from computed instructions using actual fabric names
     const fabricNames = fabricRequirements
@@ -388,6 +422,22 @@ export class PatternBuilder {
    */
   private static formatDifficulty(skillLevel: string): string {
     return skillLevel.replace('_', ' ');
+  }
+
+  /**
+   * Gets display name for a border fabric based on position and count
+   */
+  private static getBorderFabricName(index: number, totalBorders: number, fabric: any): string {
+    if (totalBorders === 1) {
+      return 'Border';
+    } else if (totalBorders === 2) {
+      return index === 0 ? 'Inner Border' : 'Outer Border';
+    } else if (totalBorders === 3) {
+      if (index === 0) return 'Inner Border';
+      if (index === 1) return 'Middle Border';
+      return 'Outer Border';
+    }
+    return `Border ${index + 1}`;
   }
 
   /**

@@ -26,15 +26,15 @@ export class SvgWrapper {
     totalHeight: number = 400,
     borderWidth: number = 0
   ): string {
-    // Use a generous viewBox that accommodates max borders (up to ~10" on each side)
-    // Quilt blocks always render at (0,0) - borders extend into negative space
-    const maxBorderSpace = 100; // Max 10" borders per side (1" = 10 SVG units)
-    const padding = 20;
+    // Calculate viewBox based on actual border width (1" = 10 SVG units)
+    // Add small padding for visual breathing room
+    const borderSpace = borderWidth > 0 ? borderWidth * 10 : 0;
+    const padding = 10; // Small padding for aesthetics
     
-    const viewBoxX = -(maxBorderSpace + padding);
-    const viewBoxY = -(maxBorderSpace + padding);
-    const viewBoxWidth = totalWidth + (2 * (maxBorderSpace + padding));
-    const viewBoxHeight = totalHeight + (2 * (maxBorderSpace + padding));
+    const viewBoxX = -(borderSpace + padding);
+    const viewBoxY = -(borderSpace + padding);
+    const viewBoxWidth = totalWidth + (2 * (borderSpace + padding));
+    const viewBoxHeight = totalHeight + (2 * (borderSpace + padding));
     
     return `<svg viewBox="${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}" xmlns="http://www.w3.org/2000/svg">
   <defs>
