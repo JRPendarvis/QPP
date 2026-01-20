@@ -40,7 +40,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'Can I save patterns for later?',
-    answer: 'Not Yet! Your pattern history is saved and we are working on displaying them. This is a feature that is COMING SOON!',
+    answer: 'Yes! All your generated patterns are automatically saved in your Library. You can view, download, and manage all your patterns from your account dashboard.',
   },
   {
     question: 'What if I\'m not happy with the generated pattern?',
