@@ -16,3 +16,12 @@ coverage/
 .nyc_output/
 .vscode/
 .idea/
+
+# Project management and temporary docs (keep local only)
+TODO.md
+MVP-TODO-LIST.md
+PRODUCTION-CHECKLIST.md
+CLEANUP-RECOMMENDATIONS.md
+BORDERS-IMPLEMENTATION.md
+UNIT-TESTING-SETUP.md
+doc/archive/
