@@ -22,7 +22,7 @@ import { useUserProfile, usePatternSelection } from './utils/hooks';
 import { validateFabricCount, getFabricValidationMessage } from './utils/validation';
 import { PatternChoice, PatternDetails } from './utils/types';
 import { getBorderName } from '@/utils/borderNaming';
-import { formatFabricRange } from '@/app/helpers/patternHelpers';
+import { formatFabricRange, SKILL_LEVELS } from '@/app/helpers/patternHelpers';
 
 export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
@@ -195,15 +195,16 @@ export default function UploadPage() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <PatternSelectionSection
                   patternChoice={patternChoice}
-                  onPatternChoiceChange={handlePatternChoiceChange}
+                  setPatternChoice={handlePatternChoiceChange}
                   selectedPattern={selectedPattern}
-                  onSelectedPatternChange={setSelectedPattern}
+                  setSelectedPattern={setSelectedPattern}
                   availablePatterns={availablePatterns}
                   selectedPatternDetails={selectedPatternDetails}
                   fabricsLength={fabrics.length}
-                  fabricCountValid={fabricCountValid}
+                  formatFabricRange={formatFabricRange}
                   challengeMe={challengeMe}
-                  onChallengeMeChange={setChallengeMe}
+                  setChallengeMe={setChallengeMe}
+                  SKILL_LEVELS={SKILL_LEVELS}
                   targetSkill={targetSkill}
                   currentSkill={currentSkill}
                 />
