@@ -1,5 +1,5 @@
 import { PatternChoice, PatternDetails } from './types';
-import { getPatternsForSkillLevel } from '../uploadUtils';
+import { getPatternsForSkillLevel } from '@/app/helpers/patternHelpers';
 
 export function validateFabricCount(
   patternChoice: PatternChoice,

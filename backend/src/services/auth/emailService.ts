@@ -5,15 +5,16 @@ const resend = process.env.RESEND_API_KEY
   : null;
 
 const FROM_EMAIL = 'Quilt Planner Pro <noreply@quiltplannerpro.com>';
+const DEBUG = process.env.DEBUG_EMAIL === 'true';
 
-if (!resend) {
+if (!resend && DEBUG) {
   console.warn('⚠️  RESEND_API_KEY not found - email functionality disabled');
 }
 
 export const emailService = {
   async sendWelcomeEmail(to: string, name?: string) {
     if (!resend) {
-      console.log('Email service disabled - skipping welcome email');
+      if (DEBUG) console.log('Email service disabled - skipping welcome email');
       return;
     }
     try {
@@ -46,7 +47,7 @@ export const emailService = {
           </div>
         `
       });
-      console.log(`Welcome email sent to ${to}`);
+      if (DEBUG) console.log(`Welcome email sent to ${to}`);
     } catch (error) {
       console.error('Failed to send welcome email:', error);
     }
@@ -54,7 +55,7 @@ export const emailService = {
 
   async sendPasswordResetEmail(to: string, resetUrl: string) {
     if (!resend) {
-      console.log('Email service disabled - skipping password reset email');
+      if (DEBUG) console.log('Email service disabled - skipping password reset email');
       return;
     }
     try {
@@ -82,7 +83,7 @@ export const emailService = {
           </div>
         `
       });
-      console.log(`Password reset email sent to ${to}`);
+      if (DEBUG) console.log(`Password reset email sent to ${to}`);
     } catch (error) {
       console.error('Failed to send password reset email:', error);
     }
@@ -90,7 +91,7 @@ export const emailService = {
 
   async sendFeedbackNotification(userEmail: string, userName: string | undefined, title: string, description: string | null) {
     if (!resend) {
-      console.log('Email service disabled - skipping feedback notification');
+      if (DEBUG) console.log('Email service disabled - skipping feedback notification');
       return;
     }
     try {
@@ -120,7 +121,7 @@ export const emailService = {
           </div>
         `
       });
-      console.log(`Feedback notification sent to ${adminEmail}`);
+      if (DEBUG) console.log(`Feedback notification sent to ${adminEmail}`);
     } catch (error) {
       console.error('Failed to send feedback notification:', error);
     }

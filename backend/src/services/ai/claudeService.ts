@@ -51,13 +51,6 @@ export class ClaudeService {
       const patternImageTypes = borderCount > 0
         ? imageTypes.slice(0, imageTypes.length - borderCount)
         : imageTypes;
-      
-      console.log('🎨 [ClaudeService] Fabric separation:', {
-        totalFabrics: fabricImages.length,
-        borderCount,
-        patternFabricCount: patternFabricImages.length,
-        borderFabricIndices: borderCount > 0 ? `${fabricImages.length - borderCount} to ${fabricImages.length - 1}` : 'none'
-      });
 
       const { patternForSvg, patternInstruction, patternId } = PromptBuilder.selectPattern(
         skillLevel,

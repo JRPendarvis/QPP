@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 import { UserProfile, PatternDetails } from './types';
-import { NEXT_LEVEL, getPatternsForSkillLevel } from '../uploadUtils';
+import { NEXT_LEVEL, getPatternsForSkillLevel } from '@/app/helpers/patternHelpers';
 
 export function useUserProfile() {
   const { user, loading } = useAuth();

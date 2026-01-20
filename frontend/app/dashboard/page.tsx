@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import Navigation from '@/components/Navigation';
+import { UserProfile } from '@/app/types/user';
 
 const SKILL_LEVELS: Record<string, string> = {
   beginner: 'Beginner',
@@ -13,14 +14,6 @@ const SKILL_LEVELS: Record<string, string> = {
   advanced: 'Advanced',
   expert: 'Expert',
 };
-
-interface UserProfile {
-  skillLevel: string;
-  subscriptionTier: string;
-  name?: string;
-  email: string;
-  badge?: string;
-}
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();

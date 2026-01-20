@@ -29,13 +29,10 @@ const slugToTitle: Record<string, string> = {
 
 export default async function DocPage({ params }: Props) {
   const { slug } = await params;
-  console.log('Legal doc request - URL slug:', slug);
   const fileName = slugToFile[slug];
   if (!fileName) {
-    console.error('Invalid slug:', slug, 'Valid slugs:', Object.keys(slugToFile));
     return <div className="p-8">Document not found</div>;
   }
-  console.log('Mapped to file:', fileName);
 
   // Use public folder path (most reliable for Next.js)
   const docPath = path.join(process.cwd(), 'public', 'doc', fileName);
@@ -45,7 +42,6 @@ export default async function DocPage({ params }: Props) {
 
   try {
     content = await fs.readFile(docPath, 'utf-8');
-    console.log('Successfully loaded:', docPath);
   } catch (err) {
     console.error('Failed to load doc:', {
       slug,

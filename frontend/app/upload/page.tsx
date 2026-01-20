@@ -13,13 +13,16 @@ import {
   FabricPreviewGrid,
   ValidationMessage,
   GenerateButton,
+  PatternSelectionSection,
+  UploadSection,
+  FabricDropzone,
 } from '@/components/upload';
 
 import { useUserProfile, usePatternSelection } from './utils/hooks';
 import { validateFabricCount, getFabricValidationMessage } from './utils/validation';
-import { PatternSelectionSection, UploadSectionContainer } from './utils/components';
 import { PatternChoice, PatternDetails } from './utils/types';
 import { getBorderName } from '@/utils/borderNaming';
+import { formatFabricRange } from '@/app/helpers/patternHelpers';
 
 export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
@@ -319,18 +322,28 @@ export default function UploadPage() {
                   </div>
                 </div>
 
-                <UploadSectionContainer
-                  patternChoice={patternChoice}
-                  selectedPatternDetails={selectedPatternDetails}
-                  MIN_FABRICS={MIN_FABRICS}
-                  MAX_FABRICS={MAX_FABRICS}
-                  fabricsLength={fabrics.length}
-                  fabricCountValid={fabricCountValid}
-                  onFilesAdded={handleFilesAddedWrapper}
-                  effectiveMaxFabrics={effectiveMaxFabrics}
-                  totalImageSize={totalImageSize}
-                  borderFabricsNeeded={borderFabricsNeeded}
-                />
+                <div className="border-2 border-gray-200 rounded-lg p-4">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                    Step 3: Upload Your Fabric Images
+                  </h2>
+                  <UploadSection
+                    patternChoice={patternChoice}
+                    selectedPatternDetails={selectedPatternDetails}
+                    MIN_FABRICS={MIN_FABRICS}
+                    MAX_FABRICS={MAX_FABRICS}
+                    fabricsLength={fabrics.length}
+                    formatFabricRange={formatFabricRange}
+                    fabricCountValid={fabricCountValid}
+                    borderFabricsNeeded={borderFabricsNeeded}
+                  />
+
+                  <FabricDropzone
+                    onFilesAdded={handleFilesAddedWrapper}
+                    currentCount={fabrics.length}
+                    maxFiles={effectiveMaxFabrics}
+                    totalSize={totalImageSize}
+                  />
+                </div>
               </div>
 
               <GenerateButton
