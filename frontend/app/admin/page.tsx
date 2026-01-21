@@ -44,6 +44,17 @@ interface PatternData {
   };
 }
 
+interface FeedbackVote {
+  id: string;
+  userId: string;
+  feedbackId: string;
+  createdAt: string;
+  user: {
+    email: string;
+    name: string | null;
+  };
+}
+
 interface FeedbackData {
   id: string;
   title: string;
@@ -55,7 +66,7 @@ interface FeedbackData {
     email: string;
     name: string | null;
   } | null;
-  votes: any[];
+  votes: FeedbackVote[];
 }
 
 export default function AdminPage() {
