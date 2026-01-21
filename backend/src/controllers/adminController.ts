@@ -135,16 +135,7 @@ export class AdminController {
               name: true,
             },
           },
-          votes: {
-            include: {
-              user: {
-                select: {
-                  email: true,
-                  name: true,
-                },
-              },
-            },
-          },
+          votes: true,
         },
         orderBy: { createdAt: 'desc' },
       });

@@ -49,10 +49,6 @@ interface FeedbackVote {
   userId: string;
   feedbackId: string;
   createdAt: string;
-  user: {
-    email: string;
-    name: string | null;
-  };
 }
 
 interface FeedbackData {
