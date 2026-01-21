@@ -120,7 +120,7 @@ export default function RegisterPage() {
               />
               <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-700">
                 I accept the{' '}
-                <Link href="/legal/terms" target="_blank" className="font-medium hover:underline" style={{color: '#2C7A7B'}}>
+                <Link href="/legal/terms-of-service" target="_blank" className="font-medium hover:underline" style={{color: '#2C7A7B'}}>
                   Terms of Service
                 </Link>
                 {' '}*
