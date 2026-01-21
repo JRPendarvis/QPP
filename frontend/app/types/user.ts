@@ -4,6 +4,7 @@ export interface UserProfile {
   name?: string;
   email: string;
   badge?: string;
+  role?: string;
   usage?: {
     used: number;
     limit: number;

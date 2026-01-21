@@ -17,6 +17,7 @@ export interface UserProfileData {
   lastResetDate: Date;
   createdAt: Date;
   badge: string | null;
+  role: string;
 }
 
 export interface UserUpdateData {
@@ -51,6 +52,7 @@ export class UserRepository {
         lastResetDate: true,
         createdAt: true,
         badge: true,
+        role: true,
       },
     });
 

@@ -11,6 +11,7 @@ interface User {
   email: string;
   name: string | null;
   subscriptionTier: string;
+  role?: string;
 }
 
 interface AuthContextType {

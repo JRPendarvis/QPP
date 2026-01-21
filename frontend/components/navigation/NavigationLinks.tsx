@@ -6,6 +6,7 @@ interface User {
   email: string;
   name: string | null;
   subscriptionTier: string;
+  role?: string;
 }
 
 interface NavigationLinksProps {
@@ -54,6 +55,11 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
           <Link href="/feedback" onClick={handleClick} className={linkClass}>
             Feedback
           </Link>
+          {user.role === 'staff' && (
+            <Link href="/admin" onClick={handleClick} className={linkClass}>
+              Admin
+            </Link>
+          )}
           <Link href="/profile" onClick={handleClick} className={linkClass}>
             Profile
           </Link>
