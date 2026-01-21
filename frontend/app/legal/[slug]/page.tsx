@@ -34,23 +34,36 @@ export default async function DocPage({ params }: Props) {
     return <div className="p-8">Document not found</div>;
   }
 
-  // Use public folder path (most reliable for Next.js)
-  const docPath = path.join(process.cwd(), 'public', 'doc', fileName);
+  // Try multiple possible paths for the markdown files
+  const possiblePaths = [
+    path.join(process.cwd(), 'public', 'doc', fileName),
+    path.join(process.cwd(), 'frontend', 'public', 'doc', fileName),
+    path.join(__dirname, '..', '..', '..', 'public', 'doc', fileName),
+  ];
 
   let content = '';
   let error: Error | null = null;
+  let usedPath = '';
 
-  try {
-    content = await fs.readFile(docPath, 'utf-8');
-  } catch (err) {
-    console.error('Failed to load doc:', {
+  for (const docPath of possiblePaths) {
+    try {
+      content = await fs.readFile(docPath, 'utf-8');
+      usedPath = docPath;
+      break; // Success, exit loop
+    } catch (err) {
+      // Continue to next path
+      continue;
+    }
+  }
+
+  if (!content) {
+    console.error('Failed to load doc from all paths:', {
       slug,
       fileName,
-      docPath,
-      error: err instanceof Error ? err.message : 'Unknown error',
+      attemptedPaths: possiblePaths,
       cwd: process.cwd(),
     });
-    error = err instanceof Error ? err : new Error('Unknown error');
+    error = new Error('Document not found in any location');
   }
 
   // Handle error case
