@@ -127,6 +127,7 @@ export class AdminController {
    */
   async getFeedback(req: Request, res: Response): Promise<void> {
     try {
+      console.log('[Admin] Fetching feedback...');
       const feedback = await prisma.feedback.findMany({
         include: {
           author: {
@@ -139,11 +140,12 @@ export class AdminController {
         },
         orderBy: { createdAt: 'desc' },
       });
+      console.log('[Admin] Feedback fetched:', feedback.length, 'items');
 
       res.json({ success: true, data: feedback });
     } catch (error) {
       console.error('Admin feedback error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch feedback' });
+      res.status(500).json({ success: false, message: 'Failed to fetch feedback', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   }
 
