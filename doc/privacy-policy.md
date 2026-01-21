@@ -408,4 +408,4 @@ If you do not agree with this Privacy Policy, please do not use the Service.
 
 *QuiltPlannerPro is a product of T Top Quilts LLC*  
 *We're quilters helping quilters—your privacy is our priority.*  
-*Copyright © 2024 T Top Quilts LLC. All rights reserved.*
+*Copyright © 2026 T Top Quilts LLC. All rights reserved.*

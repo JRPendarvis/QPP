@@ -126,4 +126,4 @@ We respond within 1-2 business days.
 ---
 
 *QuiltPlannerPro is a product of T Top Quilts LLC*  
-*Copyright © 2024 T Top Quilts LLC. All rights reserved.*
+*Copyright © 2026 T Top Quilts LLC. All rights reserved.*

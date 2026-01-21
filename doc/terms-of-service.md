@@ -266,4 +266,4 @@ BY USING QUILTPLANNERPRO, YOU ACKNOWLEDGE THAT YOU HAVE READ THESE TERMS OF SERV
 ---
 
 *QuiltPlannerPro is a product of T Top Quilts LLC*  
-*Copyright © 2024 T Top Quilts LLC. All rights reserved.*
+*Copyright © 2026 T Top Quilts LLC. All rights reserved.*
