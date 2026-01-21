@@ -1,13 +1,26 @@
 import { Router } from "express";
 import { UsageResetService } from "../services/user/usageResetService";
+import { AdminController } from "../controllers/adminController";
 import { authenticate } from "../middleware/authMiddleware";
 import { requireAdmin } from "../middleware/requireAdmin";
 
 const router = Router();
 const usageResetService = new UsageResetService();
+const adminController = new AdminController();
 
-// POST /api/admin/reset-usage - Manual usage reset trigger (ADMIN ONLY)
-router.post("/reset-usage", authenticate, requireAdmin, async (_req, res) => {
+// All admin routes require authentication + staff role
+router.use(authenticate);
+router.use(requireAdmin);
+
+// Analytics & Reports
+router.get("/overview", (req, res) => adminController.getOverview(req, res));
+router.get("/users", (req, res) => adminController.getUsers(req, res));
+router.get("/patterns", (req, res) => adminController.getPatterns(req, res));
+router.get("/feedback", (req, res) => adminController.getFeedback(req, res));
+router.get("/usage-stats", (req, res) => adminController.getUsageStats(req, res));
+
+// POST /api/admin/reset-usage - Manual usage reset trigger
+router.post("/reset-usage", async (_req, res) => {
   try {
     await usageResetService.resetMonthlyUsage();
 
@@ -24,8 +37,8 @@ router.post("/reset-usage", authenticate, requireAdmin, async (_req, res) => {
   }
 });
 
-// GET /api/admin/reset-stats - Get reset statistics (ADMIN ONLY)
-router.get("/reset-stats", authenticate, requireAdmin, async (_req, res) => {
+// GET /api/admin/reset-stats - Get reset statistics
+router.get("/reset-stats", async (_req, res) => {
   try {
     const stats = await usageResetService.getResetStats();
 

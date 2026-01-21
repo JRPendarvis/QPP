@@ -10,6 +10,7 @@ export interface UserDownloadData {
   subscriptionStatus: string;
   currentPeriodEnd: Date | null;
   downloadsThisMonth: number;
+  role: string;
 }
 
 export interface PatternDownloadData {
@@ -39,6 +40,7 @@ export class DownloadRepository {
         subscriptionStatus: true,
         currentPeriodEnd: true,
         downloadsThisMonth: true,
+        role: true,
       },
     });
   }

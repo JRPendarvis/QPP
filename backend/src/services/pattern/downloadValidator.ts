@@ -75,6 +75,11 @@ export class DownloadValidator {
       return { canDownload: true };
     }
 
+    // Staff users bypass download limits
+    if (user.role === 'staff') {
+      return { canDownload: true };
+    }
+
     const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
 
     if (user.downloadsThisMonth >= tierConfig.downloadsPerMonth) {

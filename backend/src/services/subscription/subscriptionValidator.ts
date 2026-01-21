@@ -15,6 +15,7 @@ export interface ValidatedUser {
     subscriptionStatus: string;
     currentPeriodEnd: Date | null;
     generationsThisMonth: number;
+    role: string;
   };
   tierConfig: {
     generationsPerMonth: number;
@@ -39,11 +40,21 @@ export class SubscriptionValidator {
         subscriptionStatus: true,
         currentPeriodEnd: true,
         generationsThisMonth: true,
+        role: true,
       },
     });
 
     if (!user) {
       throw new Error('USER_NOT_FOUND');
+    }
+
+    // Staff users bypass all limits
+    if (user.role === 'staff') {
+      const tierConfig = {
+        generationsPerMonth: Infinity,
+        downloadsPerMonth: Infinity,
+      };
+      return { user, tierConfig };
     }
 
     if (
