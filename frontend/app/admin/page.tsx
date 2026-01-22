@@ -95,7 +95,7 @@ export default function AdminPage() {
         
         // Load initial data
         await loadOverview();
-      } catch (err) {
+      } catch (_err) {
         setError('Access denied');
         router.push('/dashboard');
       }
@@ -111,7 +111,7 @@ export default function AdminPage() {
       if (res.data?.success) {
         setOverview(res.data.data);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load overview');
     } finally {
       setLoading(false);
@@ -125,7 +125,7 @@ export default function AdminPage() {
       if (res.data?.success) {
         setUsers(res.data.data);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load users');
     } finally {
       setLoading(false);
@@ -139,7 +139,7 @@ export default function AdminPage() {
       if (res.data?.success) {
         setPatterns(res.data.data);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load patterns');
     } finally {
       setLoading(false);
@@ -153,7 +153,7 @@ export default function AdminPage() {
       if (res.data?.success) {
         setFeedback(res.data.data);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load feedback');
     } finally {
       setLoading(false);
@@ -192,7 +192,7 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="flex-grow py-8">
+      <div className="grow py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {error && (
