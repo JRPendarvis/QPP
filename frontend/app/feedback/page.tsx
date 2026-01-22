@@ -98,15 +98,28 @@ export default function FeedbackPage() {
       console.error('Failed to toggle vote:', err);
     }
   };
-        setFbDesc('');
-        setFbMessage('Thanks! Your suggestion has been submitted.');
-      }
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      setFbError(error.response?.data?.message || 'Failed to submit feedback');
-    } finally {
-      setFbSaving(false);
-    }Feature Requests & Ideas
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+
+      {/* Header Banner */}
+      <div className="py-12 px-4" style={{backgroundColor: '#B91C1C'}}>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Feature Requests & Ideas
           </h1>
           <p className="text-red-100">
             Vote on features you&apos;d like to see or submit your own suggestions
