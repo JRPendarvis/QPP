@@ -95,7 +95,7 @@ export default function AdminPage() {
         
         // Load initial data
         await loadOverview();
-      } catch (_err) {
+      } catch {
         setError('Access denied');
         router.push('/dashboard');
       }
@@ -111,7 +111,7 @@ export default function AdminPage() {
       if (res.data?.success) {
         setOverview(res.data.data);
       }
-    } catch (_err) {
+    } catch {
       setError('Failed to load overview');
     } finally {
       setLoading(false);
@@ -125,7 +125,7 @@ export default function AdminPage() {
       if (res.data?.success) {
         setUsers(res.data.data);
       }
-    } catch (_err) {
+    } catch {
       setError('Failed to load users');
     } finally {
       setLoading(false);
@@ -139,7 +139,7 @@ export default function AdminPage() {
       if (res.data?.success) {
         setPatterns(res.data.data);
       }
-    } catch (_err) {
+    } catch {
       setError('Failed to load patterns');
     } finally {
       setLoading(false);
@@ -153,7 +153,7 @@ export default function AdminPage() {
       if (res.data?.success) {
         setFeedback(res.data.data);
       }
-    } catch (_err) {
+    } catch {
       setError('Failed to load feedback');
     } finally {
       setLoading(false);
