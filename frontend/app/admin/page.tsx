@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 
 interface OverviewStats {
   totalUsers: number;
@@ -177,8 +179,10 @@ export default function AdminPage() {
       </div>
     );
   }
-
-  return (
+flex flex-col">
+      <Navigation />
+      <div className="flex-grow py-8">
+    return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
@@ -341,6 +345,8 @@ export default function AdminPage() {
             </table>
           </div>
         )}
+    <Footer />
+  </div>
       </div>
     </div>
   );
