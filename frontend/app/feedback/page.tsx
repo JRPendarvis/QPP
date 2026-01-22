@@ -276,32 +276,11 @@ export default function FeedbackPage() {
                 </div>
               ))}
             </div>
-          )}nFocus={(e) => e.target.style.borderColor = '#2C7A7B'}
-                onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
-              />
-            </div>
-            <div className="flex justify-end gap-4">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="px-6 py-2 text-gray-700 border border-gray-300 font-semibold rounded-md hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={fbSaving}
-                className="px-6 py-2 text-white font-semibold rounded-md shadow disabled:opacity-50"
-                style={{backgroundColor: '#B91C1C'}}
-                onMouseEnter={(e) => !fbSaving && (e.currentTarget.style.backgroundColor = '#991B1B')}
-                onMouseLeave={(e) => !fbSaving && (e.currentTarget.style.backgroundColor = '#B91C1C')}
-              >
-                {fbSaving ? 'Submitting...' : 'Submit Feedback'}
-              </button>
-            </div>
-          </form>
+          )}
         </div>
       </main>
     </div>
+  );
+}
   );
 }
