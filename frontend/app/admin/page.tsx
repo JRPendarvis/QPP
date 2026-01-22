@@ -183,12 +183,17 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navigation />
+      
+      {/* Header Banner */}
+      <div className="py-8 px-4" style={{backgroundColor: '#B91C1C'}}>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-red-100">Platform analytics and management</p>
+        </div>
+      </div>
+
       <div className="flex-grow py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-red-700">Admin Dashboard</h1>
-          <p className="mt-2 text-gray-600">Platform analytics and management</p>
-        </div>
 
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
