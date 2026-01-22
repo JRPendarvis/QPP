@@ -242,7 +242,7 @@ export default function FeedbackPage() {
                     {/* Vote Button */}
                     <button
                       onClick={() => handleVote(item.id)}
-                      className={`flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-lg border-2 transition-all ${
+                      className={`shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-lg border-2 transition-all ${
                         item.voted
                           ? 'bg-red-700 border-red-700 text-white'
                           : 'bg-white border-gray-300 text-gray-700 hover:border-red-700 hover:bg-red-50'
