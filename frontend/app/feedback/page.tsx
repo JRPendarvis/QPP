@@ -49,7 +49,25 @@ export default function FeedbackPage() {
     } finally {
       setLoadingList(false);
     }
-  };  setShowForm(false);
+  };
+
+  const handleFeedbackCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFbMessage('');
+    setFbError('');
+
+    if (!fbTitle.trim()) {
+      setFbError('Please provide a short title');
+      return;
+    }
+    setFbSaving(true);
+    try {
+      const res = await api.post('/api/feedback', { title: fbTitle.trim(), description: fbDesc.trim() || undefined });
+      if (res.data?.success) {
+        setFbTitle('');
+        setFbDesc('');
+        setFbMessage('Thanks! Your suggestion has been submitted.');
+        setShowForm(false);
         loadFeedback(); // Reload the list
       }
     } catch (err: unknown) {
@@ -77,17 +95,9 @@ export default function FeedbackPage() {
         ));
       }
     } catch (err) {
-      console.error('Failed to toggle vote:', err
-
-    if (!fbTitle.trim()) {
-      setFbError('Please provide a short title');
-      return;
+      console.error('Failed to toggle vote:', err);
     }
-    setFbSaving(true);
-    try {
-      const res = await api.post('/api/feedback', { title: fbTitle.trim(), description: fbDesc.trim() || undefined });
-      if (res.data?.success) {
-        setFbTitle('');
+  };
         setFbDesc('');
         setFbMessage('Thanks! Your suggestion has been submitted.');
       }
