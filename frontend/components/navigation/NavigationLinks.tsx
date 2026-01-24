@@ -212,9 +212,3 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
     </>
   );
 }
-          </Link>
-        </>
-      )}
-    </>
-  );
-}
