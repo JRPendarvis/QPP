@@ -132,18 +132,12 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
       </Link>
       {user ? (
         <>
+          <Link href={ROUTES.DASHBOARD} onClick={handleClick} className={linkClass}>
+            Dashboard
+          </Link>
           <Link href="/feedback" onClick={handleClick} className={linkClass}>
             Feedback
           </Link>
-          {user.role === 'staff' && (
-            <Link 
-              href="/admin" 
-              onClick={handleClick} 
-              className="px-3 py-1.5 text-sm font-semibold text-purple-700 bg-purple-50 rounded-md hover:bg-purple-100 border border-purple-200"
-            >
-              Admin
-            </Link>
-          )}
           
           {/* Account Dropdown */}
           <div className="relative" ref={dropdownRef}>
@@ -167,9 +161,18 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
 
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                <Link href={ROUTES.DASHBOARD} onClick={handleClick} className={dropdownLinkClass}>
-                  Dashboard
-                </Link>
+                {user.role === 'staff' && (
+                  <>
+                    <Link 
+                      href="/admin" 
+                      onClick={handleClick} 
+                      className="block px-4 py-2 text-sm font-semibold text-purple-700 hover:bg-purple-50"
+                    >
+                      Admin
+                    </Link>
+                    <hr className="my-1 border-gray-200" />
+                  </>
+                )}
                 <Link href="/library" onClick={handleClick} className={dropdownLinkClass}>
                   My Patterns
                 </Link>
