@@ -1,10 +1,8 @@
 // src/services/subscriptionService.ts
 
 import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-11-17.clover'
-});
+import { SubscriptionDataProcessor } from './subscriptionDataProcessor';
+import { StripeApiExecutor } from './stripeApiExecutor';
 
 export interface SubscriptionUpdateData {
   subscriptionTier: string;
@@ -29,9 +27,15 @@ export interface SubscriptionCancellationData {
 
 /**
  * Handles Stripe subscription business logic
- * Single Responsibility: Subscription lifecycle operations
+ * Orchestrates subscription lifecycle operations using specialized services
  */
 export class SubscriptionService {
+  private stripeApi: StripeApiExecutor;
+
+  constructor() {
+    this.stripeApi = new StripeApiExecutor();
+  }
+
   /**
    * Process completed checkout session and extract subscription data
    * @param session - Stripe checkout session
@@ -50,15 +54,12 @@ export class SubscriptionService {
       return null;
     }
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const tier = session.metadata?.tier || 'basic';
-    const interval = session.metadata?.interval || 'monthly';
+    const subscription = await this.stripeApi.retrieveSubscription(subscriptionId);
+    const { tier, interval } = SubscriptionDataProcessor.extractMetadata(session.metadata);
     
     // Safely get current_period_end
     const subData = subscription as unknown as { current_period_end?: number };
-    const periodEnd = subData.current_period_end 
-      ? new Date(subData.current_period_end * 1000)
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const periodEnd = SubscriptionDataProcessor.convertPeriodEnd(subData.current_period_end);
 
     console.log(`Subscription activated: user=${userId} tier=${tier} interval=${interval}`);
 
@@ -82,9 +83,7 @@ export class SubscriptionService {
    */
   processSubscriptionUpdate(subscription: Stripe.Subscription): SubscriptionStatusUpdate {
     const subData = subscription as unknown as { current_period_end?: number };
-    const periodEnd = subData.current_period_end
-      ? new Date(subData.current_period_end * 1000)
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const periodEnd = SubscriptionDataProcessor.convertPeriodEnd(subData.current_period_end);
 
     console.log(`Subscription updated: id=${subscription.id} status=${subscription.status}`);
 
@@ -100,13 +99,7 @@ export class SubscriptionService {
    */
   processSubscriptionCancellation(): SubscriptionCancellationData {
     console.log('Processing subscription cancellation');
-    
-    return {
-      subscriptionTier: 'free',
-      subscriptionStatus: 'canceled',
-      stripeSubscriptionId: null,
-      billingInterval: null
-    };
+    return SubscriptionDataProcessor.createCancellationData();
   }
 
   /**
@@ -115,12 +108,7 @@ export class SubscriptionService {
    * @returns Updated subscription object
    */
   async cancelAtPeriodEnd(stripeSubscriptionId: string): Promise<Stripe.Subscription> {
-    const subscription = await stripe.subscriptions.update(stripeSubscriptionId, {
-      cancel_at_period_end: true
-    });
-
-    console.log(`Subscription scheduled for cancellation: ${stripeSubscriptionId}`);
-    return subscription;
+    return this.stripeApi.cancelAtPeriodEnd(stripeSubscriptionId);
   }
 
   /**
@@ -130,12 +118,6 @@ export class SubscriptionService {
    * @returns Portal session with URL
    */
   async createPortalSession(customerId: string, returnUrl: string): Promise<Stripe.BillingPortal.Session> {
-    const session = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: returnUrl
-    });
-
-    console.log(`Portal session created for customer: ${customerId}`);
-    return session;
+    return this.stripeApi.createPortalSession(customerId, returnUrl);
   }
 }
