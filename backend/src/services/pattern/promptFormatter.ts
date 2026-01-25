@@ -1,9 +1,14 @@
-// src/services/promptFormatter.ts
+// src/services/pattern/promptFormatter.ts
 
-import { SKILL_LEVEL_DESCRIPTIONS } from '../../config/skill-levels';
-import { PatternFormatter } from '../../utils/patternFormatter';
 import { getPatternPrompt } from '../../config/prompts';
 import { normalizePatternId } from '../../utils/patternNormalization';
+import { SkillLevelResolver } from './skillLevelResolver';
+import { PatternDescriptionResolver } from './patternDescriptionResolver';
+import { PatternGuidanceFormatter } from './patternGuidanceFormatter';
+import { FabricSummaryBuilder } from './fabricSummaryBuilder';
+import { QuiltSizeMapper } from './quiltSizeMapper';
+import { InitialPromptBuilder } from './initialPromptBuilder';
+import { RoleSwapPromptBuilder } from './roleSwapPromptBuilder';
 
 export interface FabricAnalysis {
   fabricIndex: number;
@@ -29,8 +34,8 @@ export interface RoleAssignments {
 }
 
 /**
- * Formats AI prompts for Claude pattern generation
- * Single Responsibility: Prompt text construction only
+ * Orchestrates AI prompt construction for Claude pattern generation
+ * Single Responsibility: Coordinates prompt building services only
  */
 export class PromptFormatter {
   /**
@@ -51,60 +56,22 @@ export class PromptFormatter {
     patternId?: string,
     quiltSize?: string
   ): string {
-    const skillDescription = this.getSkillDescription(skillLevel);
+    const skillDescription = SkillLevelResolver.getDescription(skillLevel);
     const patternPrompt = patternId ? getPatternPrompt(normalizePatternId(patternId)) : null;
-    const patternDescription = this.getPatternDescription(patternForSvg, patternPrompt);
-    const patternGuidance = this.buildPatternGuidance(patternForSvg, patternPrompt);
-    const targetSize = this.getTargetSize(quiltSize);
+    const patternDescription = PatternDescriptionResolver.getDescription(patternForSvg, patternPrompt);
+    const patternGuidance = PatternGuidanceFormatter.buildFullGuidance(patternForSvg, patternPrompt);
+    const targetSize = QuiltSizeMapper.getFormattedSize(quiltSize);
 
-    return `You are an expert quilter with deep knowledge of fabric selection and color theory. I'm providing you with ${fabricCount} fabric images.
-
-${patternInstruction}
-
-**CRITICAL: YOU MUST CREATE A "${patternForSvg.toUpperCase()}" PATTERN - NOT ANY OTHER PATTERN TYPE**
-
-For reference, a "${patternForSvg}" pattern has these characteristics:
-${patternDescription}
-
-${patternGuidance}
-
-**STEP 1: ANALYZE EACH FABRIC**
-For EACH fabric image, identify:
-1. Is it a PRINTED fabric (has patterns/designs/characters) or a SOLID fabric (single color)?
-2. If PRINTED: Describe the print
-3. If SOLID: Identify the hex color
-4. Identify the dominant/background color as a hex code for the SVG visualization
-5. VALUE: LIGHT / MEDIUM / DARK
-6. PRINT SCALE: SOLID / SMALL / MEDIUM / LARGE
-
-**STEP 2: ASSIGN FABRIC ROLES**
-- BACKGROUND / PRIMARY / SECONDARY / ACCENT
-
-**STEP 3: CREATE THE PATTERN**
-Create a "${patternForSvg}" quilt pattern that incorporates ALL ${fabricCount} fabrics.
-
-Skill level: ${skillDescription}
-
-Provide this JSON response:
-
-{
-  "patternName": "Creative Name - ${patternForSvg}",
-  "description": "2-3 sentences describing the pattern and how the fabrics work together",
-  "fabricAnalysis": [],
-  "roleAssignments": { "background": null, "primary": null, "secondary": null, "accent": null },
-  "fabricLayout": "",
-  "difficulty": "${skillLevel.replace('_', ' ')}",
-  "estimatedSize": "${targetSize}",
-  "instructions": [],
-  "fabricColors": [],
-  "fabricDescriptions": []
-}
-
-**IMPORTANT REQUIREMENTS:**
-- Return ONLY valid JSON
-- fabricAnalysis / fabricColors / fabricDescriptions MUST each have exactly ${fabricCount} entries
-- difficulty MUST be "${skillLevel.replace('_', ' ')}"
-- estimatedSize MUST be "${targetSize}" and instructions should be for this size`;
+    return InitialPromptBuilder.build({
+      fabricCount,
+      patternForSvg,
+      patternInstruction,
+      skillDescription,
+      patternDescription,
+      patternGuidance,
+      targetSize,
+      skillLevel,
+    });
   }
 
   /**
@@ -125,125 +92,22 @@ Provide this JSON response:
     patternId?: string,
     quiltSize?: string
   ): string {
-    const skillDescription = this.getSkillDescription(skillLevel);
+    const skillDescription = SkillLevelResolver.getDescription(skillLevel);
     const patternPrompt = patternId ? getPatternPrompt(normalizePatternId(patternId)) : null;
-    const patternDescription = this.getPatternDescription(patternForSvg, patternPrompt);
-    const fabricSummary = this.buildFabricSummary(fabricAnalysis);
-    const rolesSummary = this.buildRolesSummary(newRoleAssignments);
-    const patternGuidance = this.buildRoleSwapGuidance(patternPrompt);
-    const targetSize = this.getTargetSize(quiltSize);
+    const patternDescription = PatternDescriptionResolver.getDescription(patternForSvg, patternPrompt);
+    const fabricSummary = FabricSummaryBuilder.buildFabricSummary(fabricAnalysis);
+    const rolesSummary = FabricSummaryBuilder.buildRolesSummary(newRoleAssignments);
+    const patternGuidance = PatternGuidanceFormatter.buildRoleSwapGuidance(patternPrompt);
+    const targetSize = QuiltSizeMapper.getFormattedSize(quiltSize);
 
-    return `You are an expert quilter. The user has selected custom fabric role assignments for a "${patternForSvg}" pattern.
-
-**FABRICS:**
-${fabricSummary}
-
-**USER'S ROLE ASSIGNMENTS:**
-${rolesSummary}
-
-**PATTERN:** ${patternForSvg}
-${patternDescription}
-
-${patternGuidance}
-
-**SKILL LEVEL:** ${skillDescription}
-
-**TARGET SIZE:** ${targetSize}
-
-Generate updated instructions that use these specific role assignments for a ${targetSize} quilt.
-
-Provide this JSON response:
-
-{
-  "fabricLayout": "",
-  "instructions": [],
-  "warnings": []
-}
-
-Return ONLY valid JSON.`;
-  }
-
-  /**
-   * Get skill level description
-   */
-  private getSkillDescription(skillLevel: string): string {
-    return SKILL_LEVEL_DESCRIPTIONS[skillLevel] || SKILL_LEVEL_DESCRIPTIONS['beginner'];
-  }
-
-  /**
-   * Get pattern description from prompt or formatter
-   */
-  private getPatternDescription(patternForSvg: string, patternPrompt: any): string {
-    return patternPrompt ? patternPrompt.characteristics : PatternFormatter.getPatternDescription(patternForSvg);
-  }
-
-  /**
-   * Build pattern-specific guidance section
-   */
-  private buildPatternGuidance(patternForSvg: string, patternPrompt: any): string {
-    if (!patternPrompt) return '';
-
-    return `
-**PATTERN-SPECIFIC GUIDANCE FOR ${patternForSvg.toUpperCase()}:**
-
-${patternPrompt.fabricRoleGuidance}
-
-**Cutting Guidance:**
-${patternPrompt.cuttingInstructions}
-
-**Assembly Guidance:**
-${patternPrompt.assemblyNotes}
-
-**Common Mistakes to Avoid:**
-${patternPrompt.commonMistakes}
-`;
-  }
-
-  /**
-   * Build fabric summary for role swap prompt
-   */
-  private buildFabricSummary(fabricAnalysis: FabricAnalysis[]): string {
-    return fabricAnalysis
-      .map((f) => `- Fabric ${f.fabricIndex}: ${f.description} (${f.value} value, ${f.printScale} print)`)
-      .join('\n');
-  }
-
-  /**
-   * Build roles summary for role swap prompt
-   */
-  private buildRolesSummary(roleAssignments: RoleAssignments): string {
-    return Object.entries(roleAssignments)
-      .filter(([_, assignment]) => assignment !== null)
-      .map(([role, assignment]) => `- ${role.toUpperCase()}: Fabric ${assignment!.fabricIndex} (${assignment!.description})`)
-      .join('\n');
-  }
-
-  /**
-   * Build pattern guidance for role swap
-   */
-  private buildRoleSwapGuidance(patternPrompt: any): string {
-    if (!patternPrompt) return '';
-
-    return `
-**PATTERN-SPECIFIC GUIDANCE:**
-${patternPrompt.fabricRoleGuidance}
-${patternPrompt.assemblyNotes}
-`;
-  }
-
-  /**
-   * Get target quilt size based on user selection or default
-   */
-  private getTargetSize(quiltSize?: string): string {
-    const sizeMap: Record<string, string> = {
-      'baby': '36×52 inches baby quilt',
-      'lap': '50×65 inches lap/throw quilt',
-      'twin': '66×90 inches twin quilt',
-      'full': '80×90 inches full/double quilt',
-      'queen': '90×95 inches queen quilt',
-      'king': '105×95 inches king quilt',
-    };
-    
-    return quiltSize && sizeMap[quiltSize] ? sizeMap[quiltSize] : '60×72 inches throw quilt';
+    return RoleSwapPromptBuilder.build({
+      patternForSvg,
+      fabricSummary,
+      rolesSummary,
+      patternDescription,
+      patternGuidance,
+      skillDescription,
+      targetSize,
+    });
   }
 }
