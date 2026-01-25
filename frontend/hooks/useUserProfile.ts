@@ -20,9 +20,11 @@ export function useUserProfile(user: User | null) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProfile = async () => {
       if (!user) {
-        setProfile(null);
+        if (isMounted) setProfile(null);
         return;
       }
       
@@ -38,7 +40,7 @@ export function useUserProfile(user: User | null) {
         
         if (response.ok) {
           const result = await response.json();
-          if (result.success && result.data) {
+          if (isMounted && result.success && result.data) {
             setProfile({ badge: result.data.badge });
           }
         }
@@ -48,6 +50,10 @@ export function useUserProfile(user: User | null) {
     };
 
     fetchProfile();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   return profile;

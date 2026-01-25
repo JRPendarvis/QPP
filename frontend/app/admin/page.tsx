@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
@@ -78,33 +78,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'patterns' | 'feedback'>('overview');
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-
-    // Check if user is staff
-    const checkAccess = async () => {
-      try {
-        const profileRes = await api.get('/api/user/profile');
-        if (profileRes.data?.data?.role !== 'staff') {
-          router.push('/dashboard');
-          return;
-        }
-        
-        // Load initial data
-        await loadOverview();
-      } catch {
-        setError('Access denied');
-        router.push('/dashboard');
-      }
-    };
-
-    checkAccess();
-  }, [user, router]);
-
-  const loadOverview = async () => {
+  const loadOverview = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get('/api/admin/overview');
@@ -116,9 +90,9 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get('/api/admin/users');
@@ -130,9 +104,9 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadPatterns = async () => {
+  const loadPatterns = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get('/api/admin/patterns?limit=100');
@@ -144,9 +118,9 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadFeedback = async () => {
+  const loadFeedback = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get('/api/admin/feedback');
@@ -158,7 +132,42 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    let isMounted = true;
+
+    // Check if user is staff
+    const checkAccess = async () => {
+      try {
+        const profileRes = await api.get('/api/user/profile');
+        if (!isMounted) return;
+        
+        if (profileRes.data?.data?.role !== 'staff') {
+          router.push('/dashboard');
+          return;
+        }
+        
+        // Load initial data
+        await loadOverview();
+      } catch {
+        if (!isMounted) return;
+        setError('Access denied');
+        router.push('/dashboard');
+      }
+    };
+
+    checkAccess();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user, router, loadOverview]);
 
   const handleTabChange = async (tab: typeof activeTab) => {
     setActiveTab(tab);
