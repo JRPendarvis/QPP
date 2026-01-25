@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import { PatternLibraryService } from '../services/pattern/patternLibraryService';
 import { PDFService } from '../services/pdf/pdfService';
 import { PatternLibraryValidators } from '../validators/patternLibraryValidators';
+import { PatternListMapper } from '../services/pattern/patternListMapper';
+import { PatternDataNormalizer } from '../services/pattern/patternDataNormalizer';
+import { PatternFileNameGenerator } from '../services/pattern/patternFileNameGenerator';
 
 const patternLibraryService = new PatternLibraryService();
 const pdfService = new PDFService();
@@ -13,16 +16,7 @@ export const getUserPatterns = async (req: Request, res: Response): Promise<void
   try {
     const userId = req.user!.userId;
     const patterns = await patternLibraryService.getUserPatterns(userId);
-
-    // Return patterns with minimal data for list view
-    const patternsForList = patterns.map((pattern) => ({
-      id: pattern.id,
-      patternType: pattern.patternType,
-      patternName: pattern.patternName,
-      fabricColors: pattern.fabricColors,
-      downloadedAt: pattern.downloadedAt,
-      createdAt: pattern.createdAt,
-    }));
+    const patternsForList = PatternListMapper.toListView(patterns);
 
     res.json({
       success: true,
@@ -108,7 +102,6 @@ export const redownloadPattern = async (req: Request, res: Response): Promise<vo
       patternDataType: typeof pattern.patternData,
     });
 
-    // Validate pattern data exists
     if (!pattern.patternData) {
       console.error('❌ [PatternLibrary] Pattern data is missing');
       res.status(500).json({
@@ -118,15 +111,13 @@ export const redownloadPattern = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Ensure patternId exists in pattern data for PDF generation
-    const patternDataWithId = {
-      ...(pattern.patternData as any),
-      patternId: (pattern.patternData as any).patternId || pattern.patternType || 'unknown',
-    };
+    const patternDataWithId = PatternDataNormalizer.ensurePatternId(
+      pattern.patternData,
+      pattern.patternType
+    );
 
     console.log('📄 [PatternLibrary] Generating PDF with patternId:', patternDataWithId.patternId);
 
-    // Generate PDF from stored pattern data
     const pdfBuffer = await pdfService.generatePatternPDF(
       patternDataWithId,
       'QuiltPlannerPro User'
@@ -134,7 +125,7 @@ export const redownloadPattern = async (req: Request, res: Response): Promise<vo
 
     console.log('✅ [PatternLibrary] PDF generated successfully, size:', pdfBuffer.length);
 
-    const fileName = `${pattern.patternName || 'pattern'}-${pattern.id.slice(0, 8)}.pdf`;
+    const fileName = PatternFileNameGenerator.generate(pattern);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
