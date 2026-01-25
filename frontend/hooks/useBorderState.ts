@@ -4,6 +4,8 @@
  */
 import { useState, useCallback } from 'react';
 import { Border, BorderConfiguration, BORDER_CONSTRAINTS } from '@/types/Border';
+import { BorderValidator } from '@/utils/BorderValidator';
+import { BorderReorderService } from '@/utils/BorderReorderService';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface UseBorderStateReturn {
@@ -62,12 +64,7 @@ export function useBorderState(initialFabricIndex: number = 0): UseBorderStateRe
   const removeBorder = useCallback((borderId: string) => {
     setBorderConfiguration(prev => {
       const filtered = prev.borders.filter(b => b.id !== borderId);
-      
-      // Reorder remaining borders
-      const reordered = filtered.map((border, index) => ({
-        ...border,
-        order: index + 1
-      }));
+      const reordered = BorderReorderService.resequence(filtered);
 
       return {
         ...prev,
@@ -86,33 +83,10 @@ export function useBorderState(initialFabricIndex: number = 0): UseBorderStateRe
   }, []);
 
   const reorderBorder = useCallback((borderId: string, direction: 'up' | 'down') => {
-    setBorderConfiguration(prev => {
-      const sorted = [...prev.borders].sort((a, b) => a.order - b.order);
-      const currentIndex = sorted.findIndex(b => b.id === borderId);
-      
-      if (currentIndex === -1) return prev;
-      
-      const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-      
-      if (newIndex < 0 || newIndex >= sorted.length) {
-        return prev;
-      }
-
-      // Swap orders
-      const reordered = [...sorted];
-      [reordered[currentIndex], reordered[newIndex]] = [reordered[newIndex], reordered[currentIndex]];
-      
-      // Reassign order numbers
-      const withNewOrders = reordered.map((border, index) => ({
-        ...border,
-        order: index + 1
-      }));
-
-      return {
-        ...prev,
-        borders: withNewOrders
-      };
-    });
+    setBorderConfiguration(prev => ({
+      ...prev,
+      borders: BorderReorderService.reorder(prev.borders, borderId, direction)
+    }));
   }, []);
 
   const resetBorders = useCallback(() => {
@@ -123,30 +97,7 @@ export function useBorderState(initialFabricIndex: number = 0): UseBorderStateRe
   }, []);
 
   const validateBorderWidth = useCallback((width: number): { valid: boolean; error?: string } => {
-    if (width < BORDER_CONSTRAINTS.MIN_WIDTH) {
-      return { 
-        valid: false, 
-        error: `Border width must be at least ${BORDER_CONSTRAINTS.MIN_WIDTH}"` 
-      };
-    }
-    
-    if (width > BORDER_CONSTRAINTS.MAX_WIDTH) {
-      return { 
-        valid: false, 
-        error: `Border width cannot exceed ${BORDER_CONSTRAINTS.MAX_WIDTH}"` 
-      };
-    }
-    
-    // Check if width is a valid increment
-    const remainder = width % BORDER_CONSTRAINTS.STEP;
-    if (Math.abs(remainder) > 0.01 && Math.abs(remainder - BORDER_CONSTRAINTS.STEP) > 0.01) {
-      return { 
-        valid: false, 
-        error: `Border width must be in ${BORDER_CONSTRAINTS.STEP}" increments` 
-      };
-    }
-    
-    return { valid: true };
+    return BorderValidator.validateBorderWidth(width);
   }, []);
 
   return {
