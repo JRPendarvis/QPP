@@ -11,7 +11,7 @@ import feedbackRoutes from "./routes/feedbackRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import debugRoutes from "./routes/debugRoutes";
 
-import { StripeController } from "./controllers/stripeController";
+import { StripeWebhookController } from "./controllers/stripeWebhookController";
 import { initializeCronJobs } from "./jobs/cronJobs";
 import { SERVER_CONSTANTS, CORS_ORIGINS } from "./config/constants";
 import { sanitizeInput } from "./middleware/sanitization";
@@ -28,8 +28,8 @@ const isProduction = process.env.NODE_ENV === "production";
 const trustProxySetting = process.env.TRUST_PROXY || (isProduction ? 1 : false);
 app.set("trust proxy", trustProxySetting);
 
-// Stripe controller
-const stripeController = new StripeController();
+// Stripe webhook controller
+const stripeWebhookController = new StripeWebhookController();
 
 // -------------------------------------
 // CORS
@@ -69,7 +69,7 @@ app.use((req, res, next) => {
 app.post(
   "/api/stripe/webhook",
   express.raw({ type: "application/json" }),
-  (req, res) => stripeController.handleWebhook(req, res)
+  (req, res) => stripeWebhookController.handleWebhook(req, res)
 );
 
 // -------------------------------------
