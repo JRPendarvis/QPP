@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
-import { SubscriptionService } from '../services/subscription/subscriptionService';
-import { StripeRepository } from '../repositories/stripeRepository';
+import { SubscriptionService } from './subscriptionService';
+import { StripeRepository } from '../../repositories/stripeRepository';
 
 /**
  * Service for handling Stripe webhook events
