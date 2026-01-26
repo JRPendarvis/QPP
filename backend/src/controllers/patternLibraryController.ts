@@ -113,7 +113,7 @@ export const redownloadPattern = async (req: Request, res: Response): Promise<vo
 
     const patternDataWithId = PatternDataNormalizer.ensurePatternId(
       pattern.patternData,
-      pattern.patternType
+      pattern.patternType || 'unknown'
     );
 
     console.log('📄 [PatternLibrary] Generating PDF with patternId:', patternDataWithId.patternId);
