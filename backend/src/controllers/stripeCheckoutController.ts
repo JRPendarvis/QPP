@@ -1,28 +1,27 @@
 import { Request, Response } from 'express';
-import Stripe from 'stripe';
-import { StripeWebhookService } from '../services/subscription/stripeWebhookService';
-import { SubscriptionService } from '../services/subscription/subscriptionService';
 import { CheckoutSessionFactory } from '../services/subscription/checkoutSessionFactory';
+import { SubscriptionService } from '../services/subscription/subscriptionService';
 import { StripeRepository } from '../repositories/stripeRepository';
 
 /**
- * HTTP controller for Stripe payment operations
- * Single Responsibility: HTTP request/response handling only
- * Delegates business logic to services following Dependency Inversion
+ * Controller for Stripe checkout and portal operations
+ * Handles subscription creation and customer portal access
  */
-export class StripeController {
-  private webhookService: StripeWebhookService;
-  private subscriptionService: SubscriptionService;
+export class StripeCheckoutController {
   private checkoutFactory: CheckoutSessionFactory;
+  private subscriptionService: SubscriptionService;
   private stripeRepository: StripeRepository;
 
   constructor() {
-    this.webhookService = new StripeWebhookService();
-    this.subscriptionService = new SubscriptionService();
     this.checkoutFactory = new CheckoutSessionFactory();
+    this.subscriptionService = new SubscriptionService();
     this.stripeRepository = new StripeRepository();
   }
-  
+
+  /**
+   * POST /api/stripe/create-checkout-session
+   * Create a Stripe checkout session for subscription purchase
+   */
   async createCheckoutSession(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
@@ -60,67 +59,10 @@ export class StripeController {
     }
   }
 
-  async handleWebhook(req: Request, res: Response) {
-    const sig = req.headers['stripe-signature'] as string;
-
-    if (!this.webhookService.isConfigured()) {
-      return res.status(400).send('Webhook secret not configured');
-    }
-
-    let event: Stripe.Event;
-
-    try {
-      event = this.webhookService.verifyAndConstructEvent(req.body, sig);
-    } catch (err) {
-      const error = err as Error;
-      return res.status(400).send(error.message);
-    }
-
-    try {
-      switch (event.type) {
-        case 'checkout.session.completed':
-          await this.handleCheckoutComplete(event.data.object as Stripe.Checkout.Session);
-          break;
-        case 'customer.subscription.updated':
-          await this.handleSubscriptionUpdate(event.data.object as Stripe.Subscription);
-          break;
-        case 'customer.subscription.deleted':
-          await this.handleSubscriptionCanceled(event.data.object as Stripe.Subscription);
-          break;
-        default:
-          console.log(`Unhandled event type: ${event.type}`);
-      }
-      res.json({ received: true });
-    } catch (error) {
-      console.error('Error handling webhook:', error);
-      res.status(500).send('Webhook handler failed');
-    }
-  }
-
-private async handleCheckoutComplete(session: Stripe.Checkout.Session) {
-  const result = await this.subscriptionService.processCheckoutComplete(session);
-  if (!result) return;
-
-  const { userId, data } = result;
-  await this.stripeRepository.updateSubscription(userId, data);
-}
-
-  private async handleSubscriptionUpdate(subscription: Stripe.Subscription) {
-    const user = await this.stripeRepository.getUserBySubscriptionId(subscription.id);
-    if (!user) return;
-
-    const data = this.subscriptionService.processSubscriptionUpdate(subscription);
-    await this.stripeRepository.updateSubscriptionStatus(user.id, data);
-  }
-
-  private async handleSubscriptionCanceled(subscription: Stripe.Subscription) {
-    const user = await this.stripeRepository.getUserBySubscriptionId(subscription.id);
-    if (!user) return;
-
-    const data = this.subscriptionService.processSubscriptionCancellation();
-    await this.stripeRepository.cancelSubscription(user.id, data);
-  }
-
+  /**
+   * POST /api/stripe/create-portal-session
+   * Create a Stripe customer portal session for subscription management
+   */
   async createPortalSession(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
@@ -143,6 +85,10 @@ private async handleCheckoutComplete(session: Stripe.Checkout.Session) {
     }
   }
 
+  /**
+   * POST /api/stripe/cancel-subscription
+   * Cancel user's subscription at end of billing period
+   */
   async cancelSubscription(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;

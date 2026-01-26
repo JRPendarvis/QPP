@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import api from '@/lib/api';
 import Navigation from '@/components/Navigation';
 
@@ -33,11 +33,7 @@ export default function FeedbackPage() {
     }
   }, [user, loading, router]);
 
-  useEffect(() => {
-    loadFeedback();
-  }, []);
-
-  const loadFeedback = async () => {
+  const loadFeedback = useCallback(async () => {
     try {
       setLoadingList(true);
       const res = await api.get('/api/feedback');
@@ -49,7 +45,11 @@ export default function FeedbackPage() {
     } finally {
       setLoadingList(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadFeedback();
+  }, [loadFeedback]);
 
   const handleFeedbackCreate = async (e: React.FormEvent) => {
     e.preventDefault();

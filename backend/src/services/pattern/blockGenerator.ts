@@ -1,14 +1,17 @@
 import { Fabric } from '../../types/Fabric';
 import { getPattern } from '../../config/patterns';
+import { FabricSelector } from './fabricSelector';
+import { TemplateApplicator } from './templateApplicator';
+import { TransformCalculator } from './transformCalculator';
 
 /**
  * Service for generating SVG blocks for quilt patterns
+ * Orchestrates fabric selection, template application, and transform generation
  */
 export class BlockGenerator {
   private static readonly GRID_ROWS = 4;
   private static readonly GRID_COLS = 3;
   private static readonly BLOCK_SIZE = 100;
-  private static readonly ROTATIONS = [0, 90, 180, 270];
 
   /**
    * Generates SVG blocks for the quilt pattern using the provided fabrics.
@@ -37,106 +40,14 @@ export class BlockGenerator {
         const x = col * this.BLOCK_SIZE;
         const y = row * this.BLOCK_SIZE;
         
-        const blockFabrics = this.selectBlockFabrics(fabrics, patternDef, blockIndex, row, col);
-        const blockTemplate = this.applyFabricsToTemplate(template, blockFabrics, fabrics, patternDef);
-        const transform = this.calculateTransform(x, y, canRotate);
+        const blockFabrics = FabricSelector.selectForBlock(fabrics, patternDef, blockIndex, row, col);
+        const blockTemplate = TemplateApplicator.apply(template, blockFabrics, fabrics, patternDef);
+        const transform = TransformCalculator.calculate(x, y, canRotate);
         
         blocks += `    <g transform="${transform}">\n      ${blockTemplate.trim()}\n    </g>\n`;
       }
     }
 
     return blocks;
-  }
-
-  /**
-   * Selects fabrics for a specific block
-   */
-  private static selectBlockFabrics(
-    fabrics: Fabric[],
-    patternDef: ReturnType<typeof getPattern> | undefined,
-    blockIndex: number,
-    row: number,
-    col: number
-  ): Fabric[] {
-    if (patternDef?.getColors) {
-      const colorArr = patternDef.getColors(fabrics.map(f => f.color), { blockIndex, row, col });
-      return colorArr.map(color => fabrics.find(f => f.color === color) || fabrics[0]);
-    }
-
-    // Default fabric selection
-    const blockFabrics = fabrics.slice(0, Math.max(3, fabrics.length));
-    while (blockFabrics.length < 8) {
-      blockFabrics.push(fabrics[blockFabrics.length % fabrics.length]);
-    }
-    return blockFabrics;
-  }
-
-  /**
-   * Applies fabrics to template by replacing color placeholders
-   */
-  private static applyFabricsToTemplate(
-    template: string,
-    blockFabrics: Fabric[],
-    allFabrics: Fabric[],
-    patternDef?: ReturnType<typeof getPattern>
-  ): string {
-    // Get template for this specific block
-    let blockTemplate = patternDef?.getTemplate
-      ? patternDef.getTemplate(blockFabrics.map(f => f.color))
-      : template;
-
-    // Replace color placeholders
-    for (let i = 0; i < 8; i++) {
-      const fabric = blockFabrics[i] || allFabrics[0];
-      const fillValue = this.getFillValue(fabric, allFabrics);
-      const colorPlaceholder = new RegExp(`COLOR${i + 1}`, 'g');
-      blockTemplate = blockTemplate.replace(colorPlaceholder, fillValue);
-    }
-
-    // Clean up template
-    blockTemplate = blockTemplate.replace(/<svg[^>]*>/gi, '').replace(/<\/svg>/gi, '');
-    
-    // Add default strokes if not present
-    if (!blockTemplate.includes('stroke=')) {
-      blockTemplate = this.addDefaultStrokes(blockTemplate);
-    }
-
-    return blockTemplate;
-  }
-
-  /**
-   * Gets the fill value for a fabric (color or pattern URL)
-   */
-  private static getFillValue(fabric: Fabric, allFabrics: Fabric[]): string {
-    if (fabric.type === 'printed' && fabric.image) {
-      const fabricIndex = allFabrics.indexOf(fabric);
-      console.log(`🎨 [BlockGenerator] Using fabric pattern: fabricImage${fabricIndex} for printed fabric`);
-      return `url(#fabricImage${fabricIndex})`;
-    }
-    return fabric.color;
-  }
-
-  /**
-   * Adds default strokes to SVG elements
-   */
-  private static addDefaultStrokes(template: string): string {
-    return template
-      .replace(/<rect /g, '<rect stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
-      .replace(/<polygon /g, '<polygon stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
-      .replace(/<path /g, '<path stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ')
-      .replace(/<circle /g, '<circle stroke="rgba(0,0,0,0.1)" stroke-width="0.5" ');
-  }
-
-  /**
-   * Calculates the transform attribute for a block
-   */
-  private static calculateTransform(x: number, y: number, canRotate: boolean): string {
-    if (canRotate) {
-      const rotation = this.ROTATIONS[Math.floor(Math.random() * this.ROTATIONS.length)];
-      return rotation > 0
-        ? `translate(${x},${y}) rotate(${rotation} 50 50)`
-        : `translate(${x},${y})`;
-    }
-    return `translate(${x},${y})`;
   }
 }

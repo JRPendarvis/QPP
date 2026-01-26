@@ -1,0 +1,88 @@
+/**
+ * Service for building HTML email templates
+ */
+export class EmailTemplateBuilder {
+  /**
+   * Build welcome email HTML
+   */
+  static buildWelcomeEmail(name?: string): string {
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #4F46E5;">Welcome to Quilt Planner Pro!</h1>
+        <p>Hi ${name || 'there'},</p>
+        <p>Thank you for joining Quilt Planner Pro! We're excited to help you create beautiful quilt patterns.</p>
+        <p>Here's what you can do now:</p>
+        <ul>
+          <li>Upload your fabric images</li>
+          <li>Generate AI-powered quilt patterns</li>
+          <li>Download PDF instructions</li>
+        </ul>
+        <p>
+          <a href="https://www.quiltplannerpro.com/dashboard" 
+             style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+            Start Creating
+          </a>
+        </p>
+        <p>Happy quilting!<br>The Quilt Planner Pro Team</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="color: #666; font-size: 12px;">
+          Questions? Reply to this email or contact us at quiltplannerpro@gmail.com
+        </p>
+      </div>
+    `;
+  }
+
+  /**
+   * Build password reset email HTML
+   */
+  static buildPasswordResetEmail(resetUrl: string): string {
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #4F46E5;">Reset Your Password</h1>
+        <p>You requested a password reset for your Quilt Planner Pro account.</p>
+        <p>Click the button below to set a new password. This link expires in 1 hour.</p>
+        <p>
+          <a href="${resetUrl}" 
+             style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+            Reset Password
+          </a>
+        </p>
+        <p>If you didn't request this, you can safely ignore this email.</p>
+        <p>- The Quilt Planner Pro Team</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="color: #666; font-size: 12px;">
+          If the button doesn't work, copy and paste this link: ${resetUrl}
+        </p>
+      </div>
+    `;
+  }
+
+  /**
+   * Build feedback notification email HTML
+   */
+  static buildFeedbackNotificationEmail(
+    userEmail: string,
+    userName: string | undefined,
+    title: string,
+    description: string | null
+  ): string {
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #4F46E5;">New Feedback Received</h1>
+        <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p style="margin: 0 0 8px 0;"><strong>From:</strong> ${userName || 'Anonymous'} (${userEmail})</p>
+          <p style="margin: 0;"><strong>Title:</strong> ${title}</p>
+        </div>
+        ${description ? `
+          <div style="background: #fff; border: 1px solid #e5e7eb; padding: 16px; border-radius: 8px; margin: 16px 0;">
+            <p style="margin: 0 0 8px 0;"><strong>Description:</strong></p>
+            <p style="margin: 0; white-space: pre-wrap;">${description}</p>
+          </div>
+        ` : ''}
+        <p style="color: #666; font-size: 14px; margin-top: 20px;">
+          View all feedback at: <a href="https://www.quiltplannerpro.com/dashboard/feedback">Dashboard</a>
+        </p>
+      </div>
+    `;
+  }
+}

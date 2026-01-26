@@ -3,8 +3,7 @@ import { PDFService } from '../services/pdf/pdfService';
 import { PatternGenerationService } from '../services/pattern/patternGenerationService';
 import { PatternDownloadService } from '../services/pattern/patternDownloadService';
 import { PatternListService } from '../services/pattern/patternListService';
-import { PatternValidators } from '../validators/patternValidators';
-import { normalizePatternId } from '../utils/patternNormalization';
+import { PatternRequestValidator } from '../services/pattern/patternRequestValidator';
 import { PatternErrorHandler } from './helpers/patternErrorHandler';
 import {
   logPatternGenerationRequest,
@@ -44,11 +43,11 @@ export class PatternController {
       logPatternGenerationRequest(body);
 
       // Validation
-      const validationError =
-        PatternValidators.validateUserId(userId) ||
-        PatternValidators.validateImages(images) ||
-        PatternValidators.validateImageSizes(images) ||
-        PatternValidators.validateSkillLevel(skillLevel);
+      const validationError = PatternRequestValidator.validateGenerationRequest({
+        userId,
+        images,
+        skillLevel,
+      });
 
       if (validationError) {
         return res.status(validationError.statusCode).json({
@@ -57,7 +56,7 @@ export class PatternController {
         });
       }
 
-      const normalizedPattern = normalizePatternId(selectedPattern);
+      const normalizedPattern = PatternRequestValidator.normalizePattern(selectedPattern);
 
       const result = await this.generationService.generate({
         userId: userId!,
@@ -135,7 +134,7 @@ export class PatternController {
     try {
       const patternId = req.params.id;
 
-      if (normalizePatternId(patternId) === 'auto') {
+      if (!PatternRequestValidator.canGetFabricRoles(patternId)) {
         return res.status(400).json({
           success: false,
           message: 'Cannot get fabric roles for auto pattern selection',

@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { AdminAnalyticsService } from '../services/admin/adminAnalyticsService';
 
 /**
  * Admin Controller - Staff-only reports and analytics
@@ -13,42 +11,8 @@ export class AdminController {
    */
   async getOverview(req: Request, res: Response): Promise<void> {
     try {
-      const [
-        totalUsers,
-        activeSubscribers,
-        totalPatterns,
-        totalGenerationsThisMonth,
-        totalDownloadsThisMonth,
-        totalFeedback,
-      ] = await Promise.all([
-        prisma.user.count(),
-        prisma.user.count({
-          where: {
-            subscriptionStatus: 'active',
-            subscriptionTier: { not: 'free' },
-          },
-        }),
-        prisma.pattern.count(),
-        prisma.user.aggregate({
-          _sum: { generationsThisMonth: true },
-        }),
-        prisma.user.aggregate({
-          _sum: { downloadsThisMonth: true },
-        }),
-        prisma.feedback.count(),
-      ]);
-
-      res.json({
-        success: true,
-        data: {
-          totalUsers,
-          activeSubscribers,
-          totalPatterns,
-          totalGenerationsThisMonth: totalGenerationsThisMonth._sum.generationsThisMonth || 0,
-          totalDownloadsThisMonth: totalDownloadsThisMonth._sum.downloadsThisMonth || 0,
-          totalFeedback,
-        },
-      });
+      const data = await AdminAnalyticsService.getOverviewStats();
+      res.json({ success: true, data });
     } catch (error) {
       console.error('Admin overview error:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch overview' });
@@ -61,24 +25,7 @@ export class AdminController {
    */
   async getUsers(req: Request, res: Response): Promise<void> {
     try {
-      const users = await prisma.user.findMany({
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          skillLevel: true,
-          subscriptionTier: true,
-          subscriptionStatus: true,
-          currentPeriodEnd: true,
-          generationsThisMonth: true,
-          downloadsThisMonth: true,
-          badge: true,
-          createdAt: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-
+      const users = await AdminAnalyticsService.getUserList();
       res.json({ success: true, data: users });
     } catch (error) {
       console.error('Admin users error:', error);
@@ -93,27 +40,7 @@ export class AdminController {
   async getPatterns(req: Request, res: Response): Promise<void> {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
-
-      const patterns = await prisma.pattern.findMany({
-        select: {
-          id: true,
-          userId: true,
-          patternData: true,
-          downloaded: true,
-          downloadedAt: true,
-          createdAt: true,
-          user: {
-            select: {
-              email: true,
-              name: true,
-              subscriptionTier: true,
-            },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-      });
-
+      const patterns = await AdminAnalyticsService.getRecentPatterns(limit);
       res.json({ success: true, data: patterns });
     } catch (error) {
       console.error('Admin patterns error:', error);
@@ -128,20 +55,8 @@ export class AdminController {
   async getFeedback(req: Request, res: Response): Promise<void> {
     try {
       console.log('[Admin] Fetching feedback...');
-      const feedback = await prisma.feedback.findMany({
-        include: {
-          author: {
-            select: {
-              email: true,
-              name: true,
-            },
-          },
-          votes: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
+      const feedback = await AdminAnalyticsService.getAllFeedback();
       console.log('[Admin] Feedback fetched:', feedback.length, 'items');
-
       res.json({ success: true, data: feedback });
     } catch (error) {
       console.error('Admin feedback error:', error);
@@ -155,15 +70,7 @@ export class AdminController {
    */
   async getUsageStats(req: Request, res: Response): Promise<void> {
     try {
-      const usersByTier = await prisma.user.groupBy({
-        by: ['subscriptionTier'],
-        _count: { id: true },
-        _sum: {
-          generationsThisMonth: true,
-          downloadsThisMonth: true,
-        },
-      });
-
+      const usersByTier = await AdminAnalyticsService.getUsageStatsByTier();
       res.json({ success: true, data: usersByTier });
     } catch (error) {
       console.error('Admin usage stats error:', error);

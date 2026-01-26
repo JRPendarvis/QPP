@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { StripeController } from "../controllers/stripeController";
+import { StripeCheckoutController } from "../controllers/stripeCheckoutController";
 import { authenticate } from "../middleware/authMiddleware";
 
 const router = Router();
-const stripeController = new StripeController();
+const stripeCheckoutController = new StripeCheckoutController();
 
 // Create checkout session - user clicks "Upgrade"
 router.post("/create-checkout-session", authenticate, (req, res) =>
-  stripeController.createCheckoutSession(req, res)
+  stripeCheckoutController.createCheckoutSession(req, res)
 );
 
 // NOTE: Stripe webhook is handled ONLY in serverSetup.ts using express.raw()
@@ -15,12 +15,12 @@ router.post("/create-checkout-session", authenticate, (req, res) =>
 
 // Create customer portal session - user manages subscription
 router.post("/create-portal-session", authenticate, (req, res) =>
-  stripeController.createPortalSession(req, res)
+  stripeCheckoutController.createPortalSession(req, res)
 );
 
 // Cancel subscription - user cancels membership
 router.post("/cancel-subscription", authenticate, (req, res) =>
-  stripeController.cancelSubscription(req, res)
+  stripeCheckoutController.cancelSubscription(req, res)
 );
 
 export default router;
