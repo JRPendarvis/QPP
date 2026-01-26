@@ -1,77 +1,61 @@
 import { PrismaClient } from '@prisma/client';
+import { UsageResetCalculator } from './usageResetCalculator';
+import { UserUsageRepository } from './userUsageRepository';
 
 const prisma = new PrismaClient();
 
 export class UsageResetService {
+  private repository: UserUsageRepository;
+
+  constructor(repository?: UserUsageRepository) {
+    this.repository = repository || new UserUsageRepository(prisma);
+  }
   
   /**
    * Reset usage counters for users whose reset date has passed
    * Runs daily to check if 30 days have elapsed since last reset
    */
-async resetMonthlyUsage(): Promise<void> {
-  try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  async resetMonthlyUsage(): Promise<void> {
+    try {
+      const cutoffDate = UsageResetCalculator.getResetCutoffDate();
 
-    // Find users who need reset
-    const usersToReset = await prisma.user.findMany({
-      where: {
-        lastResetDate: {
-          lte: thirtyDaysAgo,
-        },
-      },
-      select: {
-        id: true,
-        email: true,
-        subscriptionTier: true,
-        generationsThisMonth: true,
-        downloadsThisMonth: true,
-      },
-    });
+      // Find users who need reset
+      const usersToReset = await this.repository.findUsersNeedingReset(cutoffDate);
 
-    console.log(`🔄 Found ${usersToReset.length} users needing usage reset`);
+      console.log(`🔄 Found ${usersToReset.length} users needing usage reset`);
 
-    // Reset each user
-    for (const user of usersToReset) {
-      // ✅ FREE TIER: Downloads never reset (lifetime limit)
-      const shouldResetDownloads = user.subscriptionTier !== 'free';
+      // Reset each user
+      for (const user of usersToReset) {
+        const resetData = UsageResetCalculator.createResetData(user.subscriptionTier);
+        const shouldResetDownloads = UsageResetCalculator.shouldResetDownloads(user.subscriptionTier);
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          generationsThisMonth: 0,
-          // Only reset downloads for paid tiers
-          ...(shouldResetDownloads && { downloadsThisMonth: 0 }),
-          lastResetDate: new Date(),
-        },
-      });
+        await this.repository.updateUserUsage(user.id, resetData);
 
-      console.log(`✅ Reset usage for ${user.email} (${user.subscriptionTier})`);
-      if (!shouldResetDownloads) {
-        console.log(`   ⚠️ Downloads NOT reset (free tier - lifetime limit)`);
+        console.log(`✅ Reset usage for ${user.email} (${user.subscriptionTier})`);
+        if (!shouldResetDownloads) {
+          console.log(`   ⚠️ Downloads NOT reset (free tier - lifetime limit)`);
+        }
       }
-    }
 
-    console.log('✅ Monthly usage reset completed');
-  } catch (error) {
-    console.error('❌ Error resetting monthly usage:', error);
-    throw error;
+      console.log('✅ Monthly usage reset completed');
+    } catch (error) {
+      console.error('❌ Error resetting monthly usage:', error);
+      throw error;
+    }
   }
-}
 
   /**
    * Reset a specific user's usage (for testing or manual intervention)
    */
   async resetUserUsage(userId: string): Promise<void> {
     try {
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          generationsThisMonth: 0,
-          downloadsThisMonth: 0,
-          lastResetDate: new Date()
-        }
-      });
+      const resetData = {
+        generationsThisMonth: 0,
+        downloadsThisMonth: 0,
+        lastResetDate: new Date()
+      };
+
+      await this.repository.updateUserUsage(userId, resetData);
 
       console.log(`✅ [Usage Reset] Manually reset user ${userId}`);
     } catch (error) {
@@ -88,36 +72,16 @@ async resetMonthlyUsage(): Promise<void> {
     nextResetDate: Date | null;
   }> {
     try {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const cutoffDate = UsageResetCalculator.getResetCutoffDate();
 
-      const usersNeedingReset = await prisma.user.count({
-        where: {
-          lastResetDate: {
-            lte: thirtyDaysAgo
-          }
-        }
-      });
+      const usersNeedingReset = await this.repository.countUsersNeedingReset(cutoffDate);
 
       // Find the next user who needs reset
-      const nextUser = await prisma.user.findFirst({
-        where: {
-          lastResetDate: {
-            gt: thirtyDaysAgo
-          }
-        },
-        orderBy: {
-          lastResetDate: 'asc'
-        },
-        select: {
-          lastResetDate: true
-        }
-      });
+      const nextUser = await this.repository.findNextUserToReset(cutoffDate);
 
       let nextResetDate = null;
       if (nextUser) {
-        nextResetDate = new Date(nextUser.lastResetDate);
-        nextResetDate.setDate(nextResetDate.getDate() + 30);
+        nextResetDate = UsageResetCalculator.calculateNextResetDate(nextUser.lastResetDate);
       }
 
       return {
