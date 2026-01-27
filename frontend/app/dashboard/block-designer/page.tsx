@@ -99,6 +99,38 @@ export default function BlockDesignerPage() {
     }
   };
 
+  const handleUseInQuilt = async (blockId: string) => {
+    const width = prompt('How many blocks wide?', '3');
+    const height = prompt('How many blocks tall?', '3');
+
+    if (!width || !height) return;
+
+    const quiltWidth = parseInt(width);
+    const quiltHeight = parseInt(height);
+
+    if (isNaN(quiltWidth) || isNaN(quiltHeight) || quiltWidth < 1 || quiltHeight < 1) {
+      alert('Please enter valid numbers for quilt dimensions');
+      return;
+    }
+
+    try {
+      const response = await api.post(`/api/blocks/${blockId}/generate-pattern`, {
+        quiltWidth,
+        quiltHeight,
+        fabricAssignments: {}, // Can be extended to pass actual fabrics
+      });
+
+      if (response.data.success) {
+        alert('Pattern generated! View it in your Pattern Library.');
+        router.push('/library');
+      }
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || 'Failed to generate pattern';
+      alert(errorMsg);
+      console.error('Generate pattern error:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -154,9 +186,8 @@ export default function BlockDesignerPage() {
                       Delete
                     </button>
                     <button
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
-                      disabled
-                      title="Coming soon"
+                      onClick={() => handleUseInQuilt(block.id)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
                     >
                       Use in Quilt
                     </button>

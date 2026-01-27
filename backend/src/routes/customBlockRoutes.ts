@@ -7,6 +7,10 @@ import {
   deleteBlock,
   checkBlockLimit,
 } from '../controllers/customBlockController';
+import {
+  generatePatternFromBlock,
+  getBlocksForPatterns,
+} from '../controllers/customBlockPatternController';
 import { authenticate } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -16,6 +20,12 @@ router.use(authenticate);
 
 // Check block creation limit
 router.get('/limit-check', checkBlockLimit);
+
+// Get blocks available for pattern generation
+router.get('/available-for-patterns', getBlocksForPatterns);
+
+// Generate pattern from a block
+router.post('/:id/generate-pattern', generatePatternFromBlock);
 
 // CRUD operations
 router.post('/', createBlock);
