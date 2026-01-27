@@ -3,11 +3,12 @@
 import { useState, useCallback } from 'react';
 
 export type FabricRole = 'background' | 'primary' | 'secondary' | 'accent' | null;
+type NonNullFabricRole = Exclude<FabricRole, null>;
 
 interface BlockDesignerProps {
   gridSize?: number;
   onSave?: (blockData: BlockData) => void;
-  fabricImages?: Record<FabricRole, string | null>;
+  fabricImages?: Record<NonNullFabricRole, string | null>;
 }
 
 export interface BlockData {
@@ -82,7 +83,7 @@ export default function BlockDesigner({
       return { backgroundColor: '#e5e7eb' };
     }
 
-    const imageUrl = fabricImages[role];
+    const imageUrl = fabricImages[role as NonNullFabricRole];
     if (imageUrl) {
       return {
         backgroundImage: `url(${imageUrl})`,
@@ -133,7 +134,7 @@ export default function BlockDesigner({
             Select Fabric Role to Paint
           </label>
           <div className="flex gap-3 flex-wrap">
-            {(['background', 'primary', 'secondary', 'accent'] as FabricRole[]).map((role) => (
+            {(['background', 'primary', 'secondary', 'accent'] as NonNullFabricRole[]).map((role) => (
               <button
                 key={role}
                 onClick={() => setSelectedRole(role)}
@@ -145,7 +146,7 @@ export default function BlockDesigner({
                 style={getRoleStyle(role)}
               >
                 <span className={role === 'background' ? 'text-gray-700' : 'text-white'}>
-                  {role?.charAt(0).toUpperCase() + role.slice(1)}
+                  {role.charAt(0).toUpperCase() + role.slice(1)}
                 </span>
               </button>
             ))}
