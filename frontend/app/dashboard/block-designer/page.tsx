@@ -84,8 +84,8 @@ export default function BlockDesignerPage() {
         await fetchUserBlocks();
         await checkLimit();
       }
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Failed to save block';
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to save block';
       alert(errorMsg);
       console.error('Save error:', error);
     } finally {
@@ -135,8 +135,8 @@ export default function BlockDesignerPage() {
         alert('Pattern generated! View it in your Pattern Library.');
         router.push('/library');
       }
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Failed to generate pattern';
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to generate pattern';
       alert(errorMsg);
       console.error('Generate pattern error:', error);
     }
@@ -189,7 +189,7 @@ export default function BlockDesignerPage() {
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Saved Blocks</h2>
           
-          {loading ? (
+          {loadingBlocks ? (
             <p className="text-gray-500">Loading your blocks...</p>
           ) : savedBlocks.length === 0 ? (
             <div className="bg-white rounded-lg shadow p-8 text-center">
