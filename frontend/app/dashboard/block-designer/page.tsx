@@ -160,22 +160,27 @@ export default function BlockDesignerPage() {
   return (
     <>
       <Navigation />
-      <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Block Designer</h1>
-          <p className="mt-2 text-gray-600">
+      
+      {/* Header Banner */}
+      <div className="py-8 px-4" style={{backgroundColor: '#B91C1C'}}>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold text-white mb-2">Block Designer</h1>
+          <p className="text-white text-opacity-90">
             Design your own quilt blocks and use them to generate custom quilts
-          </p>Blocks
-          {limitInfo && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>Blocks:</strong> {limitInfo.currentCount} / {limitInfo.limit === Infinity ? '∞' : limitInfo.limit}
-              </p>
-            </div>
-          )}
+          </p>
         </div>
+      </div>
+
+      <div className="min-h-screen py-8" style={{backgroundColor: '#F9FAFB'}}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Limit Info */}
+        {limitInfo && (
+          <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800">
+              <strong>Blocks:</strong> {limitInfo.currentCount} / {limitInfo.limit === Infinity ? '∞' : limitInfo.limit}
+            </p>
+          </div>
+        )}
 
         {/* Block Designer */}
         <BlockDesigner onSave={handleSaveBlock} />
