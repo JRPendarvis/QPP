@@ -485,18 +485,12 @@ export default function UploadPage() {
                         <label className="block text-sm text-gray-600 mb-2">
                           Select the size of your quilt block grid
                         </label>
-                        Design your block by clicking on the grid squares. Use the fabric swatches to select which fabric to paint with.
-                      </p>
-                      <BlockDesigner
-                        gridSize={blockGridSize}
-                        onSave={handleBlockDesignComplete}
-                        fabricImages={{
-                          background: previews[0] || null,
-                          primary: previews[1] || null,
-                          secondary: previews[2] || null,
-                          accent: previews[3] || null,
-                        }}
-                      /option value={3}>3×3 Grid (Nine Patch)</option>
+                        <select
+                          value={blockGridSize}
+                          onChange={(e) => setBlockGridSize(Number(e.target.value))}
+                          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        >
+                          <option value={3}>3×3 Grid (Nine Patch)</option>
                           <option value={4}>4×4 Grid (Sixteen Patch)</option>
                           <option value={5}>5×5 Grid (Twenty-Five Patch)</option>
                         </select>
@@ -539,10 +533,16 @@ export default function UploadPage() {
                       <p className="text-sm text-gray-600 mb-4">
                         Click the fabric swatches below to select a fabric, then click on the grid squares to paint your block design
                       </p>
-                      {/* Block Designer will be added here */}
-                      <div className="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 text-center text-gray-500">
-                        Block Designer Component Coming Next
-                      </div>
+                      <BlockDesigner
+                        gridSize={blockGridSize}
+                        onSave={handleBlockDesignComplete}
+                        fabricImages={{
+                          background: previews[0] || null,
+                          primary: previews[1] || null,
+                          secondary: previews[2] || null,
+                          accent: previews[3] || null,
+                        }}
+                      />
                     </div>
                   )}
                 </>

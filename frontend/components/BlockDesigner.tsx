@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export type FabricRole = 'background' | 'primary' | 'secondary' | 'accent' | null;
 type NonNullFabricRole = Exclude<FabricRole, null>;
@@ -9,6 +9,7 @@ interface BlockDesignerProps {
   gridSize?: number;
   onSave?: (blockData: BlockData) => void;
   fabricImages?: Record<NonNullFabricRole, string | null>;
+  initialGrid?: FabricRole[][];
 }
 
 export interface BlockData {
@@ -26,14 +27,24 @@ export default function BlockDesigner({
     primary: null,
     secondary: null,
     accent: null
-  }
+  },
+  initialGrid
 }: BlockDesignerProps) {
   const [selectedRole, setSelectedRole] = useState<FabricRole>('primary');
   const [blockName, setBlockName] = useState('');
   const [description, setDescription] = useState('');
   const [grid, setGrid] = useState<FabricRole[][]>(
-    Array(gridSize).fill(null).map(() => Array(gridSize).fill(null))
+    initialGrid || Array(gridSize).fill(null).map(() => Array(gridSize).fill(null))
   );
+
+  // Update grid when initialGrid changes (template loaded)
+  useEffect(() => {
+    if (initialGrid) {
+      setGrid(initialGrid);
+      setBlockName(''); // Clear name when loading template
+      setDescription(''); // Clear description when loading template
+    }
+  }, [initialGrid]);
 
   const handleCellClick = useCallback((row: number, col: number) => {
     const newGrid = grid.map((r, i) => 

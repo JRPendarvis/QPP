@@ -25,6 +25,24 @@ interface LimitInfo {
   limit: number;
 }
 
+interface PatternTemplate {
+  id: string;
+  name: string;
+  blockSize: number;
+  skillLevel: string;
+  minFabrics: number;
+  maxFabrics: number;
+}
+
+interface TemplateBlockData {
+  patternId: string;
+  patternName: string;
+  blockSize: number;
+  gridSize: number;
+  gridData: FabricRole[][];
+  description: string;
+}
+
 export default function BlockDesignerPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -32,6 +50,9 @@ export default function BlockDesignerPage() {
   const [limitInfo, setLimitInfo] = useState<LimitInfo | null>(null);
   const [loadingBlocks, setLoadingBlocks] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [patternTemplates, setPatternTemplates] = useState<PatternTemplate[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateBlockData | null>(null);
+  const [loadingTemplate, setLoadingTemplate] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -43,8 +64,35 @@ export default function BlockDesignerPage() {
     if (user) {
       fetchUserBlocks();
       checkLimit();
+      fetchPatternTemplates();
     }
   }, [user]);
+
+  const fetchPatternTemplates = async () => {
+    try {
+      const response = await api.get('/api/pattern-templates');
+      if (response.data.success) {
+        setPatternTemplates(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch pattern templates:', error);
+    }
+  };
+
+  const loadTemplate = async (patternId: string) => {
+    setLoadingTemplate(true);
+    try {
+      const response = await api.get(`/api/pattern-templates/${patternId}`);
+      if (response.data.success) {
+        setSelectedTemplate(response.data.data);
+      }
+    } catch (error) {
+      alert('Failed to load pattern template');
+      console.error('Load template error:', error);
+    } finally {
+      setLoadingTemplate(false);
+    }
+  };
 
   const fetchUserBlocks = async () => {
     try {
@@ -181,6 +229,53 @@ export default function BlockDesignerPage() {
             </p>
           </div>
         )}
+
+        {/* Block Designer */}
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Design a New Block</h2>
+          
+          {/* Template Selector */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Start from a Pattern Template (Optional)
+            </label>
+            <div className="flex gap-2">
+              <select
+                onChange={(e) => e.target.value && loadTemplate(e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                disabled={loadingTemplate}
+              >
+                <option value="">-- Start from scratch or select a template --</option>
+                {patternTemplates
+                  .filter(t => [4, 9, 16, 25].includes(t.blockSize)) // Only square grids
+                  .map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name} ({Math.sqrt(template.blockSize)}×{Math.sqrt(template.blockSize)})
+                    </option>
+                  ))}
+              </select>
+              {selectedTemplate && (
+                <button
+                  onClick={() => setSelectedTemplate(null)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                >
+                  Clear Template
+                </button>
+              )}
+            </div>
+            {selectedTemplate && (
+              <p className="text-sm text-gray-600 mt-2">
+                📐 Loaded: {selectedTemplate.patternName} - {selectedTemplate.description}
+              </p>
+            )}
+          </div>
+
+          <BlockDesigner 
+            onSave={handleSaveBlock}
+            gridSize={selectedTemplate?.gridSize}
+            initialGrid={selectedTemplate?.gridData}
+          />
+        </div>
 
         {/* Block Designer */}
         <BlockDesigner onSave={handleSaveBlock} />
