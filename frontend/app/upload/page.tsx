@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import { useBorderState } from '@/hooks/useBorderState';
 import Navigation from '@/components/Navigation';
 import UploadHeader from '@/components/upload/UploadHeader';
 import PatternDisplay from '@/components/upload/PatternDisplay';
 import ErrorDisplay from '@/components/upload/ErrorDisplay';
+import BlockDesigner, { BlockData } from '@/components/BlockDesigner';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '@/lib/api';
 import {
@@ -161,6 +163,52 @@ export default function UploadPage() {
       handleFilesAdded(Array.from(files));
     } else {
       handleFilesAdded(files);
+    }
+  };
+
+  const handleBlockDesignComplete = async (blockData: BlockData) => {
+    setGenerating(true);
+    const loadingToast = toast.loading('Saving your block and generating pattern...');
+
+    try {
+      // First, save the block
+      const fabricAssignments = {
+        background: previews[0] || null,
+        primary: previews[1] || null,
+        secondary: previews[2] || null,
+        accent: previews[3] || null,
+      };
+
+      const blockResponse = await api.post('/api/blocks', {
+        ...blockData,
+        blockSize: blockGridSize * blockGridSize,
+      });
+
+      if (!blockResponse.data.success) {
+        throw new Error('Failed to save block');
+      }
+
+      const savedBlock = blockResponse.data.data;
+
+      // Then generate a quilt pattern from it
+      const patternResponse = await api.post(`/api/blocks/${savedBlock.id}/generate-pattern`, {
+        quiltWidth: 5,
+        quiltHeight: 5,
+        fabricAssignments,
+      });
+
+      if (patternResponse.data.success) {
+        toast.success('Block saved and pattern generated!', { id: loadingToast });
+        // Redirect to library to view the pattern
+        setTimeout(() => {
+          window.location.href = '/library';
+        }, 1500);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to generate pattern', { id: loadingToast });
+      console.error('Block generation error:', error);
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -437,12 +485,18 @@ export default function UploadPage() {
                         <label className="block text-sm text-gray-600 mb-2">
                           Select the size of your quilt block grid
                         </label>
-                        <select
-                          value={blockGridSize}
-                          onChange={(e) => setBlockGridSize(parseInt(e.target.value))}
-                          className="w-full border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-red-700 transition-colors"
-                        >
-                          <option value={3}>3×3 Grid (Nine Patch)</option>
+                        Design your block by clicking on the grid squares. Use the fabric swatches to select which fabric to paint with.
+                      </p>
+                      <BlockDesigner
+                        gridSize={blockGridSize}
+                        onSave={handleBlockDesignComplete}
+                        fabricImages={{
+                          background: previews[0] || null,
+                          primary: previews[1] || null,
+                          secondary: previews[2] || null,
+                          accent: previews[3] || null,
+                        }}
+                      /option value={3}>3×3 Grid (Nine Patch)</option>
                           <option value={4}>4×4 Grid (Sixteen Patch)</option>
                           <option value={5}>5×5 Grid (Twenty-Five Patch)</option>
                         </select>
