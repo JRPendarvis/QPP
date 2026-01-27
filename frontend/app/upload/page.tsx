@@ -27,6 +27,7 @@ import { formatFabricRange, SKILL_LEVELS } from '@/app/helpers/patternHelpers';
 export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
   const [designMode, setDesignMode] = useState<'ai-pattern' | 'custom-block'>('ai-pattern');
+  const [blockGridSize, setBlockGridSize] = useState<number>(3);
   const [patternChoice, setPatternChoice] = useState<PatternChoice>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
@@ -243,25 +244,28 @@ export default function UploadPage() {
 
           {!pattern && (
             <>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <PatternSelectionSection
-                  patternChoice={patternChoice}
-                  setPatternChoice={handlePatternChoiceChange}
-                  selectedPattern={selectedPattern}
-                  setSelectedPattern={setSelectedPattern}
-                  availablePatterns={availablePatterns}
-                  selectedPatternDetails={selectedPatternDetails}
-                  fabricsLength={fabrics.length}
-                  formatFabricRange={formatFabricRange}
-                  challengeMe={challengeMe}
-                  setChallengeMe={setChallengeMe}
-                  SKILL_LEVELS={SKILL_LEVELS}
-                  targetSkill={targetSkill}
-                  currentSkill={currentSkill}
-                />
+              {designMode === 'ai-pattern' ? (
+                // AI Pattern Mode - Original Flow
+                <>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <PatternSelectionSection
+                      patternChoice={patternChoice}
+                      setPatternChoice={handlePatternChoiceChange}
+                      selectedPattern={selectedPattern}
+                      setSelectedPattern={setSelectedPattern}
+                      availablePatterns={availablePatterns}
+                      selectedPatternDetails={selectedPatternDetails}
+                      fabricsLength={fabrics.length}
+                      formatFabricRange={formatFabricRange}
+                      challengeMe={challengeMe}
+                      setChallengeMe={setChallengeMe}
+                      SKILL_LEVELS={SKILL_LEVELS}
+                      targetSkill={targetSkill}
+                      currentSkill={currentSkill}
+                    />
 
-                <div className="border-2 border-gray-200 rounded-lg p-4">
-                  <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 2: Choose Quilt Size</h2>
+                    <div className="border-2 border-gray-200 rounded-lg p-4">
+                      <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 2: Choose Quilt Size</h2>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm text-gray-600 mb-2">
@@ -422,6 +426,73 @@ export default function UploadPage() {
               <ValidationMessage 
                 message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} 
               />
+            </>
+              ) : (
+                // Custom Block Design Mode
+                <>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div className="border-2 border-gray-200 rounded-lg p-4">
+                      <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 1: Choose Block Grid Size</h2>
+                      <div className="space-y-3">
+                        <label className="block text-sm text-gray-600 mb-2">
+                          Select the size of your quilt block grid
+                        </label>
+                        <select
+                          value={blockGridSize}
+                          onChange={(e) => setBlockGridSize(parseInt(e.target.value))}
+                          className="w-full border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-red-700 transition-colors"
+                        >
+                          <option value={3}>3×3 Grid (Nine Patch)</option>
+                          <option value={4}>4×4 Grid (Sixteen Patch)</option>
+                          <option value={5}>5×5 Grid (Twenty-Five Patch)</option>
+                        </select>
+                        <p className="text-sm text-gray-500 mt-2">
+                          This creates a {blockGridSize}×{blockGridSize} block with {blockGridSize * blockGridSize} squares
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="border-2 border-gray-200 rounded-lg p-4">
+                      <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                        Step 2: Upload Your Fabric Images
+                      </h2>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Upload 2-4 fabrics to use in your block design
+                      </p>
+                      <FabricDropzone
+                        onFilesAdded={handleFilesAddedWrapper}
+                        currentCount={fabrics.length}
+                        maxFiles={4}
+                        totalSize={totalImageSize}
+                      />
+                    </div>
+                  </div>
+
+                  {fabrics.length > 0 && (
+                    <div className="my-6">
+                      <FabricPreviewGrid
+                        previews={previews}
+                        fabrics={fabrics}
+                        onRemove={removeFabric}
+                        onClearAll={clearAll}
+                        onReorder={handleFabricReorder}
+                      />
+                    </div>
+                  )}
+
+                  {fabrics.length >= 2 && (
+                    <div className="mt-6">
+                      <p className="text-sm text-gray-600 mb-4">
+                        Click the fabric swatches below to select a fabric, then click on the grid squares to paint your block design
+                      </p>
+                      {/* Block Designer will be added here */}
+                      <div className="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 text-center text-gray-500">
+                        Block Designer Component Coming Next
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
 
