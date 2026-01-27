@@ -77,9 +77,6 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
             <Link href="/library" onClick={handleClick} className={linkClass}>
               My Patterns
             </Link>
-            <Link href="/dashboard/block-designer" onClick={handleClick} className={linkClass}>
-              Block Designer
-            </Link>
             <Link href="/feedback" onClick={handleClick} className={linkClass}>
               Feedback
             </Link>
@@ -178,9 +175,6 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
                 )}
                 <Link href="/library" onClick={handleClick} className={dropdownLinkClass}>
                   My Patterns
-                </Link>
-                <Link href="/dashboard/block-designer" onClick={handleClick} className={dropdownLinkClass}>
-                  Block Designer
                 </Link>
                 <Link href="/profile" onClick={handleClick} className={dropdownLinkClass}>
                   Profile
