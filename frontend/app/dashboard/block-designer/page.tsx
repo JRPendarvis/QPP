@@ -46,7 +46,7 @@ export default function BlockDesignerPage() {
     }
   }, [user]);
 
-  const fetchUseBlocksrBlocks = async () => {
+  const fetchUserBlocks = async () => {
     try {
       const response = await api.get('/api/blocks');
       if (response.data.success) {
@@ -55,7 +55,7 @@ export default function BlockDesignerPage() {
     } catch (error) {
       console.error('Failed to fetch blocks:', error);
     } finally {
-      setLoading(false);
+      setLoadingBlocks(false);
     }
   };
 
