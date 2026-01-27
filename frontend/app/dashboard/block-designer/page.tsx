@@ -30,7 +30,7 @@ export default function BlockDesignerPage() {
   const { user, loading } = useAuth();
   const [savedBlocks, setSavedBlocks] = useState<SavedBlock[]>([]);
   const [limitInfo, setLimitInfo] = useState<LimitInfo | null>(null);
-  const [loading: loadingBlocks, setLoadingBlocks] = useState(true);
+  const [loadingBlocks, setLoadingBlocks] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
