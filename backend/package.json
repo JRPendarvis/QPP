@@ -11,7 +11,11 @@
     "test:coverage": "jest --coverage",
     "postinstall": "prisma generate",
     "db:backup": "pg_dump $DATABASE_URL > backup-$(date +%Y%m%d-%H%M%S).sql",
-    "db:status": "npx prisma migrate status"
+    "db:status": "npx prisma migrate status",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "engines": {
     "node": "20.x"
