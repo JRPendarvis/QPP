@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import Navigation from '@/components/Navigation';
 import BlockDesigner, { BlockData, FabricRole } from '@/components/BlockDesigner';
 import api from '@/lib/api';
 
@@ -25,17 +27,26 @@ interface LimitInfo {
 
 export default function BlockDesignerPage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [savedBlocks, setSavedBlocks] = useState<SavedBlock[]>([]);
   const [limitInfo, setLimitInfo] = useState<LimitInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading: loadingBlocks, setLoadingBlocks] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchUserBlocks();
-    checkLimit();
-  }, []);
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
 
-  const fetchUserBlocks = async () => {
+  useEffect(() => {
+    if (user) {
+      fetchUserBlocks();
+      checkLimit();
+    }
+  }, [user]);
+
+  const fetchUseBlocksrBlocks = async () => {
     try {
       const response = await api.get('/api/blocks');
       if (response.data.success) {
@@ -131,15 +142,32 @@ export default function BlockDesignerPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <>
+        <Navigation />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Block Designer</h1>
           <p className="mt-2 text-gray-600">
             Design your own quilt blocks and use them to generate custom quilts
-          </p>
+          </p>Blocks
           {limitInfo && (
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-800">
@@ -199,5 +227,6 @@ export default function BlockDesignerPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
