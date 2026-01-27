@@ -39,6 +39,7 @@ model User {
     role          String         @default("user") // 'user' or 'staff' (staff = unlimited access)
     feedbacks     Feedback[]
     feedbackVotes FeedbackVote[]
+    customBlocks  CustomBlock[] // User's saved block designs
 
     // Password reset
     resetToken       String?
@@ -96,4 +97,24 @@ model FeedbackVote {
 
     @@unique([userId, feedbackId])
     @@map("feedback_votes")
+}
+
+// Custom block designs created by users
+model CustomBlock {
+    id          String   @id @default(cuid())
+    userId      String
+    name        String
+    description String?
+    blockSize   Int // Grid dimension (e.g., 9 for 3x3, 16 for 4x4, 25 for 5x5)
+    gridData    Json // 2D array of fabric role assignments: [[role, role, ...], ...]
+    thumbnail   String? // base64 preview image
+    isPublic    Boolean  @default(false) // Future: allow sharing blocks
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([userId, createdAt])
+    @@map("custom_blocks")
 }
