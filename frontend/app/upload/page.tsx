@@ -26,6 +26,7 @@ import { formatFabricRange, SKILL_LEVELS } from '@/app/helpers/patternHelpers';
 
 export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
+  const [designMode, setDesignMode] = useState<'ai-pattern' | 'custom-block'>('ai-pattern');
   const [patternChoice, setPatternChoice] = useState<PatternChoice>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
@@ -188,6 +189,56 @@ export default function UploadPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
           
+          {/* Design Mode Selection */}
+          <div className="mb-8 border-2 border-gray-200 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Choose Your Design Method</h2>
+            <div className="space-y-3">
+              <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50" 
+                style={{
+                  borderColor: designMode === 'ai-pattern' ? '#B91C1C' : '#E5E7EB',
+                  backgroundColor: designMode === 'ai-pattern' ? '#FEF2F2' : 'white'
+                }}>
+                <input
+                  type="radio"
+                  name="designMode"
+                  value="ai-pattern"
+                  checked={designMode === 'ai-pattern'}
+                  onChange={(e) => setDesignMode(e.target.value as 'ai-pattern' | 'custom-block')}
+                  className="mt-1 h-4 w-4 text-red-700 focus:ring-red-700"
+                  style={{accentColor: '#B91C1C'}}
+                />
+                <div className="ml-3">
+                  <div className="font-semibold text-gray-900">AI-Generated Quilt Pattern</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Upload your fabrics and let AI create a complete quilt pattern from traditional designs
+                  </div>
+                </div>
+              </label>
+
+              <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50"
+                style={{
+                  borderColor: designMode === 'custom-block' ? '#B91C1C' : '#E5E7EB',
+                  backgroundColor: designMode === 'custom-block' ? '#FEF2F2' : 'white'
+                }}>
+                <input
+                  type="radio"
+                  name="designMode"
+                  value="custom-block"
+                  checked={designMode === 'custom-block'}
+                  onChange={(e) => setDesignMode(e.target.value as 'ai-pattern' | 'custom-block')}
+                  className="mt-1 h-4 w-4 text-red-700 focus:ring-red-700"
+                  style={{accentColor: '#B91C1C'}}
+                />
+                <div className="ml-3">
+                  <div className="font-semibold text-gray-900">Custom Block Design</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Design your own quilt block in a grid, then use it to create a repeating quilt pattern
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
           <ErrorDisplay error={error} />
 
           {!pattern && (
