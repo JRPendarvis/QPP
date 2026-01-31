@@ -97,15 +97,12 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span className="font-medium">{selectedPatternDetails.name}</span>
-                  </div>
-                  <p className="mt-1 text-sm text-blue-700">
-                    Requires {formatFabricRange(selectedPatternDetails.minFabrics, selectedPatternDetails.maxFabrics)}
                     {fabricsLength > 0 && (
                       <span className={`ml-2 font-medium ${fabricsLength >= selectedPatternDetails.minFabrics && fabricsLength <= selectedPatternDetails.maxFabrics ? 'text-green-600' : 'text-red-600'}`}>
                         (you have {fabricsLength})
                       </span>
                     )}
-                  </p>
+                  </div>
                 </div>
               )}
             </>
