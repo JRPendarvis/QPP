@@ -28,9 +28,13 @@ export const NEXT_LEVEL: Record<string, string> = {
 export interface PatternOption {
   id: string;
   name: string;
-  minFabrics: number;
+  minFabrics?: number;
   maxFabrics: number;
-  skillLevels: string[];
+  skillLevel: string;
+  minColors: number;
+  description: string;
+  recommendedFabricCount: number | null;
+  allowRotation: boolean;
 }
 
 let cachedPatterns: PatternOption[] | null = null;
@@ -47,7 +51,11 @@ export async function fetchAllPatterns(): Promise<PatternOption[]> {
   try {
     const response = await api.get('/patterns/list');
     if (response.data.success && response.data.data) {
-      cachedPatterns = response.data.data;
+      // Map backend response to frontend interface
+      cachedPatterns = response.data.data.map((p: any) => ({
+        ...p,
+        minFabrics: p.minColors, // Backend uses minColors, frontend expects minFabrics
+      }));
       return cachedPatterns;
     }
     return [];
@@ -70,10 +78,9 @@ export function getPatternsForSkillLevel(skillLevel: string, allPatterns: Patter
   // Get all skill levels up to and including the target level
   const availableSkillLevels = SKILL_HIERARCHY.slice(0, skillIndex + 1);
 
-  // Filter patterns that include any of the available skill levels
+  // Filter patterns by skill level
   return allPatterns.filter(pattern => 
-    pattern.skillLevels && 
-    pattern.skillLevels.some(level => availableSkillLevels.includes(level))
+    pattern.skillLevel && availableSkillLevels.includes(pattern.skillLevel)
   );
 }
 
