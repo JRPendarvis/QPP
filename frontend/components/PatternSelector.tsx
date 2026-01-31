@@ -1,5 +1,5 @@
-import React from 'react';
-import { SKILL_LEVELS, getPatternsForSkillLevel, formatFabricRange } from '../app/helpers/patternHelpers';
+import React, { useEffect, useState } from 'react';
+import { SKILL_LEVELS, getPatternsForSkillLevel, formatFabricRange, fetchAllPatterns, PatternOption } from '../app/helpers/patternHelpers';
 
 interface PatternSelectorProps {
   patternChoice: 'auto' | 'manual';
@@ -22,9 +22,21 @@ const PatternSelector: React.FC<PatternSelectorProps> = ({
   currentSkill,
   targetSkill,
 }) => {
-  const availablePatterns = getPatternsForSkillLevel(targetSkill)
+  const [allPatterns, setAllPatterns] = useState<PatternOption[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPatterns() {
+      const patterns = await fetchAllPatterns();
+      setAllPatterns(patterns);
+      setLoading(false);
+    }
+    loadPatterns();
+  }, []);
+
+  const availablePatterns = getPatternsForSkillLevel(targetSkill, allPatterns)
     .slice()
-    .sort((a: { id: string; name: string }, b: { id: string; name: string }) => a.name.localeCompare(b.name));
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -68,21 +80,29 @@ const PatternSelector: React.FC<PatternSelectorProps> = ({
               I&apos;ll Choose My Pattern
             </div>
             {patternChoice === 'manual' && (
-              <select
-                value={selectedPattern}
-                onChange={(e) => setSelectedPattern(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="">Select a pattern...</option>
-                {availablePatterns.map((patternOption: { id: string; name: string; minFabrics: number; maxFabrics: number }) => (
-                  <option key={patternOption.id} value={patternOption.id}>
-                    {patternOption.name}
-                    {patternOption.minFabrics && patternOption.maxFabrics &&
-                      ` (Best with ${formatFabricRange(patternOption.minFabrics, patternOption.maxFabrics)})`
-                    }
-                  </option>
-                ))}
-              </select>
+              <>
+                {loading ? (
+                  <div className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                    Loading patterns...
+                  </div>
+                ) : (
+                  <select
+                    value={selectedPattern}
+                    onChange={(e) => setSelectedPattern(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Select a pattern...</option>
+                    {availablePatterns.map((patternOption) => (
+                      <option key={patternOption.id} value={patternOption.id}>
+                        {patternOption.name}
+                        {patternOption.minFabrics && patternOption.maxFabrics &&
+                          ` (Best with ${formatFabricRange(patternOption.minFabrics, patternOption.maxFabrics)})`
+                        }
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </>
             )}
           </div>
         </label>

@@ -1,4 +1,5 @@
 // Pattern-related constants and helpers
+import api from '@/lib/api';
 
 export const SKILL_LEVELS: Record<string, string> = {
   beginner: 'Beginner',
@@ -24,52 +25,56 @@ export const NEXT_LEVEL: Record<string, string> = {
   expert: 'expert',
 };
 
-export const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabrics: number; maxFabrics: number }[]> = {
-  beginner: [
-    { id: 'simple-squares', name: 'Simple Squares', minFabrics: 2, maxFabrics: 8 },
-    { id: 'strip-quilt', name: 'Strip Quilt', minFabrics: 3, maxFabrics: 8 },
-    { id: 'checkerboard', name: 'Checkerboard', minFabrics: 2, maxFabrics: 2 },
-    { id: 'rail-fence', name: 'Rail Fence', minFabrics: 3, maxFabrics: 5 },
-  ],
-  advanced_beginner: [
-    { id: 'four-patch', name: 'Four Patch', minFabrics: 3, maxFabrics: 4 },
-    { id: 'nine-patch', name: 'Nine Patch', minFabrics: 2, maxFabrics: 9 },
-    { id: 'half-square-triangles', name: 'Half-Square Triangles', minFabrics: 2, maxFabrics: 8 },
-    { id: 'hourglass', name: 'Hourglass', minFabrics: 2, maxFabrics: 4 },
-    { id: 'bow-tie', name: 'Bow Tie', minFabrics: 2, maxFabrics: 8 },
-  ],
-  intermediate: [
-    { id: 'flying-geese', name: 'Flying Geese', minFabrics: 2, maxFabrics: 8 },
-    { id: 'pinwheel', name: 'Pinwheel', minFabrics: 2, maxFabrics: 4 },
-    { id: 'log-cabin', name: 'Log Cabin', minFabrics: 3, maxFabrics: 8 },
-    { id: 'sawtooth-star', name: 'Sawtooth Star', minFabrics: 2, maxFabrics: 3 },
-    { id: 'ohio-star', name: 'Ohio Star', minFabrics: 3, maxFabrics: 4 },
-    { id: 'churn-dash', name: 'Churn Dash', minFabrics: 2, maxFabrics: 3 },
-    { id: 'mosaic-star', name: 'Mosaic Star', minFabrics: 3, maxFabrics: 5 },
-  ],
-  advanced: [
-    { id: 'lone-star', name: 'Lone Star', minFabrics: 3, maxFabrics: 8 },
-    { id: 'kaleidoscope-star', name: 'Kaleidoscope Star', minFabrics: 3, maxFabrics: 5 },
-    { id: 'new-york-beauty', name: 'New York Beauty', minFabrics: 4, maxFabrics: 8 },
-    { id: 'drunkards-path', name: "Drunkard's Path", minFabrics: 2, maxFabrics: 2 },
-  ],
-  expert: [
-    { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden", minFabrics: 3, maxFabrics: 8 },
-    { id: 'pickle-dish', name: 'Pickle Dish', minFabrics: 4, maxFabrics: 6 },
-  ],
-};
+export interface PatternOption {
+  id: string;
+  name: string;
+  minFabrics: number;
+  maxFabrics: number;
+  skillLevels: string[];
+}
 
-export function getPatternsForSkillLevel(skillLevel: string) {
+let cachedPatterns: PatternOption[] | null = null;
+
+/**
+ * Fetch all available patterns from the backend
+ * Results are cached after first call
+ */
+export async function fetchAllPatterns(): Promise<PatternOption[]> {
+  if (cachedPatterns) {
+    return cachedPatterns;
+  }
+
+  try {
+    const response = await api.get('/patterns/list');
+    if (response.data.success && response.data.data) {
+      cachedPatterns = response.data.data;
+      return cachedPatterns;
+    }
+    return [];
+  } catch (error) {
+    console.error('Failed to fetch patterns:', error);
+    return [];
+  }
+}
+
+/**
+ * Get patterns available for a specific skill level
+ * Includes all patterns from current level and below
+ */
+export function getPatternsForSkillLevel(skillLevel: string, allPatterns: PatternOption[] = []): PatternOption[] {
   const skillIndex = SKILL_HIERARCHY.indexOf(skillLevel);
   if (skillIndex === -1) {
-    return PATTERN_OPTIONS['beginner'] || [];
+    return [];
   }
-  const availablePatterns = [];
-  for (let i = 0; i <= skillIndex; i++) {
-    const levelPatterns = PATTERN_OPTIONS[SKILL_HIERARCHY[i]] || [];
-    availablePatterns.push(...levelPatterns);
-  }
-  return availablePatterns;
+
+  // Get all skill levels up to and including the target level
+  const availableSkillLevels = SKILL_HIERARCHY.slice(0, skillIndex + 1);
+
+  // Filter patterns that include any of the available skill levels
+  return allPatterns.filter(pattern => 
+    pattern.skillLevels && 
+    pattern.skillLevels.some(level => availableSkillLevels.includes(level))
+  );
 }
 
 export function formatFabricRange(min: number, max: number): string {
