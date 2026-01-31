@@ -90,18 +90,15 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
                 ))}
               </select>
               {/* Pattern requirements badge */}
-              {selectedPatternDetails && (
+              {selectedPatternDetails && fabricsLength > 0 && (
                 <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
                   <div className="flex items-center text-blue-800">
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="font-medium">{selectedPatternDetails.name}</span>
-                    {fabricsLength > 0 && (
-                      <span className={`ml-2 font-medium ${fabricsLength >= selectedPatternDetails.minFabrics && fabricsLength <= selectedPatternDetails.maxFabrics ? 'text-green-600' : 'text-red-600'}`}>
-                        (you have {fabricsLength})
-                      </span>
-                    )}
+                    <span className={`font-medium ${fabricsLength >= selectedPatternDetails.minFabrics && fabricsLength <= selectedPatternDetails.maxFabrics ? 'text-green-600' : 'text-red-600'}`}>
+                      You have {fabricsLength} fabric{fabricsLength !== 1 ? 's' : ''}
+                    </span>
                   </div>
                 </div>
               )}
