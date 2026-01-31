@@ -56,15 +56,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({
       Supported formats: JPG, PNG, WEBP (max 5MB per image)
     </p>
     {/* FabricDropzone must be passed as a child or replaced in parent */}
-    {/* Fabric count indicator */}
-    {fabricsLength > 0 && (
-      <div className={`mt-4 text-sm ${fabricCountValid ? 'text-green-600' : 'text-amber-600'}`}>
-        {fabricsLength} of {patternChoice === 'manual' && selectedPatternDetails
-          ? formatFabricRange(selectedPatternDetails.minFabrics, selectedPatternDetails.maxFabrics)
-          : `${MIN_FABRICS}-${MAX_FABRICS}`
-        } fabrics uploaded
-      </div>
-    )}
   </>
 );
 
