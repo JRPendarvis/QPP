@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { CustomBlockService } from '../services/customBlockService';
+import { CUSTOM_BLOCK_CONSTANTS } from '../config/constants';
 
 const blockService = new CustomBlockService();
 
@@ -199,6 +200,30 @@ export const checkBlockLimit = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to check block limit',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get supported grid sizes configuration
+ * GET /api/blocks/grid-sizes
+ */
+export const getGridSizes = async (req: Request, res: Response) => {
+  try {
+    return res.json({
+      success: true,
+      data: {
+        gridSizes: CUSTOM_BLOCK_CONSTANTS.SUPPORTED_GRID_SIZES,
+        minSize: CUSTOM_BLOCK_CONSTANTS.MIN_GRID_SIZE,
+        maxSize: CUSTOM_BLOCK_CONSTANTS.MAX_GRID_SIZE,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error fetching grid sizes:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch grid sizes',
       error: error.message,
     });
   }

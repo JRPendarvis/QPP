@@ -490,9 +490,12 @@ export default function UploadPage() {
                           onChange={(e) => setBlockGridSize(Number(e.target.value))}
                           className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         >
+                          <option value={2}>2×2 Grid (Four Patch)</option>
                           <option value={3}>3×3 Grid (Nine Patch)</option>
                           <option value={4}>4×4 Grid (Sixteen Patch)</option>
                           <option value={5}>5×5 Grid (Twenty-Five Patch)</option>
+                          <option value={6}>6×6 Grid (Thirty-Six Patch)</option>
+                          <option value={7}>7×7 Grid (Forty-Nine Patch)</option>
                         </select>
                         <p className="text-sm text-gray-500 mt-2">
                           This creates a {blockGridSize}×{blockGridSize} block with {blockGridSize * blockGridSize} squares

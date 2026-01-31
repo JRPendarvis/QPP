@@ -6,6 +6,7 @@ import {
   updateBlock,
   deleteBlock,
   checkBlockLimit,
+  getGridSizes,
 } from '../controllers/customBlockController';
 import {
   generatePatternFromBlock,
@@ -15,7 +16,10 @@ import { authenticate } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-// All routes require authentication
+// Public route for grid sizes (no auth required)
+router.get('/grid-sizes', getGridSizes);
+
+// All other routes require authentication
 router.use(authenticate);
 
 // Check block creation limit
