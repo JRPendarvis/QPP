@@ -30,12 +30,37 @@ export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
   const [designMode, setDesignMode] = useState<'ai-pattern' | 'custom-block'>('ai-pattern');
   const [blockGridSize, setBlockGridSize] = useState<number>(3);
+  const [gridSizes, setGridSizes] = useState<Array<{ value: number; label: string; squares: number }>>([]);
+  const [loadingGridSizes, setLoadingGridSizes] = useState(true);
   const [patternChoice, setPatternChoice] = useState<PatternChoice>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
   const [quiltSize, setQuiltSize] = useState<string>('');
+
+  // Fetch grid sizes from backend
+  useEffect(() => {
+    async function fetchGridSizes() {
+      try {
+        const response = await api.get('/blocks/grid-sizes');
+        if (response.data.success && response.data.data) {
+          setGridSizes(response.data.data.gridSizes);
+        }
+      } catch (error) {
+        console.error('Failed to fetch grid sizes:', error);
+        // Fallback to default sizes if API fails
+        setGridSizes([
+          { value: 3, label: '3×3 Grid (Nine Patch)', squares: 9 },
+          { value: 4, label: '4×4 Grid (Sixteen Patch)', squares: 16 },
+          { value: 5, label: '5×5 Grid (Twenty-Five Patch)', squares: 25 },
+        ]);
+      } finally {
+        setLoadingGridSizes(false);
+      }
+    }
+    fetchGridSizes();
+  }, []);
 
   // Border state management
   const {
@@ -485,18 +510,23 @@ export default function UploadPage() {
                         <label className="block text-sm text-gray-600 mb-2">
                           Select the size of your quilt block grid
                         </label>
-                        <select
-                          value={blockGridSize}
-                          onChange={(e) => setBlockGridSize(Number(e.target.value))}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        >
-                          <option value={2}>2×2 Grid (Four Patch)</option>
-                          <option value={3}>3×3 Grid (Nine Patch)</option>
-                          <option value={4}>4×4 Grid (Sixteen Patch)</option>
-                          <option value={5}>5×5 Grid (Twenty-Five Patch)</option>
-                          <option value={6}>6×6 Grid (Thirty-Six Patch)</option>
-                          <option value={7}>7×7 Grid (Forty-Nine Patch)</option>
-                        </select>
+                        {loadingGridSizes ? (
+                          <div className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-500">
+                            Loading grid sizes...
+                          </div>
+                        ) : (
+                          <select
+                            value={blockGridSize}
+                            onChange={(e) => setBlockGridSize(Number(e.target.value))}
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                          >
+                            {gridSizes.map((size) => (
+                              <option key={size.value} value={size.value}>
+                                {size.label}
+                              </option>
+                            ))}
+                          </select>
+                        )}
                         <p className="text-sm text-gray-500 mt-2">
                           This creates a {blockGridSize}×{blockGridSize} block with {blockGridSize * blockGridSize} squares
                         </p>
