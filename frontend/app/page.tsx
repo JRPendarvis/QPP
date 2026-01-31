@@ -32,7 +32,7 @@ export default function HomePage() {
       <Navigation />
 
       {/* Hero Section */}
-      <div className="py-20 px-4" style={{backgroundColor: '#B91C1C'}}>
+      <div className="py-20 px-4" style={{backgroundImage: 'url(/QuiltPlannerProBackGround.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
             AI-Powered Quilt Pattern Generator

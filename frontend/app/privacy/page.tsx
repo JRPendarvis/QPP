@@ -1,9 +1,18 @@
+import Navigation from '@/components/Navigation';
+
 export default function PrivacyPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
-      <p className="text-gray-600 mb-4">Last updated: January 2, 2026</p>
+    <div className="min-h-screen" style={{background: 'linear-gradient(135deg, #FEF2F2 0%, #F0FDFA 50%, #FFFBEB 100%)'}}>
+      <Navigation />
       
+      <div className="py-12 px-4" style={{backgroundImage: 'url(/QuiltPlannerProBackGround.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-bold text-white mb-2">Privacy Policy</h1>
+          <p className="text-white text-opacity-90">Last updated: January 2, 2026</p>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 py-12">
       <h2 className="text-xl font-semibold mt-6 mb-3">Information We Collect</h2>
       <p className="text-gray-700 mb-4">
         • Email address and name (for account creation)<br/>
@@ -34,6 +43,7 @@ export default function PrivacyPage() {
       <p className="text-gray-700">
         Privacy questions? Email privacy@quiltplannerpro.com
       </p>
+      </div>
     </div>
   );
 }

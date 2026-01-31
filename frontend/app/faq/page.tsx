@@ -88,7 +88,7 @@ export default function FAQPage() {
       <Navigation />
 
       {/* Hero Section */}
-      <div className="py-12 px-4" style={{backgroundColor: '#B91C1C'}}>
+      <div className="py-12 px-4" style={{backgroundImage: 'url(/QuiltPlannerProBackGround.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Frequently Asked Questions

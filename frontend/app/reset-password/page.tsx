@@ -1,9 +1,65 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
+
+type PasswordStrength = 'weak' | 'fair' | 'good' | 'strong';
+
+interface PasswordStrengthResult {
+  strength: PasswordStrength;
+  score: number;
+  feedback: string[];
+  color: string;
+  bgColor: string;
+}
+
+function calculatePasswordStrength(password: string): PasswordStrengthResult {
+  let score = 0;
+  const feedback: string[] = [];
+
+  if (password.length >= 8) score += 1;
+  if (password.length >= 12) score += 1;
+  if (password.length >= 16) score += 1;
+  else if (password.length < 8) feedback.push('At least 8 characters');
+
+  if (/[a-z]/.test(password)) score += 1;
+  else feedback.push('Lowercase letters');
+
+  if (/[A-Z]/.test(password)) score += 1;
+  else feedback.push('Uppercase letters');
+
+  if (/[0-9]/.test(password)) score += 1;
+  else feedback.push('Numbers');
+
+  if (/[^a-zA-Z0-9]/.test(password)) score += 1;
+  else feedback.push('Special characters (!@#$%^&*)');
+
+  let strength: PasswordStrength;
+  let color: string;
+  let bgColor: string;
+
+  if (score <= 2) {
+    strength = 'weak';
+    color = '#DC2626';
+    bgColor = '#FEE2E2';
+  } else if (score <= 4) {
+    strength = 'fair';
+    color = '#F59E0B';
+    bgColor = '#FEF3C7';
+  } else if (score <= 6) {
+    strength = 'good';
+    color = '#10B981';
+    bgColor = '#D1FAE5';
+  } else {
+    strength = 'strong';
+    color = '#059669';
+    bgColor = '#A7F3D0';
+  }
+
+  return { strength, score, feedback, color, bgColor };
+}
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -15,6 +71,11 @@ function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  const passwordStrength = useMemo(() => 
+    password ? calculatePasswordStrength(password) : null,
+    [password]
+  );
 
   if (!token) {
     return (
@@ -103,6 +164,39 @@ function ResetPasswordForm() {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
+            
+            {/* Password Strength Indicator */}
+            {password && passwordStrength && (
+              <div className="mt-2">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium text-gray-600">Password Strength:</span>
+                  <span className="text-xs font-semibold" style={{ color: passwordStrength.color }}>
+                    {passwordStrength.strength.toUpperCase()}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${(passwordStrength.score / 7) * 100}%`,
+                      backgroundColor: passwordStrength.color,
+                    }}
+                  />
+                </div>
+                {passwordStrength.feedback.length > 0 && (
+                  <div className="mt-2 p-2 rounded text-xs" style={{ backgroundColor: passwordStrength.bgColor }}>
+                    <p className="font-medium mb-1" style={{ color: passwordStrength.color }}>
+                      Add these to strengthen:
+                    </p>
+                    <ul className="list-disc list-inside space-y-0.5 text-gray-700">
+                      {passwordStrength.feedback.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div>

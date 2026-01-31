@@ -73,7 +73,7 @@ export default function PatternCard({ pattern, onDownload, onDelete, onRename }:
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       {/* Pattern preview */}
-      <div className="h-48 bg-linear-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+      <div className="h-80 bg-linear-to-br from-purple-100 to-pink-100 flex items-center justify-center">
         <div className="text-6xl">🧵</div>
       </div>
 
