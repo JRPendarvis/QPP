@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-01-31 - Visual Improvements & UI Cleanup
+
+### Added (2026-01-31)
+- **Password Strength Indicator**: Real-time password validation with visual feedback
+  - 7-point scoring system (length 8/12/16, lowercase, uppercase, numbers, special characters)
+  - 4 strength levels: weak (red), fair (orange), good (green), strong (dark green)
+  - Color-coded progress bar with specific improvement suggestions
+  - Implemented on registration page and password reset page
+  - Uses `useMemo` for optimized performance
+
+### Changed (2026-01-31)
+- **Brand-Consistent Background**: Replaced solid red (#B91C1C) with QuiltPlannerProBackGround.png across entire application
+  - Applied to 14+ page headers (upload, library, profile, home, pricing, feedback, legal, FAQ, dashboard, about, admin, terms, privacy)
+  - CSS: `backgroundSize: 'cover', backgroundPosition: 'center'` for responsive scaling
+  - Added Navigation component to Terms and Privacy pages for consistent layout
+  - Gradient backgrounds on page bodies: `linear-gradient(135deg, #FEF2F2 0%, #F0FDFA 50%, #FFFBEB 100%)`
+- **Pattern Preview Size**: Increased pattern card preview area from 192px (h-48) to 320px (h-80) for better visibility in pattern library
+
+### Fixed (2026-01-31)
+- **UI Cleanup - Duplicate Information Removal**:
+  - Removed duplicate fabric count display from pattern selector (shown in both upload section and info badge)
+  - Removed duplicate pattern name from selection badge (already visible in dropdown)
+  - Removed "Requires X-Y fabrics" text from info badge (requirements shown in dropdown)
+  - Pattern selection badge now only shows when fabrics are uploaded: "You have X fabric(s)" with color-coded validation
+  - Cleaner, less redundant user interface based on user feedback
+
+### Technical Notes (2026-01-31)
+- QuiltPlannerProBackGround.png: 2.2MB brand asset
+- Session commits: 7 commits covering visual improvements and UI cleanup
+- Branch workflow: Panel branch created for visual improvements, merged to main 3 times, currently on hold
+- Backend deployed to Railway successfully (port 3001, 6 migrations, cron jobs initialized)
+
 ## [1.1.0] - 2026-01-25 - SOLID Refactoring Release
 
 ### Major Refactoring (2026-01-25) - SOLID Principles Implementation
