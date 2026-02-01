@@ -1,23 +1,23 @@
 import { Request, Response } from 'express';
-import patterns from '../config/patterns';
-import { FabricRole } from '../types/QuiltPattern';
+import { getAllPatterns, getPattern, PatternDefinition } from '../config/patterns';
+
+type FabricRole = string;
 
 /**
  * Get list of available pattern templates for block design
  */
 export const getPatternTemplates = async (req: Request, res: Response) => {
   try {
-    const templates = Object.entries(patterns)
-      .filter(([_, pattern]) => pattern.status !== 'incomplete')
-      .map(([id, pattern]) => ({
-        id,
+    const allPatterns = getAllPatterns();
+    const templates = allPatterns
+      .map((pattern: PatternDefinition) => ({
+        id: pattern.id,
         name: pattern.name,
-        blockSize: pattern.blockSize || 9, // Default to 9 for 3x3
-        skillLevel: pattern.skillLevels?.[0] || 'beginner',
+        blockSize: 9, // Default to 9 for 3x3
         minFabrics: pattern.minFabrics,
         maxFabrics: pattern.maxFabrics,
       }))
-      .sort((a, b) => a.blockSize - b.blockSize);
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     res.json({
       success: true,
@@ -39,7 +39,7 @@ export const getPatternTemplates = async (req: Request, res: Response) => {
 export const getPatternBlockTemplate = async (req: Request, res: Response) => {
   try {
     const { patternId } = req.params;
-    const pattern = patterns[patternId];
+    const pattern = getPattern(patternId);
 
     if (!pattern) {
       return res.status(404).json({
@@ -48,23 +48,9 @@ export const getPatternBlockTemplate = async (req: Request, res: Response) => {
       });
     }
 
-    if (pattern.status === 'incomplete') {
-      return res.status(400).json({
-        success: false,
-        message: 'This pattern is not yet available',
-      });
-    }
-
     // Generate a sample block based on the pattern structure
-    const blockSize = pattern.blockSize || 9;
+    const blockSize = 9; // Default to 9 for 3x3
     const gridSize = Math.sqrt(blockSize);
-
-    if (!Number.isInteger(gridSize)) {
-      return res.status(400).json({
-        success: false,
-        message: 'This pattern does not have a square block structure',
-      });
-    }
 
     // Create a basic template grid using the pattern's fabric roles
     const gridData: FabricRole[][] = generateTemplateGrid(pattern, gridSize);
