@@ -6,18 +6,19 @@ import {
   updateBlock,
   deleteBlock,
   checkBlockLimit,
-  getGridSizes,
 } from '../controllers/customBlockController';
 import {
   generatePatternFromBlock,
   getBlocksForPatterns,
 } from '../controllers/customBlockPatternController';
+import { getPatternTemplates, getPatternBlockTemplate } from '../controllers/patternTemplateController';
 import { authenticate } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-// Public route for grid sizes (no auth required)
-router.get('/grid-sizes', getGridSizes);
+// Public routes (no auth required)
+router.get('/pattern-templates', getPatternTemplates);
+router.get('/pattern-templates/:patternId', getPatternBlockTemplate);
 
 // All other routes require authentication
 router.use(authenticate);

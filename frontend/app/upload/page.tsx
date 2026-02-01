@@ -29,9 +29,9 @@ import { formatFabricRange, SKILL_LEVELS } from '@/app/helpers/patternHelpers';
 export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
   const [designMode, setDesignMode] = useState<'ai-pattern' | 'custom-block'>('ai-pattern');
-  const [blockGridSize, setBlockGridSize] = useState<number>(3);
-  const [gridSizes, setGridSizes] = useState<Array<{ value: number; label: string; squares: number }>>([]);
-  const [loadingGridSizes, setLoadingGridSizes] = useState(true);
+  const [selectedPatternTemplate, setSelectedPatternTemplate] = useState<string>('');
+  const [patternTemplates, setPatternTemplates] = useState<Array<{ id: string; name: string }>>([]);
+  const [loadingPatternTemplates, setLoadingPatternTemplates] = useState(true);
   const [patternChoice, setPatternChoice] = useState<PatternChoice>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
@@ -39,21 +39,21 @@ export default function UploadPage() {
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
   const [quiltSize, setQuiltSize] = useState<string>('');
 
-  // Fetch grid sizes from backend
+  // Fetch pattern templates for custom block design
   useEffect(() => {
-    async function fetchGridSizes() {
+    async function fetchPatternTemplates() {
       try {
-        const response = await api.get('/blocks/grid-sizes');
+        const response = await api.get('/blocks/pattern-templates');
         if (response.data.success && response.data.data) {
-          setGridSizes(response.data.data.gridSizes);
+          setPatternTemplates(response.data.data);
         }
       } catch (error) {
-        console.error('Failed to fetch grid sizes:', error);
+        console.error('Failed to fetch pattern templates:', error);
       } finally {
-        setLoadingGridSizes(false);
+        setLoadingPatternTemplates(false);
       }
     }
-    fetchGridSizes();
+    fetchPatternTemplates();
   }, []);
 
   // Border state management
@@ -499,30 +499,33 @@ export default function UploadPage() {
                 <>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <div className="border-2 border-gray-200 rounded-lg p-4">
-                      <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 1: Choose Block Grid Size</h2>
+                      <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 1: Choose Pattern Template</h2>
                       <div className="space-y-3">
                         <label className="block text-sm text-gray-600 mb-2">
-                          Select the size of your quilt block grid
+                          Select a pattern block to use as your starting template
                         </label>
-                        {loadingGridSizes ? (
+                        {loadingPatternTemplates ? (
                           <div className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-500">
-                            Loading grid sizes...
+                            Loading pattern templates...
                           </div>
                         ) : (
                           <select
-                            value={blockGridSize}
-                            onChange={(e) => setBlockGridSize(Number(e.target.value))}
+                            value={selectedPatternTemplate}
+                            onChange={(e) => setSelectedPatternTemplate(e.target.value)}
                             className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                           >
-                            {gridSizes.map((size) => (
-                              <option key={size.value} value={size.value}>
-                                {size.label}
+                            <option value="">Select a pattern block...</option>
+                            {patternTemplates.map((template) => (
+                              <option key={template.id} value={template.id}>
+                                {template.name}
                               </option>
                             ))}
                           </select>
                         )}
                         <p className="text-sm text-gray-500 mt-2">
-                          This creates a {blockGridSize}×{blockGridSize} block with {blockGridSize * blockGridSize} squares
+                          {selectedPatternTemplate 
+                            ? `Use the ${patternTemplates.find(t => t.id === selectedPatternTemplate)?.name} block as your starting design`
+                            : 'Choose a pattern to load its block structure'}
                         </p>
                       </div>
                     </div>
