@@ -49,12 +49,6 @@ export default function UploadPage() {
         }
       } catch (error) {
         console.error('Failed to fetch grid sizes:', error);
-        // Fallback to default sizes if API fails
-        setGridSizes([
-          { value: 3, label: '3×3 Grid (Nine Patch)', squares: 9 },
-          { value: 4, label: '4×4 Grid (Sixteen Patch)', squares: 16 },
-          { value: 5, label: '5×5 Grid (Twenty-Five Patch)', squares: 25 },
-        ]);
       } finally {
         setLoadingGridSizes(false);
       }
