@@ -56,7 +56,7 @@ export async function fetchAllPatterns(): Promise<PatternOption[]> {
         ...p,
         minFabrics: p.minColors, // Backend uses minColors, frontend expects minFabrics
       }));
-      return cachedPatterns;
+      return cachedPatterns!;
     }
     return [];
   } catch (error) {
