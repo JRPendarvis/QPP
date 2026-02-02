@@ -45,12 +45,21 @@ export function useUserProfile() {
 export function usePatternSelection(profile: UserProfile | null, challengeMe: boolean) {
   const currentSkill = profile?.skillLevel || 'beginner';
   const targetSkill = challengeMe ? NEXT_LEVEL[currentSkill] : currentSkill;
+  const [allPatterns, setAllPatterns] = useState<PatternDetails[]>([]);
+  
+  useEffect(() => {
+    import('@/app/helpers/patternHelpers').then(({ fetchAllPatterns }) => {
+      fetchAllPatterns().then(patterns => {
+        setAllPatterns(patterns as PatternDetails[]);
+      });
+    });
+  }, []);
   
   const availablePatterns = useMemo(() => {
-    return getPatternsForSkillLevel(targetSkill)
+    return getPatternsForSkillLevel(targetSkill, allPatterns)
       .slice()
       .sort((a: PatternDetails, b: PatternDetails) => a.name.localeCompare(b.name));
-  }, [targetSkill]);
+  }, [targetSkill, allPatterns]);
 
   return { currentSkill, targetSkill, availablePatterns };
 }

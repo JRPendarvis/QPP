@@ -1,7 +1,7 @@
 // Frontend constants and configuration
 export const AUTH_CONSTANTS = {
   TOKEN_KEY: 'token',
-  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
 } as const;
 
 export const ROUTES = {

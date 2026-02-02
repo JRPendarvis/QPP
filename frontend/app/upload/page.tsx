@@ -32,6 +32,12 @@ export default function UploadPage() {
   const [selectedPatternTemplate, setSelectedPatternTemplate] = useState<string>('');
   const [patternTemplates, setPatternTemplates] = useState<Array<{ id: string; name: string }>>([]);
   const [loadingPatternTemplates, setLoadingPatternTemplates] = useState(true);
+  const [templateBlockData, setTemplateBlockData] = useState<{ 
+    gridSize: number; 
+    gridData: string[][]; 
+    svgTemplate?: string;
+    patternName?: string;
+  } | null>(null);
   const [patternChoice, setPatternChoice] = useState<PatternChoice>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
@@ -43,7 +49,7 @@ export default function UploadPage() {
   useEffect(() => {
     async function fetchPatternTemplates() {
       try {
-        const response = await api.get('/blocks/pattern-templates');
+        const response = await api.get('/api/blocks/pattern-templates');
         if (response.data.success && response.data.data) {
           setPatternTemplates(response.data.data);
         }
@@ -55,6 +61,27 @@ export default function UploadPage() {
     }
     fetchPatternTemplates();
   }, []);
+
+  // Fetch selected pattern template block structure
+  useEffect(() => {
+    async function fetchTemplateBlockData() {
+      if (!selectedPatternTemplate) {
+        setTemplateBlockData(null);
+        return;
+      }
+
+      try {
+        const response = await api.get(`/api/blocks/pattern-templates/${selectedPatternTemplate}`);
+        if (response.data.success && response.data.data) {
+          console.log('Loaded template data:', response.data.data);
+          setTemplateBlockData(response.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch template block data:', error);
+      }
+    }
+    fetchTemplateBlockData();
+  }, [selectedPatternTemplate]);
 
   // Border state management
   const {
@@ -200,7 +227,7 @@ export default function UploadPage() {
 
       const blockResponse = await api.post('/api/blocks', {
         ...blockData,
-        blockSize: blockGridSize * blockGridSize,
+        blockSize: templateBlockData ? templateBlockData.gridSize * templateBlockData.gridSize : 9,
       });
 
       if (!blockResponse.data.success) {
@@ -558,21 +585,37 @@ export default function UploadPage() {
                     </div>
                   )}
 
-                  {fabrics.length >= 2 && (
+                  {fabrics.length >= 2 && selectedPatternTemplate && templateBlockData && (
                     <div className="mt-6">
-                      <p className="text-sm text-gray-600 mb-4">
-                        Click the fabric swatches below to select a fabric, then click on the grid squares to paint your block design
-                      </p>
-                      <BlockDesigner
-                        gridSize={blockGridSize}
-                        onSave={handleBlockDesignComplete}
-                        fabricImages={{
-                          background: previews[0] || null,
-                          primary: previews[1] || null,
-                          secondary: previews[2] || null,
-                          accent: previews[3] || null,
-                        }}
-                      />
+                      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800 font-medium mb-2">
+                          📋 Pattern Template: {templateBlockData.patternName}
+                        </p>
+                        <p className="text-xs text-blue-700">
+                          Preview shows the actual pattern with your fabrics.
+                        </p>
+                      </div>
+
+                      {/* SVG Pattern Preview */}
+                      {templateBlockData.svgTemplate && fabrics.length >= 2 && (
+                        <div className="flex justify-center">
+                          <div className="border-4 border-gray-800 rounded-lg overflow-hidden" style={{ width: '300px', height: '300px' }}>
+                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}
+                              dangerouslySetInnerHTML={{
+                                __html: templateBlockData.svgTemplate
+                                  .replace(/COLOR1/g, previews[0] ? `url(#bg-${Date.now()})` : '#D1D5DB')
+                                  .replace(/COLOR2/g, previews[1] ? `url(#primary-${Date.now()})` : '#9CA3AF')
+                                  .replace(/COLOR3/g, previews[2] ? `url(#secondary-${Date.now()})` : '#FDE047')
+                                  .replace(/COLOR4/g, previews[3] ? `url(#accent-${Date.now()})` : '#F59E0B') +
+                                  (previews[0] ? `<defs><pattern id="bg-${Date.now()}" patternUnits="userSpaceOnUse" width="100" height="100"><image href="${previews[0]}" width="100" height="100"/></pattern></defs>` : '') +
+                                  (previews[1] ? `<defs><pattern id="primary-${Date.now()}" patternUnits="userSpaceOnUse" width="100" height="100"><image href="${previews[1]}" width="100" height="100"/></pattern></defs>` : '') +
+                                  (previews[2] ? `<defs><pattern id="secondary-${Date.now()}" patternUnits="userSpaceOnUse" width="100" height="100"><image href="${previews[2]}" width="100" height="100"/></pattern></defs>` : '') +
+                                  (previews[3] ? `<defs><pattern id="accent-${Date.now()}" patternUnits="userSpaceOnUse" width="100" height="100"><image href="${previews[3]}" width="100" height="100"/></pattern></defs>` : '')
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>

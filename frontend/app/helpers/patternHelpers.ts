@@ -49,7 +49,7 @@ export async function fetchAllPatterns(): Promise<PatternOption[]> {
   }
 
   try {
-    const response = await api.get('/patterns/list');
+    const response = await api.get('/api/patterns/list');
     if (response.data.success && response.data.data) {
       // Map backend response to frontend interface
       cachedPatterns = response.data.data.map((p: any) => ({
