@@ -17,6 +17,11 @@ router.get('/:id/fabric-roles', (req, res) =>
   patternController.getFabricRoles(req, res)
 );
 
+// POST /api/patterns/auto-assign-roles - AI-powered fabric role coordination
+router.post('/auto-assign-roles', authenticate, (req, res) =>
+  patternController.autoAssignFabricRoles(req, res)
+);
+
 // POST /api/patterns/generate - Protected route
 router.post('/generate', authenticate, patternLimiter, (req, res) => 
   patternController.generatePattern(req, res)

@@ -5,6 +5,7 @@ import { PatternDownloadService } from '../services/pattern/patternDownloadServi
 import { PatternListService } from '../services/pattern/patternListService';
 import { PatternRequestValidator } from '../services/pattern/patternRequestValidator';
 import { PatternErrorHandler } from './helpers/patternErrorHandler';
+import { FabricCoordinationService } from '../services/ai/fabricCoordinationService';
 import {
   logPatternGenerationRequest,
   buildDebugInfo,
@@ -153,6 +154,69 @@ export class PatternController {
       });
     } catch (error) {
       return PatternErrorHandler.handleGenericError(error, res, 'Get fabric roles');
+    }
+  }
+
+  /**
+   * Auto-assign fabric roles using AI coordination
+   * Analyzes uploaded fabrics and assigns optimal roles for a coordinated quilt design
+   */
+  async autoAssignFabricRoles(req: Request, res: Response) {
+    try {
+      const { fabrics } = req.body;
+
+      // Validation
+      if (!fabrics || !Array.isArray(fabrics)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid request: fabrics array is required',
+        });
+      }
+
+      if (fabrics.length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please upload at least 2 fabrics for auto-assignment',
+        });
+      }
+
+      if (fabrics.length > 10) {
+        return res.status(400).json({
+          success: false,
+          message: 'Maximum 10 fabrics allowed for auto-assignment',
+        });
+      }
+
+      // Validate fabric data structure
+      const isValid = fabrics.every(
+        (fabric: any) => fabric.imageData && fabric.fileName && typeof fabric.imageData === 'string'
+      );
+
+      if (!isValid) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid fabric data format',
+        });
+      }
+
+      console.log(`[PatternController] Auto-assigning roles for ${fabrics.length} fabrics`);
+
+      const coordinationService = new FabricCoordinationService();
+      const roleAssignments = await coordinationService.autoAssignRoles(fabrics);
+
+      res.json({
+        success: true,
+        data: roleAssignments,
+        message: 'Fabric roles automatically coordinated',
+      });
+    } catch (error) {
+      console.error('[PatternController] Auto-assign fabric roles error:', error);
+      const message = error instanceof Error ? error.message : 'Failed to auto-assign fabric roles';
+      
+      res.status(500).json({
+        success: false,
+        message,
+      });
     }
   }
 }

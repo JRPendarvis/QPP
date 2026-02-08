@@ -4,6 +4,7 @@ import { getPatternsForSkillLevel } from '../../utils/skillLevelHelper';
 import { getPatternById, calculateFabricCountScore } from '../../config/quiltPatterns';
 import { normalizePatternId } from '../../utils/patternNormalization';
 import { PatternFormatter } from '../../utils/patternFormatter';
+import { PATTERNS_BY_SKILL } from '../../config/skill-levels';
 
 export interface PatternSelectionResult {
   patternForSvg: string;
@@ -46,19 +47,16 @@ export class PatternSelector {
 
   /**
    * Auto-select best pattern for skill level and fabric count
+   * Prioritizes patterns at the user's exact skill level for better matching
    */
   private autoSelectPattern(skillLevel: string, fabricCount?: number): PatternSelectionResult {
-    const availablePatternIds = getPatternsForSkillLevel(skillLevel);
+    // First try: Get patterns at EXACT skill level (preferred for matching user expertise)
+    let filteredPatterns = this.getFilteredPatternsForLevel(skillLevel, fabricCount, true);
 
-    let filteredPatterns = availablePatternIds
-      .map((id) => getPatternById(id))
-      .filter((p): p is any => !!p && typeof p.minColors === 'number' && typeof p.maxFabrics === 'number');
-
-    // Filter by fabric count if provided
-    if (typeof fabricCount === 'number') {
-      filteredPatterns = filteredPatterns.filter(
-        (pattern) => fabricCount >= pattern.minColors && fabricCount <= pattern.maxFabrics
-      );
+    // Fallback: If no patterns at exact level, try all accessible patterns (including lower levels)
+    if (filteredPatterns.length === 0) {
+      console.log(`[Pattern Selection] No patterns at exact ${skillLevel} level, trying all accessible patterns`);
+      filteredPatterns = this.getFilteredPatternsForLevel(skillLevel, fabricCount, false);
     }
 
     if (filteredPatterns.length === 0) {
@@ -75,7 +73,40 @@ export class PatternSelector {
     const patternId = selectedPattern.id;
     const patternInstruction = `**REQUIRED PATTERN TYPE:** Create a "${patternForSvg}" pattern. This pattern is appropriate for the ${skillLevel} skill level.`;
 
+    console.log(`[Pattern Selection] Auto-selected "${patternId}" for ${skillLevel} with ${filteredPatterns.length} compatible patterns`);
+
     return { patternForSvg, patternInstruction, patternId };
+  }
+
+  /**
+   * Get filtered patterns for a skill level with optional exact-level-only filter
+   * @param skillLevel - User's skill level
+   * @param fabricCount - Number of fabrics
+   * @param exactLevelOnly - If true, only return patterns at this exact skill level (not lower levels)
+   */
+  private getFilteredPatternsForLevel(skillLevel: string, fabricCount: number | undefined, exactLevelOnly: boolean): any[] {
+    let availablePatternIds: string[];
+
+    if (exactLevelOnly) {
+      // Get patterns ONLY at this exact skill level
+      availablePatternIds = PATTERNS_BY_SKILL[skillLevel] || [];
+    } else {
+      // Get patterns at this level and all lower levels (fallback)
+      availablePatternIds = getPatternsForSkillLevel(skillLevel);
+    }
+
+    let filteredPatterns = availablePatternIds
+      .map((id) => getPatternById(id))
+      .filter((p): p is any => !!p && typeof p.minColors === 'number' && typeof p.maxFabrics === 'number');
+
+    // Filter by fabric count if provided
+    if (typeof fabricCount === 'number') {
+      filteredPatterns = filteredPatterns.filter(
+        (pattern) => fabricCount >= pattern.minColors && fabricCount <= pattern.maxFabrics
+      );
+    }
+
+    return filteredPatterns;
   }
 
   /**
