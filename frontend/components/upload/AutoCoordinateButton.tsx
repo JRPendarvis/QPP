@@ -35,8 +35,8 @@ const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
   const [isCoordinating, setIsCoordinating] = useState(false);
 
   const handleAutoCoordinate = async () => {
-    if (fabrics.length < 2) {
-      toast.error('Upload at least 2 fabrics for auto-coordination');
+    if (fabrics.length === 0) {
+      toast.error('Upload at least 1 fabric for auto-coordination');
       return;
     }
 
@@ -87,7 +87,7 @@ const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
     }
   };
 
-  const isDisabled = fabrics.length < 2 || fabrics.length > 10 || isCoordinating;
+  const isDisabled = fabrics.length === 0 || fabrics.length > 10 || isCoordinating;
 
   return (
     <button
@@ -101,8 +101,8 @@ const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
         }
       `}
       title={
-        fabrics.length < 2
-          ? 'Upload at least 2 fabrics'
+        fabrics.length === 0
+          ? 'Upload at least 1 fabric'
           : fabrics.length > 10
           ? 'Maximum 10 fabrics allowed'
           : 'AI will analyze your fabrics and suggest optimal color coordination'

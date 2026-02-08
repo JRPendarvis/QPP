@@ -4,7 +4,22 @@
  */
 
 export const buildFabricCoordinationPrompt = (fabricCount: number): string => {
-  return `You are an expert quilt designer specializing in color coordination and fabric pairing. Analyze these ${fabricCount} fabric images and assign each to optimal roles for a beautifully coordinated quilt pattern.
+  // Determine required roles based on fabric count
+  let requiredRoles: string;
+  let rulesExplanation: string;
+  
+  if (fabricCount === 1) {
+    requiredRoles = 'primary';
+    rulesExplanation = '- Assign the fabric to the primary role\n- This single fabric will be the main feature';
+  } else if (fabricCount === 2) {
+    requiredRoles = 'primary and secondary';
+    rulesExplanation = '- primary and secondary are REQUIRED\n- Assign one fabric as the primary (main feature) and one as secondary (support)';
+  } else {
+    requiredRoles = 'background, primary, and secondary';
+    rulesExplanation = '- background, primary, and secondary are REQUIRED\n- accent is OPTIONAL (only if truly beneficial)\n- Assign EXACTLY ONE fabric per role';
+  }
+  
+  return `You are an expert quilt designer specializing in color coordination and fabric pairing. Analyze these ${fabricCount} fabric image${fabricCount === 1 ? '' : 's'} and assign ${fabricCount === 1 ? 'it' : 'each'} to optimal ${fabricCount === 1 ? 'role' : 'roles'} for a beautifully coordinated quilt pattern.
 
 Available roles:
 - **background**: Subtle, low-contrast fabric that won't compete with design elements. Should recede visually and provide a calm foundation.
@@ -20,29 +35,18 @@ Guidelines for fabric coordination:
 5. **Accent Usage**: Only assign an accent if a fabric provides exceptional pop (don't force it)
 
 Assignment rules:
-- Assign EXACTLY ONE fabric per role
-- background, primary, and secondary are REQUIRED
-- accent is OPTIONAL (only if truly beneficial)
+${rulesExplanation}
 - Fabrics are numbered 1-${fabricCount} in the order they appear
 - Consider the entire composition, not just individual fabrics
 
 Respond with ONLY valid JSON in this EXACT format:
 {
-  "background": <fabric number>,
-  "primary": <fabric number>,
-  "secondary": <fabric number>,
+  ${fabricCount >= 3 ? '"background": <fabric number>,\n  ' : ''}"primary": <fabric number>,${fabricCount >= 2 ? '\n  "secondary": <fabric number>,' : ''}
   "accent": <fabric number or omit this line>,
   "reasoning": "Brief 1-2 sentence explanation of your color coordination strategy"
 }
 
-Example response (for 4 fabrics):
-{
-  "background": 3,
-  "primary": 1,
-  "secondary": 2,
-  "accent": 4,
-  "reasoning": "Fabric 3's soft cream tone provides a neutral backdrop, while the vibrant floral (1) takes center stage. The teal solid (2) bridges the palette, and the coral geometric (4) adds energizing contrast."
-}
+${fabricCount === 1 ? 'Example response (for 1 fabric):\n{\n  "primary": 1,\n  "reasoning": "This vibrant floral fabric will serve as the main feature, creating a bold and beautiful focal point for the quilt."\n}' : fabricCount === 2 ? 'Example response (for 2 fabrics):\n{\n  "primary": 1,\n  "secondary": 2,\n  "reasoning": "The vibrant floral takes center stage while the coordinating solid provides support and balance."\n}' : 'Example response (for 4 fabrics):\n{\n  "background": 3,\n  "primary": 1,\n  "secondary": 2,\n  "accent": 4,\n  "reasoning": "Fabric 3\'s soft cream tone provides a neutral backdrop, while the vibrant floral (1) takes center stage. The teal solid (2) bridges the palette, and the coral geometric (4) adds energizing contrast."\n}'}
 
-Now analyze the fabrics and provide your coordination recommendations:`;
+Now analyze the ${fabricCount === 1 ? 'fabric' : 'fabrics'} and provide your coordination recommendations:`;
 };
