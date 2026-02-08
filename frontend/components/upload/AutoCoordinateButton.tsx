@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 interface AutoCoordinateButtonProps {
   fabrics: File[];
-  onCoordinationComplete?: (assignments: FabricCoordination) => void;
+  onRearrange?: (assignments: FabricCoordination) => void;
 }
 
 export interface FabricCoordination {
@@ -30,7 +30,7 @@ const SparklesIcon = () => (
  */
 const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
   fabrics,
-  onCoordinationComplete,
+  onRearrange,
 }) => {
   const [isCoordinating, setIsCoordinating] = useState(false);
 
@@ -53,7 +53,7 @@ const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
       const fabricsWithTypes = await convertFilesToBase64(fabrics);
       
       const fabricData = fabricsWithTypes.map((fabric, index) => ({
-        imageData: fabric.data.split(',')[1], // Remove data:image/jpeg;base64, prefix
+        imageData: fabric.data, // Already base64 without prefix (handled by convertFilesToBase64)
         fileName: fabrics[index].name,
       }));
 
@@ -66,13 +66,14 @@ const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
       if (response.data.success) {
         const assignments = response.data.data;
         
-        // Show coordination results
-        const coordinationMessage = formatCoordinationMessage(assignments, fabrics);
-        toast.success(coordinationMessage, { duration: 6000 });
-
-        // Call callback if provided
-        if (onCoordinationComplete) {
-          onCoordinationComplete(assignments);
+        // Rearrange fabrics if handler provided
+        if (onRearrange) {
+          onRearrange(assignments);
+          toast.success('✨ Fabrics automatically coordinated and rearranged!', { duration: 4000 });
+        } else {
+          // Fallback: just show coordination results
+          const coordinationMessage = formatCoordinationMessage(assignments, fabrics);
+          toast.success(coordinationMessage, { duration: 6000 });
         }
       } else {
         toast.error(response.data.message || 'Failed to coordinate fabrics');
