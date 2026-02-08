@@ -10,6 +10,27 @@ jest.mock('../../services/ai/fabricCoordinationService');
 
 const mockFabricCoordinationService = FabricCoordinationService as jest.MockedClass<typeof FabricCoordinationService>;
 
+// Test Data Helpers
+const createMockFabric = (index: number) => ({
+  imageData: `data${index}`,
+  fileName: `fabric${index}.jpg`,
+});
+
+const createMockFabrics = (count: number) =>
+  Array.from({ length: count }, (_, i) => createMockFabric(i + 1));
+
+const createMockRequest = (body: any = {}): Partial<Request> => ({ body });
+
+const createMockResponse = (): { response: Partial<Response>; json: jest.Mock; status: jest.Mock } => {
+  const json = jest.fn().mockReturnThis();
+  const status = jest.fn().mockReturnThis();
+  return {
+    response: { json, status },
+    json,
+    status,
+  };
+};
+
 describe('PatternController - autoAssignFabricRoles', () => {
   let controller: PatternController;
   let mockRequest: Partial<Request>;
@@ -21,18 +42,12 @@ describe('PatternController - autoAssignFabricRoles', () => {
     jest.clearAllMocks();
     
     controller = new PatternController();
+    const mockResponseObj = createMockResponse();
+    mockResponse = mockResponseObj.response;
+    mockJson = mockResponseObj.json;
+    mockStatus = mockResponseObj.status;
 
-    mockJson = jest.fn().mockReturnThis();
-    mockStatus = jest.fn().mockReturnThis();
-    
-    mockResponse = {
-      json: mockJson,
-      status: mockStatus,
-    };
-
-    mockRequest = {
-      body: {},
-    };
+    mockRequest = createMockRequest();
   });
 
   describe('Successful coordination', () => {
@@ -46,14 +61,7 @@ describe('PatternController - autoAssignFabricRoles', () => {
 
       mockFabricCoordinationService.prototype.autoAssignRoles = jest.fn().mockResolvedValue(mockAssignments);
 
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'fabric1.jpg' },
-          { imageData: 'data2', fileName: 'fabric2.jpg' },
-          { imageData: 'data3', fileName: 'fabric3.jpg' },
-          { imageData: 'data4', fileName: 'fabric4.jpg' },
-        ],
-      };
+      mockRequest.body = { fabrics: createMockFabrics(4) };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
@@ -74,13 +82,7 @@ describe('PatternController - autoAssignFabricRoles', () => {
 
       mockFabricCoordinationService.prototype.autoAssignRoles = jest.fn().mockResolvedValue(mockAssignments);
 
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'fabric1.jpg' },
-          { imageData: 'data2', fileName: 'fabric2.jpg' },
-          { imageData: 'data3', fileName: 'fabric3.jpg' },
-        ],
-      };
+      mockRequest.body = { fabrics: createMockFabrics(3) };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
@@ -93,18 +95,13 @@ describe('PatternController - autoAssignFabricRoles', () => {
 
     it('should call FabricCoordinationService with correct parameters', async () => {
       const mockAssignRoles = jest.fn().mockResolvedValue({
-        background: 'f1.jpg',
-        primary: 'f2.jpg',
-        secondary: 'f3.jpg',
+        background: 'fabric1.jpg',
+        primary: 'fabric2.jpg',
+        secondary: 'fabric3.jpg',
       });
       mockFabricCoordinationService.prototype.autoAssignRoles = mockAssignRoles;
 
-      const fabricData = [
-        { imageData: 'imagedata1', fileName: 'f1.jpg' },
-        { imageData: 'imagedata2', fileName: 'f2.jpg' },
-        { imageData: 'imagedata3', fileName: 'f3.jpg' },
-      ];
-
+      const fabricData = createMockFabrics(3);
       mockRequest.body = { fabrics: fabricData };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
@@ -114,105 +111,40 @@ describe('PatternController - autoAssignFabricRoles', () => {
   });
 
   describe('Validation errors', () => {
-    it('should return 400 when fabrics is missing', async () => {
-      mockRequest.body = {};
+    // Parameterized tests for cleaner validation testing
+    test.each([
+      { scenario: 'missing', body: {}, expectedMessage: 'Invalid request: fabrics array is required' },
+      { scenario: 'not an array', body: { fabrics: 'not-an-array' }, expectedMessage: 'Invalid request: fabrics array is required' },
+      { scenario: 'empty array', body: { fabrics: [] }, expectedMessage: 'Please upload at least 2 fabrics for auto-assignment' },
+      { scenario: 'only 1 fabric', body: { fabrics: createMockFabrics(1) }, expectedMessage: 'Please upload at least 2 fabrics for auto-assignment' },
+      { scenario: '11 fabrics', body: { fabrics: createMockFabrics(11) }, expectedMessage: 'Maximum 10 fabrics allowed for auto-assignment' },
+    ])('should return 400 when fabrics $scenario', async ({ body, expectedMessage }) => {
+      mockRequest.body = body;
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
       expect(mockStatus).toHaveBeenCalledWith(400);
       expect(mockJson).toHaveBeenCalledWith({
         success: false,
-        message: 'Invalid request: fabrics array is required',
+        message: expectedMessage,
       });
     });
 
-    it('should return 400 when fabrics is not an array', async () => {
-      mockRequest.body = { fabrics: 'not-an-array' };
-
-      await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid request: fabrics array is required',
-      });
-    });
-
-    it('should return 400 when fewer than 2 fabrics provided', async () => {
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'fabric1.jpg' },
-        ],
-      };
-
-      await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        success: false,
-        message: 'Please upload at least 2 fabrics for auto-assignment',
-      });
-    });
-
-    it('should return 400 when more than 10 fabrics provided', async () => {
-      mockRequest.body = {
-        fabrics: Array.from({ length: 11 }, (_, i) => ({
-          imageData: `data${i}`,
-          fileName: `fabric${i}.jpg`,
-        })),
-      };
-
-      await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        success: false,
-        message: 'Maximum 10 fabrics allowed for auto-assignment',
-      });
-    });
-
-    it('should return 400 when fabric data structure is invalid', async () => {
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'fabric1.jpg' },
-          { fileName: 'fabric2.jpg' }, // Missing imageData
-          { imageData: 'data3', fileName: 'fabric3.jpg' },
-        ],
-      };
-
-      await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid fabric data format',
-      });
-    });
-
-    it('should return 400 when fileName is missing', async () => {
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'fabric1.jpg' },
-          { imageData: 'data2' }, // Missing fileName
-        ],
-      };
-
-      await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid fabric data format',
-      });
-    });
-
-    it('should return 400 when imageData is not a string', async () => {
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'fabric1.jpg' },
-          { imageData: 12345, fileName: 'fabric2.jpg' }, // Not a string
-        ],
-      };
+    test.each([
+      { 
+        scenario: 'missing imageData', 
+        fabrics: [createMockFabric(1), { fileName: 'fabric2.jpg' }, createMockFabric(3)] 
+      },
+      { 
+        scenario: 'missing fileName', 
+        fabrics: [createMockFabric(1), { imageData: 'data2' }] 
+      },
+      { 
+        scenario: 'imageData not a string', 
+        fabrics: [createMockFabric(1), { imageData: 12345, fileName: 'fabric2.jpg' }] 
+      },
+    ])('should return 400 when $scenario', async ({ fabrics }) => {
+      mockRequest.body = { fabrics };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
@@ -230,13 +162,7 @@ describe('PatternController - autoAssignFabricRoles', () => {
         new Error('AI service unavailable')
       );
 
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'fabric1.jpg' },
-          { imageData: 'data2', fileName: 'fabric2.jpg' },
-          { imageData: 'data3', fileName: 'fabric3.jpg' },
-        ],
-      };
+      mockRequest.body = { fabrics: createMockFabrics(3) };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
@@ -252,12 +178,7 @@ describe('PatternController - autoAssignFabricRoles', () => {
         'Unknown error string'
       );
 
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'fabric1.jpg' },
-          { imageData: 'data2', fileName: 'fabric2.jpg' },
-        ],
-      };
+      mockRequest.body = { fabrics: createMockFabrics(2) };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
@@ -269,44 +190,31 @@ describe('PatternController - autoAssignFabricRoles', () => {
     });
 
     it('should log coordination attempts to console', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'log');
       
       mockFabricCoordinationService.prototype.autoAssignRoles = jest.fn().mockResolvedValue({
-        background: 'f1.jpg',
-        primary: 'f2.jpg',
-        secondary: 'f3.jpg',
+        background: 'fabric1.jpg',
+        primary: 'fabric2.jpg',
+        secondary: 'fabric3.jpg',
       });
 
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'f1.jpg' },
-          { imageData: 'data2', fileName: 'f2.jpg' },
-          { imageData: 'data3', fileName: 'f3.jpg' },
-        ],
-      };
+      mockRequest.body = { fabrics: createMockFabrics(3) };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('[PatternController] Auto-assigning roles for 3 fabrics')
       );
-
-      consoleSpy.mockRestore();
     });
 
     it('should log errors to console.error', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = jest.spyOn(console, 'error');
       
       mockFabricCoordinationService.prototype.autoAssignRoles = jest.fn().mockRejectedValue(
         new Error('Test error')
       );
 
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'f1.jpg' },
-          { imageData: 'data2', fileName: 'f2.jpg' },
-        ],
-      };
+      mockRequest.body = { fabrics: createMockFabrics(2) };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
@@ -314,25 +222,18 @@ describe('PatternController - autoAssignFabricRoles', () => {
         expect.stringContaining('[PatternController] Auto-assign fabric roles error:'),
         expect.any(Error)
       );
-
-      consoleErrorSpy.mockRestore();
     });
   });
 
   describe('Edge cases', () => {
     it('should handle exactly 2 fabrics (minimum valid)', async () => {
       mockFabricCoordinationService.prototype.autoAssignRoles = jest.fn().mockResolvedValue({
-        background: 'f1.jpg',
-        primary: 'f2.jpg',
-        secondary: 'f1.jpg',
+        background: 'fabric1.jpg',
+        primary: 'fabric2.jpg',
+        secondary: 'fabric1.jpg',
       });
 
-      mockRequest.body = {
-        fabrics: [
-          { imageData: 'data1', fileName: 'f1.jpg' },
-          { imageData: 'data2', fileName: 'f2.jpg' },
-        ],
-      };
+      mockRequest.body = { fabrics: createMockFabrics(2) };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
@@ -343,35 +244,18 @@ describe('PatternController - autoAssignFabricRoles', () => {
 
     it('should handle exactly 10 fabrics (maximum valid)', async () => {
       mockFabricCoordinationService.prototype.autoAssignRoles = jest.fn().mockResolvedValue({
-        background: 'f1.jpg',
-        primary: 'f2.jpg',
-        secondary: 'f3.jpg',
+        background: 'fabric1.jpg',
+        primary: 'fabric2.jpg',
+        secondary: 'fabric3.jpg',
       });
 
-      mockRequest.body = {
-        fabrics: Array.from({ length: 10 }, (_, i) => ({
-          imageData: `data${i}`,
-          fileName: `f${i}.jpg`,
-        })),
-      };
+      mockRequest.body = { fabrics: createMockFabrics(10) };
 
       await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
 
       expect(mockJson).toHaveBeenCalledWith(
         expect.objectContaining({ success: true })
       );
-    });
-
-    it('should handle empty fabrics array', async () => {
-      mockRequest.body = { fabrics: [] };
-
-      await controller.autoAssignFabricRoles(mockRequest as Request, mockResponse as Response);
-
-      expect(mockStatus).toHaveBeenCalledWith(400);
-      expect(mockJson).toHaveBeenCalledWith({
-        success: false,
-        message: 'Please upload at least 2 fabrics for auto-assignment',
-      });
     });
   });
 });

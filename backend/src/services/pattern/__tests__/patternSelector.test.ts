@@ -1,6 +1,6 @@
 import { PatternSelector } from '../patternSelector';
 import { getPatternsForSkillLevel } from '../../../utils/skillLevelHelper';
-import { getPatternById } from '../../../config/quiltPatterns';
+import { getPatternById, QuiltPattern } from '../../../config/quiltPatterns';
 import { PATTERNS_BY_SKILL } from '../../../config/skill-levels';
 
 // Mock dependencies
@@ -18,6 +18,89 @@ jest.mock('../../../config/skill-levels', () => ({
 
 const mockedGetPatternsForSkillLevel = getPatternsForSkillLevel as jest.MockedFunction<typeof getPatternsForSkillLevel>;
 const mockedGetPatternById = getPatternById as jest.MockedFunction<typeof getPatternById>;
+
+// Shared test data - reduces duplication
+const MOCK_PATTERNS: Record<string, QuiltPattern> = {
+  'mariners-compass': {
+    id: 'mariners-compass',
+    name: 'Mariners Compass',
+    skillLevel: 'expert',
+    description: 'Complex compass design',
+    minColors: 4,
+    maxFabrics: 8,
+    recommendedFabricCount: 6,
+    allowRotation: true,
+  },
+  'storm-at-sea': {
+    id: 'storm-at-sea',
+    name: 'Storm at Sea',
+    skillLevel: 'expert',
+    description: 'Intricate curved pattern',
+    minColors: 3,
+    maxFabrics: 6,
+    recommendedFabricCount: 4,
+    allowRotation: true,
+  },
+  'pinwheel': {
+    id: 'pinwheel',
+    name: 'Pinwheel',
+    skillLevel: 'intermediate',
+    description: 'Spinning pinwheel blocks',
+    minColors: 2,
+    maxFabrics: 5,
+    recommendedFabricCount: 3,
+    allowRotation: true,
+  },
+  'simple-squares': {
+    id: 'simple-squares',
+    name: 'Simple Squares',
+    skillLevel: 'beginner',
+    description: 'Basic square blocks',
+    minColors: 2,
+    maxFabrics: 8,
+    recommendedFabricCount: 4,
+    allowRotation: false,
+  },
+  'flying-geese': {
+    id: 'flying-geese',
+    name: 'Flying Geese',
+    skillLevel: 'intermediate',
+    description: 'Flying geese pattern',
+    minColors: 2,
+    maxFabrics: 5,
+    recommendedFabricCount: 3,
+    allowRotation: true,
+  },
+  'checkerboard': {
+    id: 'checkerboard',
+    name: 'Checkerboard',
+    skillLevel: 'beginner',
+    description: 'Checkerboard pattern',
+    minColors: 2,
+    maxFabrics: 4,
+    recommendedFabricCount: 2,
+    allowRotation: false,
+  },
+};
+
+// Helper function to create custom patterns for specific test scenarios
+const createMockPattern = (overrides: Partial<QuiltPattern>): QuiltPattern => ({
+  id: overrides.id || 'test-pattern',
+  name: overrides.name || overrides.id?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Test Pattern',
+  skillLevel: overrides.skillLevel || 'intermediate',
+  description: overrides.description || 'Test pattern',
+  minColors: overrides.minColors ?? 2,
+  maxFabrics: overrides.maxFabrics ?? 6,
+  recommendedFabricCount: overrides.recommendedFabricCount ?? 4,
+  allowRotation: overrides.allowRotation ?? true,
+});
+
+// Helper to setup pattern mocks
+const setupPatternMocks = (patternIds: string[], customPatterns?: Record<string, QuiltPattern>) => {
+  const patterns = customPatterns || MOCK_PATTERNS;
+  mockedGetPatternsForSkillLevel.mockReturnValue(patternIds);
+  mockedGetPatternById.mockImplementation((id: string) => patterns[id] || undefined);
+};
 
 describe('PatternSelector', () => {
   let selector: PatternSelector;
@@ -53,51 +136,8 @@ describe('PatternSelector', () => {
 
   describe('selectPattern - Auto-selection with skill level priority', () => {
     beforeEach(() => {
-      // Setup mock patterns with different characteristics
-      const mockPatterns = {
-        'mariners-compass': {
-          id: 'mariners-compass',
-          name: 'Mariners Compass',
-          skillLevel: 'expert',
-          description: 'Complex compass design',
-          minColors: 4,
-          maxFabrics: 8,
-          recommendedFabricCount: 6,
-          allowRotation: true,
-        },
-        'storm-at-sea': {
-          id: 'storm-at-sea',
-          name: 'Storm at Sea',
-          skillLevel: 'expert',
-          description: 'Intricate curved pattern',
-          minColors: 3,
-          maxFabrics: 6,
-          recommendedFabricCount: 4,
-          allowRotation: true,
-        },
-        'pinwheel': {
-          id: 'pinwheel',
-          name: 'Pinwheel',
-          skillLevel: 'intermediate',
-          description: 'Spinning pinwheel blocks',
-          minColors: 2,
-          maxFabrics: 5,
-          recommendedFabricCount: 3,
-          allowRotation: true,
-        },
-        'simple-squares': {
-          id: 'simple-squares',
-          name: 'Simple Squares',
-          skillLevel: 'beginner',
-          description: 'Basic square blocks',
-          minColors: 2,
-          maxFabrics: 8,
-          recommendedFabricCount: 4,
-          allowRotation: false,
-        },
-      };
-
-      mockedGetPatternById.mockImplementation((id: string) => mockPatterns[id as keyof typeof mockPatterns] || undefined);
+      // Use shared mock patterns
+      setupPatternMocks(['simple-squares', 'pinwheel', 'mariners-compass', 'storm-at-sea']);
     });
 
     it('should prioritize patterns at exact skill level for expert users', () => {
@@ -114,37 +154,14 @@ describe('PatternSelector', () => {
     });
 
     it('should fall back to lower skill levels when no exact match exists', () => {
-      // First call for exact level returns empty (no expert patterns match fabric count)
-      // Second call for all accessible levels returns patterns
-      mockedGetPatternsForSkillLevel.mockReturnValue([
-        'simple-squares', 'pinwheel', 'mariners-compass', 'storm-at-sea'
-      ]);
-
-      // Mock getPatternById to return null for expert patterns with this fabric count
-      mockedGetPatternById.mockImplementation((id: string) => {
-        if (id === 'mariners-compass' || id === 'storm-at-sea') {
-          return {
-            id,
-            name: id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-            skillLevel: 'expert',
-            description: 'Expert pattern',
-            minColors: 6, // Don't match fabric count of 2
-            maxFabrics: 8,
-            recommendedFabricCount: 6,
-            allowRotation: true,
-          };
-        }
-        return {
-          id,
-          name: id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-          skillLevel: 'intermediate',
-          description: 'Intermediate pattern',
-          minColors: 2,
-          maxFabrics: 5,
-          recommendedFabricCount: 3,
-          allowRotation: true,
-        };
-      });
+      // Create custom patterns where expert patterns don't match fabric count of 2
+      const customPatterns = {
+        'mariners-compass': createMockPattern({ id: 'mariners-compass', skillLevel: 'expert', minColors: 6, maxFabrics: 8 }),
+        'storm-at-sea': createMockPattern({ id: 'storm-at-sea', skillLevel: 'expert', minColors: 6, maxFabrics: 8 }),
+        'pinwheel': MOCK_PATTERNS.pinwheel,
+        'simple-squares': MOCK_PATTERNS['simple-squares'],
+      };
+      setupPatternMocks(['simple-squares', 'pinwheel', 'mariners-compass', 'storm-at-sea'], customPatterns);
 
       const result = selector.selectPattern('expert', 'auto', 2);
 
@@ -154,35 +171,12 @@ describe('PatternSelector', () => {
     });
 
     it('should filter patterns by fabric count', () => {
-      // Reset for this specific test - only storm-at-sea matches fabric count of 4
-      mockedGetPatternsForSkillLevel.mockReturnValue(['storm-at-sea', 'mariners-compass']);
-      mockedGetPatternById.mockImplementation((id: string) => {
-        if (id === 'storm-at-sea') {
-          return {
-            id: 'storm-at-sea',
-            name: 'Storm at Sea',
-            skillLevel: 'expert',
-            description: 'Complex curved pattern',
-            minColors: 3,
-            maxFabrics: 6,
-            recommendedFabricCount: 4,
-            allowRotation: true,
-          };
-        }
-        if (id === 'mariners-compass') {
-          return {
-            id: 'mariners-compass',
-            name: "Mariner's Compass",
-            skillLevel: 'expert',
-            description: 'Complex compass design',
-            minColors: 7, // Doesn't match fabric count of 4
-            maxFabrics: 10,
-            recommendedFabricCount: 8,
-            allowRotation: true,
-          };
-        }
-        return undefined;
-      });
+      // Only storm-at-sea matches fabric count of 4
+      const customPatterns = {
+        'storm-at-sea': MOCK_PATTERNS['storm-at-sea'],
+        'mariners-compass': createMockPattern({ id: 'mariners-compass', skillLevel: 'expert', minColors: 7, maxFabrics: 10 }),
+      };
+      setupPatternMocks(['storm-at-sea', 'mariners-compass'], customPatterns);
       
       const result = selector.selectPattern('expert', 'auto', 4);
 
@@ -191,18 +185,10 @@ describe('PatternSelector', () => {
     });
 
     it('should return error when no patterns match criteria', () => {
-      // Mock with patterns that don't match fabric count
-      mockedGetPatternsForSkillLevel.mockReturnValue(['storm-at-sea']);
-      mockedGetPatternById.mockReturnValue({
-        id: 'storm-at-sea',
-        name: 'Storm at Sea',
-        skillLevel: 'expert',
-        description: 'Complex pattern',
-        minColors: 10, // Doesn't match fabric count
-        maxFabrics: 12,
-        recommendedFabricCount: 10,
-        allowRotation: true,
-      });
+      const customPatterns = {
+        'storm-at-sea': createMockPattern({ id: 'storm-at-sea', skillLevel: 'expert', minColors: 10, maxFabrics: 12 }),
+      };
+      setupPatternMocks(['storm-at-sea'], customPatterns);
 
       const result = selector.selectPattern('expert', 'auto', 4);
 
@@ -215,34 +201,11 @@ describe('PatternSelector', () => {
 
   describe('selectPattern - Fabric count validation', () => {
     beforeEach(() => {
-      mockedGetPatternsForSkillLevel.mockReturnValue(['pinwheel', 'storm-at-sea']);
-      mockedGetPatternById.mockImplementation((id: string) => {
-        if (id === 'pinwheel') {
-          return {
-            id: 'pinwheel',
-            name: 'Pinwheel',
-            skillLevel: 'intermediate',
-            description: 'Spinning pattern',
-            minColors: 2,
-            maxFabrics: 4,
-            recommendedFabricCount: 3,
-            allowRotation: true,
-          };
-        }
-        if (id === 'storm-at-sea') {
-          return {
-            id: 'storm-at-sea',
-            name: 'Storm at Sea',
-            skillLevel: 'expert',
-            description: 'Complex curved pattern',
-            minColors: 5,
-            maxFabrics: 8,
-            recommendedFabricCount: 6,
-            allowRotation: true,
-          };
-        }
-        return undefined;
-      });
+      const customPatterns = {
+        pinwheel: createMockPattern({ id: 'pinwheel', skillLevel: 'intermediate', minColors: 2, maxFabrics: 4 }),
+        'storm-at-sea': createMockPattern({ id: 'storm-at-sea', skillLevel: 'expert', minColors: 5, maxFabrics: 8 }),
+      };
+      setupPatternMocks(['pinwheel', 'storm-at-sea'], customPatterns);
     });
 
     it('should select pattern matching fabric count range', () => {
@@ -275,35 +238,17 @@ describe('PatternSelector', () => {
 
   describe('selectPattern - Edge cases', () => {
     it('should handle empty string as selectedPattern (auto mode)', () => {
-      mockedGetPatternsForSkillLevel.mockReturnValue(['simple-squares']);
-      mockedGetPatternById.mockReturnValue({
-        id: 'simple-squares',
-        name: 'Simple Squares',
-        skillLevel: 'beginner',
-        description: 'Basic squares',
-        minColors: 2,
-        maxFabrics: 6,
-        recommendedFabricCount: 4,
-        allowRotation: false,
-      });
+      setupPatternMocks(['simple-squares', 'checkerboard']);
 
       const result = selector.selectPattern('beginner', '', 4);
 
-      expect(result.patternId).toBe('simple-squares');
+      // Should auto-select one of the beginner patterns
+      expect(['simple-squares', 'checkerboard']).toContain(result.patternId);
+      expect(result.patternForSvg).toBeDefined();
     });
 
     it('should handle "auto" as selectedPattern explicitly', () => {
-      mockedGetPatternsForSkillLevel.mockReturnValue(['checkerboard']);
-      mockedGetPatternById.mockReturnValue({
-        id: 'checkerboard',
-        name: 'Checkerboard',
-        skillLevel: 'beginner',
-        description: 'Checkerboard pattern',
-        minColors: 2,
-        maxFabrics: 4,
-        recommendedFabricCount: 2,
-        allowRotation: false,
-      });
+      setupPatternMocks(['checkerboard']);
 
       const result = selector.selectPattern('beginner', 'auto', 2);
 
@@ -322,17 +267,7 @@ describe('PatternSelector', () => {
 
   describe('Pattern instruction formatting', () => {
     it('should include skill level in auto-selected pattern instruction', () => {
-      mockedGetPatternsForSkillLevel.mockReturnValue(['flying-geese']);
-      mockedGetPatternById.mockReturnValue({
-        id: 'flying-geese',
-        name: 'Flying Geese',
-        skillLevel: 'intermediate',
-        description: 'Flying geese pattern',
-        minColors: 2,
-        maxFabrics: 5,
-        recommendedFabricCount: 3,
-        allowRotation: true,
-      });
+      setupPatternMocks(['flying-geese']);
 
       const result = selector.selectPattern('intermediate', 'auto', 3);
 

@@ -4,9 +4,32 @@ import Anthropic from '@anthropic-ai/sdk';
 // Mock Anthropic SDK
 jest.mock('@anthropic-ai/sdk');
 
+// Test Data Factories
+const createMockFabric = (index: number, overrides?: { imageData?: string; fileName?: string }) => ({
+  imageData: overrides?.imageData || `base64data${index}`,
+  fileName: overrides?.fileName || `fabric${index}.jpg`,
+});
+
+const createMockFabrics = (count: number) => 
+  Array.from({ length: count }, (_, i) => createMockFabric(i + 1));
+
+const createMockResponse = (assignments: Record<string, number | string>, asMarkdown = false) => {
+  const jsonContent = JSON.stringify(assignments);
+  return {
+    content: [{
+      type: 'text',
+      text: asMarkdown ? `\`\`\`json\n${jsonContent}\n\`\`\`` : jsonContent,
+    }],
+  };
+};
+
 // Mock console to avoid noise in test output
-global.console.log = jest.fn();
-global.console.error = jest.fn();
+const mockConsole = () => {
+  global.console.log = jest.fn();
+  global.console.error = jest.fn();
+};
+
+mockConsole();
 
 describe('FabricCoordinationService', () => {
   let service: FabricCoordinationService;
@@ -28,26 +51,16 @@ describe('FabricCoordinationService', () => {
 
   describe('autoAssignRoles - Success cases', () => {
     it('should successfully assign fabric roles with all 4 roles', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            background: 3,
-            primary: 1,
-            secondary: 2,
-            accent: 4,
-            reasoning: 'Fabric 3 provides subtle background, 1 is bold primary, 2 complements, 4 adds contrast.'
-          })
-        }]
-      };
+      const mockResponse = createMockResponse({
+        background: 3,
+        primary: 1,
+        secondary: 2,
+        accent: 4,
+        reasoning: 'Fabric 3 provides subtle background, 1 is bold primary, 2 complements, 4 adds contrast.'
+      });
       mockAnthropicCreate.mockResolvedValue(mockResponse);
 
-      const fabrics = [
-        { imageData: 'base64data1', fileName: 'fabric1.jpg' },
-        { imageData: 'base64data2', fileName: 'fabric2.jpg' },
-        { imageData: 'base64data3', fileName: 'fabric3.jpg' },
-        { imageData: 'base64data4', fileName: 'fabric4.jpg' },
-      ];
+      const fabrics = createMockFabrics(4);
 
       const result = await service.autoAssignRoles(fabrics);
 
@@ -60,24 +73,15 @@ describe('FabricCoordinationService', () => {
     });
 
     it('should assign roles without accent when not provided by AI', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            background: 2,
-            primary: 1,
-            secondary: 3,
-            reasoning: 'No fabric suitable for accent role.'
-          })
-        }]
-      };
+      const mockResponse = createMockResponse({
+        background: 2,
+        primary: 1,
+        secondary: 3,
+        reasoning: 'No fabric suitable for accent role.'
+      });
       mockAnthropicCreate.mockResolvedValue(mockResponse);
 
-      const fabrics = [
-        { imageData: 'base64data1', fileName: 'fabric1.jpg' },
-        { imageData: 'base64data2', fileName: 'fabric2.jpg' },
-        { imageData: 'base64data3', fileName: 'fabric3.jpg' },
-      ];
+      const fabrics = createMockFabrics(3);
 
       const result = await service.autoAssignRoles(fabrics);
 
@@ -90,41 +94,28 @@ describe('FabricCoordinationService', () => {
     });
 
     it('should handle markdown code blocks in AI response', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '```json\n{"background": 1, "primary": 2, "secondary": 3, "reasoning": "Test"}\n```'
-        }]
-      };
+      const mockResponse = createMockResponse({
+        background: 1,
+        primary: 2,
+        secondary: 3,
+        reasoning: 'Test'
+      }, true); // With markdown wrapper
       mockAnthropicCreate.mockResolvedValue(mockResponse);
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
+      const fabrics = createMockFabrics(3);
 
       const result = await service.autoAssignRoles(fabrics);
 
-      expect(result.background).toBe('f1.jpg');
-      expect(result.primary).toBe('f2.jpg');
-      expect(result.secondary).toBe('f3.jpg');
+      expect(result.background).toBe('fabric1.jpg');
+      expect(result.primary).toBe('fabric2.jpg');
+      expect(result.secondary).toBe('fabric3.jpg');
     });
 
     it('should call Anthropic API with correct parameters', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 2, "secondary": 3}'
-        }]
-      };
+      const mockResponse = createMockResponse({ background: 1, primary: 2, secondary: 3 });
       mockAnthropicCreate.mockResolvedValue(mockResponse);
 
-      const fabrics = [
-        { imageData: 'img1data', fileName: 'fabric1.jpg' },
-        { imageData: 'img2data', fileName: 'fabric2.jpg' },
-        { imageData: 'img3data', fileName: 'fabric3.jpg' },
-      ];
+      const fabrics = createMockFabrics(3);
 
       await service.autoAssignRoles(fabrics);
 
@@ -142,7 +133,7 @@ describe('FabricCoordinationService', () => {
                   source: {
                     type: 'base64',
                     media_type: 'image/jpeg',
-                    data: 'img1data'
+                    data: 'base64data1' // Updated to match factory
                   }
                 }),
               ])
@@ -155,59 +146,28 @@ describe('FabricCoordinationService', () => {
 
   describe('autoAssignRoles - Validation', () => {
     it('should reject fewer than 2 fabrics', async () => {
-      const fabrics = [
-        { imageData: 'data1', fileName: 'fabric1.jpg' },
-      ];
-
-      await expect(service.autoAssignRoles(fabrics))
+      await expect(service.autoAssignRoles(createMockFabrics(1)))
         .rejects
         .toThrow('Auto-assignment requires 2-10 fabrics');
     });
 
     it('should reject more than 10 fabrics', async () => {
-      const fabrics = Array.from({ length: 11 }, (_, i) => ({
-        imageData: `data${i}`,
-        fileName: `fabric${i}.jpg`,
-      }));
-
-      await expect(service.autoAssignRoles(fabrics))
+      await expect(service.autoAssignRoles(createMockFabrics(11)))
         .rejects
         .toThrow('Auto-assignment requires 2-10 fabrics');
     });
 
     it('should accept exactly 2 fabrics', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 2, "secondary": 1}'
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 1, primary: 2, secondary: 1 }));
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-      ];
-
-      const result = await service.autoAssignRoles(fabrics);
+      const result = await service.autoAssignRoles(createMockFabrics(2));
       expect(result).toBeDefined();
     });
 
     it('should accept exactly 10 fabrics', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 2, "secondary": 3}'
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 1, primary: 2, secondary: 3 }));
 
-      const fabrics = Array.from({ length: 10 }, (_, i) => ({
-        imageData: `data${i}`,
-        fileName: `f${i}.jpg`,
-      }));
-
-      const result = await service.autoAssignRoles(fabrics);
+      const result = await service.autoAssignRoles(createMockFabrics(10));
       expect(result).toBeDefined();
     });
   });
@@ -219,93 +179,41 @@ describe('FabricCoordinationService', () => {
       };
       mockAnthropicCreate.mockResolvedValue(mockResponse);
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
-
-      await expect(service.autoAssignRoles(fabrics))
+      await expect(service.autoAssignRoles(createMockFabrics(3)))
         .rejects
         .toThrow('No text response from Claude');
     });
 
     it('should throw error when JSON parsing fails', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: 'This is not valid JSON'
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue({
+        content: [{ type: 'text', text: 'This is not valid JSON' }]
+      });
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
-
-      await expect(service.autoAssignRoles(fabrics))
+      await expect(service.autoAssignRoles(createMockFabrics(3)))
         .rejects
         .toThrow('Could not parse fabric role assignments from AI response');
     });
 
     it('should throw error when required role is missing', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 2}'  // Missing secondary
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 1, primary: 2 })); // Missing secondary
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
-
-      await expect(service.autoAssignRoles(fabrics))
+      await expect(service.autoAssignRoles(createMockFabrics(3)))
         .rejects
         .toThrow('Invalid or missing assignment for secondary');
     });
 
     it('should throw error when role assignment is out of bounds', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 5, "secondary": 3}'  // 5 is out of bounds
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 1, primary: 5, secondary: 3 }));
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
-
-      await expect(service.autoAssignRoles(fabrics))
+      await expect(service.autoAssignRoles(createMockFabrics(3)))
         .rejects
         .toThrow('Invalid or missing assignment for primary');
     });
 
     it('should throw error when role assignment is zero', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 0, "primary": 1, "secondary": 2}'
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 0, primary: 1, secondary: 2 }));
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
-
-      await expect(service.autoAssignRoles(fabrics))
+      await expect(service.autoAssignRoles(createMockFabrics(3)))
         .rejects
         .toThrow('Invalid or missing assignment for background');
     });
@@ -313,81 +221,32 @@ describe('FabricCoordinationService', () => {
 
   describe('autoAssignRoles - Accent role handling', () => {
     it('should include accent when valid', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 2, "secondary": 3, "accent": 4}'
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 1, primary: 2, secondary: 3, accent: 4 }));
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-        { imageData: 'data4', fileName: 'f4.jpg' },
-      ];
-
-      const result = await service.autoAssignRoles(fabrics);
-      expect(result.accent).toBe('f4.jpg');
+      const result = await service.autoAssignRoles(createMockFabrics(4));
+      expect(result.accent).toBe('fabric4.jpg');
     });
 
     it('should ignore accent when out of bounds', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 2, "secondary": 3, "accent": 10}'
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 1, primary: 2, secondary: 3, accent: 10 }));
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
-
-      const result = await service.autoAssignRoles(fabrics);
+      const result = await service.autoAssignRoles(createMockFabrics(3));
       expect(result.accent).toBeUndefined();
     });
 
     it('should ignore accent when zero', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 2, "secondary": 3, "accent": 0}'
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 1, primary: 2, secondary: 3, accent: 0 }));
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
-
-      const result = await service.autoAssignRoles(fabrics);
+      const result = await service.autoAssignRoles(createMockFabrics(3));
       expect(result.accent).toBeUndefined();
     });
   });
 
   describe('Prompt generation', () => {
     it('should include fabric count in prompt', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 2, "secondary": 3}'
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 1, primary: 2, secondary: 3 }));
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
-
-      await service.autoAssignRoles(fabrics);
+      await service.autoAssignRoles(createMockFabrics(3));
 
       const callArgs = mockAnthropicCreate.mock.calls[0][0];
       const textContent = callArgs.messages[0].content.find((c: any) => c.type === 'text');
@@ -397,21 +256,9 @@ describe('FabricCoordinationService', () => {
     });
 
     it('should describe all role types in prompt', async () => {
-      const mockResponse = {
-        content: [{
-          type: 'text',
-          text: '{"background": 1, "primary": 2, "secondary": 3}'
-        }]
-      };
-      mockAnthropicCreate.mockResolvedValue(mockResponse);
+      mockAnthropicCreate.mockResolvedValue(createMockResponse({ background: 1, primary: 2, secondary: 3 }));
 
-      const fabrics = [
-        { imageData: 'data1', fileName: 'f1.jpg' },
-        { imageData: 'data2', fileName: 'f2.jpg' },
-        { imageData: 'data3', fileName: 'f3.jpg' },
-      ];
-
-      await service.autoAssignRoles(fabrics);
+      await service.autoAssignRoles(createMockFabrics(3));
 
       const callArgs = mockAnthropicCreate.mock.calls[0][0];
       const textContent = callArgs.messages[0].content.find((c: any) => c.type === 'text');

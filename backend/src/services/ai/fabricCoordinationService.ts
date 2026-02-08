@@ -2,6 +2,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { FabricsByRole } from '../../types/QuiltPattern';
+import { buildFabricCoordinationPrompt } from './prompts/fabricCoordinationPrompt';
 
 interface FabricAnalysis {
   imageData: string;
@@ -15,6 +16,31 @@ interface CoordinationResponse {
   accent?: number;
   reasoning?: string;
 }
+
+type FabricRole = 'background' | 'primary' | 'secondary' | 'accent';
+
+/**
+ * Validates a role assignment is a valid number within the fabric count
+ */
+const isValidRoleAssignment = (value: unknown, fabricCount: number): value is number => {
+  return typeof value === 'number' && value >= 1 && value <= fabricCount;
+};
+
+/**
+ * Validates required role assignments from AI response
+ */
+const validateRequiredRoles = (parsed: CoordinationResponse, fabricCount: number): void => {
+  const requiredRoles: FabricRole[] = ['background', 'primary', 'secondary'];
+  
+  for (const role of requiredRoles) {
+    const value = parsed[role];
+    if (!isValidRoleAssignment(value, fabricCount)) {
+      throw new Error(
+        `Invalid or missing assignment for ${role}. Expected number 1-${fabricCount}, got: ${value}`
+      );
+    }
+  }
+};
 
 /**
  * AI-powered fabric coordination service
@@ -33,15 +59,17 @@ export class FabricCoordinationService {
    * Auto-assign fabric roles using AI analysis
    * @param fabrics - Array of fabric images with base64 data and filenames
    * @returns Fabric role assignments
+   * @throws Error if fabric count is out of range (2-10)
    */
   async autoAssignRoles(fabrics: FabricAnalysis[]): Promise<FabricsByRole> {
+    // Validate input
     if (fabrics.length < 2 || fabrics.length > 10) {
-      throw new Error('Auto-assignment requires 2-10 fabrics');
+      throw new Error(`Auto-assignment requires 2-10 fabrics, received ${fabrics.length}`);
     }
 
     console.log(`[Fabric Coordination] Auto-assigning roles for ${fabrics.length} fabrics`);
 
-    const prompt = this.buildCoordinationPrompt(fabrics);
+    const prompt = buildFabricCoordinationPrompt(fabrics.length);
     
     const response = await this.client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -75,53 +103,6 @@ export class FabricCoordinationService {
   }
 
   /**
-   * Build prompt for Claude to analyze and coordinate fabrics
-   */
-  private buildCoordinationPrompt(fabrics: FabricAnalysis[]): string {
-    return `You are an expert quilt designer specializing in color coordination and fabric pairing. Analyze these ${fabrics.length} fabric images and assign each to optimal roles for a beautifully coordinated quilt pattern.
-
-Available roles:
-- **background**: Subtle, low-contrast fabric that won't compete with design elements. Should recede visually and provide a calm foundation.
-- **primary**: Main feature fabric with bold colors or patterns. This is the star of the quilt.
-- **secondary**: Complementary fabric that supports and enhances the primary without overwhelming it.
-- **accent**: High-contrast fabric for visual pop and energy (OPTIONAL - only assign if a fabric truly provides strong contrast and would enhance the design).
-
-Guidelines for fabric coordination:
-1. **Color Harmony**: Look for fabrics that share a common color family or create intentional contrast
-2. **Visual Weight**: Balance busy patterns with calmer fabrics
-3. **Value Contrast**: Ensure sufficient light/dark contrast for pattern visibility
-4. **Scale Variety**: Mix different print scales (small, medium, large) for visual interest
-5. **Accent Usage**: Only assign an accent if a fabric provides exceptional pop (don't force it)
-
-Assignment rules:
-- Assign EXACTLY ONE fabric per role
-- background, primary, and secondary are REQUIRED
-- accent is OPTIONAL (only if truly beneficial)
-- Fabrics are numbered 1-${fabrics.length} in the order they appear
-- Consider the entire composition, not just individual fabrics
-
-Respond with ONLY valid JSON in this EXACT format:
-{
-  "background": <fabric number>,
-  "primary": <fabric number>,
-  "secondary": <fabric number>,
-  "accent": <fabric number or omit this line>,
-  "reasoning": "Brief 1-2 sentence explanation of your color coordination strategy"
-}
-
-Example response (for 4 fabrics):
-{
-  "background": 3,
-  "primary": 1,
-  "secondary": 2,
-  "accent": 4,
-  "reasoning": "Fabric 3's soft cream tone provides a neutral backdrop, while the vibrant floral (1) takes center stage. The teal solid (2) bridges the palette, and the coral geometric (4) adds energizing contrast."
-}
-
-Now analyze the fabrics and provide your coordination recommendations:`;
-  }
-
-  /**
    * Parse AI response and extract role assignments
    */
   private parseRoleAssignments(
@@ -129,12 +110,8 @@ Now analyze the fabrics and provide your coordination recommendations:`;
     fabrics: FabricAnalysis[]
   ): FabricsByRole {
     // Extract JSON from response (handle markdown code blocks)
-    let jsonText = response.trim();
     const jsonMatch = response.match(/```json\s*(\{[\s\S]*?\})\s*```/) || response.match(/(\{[\s\S]*\})/);
-    
-    if (jsonMatch) {
-      jsonText = jsonMatch[1] || jsonMatch[0];
-    }
+    const jsonText = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : response.trim();
 
     let parsed: CoordinationResponse;
     try {
@@ -144,14 +121,8 @@ Now analyze the fabrics and provide your coordination recommendations:`;
       throw new Error('Could not parse fabric role assignments from AI response');
     }
     
-    // Validate required assignments
-    const requiredRoles: Array<keyof CoordinationResponse> = ['background', 'primary', 'secondary'];
-    for (const role of requiredRoles) {
-      const value = parsed[role];
-      if (!value || typeof value !== 'number' || value < 1 || value > fabrics.length) {
-        throw new Error(`Invalid or missing assignment for ${role}`);
-      }
-    }
+    // Validate required assignments with improved error messages
+    validateRequiredRoles(parsed, fabrics.length);
 
     // Build result (convert 1-indexed to 0-indexed and get filenames)
     const result: FabricsByRole = {
@@ -160,7 +131,8 @@ Now analyze the fabrics and provide your coordination recommendations:`;
       secondary: fabrics[parsed.secondary! - 1].fileName,
     };
 
-    if (parsed.accent && parsed.accent >= 1 && parsed.accent <= fabrics.length) {
+    // Optionally include accent if valid
+    if (isValidRoleAssignment(parsed.accent, fabrics.length)) {
       result.accent = fabrics[parsed.accent - 1].fileName;
     }
 
