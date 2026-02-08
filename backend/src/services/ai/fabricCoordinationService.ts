@@ -148,7 +148,7 @@ Now analyze the fabrics and provide your coordination recommendations:`;
     const requiredRoles: Array<keyof CoordinationResponse> = ['background', 'primary', 'secondary'];
     for (const role of requiredRoles) {
       const value = parsed[role];
-      if (!value || value < 1 || value > fabrics.length) {
+      if (!value || typeof value !== 'number' || value < 1 || value > fabrics.length) {
         throw new Error(`Invalid or missing assignment for ${role}`);
       }
     }
