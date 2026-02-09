@@ -93,6 +93,7 @@ const createMockPattern = (overrides: Partial<QuiltPattern>): QuiltPattern => ({
   maxFabrics: overrides.maxFabrics ?? 6,
   recommendedFabricCount: overrides.recommendedFabricCount ?? 4,
   allowRotation: overrides.allowRotation ?? true,
+  enabled: overrides.enabled,
 });
 
 // Helper to setup pattern mocks
@@ -248,11 +249,12 @@ describe('PatternSelector', () => {
     });
 
     it('should handle "auto" as selectedPattern explicitly', () => {
-      setupPatternMocks(['checkerboard']);
+      setupPatternMocks(['simple-squares', 'checkerboard']);
 
       const result = selector.selectPattern('beginner', 'auto', 2);
 
-      expect(result.patternId).toBe('checkerboard');
+      // Should auto-select one of the beginner patterns (random selection from top matches)
+      expect(['simple-squares', 'checkerboard']).toContain(result.patternId);
     });
 
     it('should handle unknown skill level gracefully', () => {
@@ -262,6 +264,50 @@ describe('PatternSelector', () => {
 
       expect(result.patternForSvg).toBe('');
       expect(result.patternInstruction).toContain('ERROR');
+    });
+
+    it('should exclude disabled patterns from auto-selection', () => {
+      const customPatterns = {
+        'enabled-pattern': createMockPattern({ 
+          id: 'enabled-pattern', 
+          skillLevel: 'intermediate', 
+          minColors: 2, 
+          maxFabrics: 6,
+          enabled: true 
+        }),
+        'disabled-pattern': createMockPattern({ 
+          id: 'disabled-pattern', 
+          skillLevel: 'intermediate', 
+          minColors: 2, 
+          maxFabrics: 6,
+          enabled: false 
+        }),
+      };
+      setupPatternMocks(['enabled-pattern', 'disabled-pattern'], customPatterns);
+
+      const result = selector.selectPattern('intermediate', 'auto', 4);
+
+      // Should only select enabled pattern, never disabled one
+      expect(result.patternId).toBe('enabled-pattern');
+      expect(result.patternId).not.toBe('disabled-pattern');
+    });
+
+    it('should treat patterns without enabled property as enabled', () => {
+      const customPatterns = {
+        'pattern-no-enabled-flag': createMockPattern({ 
+          id: 'pattern-no-enabled-flag', 
+          skillLevel: 'beginner', 
+          minColors: 2, 
+          maxFabrics: 6
+          // enabled property not set - should default to enabled
+        }),
+      };
+      setupPatternMocks(['pattern-no-enabled-flag'], customPatterns);
+
+      const result = selector.selectPattern('beginner', 'auto', 4);
+
+      // Pattern without enabled flag should be selectable
+      expect(result.patternId).toBe('pattern-no-enabled-flag');
     });
   });
 

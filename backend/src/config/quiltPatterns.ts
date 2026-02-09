@@ -14,6 +14,7 @@ export interface QuiltPattern {
   minColors: number;
   maxFabrics: number;
   allowRotation: boolean;
+  enabled?: boolean;
 }
 
 /**
@@ -50,6 +51,7 @@ export function getQuiltPattern(patternId: string): QuiltPattern | undefined {
     minColors: patternDef.minFabrics,
     maxFabrics: patternDef.maxFabrics,
     allowRotation: patternDef.allowRotation ?? true,
+    enabled: patternDef.enabled,
   };
 }
 

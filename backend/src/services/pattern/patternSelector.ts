@@ -97,7 +97,9 @@ export class PatternSelector {
 
     let filteredPatterns = availablePatternIds
       .map((id) => getPatternById(id))
-      .filter((p): p is any => !!p && typeof p.minColors === 'number' && typeof p.maxFabrics === 'number');
+      .filter((p): p is any => !!p && typeof p.minColors === 'number' && typeof p.maxFabrics === 'number')
+      // Exclude disabled patterns from auto-selection
+      .filter((p) => p.enabled !== false);
 
     // Filter by fabric count if provided
     if (typeof fabricCount === 'number') {
