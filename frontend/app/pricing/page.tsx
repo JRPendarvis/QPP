@@ -17,7 +17,6 @@ import FAQSection from '@/components/pricing/FAQSection';
 export default function PricingPage() {
   const { user, loading } = useAuth();
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
-  const [hoveredTier, setHoveredTier] = useState<string | null>(null);
   const { loadingTier, selectedTier, handleButtonClick } = useCheckout(user);
 
   if (loading) {
@@ -62,8 +61,7 @@ export default function PricingPage() {
               billingInterval={billingInterval}
               isLoading={loadingTier === tier.id}
               isSelected={selectedTier === tier.id}
-              isHovered={hoveredTier === tier.id}
-              onHover={setHoveredTier}
+              hasSelection={Boolean(selectedTier)}
               onButtonClick={(action, tierId) => handleButtonClick(action, tierId, billingInterval)}
             />
           ))}
