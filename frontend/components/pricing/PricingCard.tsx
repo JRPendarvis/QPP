@@ -22,7 +22,10 @@ export default function PricingCard({
   onButtonClick
 }: PricingCardProps) {
   const isDefaultPopular = tier.popular && !hasSelection;
-  const monthlyLimits = tier.patterns.split('•').map((item) => item.trim()).filter(Boolean);
+  const monthlyLimits = tier.patterns
+    .split('•')
+    .map((item) => item.trim().replace(/\/month\b/gi, '').trim())
+    .filter(Boolean);
 
   const badgeText = isDefaultPopular ? 'Most Popular' : null;
 
