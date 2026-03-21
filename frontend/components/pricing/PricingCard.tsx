@@ -74,7 +74,8 @@ export default function PricingCard({
           )}
         </div>
 
-        <div className="text-sm text-gray-600 mb-4">
+        <div className="text-sm text-gray-600 mb-4" aria-label="Monthly usage limits">
+          <span className="font-medium text-gray-700">Monthly limits: </span>
           {tier.patterns}
         </div>
       </div>

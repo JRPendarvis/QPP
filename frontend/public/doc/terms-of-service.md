@@ -71,7 +71,7 @@ We reserve the right to modify subscription pricing with 30 days' notice to exis
 ## 5. Usage Limits and Restrictions
 
 ### 5.1 Fair Use
-Each subscription tier includes specific usage limits (number of patterns generated per month). These limits reset on the first day of each calendar month.
+Each subscription tier includes specific monthly usage limits, including pattern generations and pattern downloads. These limits reset on the first day of each calendar month.
 
 ### 5.2 Prohibited Uses
 You agree NOT to:
