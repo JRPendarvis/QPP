@@ -22,6 +22,7 @@ export default function PricingCard({
   onButtonClick
 }: PricingCardProps) {
   const isDefaultPopular = tier.popular && !hasSelection;
+  const monthlyLimits = tier.patterns.split('•').map((item) => item.trim()).filter(Boolean);
 
   const badgeText = isDefaultPopular ? 'Most Popular' : null;
 
@@ -75,8 +76,10 @@ export default function PricingCard({
         </div>
 
         <div className="text-sm text-gray-600 mb-4" aria-label="Monthly usage limits">
-          <span className="font-medium text-gray-700">Monthly limits: </span>
-          {tier.patterns}
+          <p className="font-medium text-gray-700">Monthly limits:</p>
+          {monthlyLimits.map((limit) => (
+            <p key={limit}>{limit}</p>
+          ))}
         </div>
       </div>
 
