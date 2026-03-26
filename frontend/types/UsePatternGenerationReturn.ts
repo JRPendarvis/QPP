@@ -8,7 +8,7 @@ export interface UsePatternGenerationReturn {
   // Fabric state
   fabrics: File[];
   previews: string[];
-  handleFilesAdded: (files: File[]) => void;
+  handleFilesAdded: (files: File[], maxFabrics?: number) => void;
   removeFabric: (index: number) => void;
   setFabrics: React.Dispatch<React.SetStateAction<File[]>>;
   setPreviews: React.Dispatch<React.SetStateAction<string[]>>;

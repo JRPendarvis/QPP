@@ -8,8 +8,8 @@ interface PatternOption {
 }
 
 export interface PatternSelectionSectionProps {
-  patternChoice: 'auto' | 'manual';
-  setPatternChoice: (choice: 'auto' | 'manual') => void;
+  patternChoice: 'auto' | 'manual' | 'tshirt';
+  setPatternChoice: (choice: 'auto' | 'manual' | 'tshirt') => void;
   selectedPattern: string;
   setSelectedPattern: (id: string) => void;
   availablePatterns: PatternOption[];
@@ -106,8 +106,27 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
           )}
         </div>
       </label>
+      <label className="flex items-start cursor-pointer">
+        <input
+          type="radio"
+          name="patternChoice"
+          value="tshirt"
+          checked={patternChoice === 'tshirt'}
+          onChange={() => setPatternChoice('tshirt')}
+          className="mt-1 mr-3"
+        />
+        <div>
+          <div className="font-medium text-gray-900">
+            T-Shirt Quilt
+          </div>
+          <div className="text-sm text-gray-600">
+            Arrange your T-shirt photos into a custom quilt layout
+          </div>
+        </div>
+      </label>
     </div>
-    {/* Challenge Me Checkbox */}
+    {/* Challenge Me Checkbox — hidden for T-Shirt Quilt */}
+    {patternChoice !== 'tshirt' && (
     <label className="flex items-center cursor-pointer p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
       <input
         type="checkbox"
@@ -127,6 +146,7 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
         </div>
       </div>
     </label>
+    )}
   </div>
 );
 

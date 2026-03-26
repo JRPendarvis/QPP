@@ -25,4 +25,4 @@ export interface PatternDetails {
   maxFabrics: number;
 }
 
-export type PatternChoice = 'auto' | 'manual';
+export type PatternChoice = 'auto' | 'manual' | 'tshirt';

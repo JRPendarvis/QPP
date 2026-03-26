@@ -1,10 +1,11 @@
 import React from 'react';
 
 export interface UploadSectionProps {
-  patternChoice: 'auto' | 'manual';
+  patternChoice: 'auto' | 'manual' | 'tshirt';
   selectedPatternDetails: { name: string; minFabrics: number; maxFabrics: number } | null;
   MIN_FABRICS: number;
   MAX_FABRICS: number;
+  tshirtSlotCount: number;
   fabricsLength: number;
   formatFabricRange: (min: number, max: number) => string;
   fabricCountValid: boolean;
@@ -16,6 +17,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({
   selectedPatternDetails,
   MIN_FABRICS,
   MAX_FABRICS,
+  tshirtSlotCount,
   fabricsLength,
   formatFabricRange,
   fabricCountValid,
@@ -23,7 +25,12 @@ const UploadSection: React.FC<UploadSectionProps> = ({
 }) => (
   <>
     <p className="text-gray-600 mb-4">
-      {patternChoice === 'manual' && selectedPatternDetails ? (
+      {patternChoice === 'tshirt' ? (
+        <>
+          Upload up to <span className="font-medium text-teal-700">{tshirtSlotCount}</span> T-shirt photos
+          to fill your selected grid layout.
+        </>
+      ) : patternChoice === 'manual' && selectedPatternDetails ? (
         <>
           <span className="font-medium">{selectedPatternDetails.name}</span> requires{' '}
           <span className="font-medium text-indigo-600">

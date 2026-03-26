@@ -11,13 +11,15 @@ export interface FabricDropzoneProps {
   currentCount: number;
   maxFiles: number;
   totalSize: number;
+  uploadLabel?: string;
 }
 
 export default function FabricDropzone({
   onFilesAdded,
   currentCount,
   maxFiles,
-  totalSize
+  totalSize,
+  uploadLabel = 'fabric images'
 }: FabricDropzoneProps) {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [showCameraButton, setShowCameraButton] = useState(false);
@@ -122,7 +124,7 @@ export default function FabricDropzone({
         ) : (
           <div>
             <p className="mt-4 text-base sm:text-sm text-gray-600 font-medium">
-              Drag and drop fabric images here, or tap to select files
+              Drag and drop {uploadLabel} here, or tap to select files
             </p>
             <p className="mt-2 text-sm sm:text-xs text-gray-500">
               Max 5MB per image • {currentCount}/{maxFiles} uploaded

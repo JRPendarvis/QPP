@@ -17,6 +17,8 @@ import {
   UploadSection,
   FabricDropzone,
 } from '@/components/upload';
+import TShirtLayoutPrototype from '@/components/upload/TShirtLayoutPrototype';
+import TShirtConfigSection, { TShirtConfig, DEFAULT_TSHIRT_CONFIG } from '@/components/upload/TShirtConfigSection';
 
 import { useUserProfile, usePatternSelection } from './utils/hooks';
 import { validateFabricCount, getFabricValidationMessage } from './utils/validation';
@@ -28,6 +30,7 @@ export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
   const [patternChoice, setPatternChoice] = useState<PatternChoice>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
+  const [tshirtConfig, setTshirtConfig] = useState<TShirtConfig>(DEFAULT_TSHIRT_CONFIG);
   const [challengeMe, setChallengeMe] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
@@ -64,6 +67,7 @@ export default function UploadPage() {
     : 0;
 
   const { currentSkill, targetSkill, availablePatterns } = usePatternSelection(profile, challengeMe);
+  const tshirtSlotCount = tshirtConfig.columns * tshirtConfig.rows;
 
   const selectedPatternDetails = useMemo(() => {
     if (patternChoice === 'manual' && selectedPattern) {
@@ -74,7 +78,9 @@ export default function UploadPage() {
 
   // Calculate effective max fabrics including border fabrics
   const borderFabricsNeeded = borderConfiguration.enabled ? borderConfiguration.borders.length : 0;
-  const effectiveMaxFabrics = (selectedPatternDetails?.maxFabrics ?? MAX_FABRICS) + borderFabricsNeeded;
+  const effectiveMaxFabrics = patternChoice === 'tshirt'
+    ? tshirtSlotCount
+    : (selectedPatternDetails?.maxFabrics ?? MAX_FABRICS) + borderFabricsNeeded;
 
   const fabricCountValid = useMemo(
     () => validateFabricCount(
@@ -100,7 +106,7 @@ export default function UploadPage() {
 
   const handlePatternChoiceChange = (choice: PatternChoice) => {
     setPatternChoice(choice);
-    if (choice === 'auto') {
+    if (choice === 'auto' || choice === 'tshirt') {
       setSelectedPattern('');
       setFabricRoles([]);
     }
@@ -195,9 +201,9 @@ export default function UploadPage() {
 
   const handleFilesAddedWrapper = (files: FileList | File[]) => {
     if (files instanceof FileList) {
-      handleFilesAdded(Array.from(files));
+      handleFilesAdded(Array.from(files), effectiveMaxFabrics);
     } else {
-      handleFilesAdded(files);
+      handleFilesAdded(files, effectiveMaxFabrics);
     }
   };
 
@@ -226,14 +232,13 @@ export default function UploadPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
-          
           <ErrorDisplay error={error} />
 
           {!pattern && (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <PatternSelectionSection
-                  patternChoice={patternChoice}
+                  patternChoice={patternChoice as 'auto' | 'manual' | 'tshirt'}
                   setPatternChoice={handlePatternChoiceChange}
                   selectedPattern={selectedPattern}
                   setSelectedPattern={setSelectedPattern}
@@ -249,6 +254,13 @@ export default function UploadPage() {
                 />
 
                 <div className="border-2 border-gray-200 rounded-lg p-4">
+                  {patternChoice === 'tshirt' ? (
+                    <>
+                      <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 2: Choose Layout Options</h2>
+                      <TShirtConfigSection config={tshirtConfig} onChange={setTshirtConfig} />
+                    </>
+                  ) : (
+                  <>
                   <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 2: Choose Quilt Size</h2>
                   <div className="space-y-4">
                     <div>
@@ -360,17 +372,20 @@ export default function UploadPage() {
                       )}
                     </div>
                   </div>
+                  </>
+                  )}
                 </div>
 
                 <div className="border-2 border-gray-200 rounded-lg p-4">
                   <h2 className="text-lg font-semibold text-gray-800 mb-3">
-                    Step 3: Upload Your Fabric Images
+                    {patternChoice === 'tshirt' ? 'Step 3: Upload Your T-Shirt Photos' : 'Step 3: Upload Your Fabric Images'}
                   </h2>
                   <UploadSection
                     patternChoice={patternChoice}
                     selectedPatternDetails={selectedPatternDetails}
                     MIN_FABRICS={MIN_FABRICS}
                     MAX_FABRICS={MAX_FABRICS}
+                    tshirtSlotCount={tshirtSlotCount}
                     fabricsLength={fabrics.length}
                     formatFabricRange={formatFabricRange}
                     fabricCountValid={fabricCountValid}
@@ -382,18 +397,28 @@ export default function UploadPage() {
                     currentCount={fabrics.length}
                     maxFiles={effectiveMaxFabrics}
                     totalSize={totalImageSize}
+                    uploadLabel={patternChoice === 'tshirt' ? 'T-shirt photos' : 'fabric images'}
                   />
                 </div>
               </div>
 
-              <GenerateButton
-                onClick={handleGenerate}
-                disabled={generating || !fabricCountValid || !!fabricValidationMessage}
-                generating={generating}
-                fabricCount={fabrics.length}
-              />
+              {patternChoice === 'tshirt' ? (
+                fabrics.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Your T-Shirt Quilt Layout</h3>
+                    <TShirtLayoutPrototype previews={previews} config={tshirtConfig} />
+                  </div>
+                )
+              ) : (
+                <GenerateButton
+                  onClick={handleGenerate}
+                  disabled={generating || !fabricCountValid || !!fabricValidationMessage}
+                  generating={generating}
+                  fabricCount={fabrics.length}
+                />
+              )}
 
-              {fabrics.length > 0 && (
+              {patternChoice !== 'tshirt' && fabrics.length > 0 && (
                 <div className="my-6">
                   <FabricPreviewGrid
                     previews={previews}
@@ -408,9 +433,11 @@ export default function UploadPage() {
                 </div>
               )}
 
-              <ValidationMessage 
-                message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} 
-              />
+              {patternChoice !== 'tshirt' && (
+                <ValidationMessage 
+                  message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} 
+                />
+              )}
             </>
           )}
 

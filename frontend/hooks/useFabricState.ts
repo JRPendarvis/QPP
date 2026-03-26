@@ -16,9 +16,9 @@ export function useFabricState() {
   /**
    * Handle file addition with validation
    */
-  const handleFilesAdded = useCallback((acceptedFiles: File[]) => {
+  const handleFilesAdded = useCallback((acceptedFiles: File[], maxFabrics: number = MAX_FABRICS) => {
     const imageFiles = filterImageFiles(acceptedFiles);
-    const remainingSlots = MAX_FABRICS - fabrics.length;
+    const remainingSlots = maxFabrics - fabrics.length;
     const filesToAdd = imageFiles.slice(0, remainingSlots);
 
     setFabrics(prev => [...prev, ...filesToAdd]);
