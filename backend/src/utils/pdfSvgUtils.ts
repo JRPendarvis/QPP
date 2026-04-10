@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit';
+import { ISvgRasterizer, SharpSvgRasterizer } from './svgRasterizer';
 
 /**
  * Extracts fabric image patterns from SVG <defs>
@@ -72,19 +73,91 @@ function parsePolygonPoints(points: string, scale: number, startX: number, start
 }
 
 /**
- * Draws SVG rects on a PDF document. If outlineOnly is true, only strokes are drawn.
- * Now supports rendering printed fabric patterns as images.
+ * Draws an outline-only (stroke) representation of the SVG blocks.
+ * Used for the blank block template section of the PDF.
  */
-export function drawSVGPattern(doc: InstanceType<typeof PDFDocument>, svgString: string, outlineOnly = false): void {
+export function drawSVGPatternOutline(doc: InstanceType<typeof PDFDocument>, svgString: string): void {
+  const startX = 50 + (512 - 320) / 2; // Centered within 512pt usable width
+  const startY = doc.y;
+
+  drawSVGOutlineShapes(doc, svgString, startX, startY);
+
+  // Move cursor past visualization
+  doc.y = startY + 320;
+}
+
+/**
+ * Renders the full SVG (with transforms and embedded images) as a rasterized image.
+ * Accepts an optional ISvgRasterizer to allow swapping the imaging backend
+ * (e.g. in tests) without modifying this module (Dependency Inversion).
+ */
+export async function drawSVGPatternAsync(
+  doc: InstanceType<typeof PDFDocument>,
+  svgString: string,
+  rasterizer: ISvgRasterizer = new SharpSvgRasterizer()
+): Promise<void> {
+  const startY = doc.y;
+
+  // Page width 612pt (LETTER), margins 50+50=100pt → usable 512pt
+  const pageUsableWidth = 512;
+  const maxHeight = 320;
+
+  const { fitWidth, fitHeight } = getSvgFitDimensions(svgString, pageUsableWidth, maxHeight);
+
+  // Center the image horizontally within the usable area (left margin 50pt)
+  const startX = 50 + (pageUsableWidth - fitWidth) / 2;
+
+  try {
+    const pngBuffer = await rasterizer.rasterize(Buffer.from(svgString));
+    doc.image(pngBuffer, startX, startY, {
+      fit: [fitWidth, fitHeight],
+      align: 'center',
+      valign: 'center',
+    });
+  } catch (err) {
+    console.error('Error rasterizing SVG for PDF, falling back to manual renderer:', err);
+    // Fallback keeps export working if rasterization fails in a specific environment.
+    drawSVGOutlineShapes(doc, svgString, startX, startY, false);
+  }
+
+  // Move cursor past visualization
+  doc.y = startY + fitHeight + 10;
+}
+
+function getSvgFitDimensions(svgString: string, maxWidth = 320, maxHeight = 320): { fitWidth: number; fitHeight: number } {
+  const viewBoxMatch = svgString.match(/viewBox=['"]([^'"]+)['"]/i);
+  if (!viewBoxMatch) {
+    return { fitWidth: maxWidth, fitHeight: maxHeight };
+  }
+
+  const parts = viewBoxMatch[1].trim().split(/\s+/).map(Number);
+  if (parts.length !== 4 || !parts.every(Number.isFinite)) {
+    return { fitWidth: maxWidth, fitHeight: maxHeight };
+  }
+
+  const viewBoxWidth = Math.abs(parts[2]) || 1;
+  const viewBoxHeight = Math.abs(parts[3]) || 1;
+
+  if (viewBoxWidth / viewBoxHeight >= maxWidth / maxHeight) {
+    return { fitWidth: maxWidth, fitHeight: (viewBoxHeight / viewBoxWidth) * maxWidth };
+  }
+
+  return { fitWidth: (viewBoxWidth / viewBoxHeight) * maxHeight, fitHeight: maxHeight };
+}
+
+function drawSVGOutlineShapes(
+  doc: InstanceType<typeof PDFDocument>,
+  svgString: string,
+  startX: number,
+  startY: number,
+  outlineOnly = true
+): void {
   // Extract fabric image patterns from SVG
   const fabricPatterns = extractFabricPatterns(svgString);
   
   // Extract shape elements from SVG
   const rectMatches = svgString.matchAll(/<rect[^>]+>/g);
   const polygonMatches = svgString.matchAll(/<polygon[^>]+>/g);
-
-  const startX = 200; // Center offset
-  const startY = doc.y;
   const scale = 0.8;
 
   for (const match of rectMatches) {
@@ -178,6 +251,4 @@ export function drawSVGPattern(doc: InstanceType<typeof PDFDocument>, svgString:
     }
   }
 
-  // Move cursor past visualization
-  doc.y = startY + 320;
 }

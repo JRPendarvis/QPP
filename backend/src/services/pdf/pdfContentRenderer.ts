@@ -10,8 +10,8 @@ export class PDFContentRenderer {
   /**
    * Render pattern visualization and blank block template
    */
-  renderPatternVisualization(doc: InstanceType<typeof PDFDocument>, visualSvg: string): void {
-    renderPatternBlocks(doc, visualSvg);
+  async renderPatternVisualization(doc: InstanceType<typeof PDFDocument>, visualSvg: string): Promise<void> {
+    await renderPatternBlocks(doc, visualSvg);
   }
 
   /**
@@ -55,8 +55,8 @@ export class PDFContentRenderer {
   /**
    * Render all content sections (visualization + description + fabric layout)
    */
-  renderAllContentSections(doc: InstanceType<typeof PDFDocument>, pattern: QuiltPattern): void {
-    this.renderPatternVisualization(doc, pattern.visualSvg);
+  async renderAllContentSections(doc: InstanceType<typeof PDFDocument>, pattern: QuiltPattern): Promise<void> {
+    await this.renderPatternVisualization(doc, pattern.visualSvg);
     this.renderDescription(doc, pattern.description);
     this.renderFabricLayout(doc, pattern.fabricLayout);
   }

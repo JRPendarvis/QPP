@@ -1,5 +1,5 @@
 import PDFDocument from 'pdfkit';
-import { drawSVGPattern } from './pdfSvgUtils';
+import { drawSVGPatternOutline } from './pdfSvgUtils';
 
 /**
  * Renders the blank block template section in the PDF.
@@ -11,7 +11,7 @@ export function renderBlankBlockTemplate(doc: InstanceType<typeof PDFDocument>, 
     .text('Blank Block Template')
     .moveDown(0.5);
   try {
-    drawSVGPattern(doc, visualSvg, true); // true = outline only
+    drawSVGPatternOutline(doc, visualSvg);
     doc.moveDown(1.5);
   } catch (err) {
     console.error('Error drawing blank SVG:', err);
