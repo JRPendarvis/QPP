@@ -36,7 +36,7 @@ export class SvgWrapper {
     const viewBoxWidth = totalWidth + (2 * (borderSpace + padding));
     const viewBoxHeight = totalHeight + (2 * (borderSpace + padding));
     
-    return `<svg viewBox="${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}" xmlns="http://www.w3.org/2000/svg">
+    return `<svg viewBox="${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <defs>
     ${this.getDefaultPatterns()}
     ${extraDefs}
