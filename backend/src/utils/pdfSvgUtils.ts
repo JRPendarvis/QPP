@@ -77,13 +77,17 @@ function parsePolygonPoints(points: string, scale: number, startX: number, start
  * Used for the blank block template section of the PDF.
  */
 export function drawSVGPatternOutline(doc: InstanceType<typeof PDFDocument>, svgString: string): void {
-  const startX = 50 + (512 - 320) / 2; // Centered within 512pt usable width
+  const maxWidth = 260;
+  const maxHeight = 260;
+  const { fitWidth, fitHeight } = getSvgFitDimensions(svgString, maxWidth, maxHeight);
+
+  const startX = 50 + (512 - fitWidth) / 2; // Centered within 512pt usable width
   const startY = doc.y;
 
-  drawSVGOutlineShapes(doc, svgString, startX, startY);
+  drawSVGOutlineShapes(doc, svgString, startX, startY, true, fitWidth, fitHeight);
 
   // Move cursor past visualization
-  doc.y = startY + 320;
+  doc.y = startY + fitHeight + 10;
 }
 
 /**
@@ -150,7 +154,9 @@ function drawSVGOutlineShapes(
   svgString: string,
   startX: number,
   startY: number,
-  outlineOnly = true
+  outlineOnly = true,
+  targetWidth?: number,
+  targetHeight?: number
 ): void {
   // Extract fabric image patterns from SVG
   const fabricPatterns = extractFabricPatterns(svgString);
@@ -158,7 +164,16 @@ function drawSVGOutlineShapes(
   // Extract shape elements from SVG
   const rectMatches = svgString.matchAll(/<rect[^>]+>/g);
   const polygonMatches = svgString.matchAll(/<polygon[^>]+>/g);
-  const scale = 0.8;
+  const { fitWidth, fitHeight } = getSvgFitDimensions(svgString, targetWidth ?? 320, targetHeight ?? 320);
+  const viewBoxMatch = svgString.match(/viewBox=['"]([^'"]+)['"]/i);
+  const viewBoxParts = viewBoxMatch ? viewBoxMatch[1].trim().split(/\s+/).map(Number) : [];
+  const viewBoxX = viewBoxParts.length === 4 && Number.isFinite(viewBoxParts[0]) ? viewBoxParts[0] : 0;
+  const viewBoxY = viewBoxParts.length === 4 && Number.isFinite(viewBoxParts[1]) ? viewBoxParts[1] : 0;
+  const viewBoxWidth = viewBoxParts.length === 4 && Number.isFinite(viewBoxParts[2]) && viewBoxParts[2] !== 0 ? Math.abs(viewBoxParts[2]) : 100;
+  const viewBoxHeight = viewBoxParts.length === 4 && Number.isFinite(viewBoxParts[3]) && viewBoxParts[3] !== 0 ? Math.abs(viewBoxParts[3]) : 100;
+
+  const scaleX = fitWidth / viewBoxWidth;
+  const scaleY = fitHeight / viewBoxHeight;
 
   for (const match of rectMatches) {
     const rect = match[0];
@@ -169,10 +184,10 @@ function drawSVGOutlineShapes(
     const heightMatch = rect.match(/height=['"]([^'"]+)['"]/);
 
     if (xMatch && yMatch && widthMatch && heightMatch) {
-      const x = parseFloat(xMatch[1]) * scale + startX;
-      const y = parseFloat(yMatch[1]) * scale + startY;
-      const width = parseFloat(widthMatch[1]) * scale;
-      const height = parseFloat(heightMatch[1]) * scale;
+      const x = (parseFloat(xMatch[1]) - viewBoxX) * scaleX + startX;
+      const y = (parseFloat(yMatch[1]) - viewBoxY) * scaleY + startY;
+      const width = parseFloat(widthMatch[1]) * scaleX;
+      const height = parseFloat(heightMatch[1]) * scaleY;
       
       if (outlineOnly) {
         doc.rect(x, y, width, height)
@@ -214,7 +229,7 @@ function drawSVGOutlineShapes(
     const pointsMatch = polygon.match(/\bpoints=['"]([^'"]+)['"]/);
     if (!pointsMatch) continue;
 
-    const points = parsePolygonPoints(pointsMatch[1], scale, startX, startY);
+    const points = parsePolygonPoints(pointsMatch[1], scaleX, startX - (viewBoxX * scaleX), startY - (viewBoxY * scaleY));
     if (points.length < 3) continue;
 
     if (outlineOnly) {

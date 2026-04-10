@@ -10,6 +10,7 @@ import { renderBlankBlockTemplate } from './renderBlankBlockTemplate';
 export async function renderPatternBlocks(doc: InstanceType<typeof PDFDocument>, visualSvg: string) {
   if (visualSvg && visualSvg.includes('svg')) {
     await renderPatternVisualization(doc, visualSvg);
+    doc.addPage();
     renderBlankBlockTemplate(doc, visualSvg);
   }
 }
