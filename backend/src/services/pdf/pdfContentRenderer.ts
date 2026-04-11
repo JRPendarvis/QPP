@@ -1,17 +1,44 @@
 import PDFDocument from 'pdfkit';
 import type { QuiltPattern } from '../../types/QuiltPattern';
 import { renderPatternBlocks } from '../../utils/pdfPatternBlocks';
+import { LayoutComputer } from '../pattern/layoutComputer';
+import { normalizePatternId } from '../../utils/patternNormalization';
 
 /**
  * Service for rendering PDF content sections
  * Single Responsibility: Description, fabric layout, and pattern visualization rendering
  */
 export class PDFContentRenderer {
+  private resolveFabricLayoutForPdf(pattern: QuiltPattern): string {
+    const rawPatternId =
+      (pattern as any).patternId ??
+      (pattern as any).id ??
+      String(pattern.patternName || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-');
+
+    const patternId = normalizePatternId(rawPatternId);
+
+    const fabricNames = (pattern.fabricRequirements || [])
+      .filter((req) => !['Backing', 'Batting', 'Binding'].includes(req.role))
+      .map((req) => req.role);
+
+    const computedLayout = LayoutComputer.computeAccurateLayout(
+      patternId,
+      pattern.estimatedSize,
+      fabricNames,
+      pattern.requestedQuiltSize
+    );
+
+    return LayoutComputer.enhanceLayout(computedLayout, pattern.fabricLayout, fabricNames);
+  }
+
   /**
    * Render pattern visualization and blank block template
    */
-  renderPatternVisualization(doc: InstanceType<typeof PDFDocument>, visualSvg: string): void {
-    renderPatternBlocks(doc, visualSvg);
+  async renderPatternVisualization(doc: InstanceType<typeof PDFDocument>, visualSvg: string): Promise<void> {
+    await renderPatternBlocks(doc, visualSvg);
   }
 
   /**
@@ -55,9 +82,9 @@ export class PDFContentRenderer {
   /**
    * Render all content sections (visualization + description + fabric layout)
    */
-  renderAllContentSections(doc: InstanceType<typeof PDFDocument>, pattern: QuiltPattern): void {
-    this.renderPatternVisualization(doc, pattern.visualSvg);
+  async renderAllContentSections(doc: InstanceType<typeof PDFDocument>, pattern: QuiltPattern): Promise<void> {
+    await this.renderPatternVisualization(doc, pattern.visualSvg);
     this.renderDescription(doc, pattern.description);
-    this.renderFabricLayout(doc, pattern.fabricLayout);
+    this.renderFabricLayout(doc, this.resolveFabricLayoutForPdf(pattern));
   }
 }

@@ -244,7 +244,6 @@ export default function UploadPage() {
                   setSelectedPattern={setSelectedPattern}
                   availablePatterns={availablePatterns}
                   selectedPatternDetails={selectedPatternDetails}
-                  fabricsLength={fabrics.length}
                   formatFabricRange={formatFabricRange}
                   challengeMe={challengeMe}
                   setChallengeMe={setChallengeMe}

@@ -32,42 +32,42 @@ describe('UsageResetCalculator', () => {
 
   describe('calculateNextResetDate', () => {
     it('should add 30 days to given date', () => {
-      const lastReset = new Date('2025-01-01');
+      const lastReset = new Date(2025, 0, 1);
       const nextReset = UsageResetCalculator.calculateNextResetDate(lastReset);
 
       expect(nextReset.getFullYear()).toBe(2025);
       expect(nextReset.getMonth()).toBe(0); // January (0-indexed)
-      expect(nextReset.getDate()).toBe(30);
+      expect(nextReset.getDate()).toBe(31);
     });
 
     it('should handle month boundaries', () => {
-      const lastReset = new Date('2025-01-15');
+      const lastReset = new Date(2025, 0, 15);
       const nextReset = UsageResetCalculator.calculateNextResetDate(lastReset);
 
       expect(nextReset.getMonth()).toBe(1); // February
-      expect(nextReset.getDate()).toBe(13);
+      expect(nextReset.getDate()).toBe(14);
     });
 
     it('should handle year boundaries', () => {
-      const lastReset = new Date('2025-12-15');
+      const lastReset = new Date(2025, 11, 15);
       const nextReset = UsageResetCalculator.calculateNextResetDate(lastReset);
 
       expect(nextReset.getFullYear()).toBe(2026);
       expect(nextReset.getMonth()).toBe(0); // January
-      expect(nextReset.getDate()).toBe(13);
+      expect(nextReset.getDate()).toBe(14);
     });
 
     it('should handle leap years', () => {
-      const lastReset = new Date('2024-01-31'); // 2024 is a leap year
+      const lastReset = new Date(2024, 0, 31); // 2024 is a leap year
       const nextReset = UsageResetCalculator.calculateNextResetDate(lastReset);
 
       // 31 + 30 = March 1 (Feb has 29 days in 2024)
-      expect(nextReset.getMonth()).toBe(1); // February
-      expect(nextReset.getDate()).toBe(29);
+      expect(nextReset.getMonth()).toBe(2); // March
+      expect(nextReset.getDate()).toBe(1);
     });
 
     it('should not modify original date', () => {
-      const lastReset = new Date('2025-01-01');
+      const lastReset = new Date(2025, 0, 1);
       const originalTime = lastReset.getTime();
 
       UsageResetCalculator.calculateNextResetDate(lastReset);

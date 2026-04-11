@@ -173,10 +173,10 @@ export class PatternController {
         });
       }
 
-      if (fabrics.length < 1) {
+      if (fabrics.length < 2) {
         return res.status(400).json({
           success: false,
-          message: 'Please upload at least 1 fabric for auto-assignment',
+          message: 'Please upload at least 2 fabrics for auto-assignment',
         });
       }
 
