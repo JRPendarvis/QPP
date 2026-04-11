@@ -32,10 +32,14 @@ describe('UserRegistrationProcessor', () => {
     });
 
     it('should use current date when not provided', () => {
-      // Since we're in Jan 2026, should get tester badge
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-01-15T00:00:00Z'));
+
       const badge = UserRegistrationProcessor.determineBadge();
 
       expect(badge).toBe('tester');
+
+      jest.useRealTimers();
     });
   });
 
@@ -92,6 +96,9 @@ describe('UserRegistrationProcessor', () => {
 
   describe('createUserData', () => {
     it('should create complete user data with all fields', () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-01-15T00:00:00Z'));
+
       const userData = UserRegistrationProcessor.createUserData(
         'user@example.com',
         'hashedPassword123',
@@ -108,6 +115,8 @@ describe('UserRegistrationProcessor', () => {
       expect(userData.badge).toBe('tester'); // Current date is before cutoff
       expect(userData.termsAcceptedAt).toBeInstanceOf(Date);
       expect(userData.privacyAcceptedAt).toBeInstanceOf(Date);
+
+      jest.useRealTimers();
     });
 
     it('should create user data without name', () => {
@@ -145,13 +154,17 @@ describe('UserRegistrationProcessor', () => {
     });
 
     it('should include tester badge for current date', () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-01-15T00:00:00Z'));
+
       const userData = UserRegistrationProcessor.createUserData(
         'tester@example.com',
         'hash'
       );
 
-      // Current date (Jan 2026) is before cutoff (Feb 28, 2026)
       expect(userData.badge).toBe('tester');
+
+      jest.useRealTimers();
     });
 
     it('should handle partial legal acceptance', () => {

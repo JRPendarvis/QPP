@@ -30,23 +30,15 @@ const isValidRoleAssignment = (value: unknown, fabricCount: number): value is nu
  * Validates required role assignments from AI response
  */
 const validateRequiredRoles = (parsed: CoordinationResponse, fabricCount: number): void => {
-  let requiredRoles: FabricRole[] = [];
-  
-  // Adjust required roles based on fabric count
-  if (fabricCount === 1) {
-    requiredRoles = ['primary'];
-  } else if (fabricCount === 2) {
-    requiredRoles = ['primary', 'secondary'];
-  } else {
-    requiredRoles = ['background', 'primary', 'secondary'];
-  }
+  const requiredRoles: FabricRole[] =
+    fabricCount === 2
+      ? ['primary', 'secondary']
+      : ['background', 'primary', 'secondary'];
   
   for (const role of requiredRoles) {
     const value = parsed[role];
     if (!isValidRoleAssignment(value, fabricCount)) {
-      throw new Error(
-        `Invalid or missing assignment for ${role}. Expected number 1-${fabricCount}, got: ${value}`
-      );
+      throw new Error(`Invalid or missing assignment for ${role}`);
     }
   }
 };
@@ -68,12 +60,12 @@ export class FabricCoordinationService {
    * Auto-assign fabric roles using AI analysis
    * @param fabrics - Array of fabric images with base64 data and filenames
    * @returns Fabric role assignments
-   * @throws Error if fabric count is out of range (1-10)
+   * @throws Error if fabric count is out of range (2-10)
    */
   async autoAssignRoles(fabrics: FabricAnalysis[]): Promise<FabricsByRole> {
     // Validate input
-    if (fabrics.length < 1 || fabrics.length > 10) {
-      throw new Error(`Auto-assignment requires 1-10 fabrics, received ${fabrics.length}`);
+    if (fabrics.length < 2 || fabrics.length > 10) {
+      throw new Error('Auto-assignment requires 2-10 fabrics');
     }
 
     console.log(`[Fabric Coordination] Auto-assigning roles for ${fabrics.length} fabrics`);
