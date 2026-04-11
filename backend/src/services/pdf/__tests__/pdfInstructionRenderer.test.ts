@@ -34,7 +34,7 @@ describe('PDFInstructionRenderer', () => {
     expect(doc.roundedRect).toHaveBeenCalled();
 
     const renderedTextCalls = doc.text.mock.calls.map((call: any[]) => call[0]);
-    expect(renderedTextCalls).toContain('IMPORTANT');
+    expect(renderedTextCalls).toContain('IMPORTANT:');
 
     const stepNumberCalls = renderedTextCalls.filter(
       (value: unknown) => value === '1.' || value === '2.' || value === '3.'

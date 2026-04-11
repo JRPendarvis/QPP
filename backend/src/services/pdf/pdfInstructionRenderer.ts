@@ -45,18 +45,23 @@ export class PDFInstructionRenderer {
   private renderRecommendationNotice(doc: InstanceType<typeof PDFDocument>, recommendationNotice: string): void {
     const noticeY = doc.y;
 
-    doc.roundedRect(50, noticeY, 495, 34, 6).stroke('#FCD34D');
+    doc.roundedRect(50, noticeY, 495, 56, 6).stroke('#FCD34D');
     doc
       .fontSize(10)
       .font('Helvetica-Bold')
       .fillColor('#92400E')
-      .text('IMPORTANT', 60, noticeY + 6, { continued: true })
+      .text('IMPORTANT:', 60, noticeY + 8, {
+        width: 475,
+        align: 'center',
+      })
       .font('Helvetica')
-      .text(` ${recommendationNotice.replace(/^IMPORTANT:\s*/i, '')}`, {
-        width: 455,
+      .text(recommendationNotice.replace(/^IMPORTANT:\s*/i, ''), {
+        width: 475,
+        align: 'center',
+        lineGap: 1,
       });
 
-    doc.moveDown(1.2);
+    doc.moveDown(1.9);
   }
 
   /**
