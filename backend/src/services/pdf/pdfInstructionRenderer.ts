@@ -1,10 +1,69 @@
 import PDFDocument from 'pdfkit';
 
+const RECOMMENDATION_NOTICE_PATTERN = /important:\s*this is only a recommendation\./i;
+const INSTRUCTION_SOURCE_PATTERN = /^Instruction source:\s*/i;
+
+type InstructionRenderParts = {
+  recommendationNotice?: string;
+  steps: string[];
+};
+
 /**
  * Service for rendering instruction sections in PDFs
  * Single Responsibility: Instruction rendering with status badges
  */
 export class PDFInstructionRenderer {
+  private splitInstructionContent(instructions: string[]): InstructionRenderParts {
+    let recommendationNotice: string | undefined;
+    const steps: string[] = [];
+
+    instructions.forEach((instruction) => {
+      const trimmedInstruction = instruction.trim();
+
+      if (!trimmedInstruction) {
+        return;
+      }
+
+      if (INSTRUCTION_SOURCE_PATTERN.test(trimmedInstruction)) {
+        return;
+      }
+
+      if (!recommendationNotice && RECOMMENDATION_NOTICE_PATTERN.test(trimmedInstruction)) {
+        recommendationNotice = trimmedInstruction
+          .replace(/^📌\s*/u, '')
+          .replace(/—/g, '-')
+          .trim();
+        return;
+      }
+
+      steps.push(trimmedInstruction);
+    });
+
+    return { recommendationNotice, steps };
+  }
+
+  private renderRecommendationNotice(doc: InstanceType<typeof PDFDocument>, recommendationNotice: string): void {
+    const noticeY = doc.y;
+
+    doc.roundedRect(50, noticeY, 495, 56, 6).stroke('#FCD34D');
+    doc
+      .fontSize(10)
+      .font('Helvetica-Bold')
+      .fillColor('#92400E')
+      .text('IMPORTANT:', 60, noticeY + 8, {
+        width: 475,
+        align: 'center',
+      })
+      .font('Helvetica')
+      .text(recommendationNotice.replace(/^IMPORTANT:\s*/i, ''), {
+        width: 475,
+        align: 'center',
+        lineGap: 1,
+      });
+
+    doc.moveDown(1.9);
+  }
+
   /**
    * Render section title
    */
@@ -79,8 +138,14 @@ export class PDFInstructionRenderer {
    * Render complete instruction section (title + badge + instructions)
    */
   renderCompleteInstructionSection(doc: InstanceType<typeof PDFDocument>, instructions: string[], patternId: string): void {
+    const { recommendationNotice, steps } = this.splitInstructionContent(instructions);
+
+    if (recommendationNotice) {
+      this.renderRecommendationNotice(doc, recommendationNotice);
+    }
+
     this.renderSectionTitle(doc);
     this.renderSuccessBadge(doc, patternId);
-    this.renderInstructions(doc, instructions);
+    this.renderInstructions(doc, steps);
   }
 }
