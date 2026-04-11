@@ -1,8 +1,8 @@
 import { normalizePatternId } from '../../utils/patternNormalization';
-import { parseQuiltSizeIn } from '../../utils/parseQuiltSize';
 import { generateInstructions } from '../instructions/generateInstructions';
 import type { FabricAssignments } from '../instructions/fabricAssignments';
 import type { QuiltPattern } from '../../types/QuiltPattern';
+import { QuiltSizeCatalog } from '../pattern/quiltSizeCatalog';
 
 export interface PreparedInstructions {
   instructions: string[];
@@ -31,8 +31,11 @@ export class InstructionPreparationService {
 
     const resolvedPatternId = normalizePatternId(rawPatternId);
 
-    // Parse quilt size
-    const quiltSize = parseQuiltSizeIn(pattern.estimatedSize);
+    // Resolve size with user-requested dimensions taking precedence.
+    const quiltSize = QuiltSizeCatalog.resolveDimensions(
+      pattern.requestedQuiltSize,
+      pattern.estimatedSize
+    );
 
     // Extract fabric assignments (structured data required)
     const fabricsByRole =
@@ -75,7 +78,7 @@ export class InstructionPreparationService {
     // Generate deterministic instructions
     const res = generateInstructions(
       resolvedPatternId,
-      { widthIn: quiltSize.width, heightIn: quiltSize.height },
+      quiltSize,
       fabricAssignments
     );
 
