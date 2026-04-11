@@ -41,20 +41,20 @@ describe('UsageResetCalculator', () => {
     });
 
     it('should handle month boundaries', () => {
-      const lastReset = new Date('2025-01-15');
+      const lastReset = new Date(2025, 0, 15);
       const nextReset = UsageResetCalculator.calculateNextResetDate(lastReset);
 
       expect(nextReset.getMonth()).toBe(1); // February
-      expect(nextReset.getDate()).toBe(13);
+      expect(nextReset.getDate()).toBe(14);
     });
 
     it('should handle year boundaries', () => {
-      const lastReset = new Date('2025-12-15');
+      const lastReset = new Date(2025, 11, 15);
       const nextReset = UsageResetCalculator.calculateNextResetDate(lastReset);
 
       expect(nextReset.getFullYear()).toBe(2026);
       expect(nextReset.getMonth()).toBe(0); // January
-      expect(nextReset.getDate()).toBe(13);
+      expect(nextReset.getDate()).toBe(14);
     });
 
     it('should handle leap years', () => {
@@ -67,7 +67,7 @@ describe('UsageResetCalculator', () => {
     });
 
     it('should not modify original date', () => {
-      const lastReset = new Date('2025-01-01');
+      const lastReset = new Date(2025, 0, 1);
       const originalTime = lastReset.getTime();
 
       UsageResetCalculator.calculateNextResetDate(lastReset);
