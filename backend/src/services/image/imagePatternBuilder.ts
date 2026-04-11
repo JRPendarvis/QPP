@@ -1,4 +1,5 @@
 import { Fabric } from '../../types/Fabric';
+import { ImageTypeDetector } from '../../utils/imageTypeDetector';
 
 /**
  * Service for building SVG pattern definitions for printed fabrics
@@ -43,8 +44,19 @@ export class ImagePatternBuilder {
    * Creates a single pattern definition for a fabric image
    */
   private static createPatternDefinition(imageData: string, index: number): string {
+    const normalizedData = this.normalizeBase64Data(imageData);
+    const mimeType = ImageTypeDetector.detectFromBase64(normalizedData);
+
     return `\n<pattern id="fabricImage${index}" patternUnits="userSpaceOnUse" width="50" height="50">` +
-      `<image href="data:image/png;base64,${imageData}" x="0" y="0" width="50" height="50" preserveAspectRatio="xMidYMid slice" />` +
+      `<image href="data:${mimeType};base64,${normalizedData}" xlink:href="data:${mimeType};base64,${normalizedData}" x="0" y="0" width="50" height="50" preserveAspectRatio="xMidYMid slice" />` +
       `</pattern>`;
+  }
+
+  /**
+   * Ensure stored image data is raw base64 (not a full data URL).
+   */
+  private static normalizeBase64Data(imageData: string): string {
+    const dataUrlMatch = imageData.match(/^data:image\/[^;]+;base64,(.+)$/);
+    return dataUrlMatch ? dataUrlMatch[1] : imageData;
   }
 }

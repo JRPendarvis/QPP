@@ -1,9 +1,11 @@
 {
+    "typescript.tsdk": "backend/node_modules/typescript/lib",
     "cSpell.words": [
         "DALL",
         "Hsts",
         "NHMK",
         "quiltplanner",
         "VBOR"
-    ]
+    ],
+    "js/ts.tsdk.path": "backend/node_modules/typescript/lib"
 }

@@ -185,6 +185,45 @@ export default function UploadPage() {
     setPreviews(newPreviews);
   };
 
+  const handleAIRearrange = (assignments: { background?: string; primary?: string; secondary?: string; accent?: string }) => {
+    // Create a map of filename to index for quick lookup
+    const fabricIndexMap = new Map<string, number>();
+    fabrics.forEach((fabric, index) => {
+      fabricIndexMap.set(fabric.name, index);
+    });
+
+    // Build ordered list of indices based on AI recommendations
+    const orderedIndices: number[] = [];
+    const usedIndices = new Set<number>();
+
+    // Add in priority order: background, primary, secondary, accent
+    const roles = ['background', 'primary', 'secondary', 'accent'] as const;
+    for (const role of roles) {
+      const filename = assignments[role];
+      if (filename) {
+        const index = fabricIndexMap.get(filename);
+        if (index !== undefined && !usedIndices.has(index)) {
+          orderedIndices.push(index);
+          usedIndices.add(index);
+        }
+      }
+    }
+
+    // Add any remaining fabrics that weren't assigned a role
+    fabrics.forEach((_, index) => {
+      if (!usedIndices.has(index)) {
+        orderedIndices.push(index);
+      }
+    });
+
+    // Reorder fabrics and previews based on the new order
+    const newFabrics = orderedIndices.map(i => fabrics[i]);
+    const newPreviews = orderedIndices.map(i => previews[i]);
+
+    setFabrics(newFabrics);
+    setPreviews(newPreviews);
+  };
+
   const handleGenerate = async () => {
     const loadingToast = toast.loading('Generating your quilt pattern! This may take a moment...');
     setGenerating(true);
@@ -511,6 +550,7 @@ export default function UploadPage() {
                     onRemove={removeFabric}
                     onClearAll={clearAll}
                     onReorder={handleFabricReorder}
+                    onAIRearrange={handleAIRearrange}
                     fabricRoles={fabricRoles.length > 0 ? fabricRoles : undefined}
                     borderConfiguration={borderConfiguration}
                   />

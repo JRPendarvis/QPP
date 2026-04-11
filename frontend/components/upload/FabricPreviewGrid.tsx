@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { getBorderName } from '@/utils/borderNaming';
+import AutoCoordinateButton from './AutoCoordinateButton';
+
 export interface FabricPreviewGridProps {
   previews: string[];
   fabrics: File[];
   onRemove: (index: number) => void;
   onClearAll: () => void;
   onReorder: (fromIdx: number, toIdx: number) => void;
+  onAIRearrange?: (assignments: { background?: string; primary?: string; secondary?: string; accent?: string }) => void;
   fabricRoles?: string[]; // Optional pattern-specific fabric roles
   borderConfiguration?: {
     enabled: boolean;
@@ -113,6 +116,7 @@ export default function FabricPreviewGrid({
   onRemove,
   onClearAll,
   onReorder,
+  onAIRearrange,
   fabricRoles,
   borderConfiguration,
 }: FabricPreviewGridProps) {
@@ -129,17 +133,19 @@ export default function FabricPreviewGrid({
   
   return (
     <div className="mt-8">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <h3 className="text-xl sm:text-lg font-semibold">
           Uploaded Fabrics ({fabrics.length})
         </h3>
-        {/* Larger touch target for Clear All on mobile */}
-        <button
-          onClick={onClearAll}
-          className="px-6 py-3 sm:px-4 sm:py-2 text-base sm:text-sm font-medium text-red-600 hover:text-red-700 active:text-red-800 bg-red-50 sm:bg-transparent rounded-lg sm:rounded-none min-h-12 sm:min-h-0 transition-colors"
-        >
-          Clear All
-        </button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <AutoCoordinateButton fabrics={fabrics} onRearrange={onAIRearrange} />
+          <button
+            onClick={onClearAll}
+            className="px-6 py-3 sm:px-4 sm:py-2 text-base sm:text-sm font-medium text-red-600 hover:text-red-700 active:text-red-800 bg-red-50 sm:bg-transparent rounded-lg sm:rounded-none min-h-12 sm:min-h-0 transition-colors"
+          >
+            Clear All
+          </button>
+        </div>
       </div>
 
       {/* Mobile: single column, Tablet+: 2-4 columns */}
@@ -173,7 +179,7 @@ export default function FabricPreviewGrid({
       </div>
       {/* Larger, more readable hint text on mobile */}
       <p className="mt-4 sm:mt-2 text-sm sm:text-xs text-gray-500 text-center sm:text-left">
-        Drag and drop to reorder fabrics. The order affects pattern generation and role assignment.
+        Drag and drop to reorder fabrics. Use <strong>AI Coordinate Colors</strong> to let our AI suggest optimal fabric roles for your quilt.
       </p>
     </div>
   );

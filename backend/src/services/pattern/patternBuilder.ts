@@ -89,7 +89,7 @@ export class PatternBuilder {
       patternForSvg,
       finalSize,
       fabricNames,
-      quiltSize || 'default'
+      quiltSize
     );
 
     const accurateFabricLayout = LayoutComputer.enhanceLayout(
@@ -117,6 +117,7 @@ export class PatternBuilder {
       estimatedSize: finalSize,
       instructions: validatedInstructions,
       visualSvg: visualSvg,
+      ...(quiltSize && { requestedQuiltSize: quiltSize }),
       fabricRequirements: fabricRequirements,
       fabricImages: fabricImages,
       ...(borderConfiguration && { borderConfiguration }),

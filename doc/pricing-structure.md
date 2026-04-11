@@ -1,31 +1,35 @@
 # QuiltPlannerPro Pricing Structure
 
-**Last Updated: December 10, 2024**
+**Last Updated: March 21, 2026**
 
 ## Official Pricing Tiers
 
 ### Free Tier
 - **Cost:** $0
 - **Billing:** None
-- **Patterns:** 3 lifetime downloads
+- **Pattern Generations:** 3 per month
+- **Pattern Downloads:** 1 per month
 - **Features:** Basic pattern generation
 
 ### Hobbyist Tier
 - **Monthly:** $5.99/month
-- **Annual:** $59.99/year (save $11.89 - ~17% discount)
-- **Patterns:** 10 per month
+- **Annual:** $59.99/year (save $11.89 - ~16.5% discount)
+- **Pattern Generations:** 5 per month
+- **Pattern Downloads:** 2 per month
 - **Features:** All basic features + skill level matching
 
 ### Enthusiast Tier
 - **Monthly:** $9.99/month
-- **Annual:** $94.99/year (save $24.89 - ~21% discount)
-- **Patterns:** 30 per month
+- **Annual:** $94.99/year (save $24.89 - ~20.8% discount)
+- **Pattern Generations:** 15 per month
+- **Pattern Downloads:** 10 per month
 - **Features:** All Hobbyist features + advanced patterns + priority support
 
 ### Pro Tier
 - **Monthly:** $19.99/month
-- **Annual:** $199.99/year (save $39.89 - ~17% discount)
-- **Patterns:** Unlimited
+- **Annual:** $199.99/year (save $39.89 - ~16.6% discount)
+- **Pattern Generations:** 50 per month
+- **Pattern Downloads:** 25 per month
 - **Features:** Everything + commercial use rights + API access (future)
 
 ## Pricing Logic
@@ -73,12 +77,12 @@
 **Compared to other quilt pattern generators:**
 - Most charge $30-50 for single pattern books
 - Digital competitors: $15-30/month with limited features
-- QuiltPlannerPro: $5.99-19.99 for unlimited AI-generated custom patterns
+- QuiltPlannerPro: $5.99-19.99 for monthly AI-generated custom pattern generation and downloads
 
 **Value Proposition:**
 - Hobbyist tier = 1 pattern book per year in traditional quilting
 - Enthusiast tier = 2-3 pattern books per year
-- Pro tier = unlimited patterns (thousands of dollars in traditional patterns)
+- Pro tier = high-volume monthly generation and downloads for power users
 
 ## Pricing Psychology
 
@@ -161,7 +165,7 @@ Small incremental increases encourage upgrades
 - "Start free, upgrade anytime"
 - "Save 17-21% with annual billing"
 - "Cancel anytime, no questions asked"
-- "All plans include AI-powered pattern generation"
+- "All plans include AI-powered pattern generation with monthly generation and download limits"
 
 **Value Props:**
 - Hobbyist: "Perfect for weekend quilters"

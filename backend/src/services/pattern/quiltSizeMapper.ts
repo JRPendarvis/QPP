@@ -1,5 +1,7 @@
 // src/services/pattern/quiltSizeMapper.ts
 
+import { QuiltSizeCatalog } from './quiltSizeCatalog';
+
 /**
  * Maps quilt size keys to formatted size strings
  * Single Responsibility: Quilt size string resolution only
@@ -11,15 +13,6 @@ export class QuiltSizeMapper {
    * @returns Formatted size string
    */
   static getFormattedSize(quiltSize?: string): string {
-    const sizeMap: Record<string, string> = {
-      'baby': '36×52 inches baby quilt',
-      'lap': '50×65 inches lap/throw quilt',
-      'twin': '66×90 inches twin quilt',
-      'full': '80×90 inches full/double quilt',
-      'queen': '90×95 inches queen quilt',
-      'king': '105×95 inches king quilt',
-    };
-    
-    return quiltSize && sizeMap[quiltSize] ? sizeMap[quiltSize] : '60×72 inches throw quilt';
+    return QuiltSizeCatalog.formatPromptSize(quiltSize);
   }
 }

@@ -29,6 +29,9 @@ export interface QuiltPattern {
   // New (recommended) stable id (e.g., "pinwheel")
   patternId?: string;
 
+  // Optional original size request from the quilter (preset key or explicit dimensions)
+  requestedQuiltSize?: string;
+
   // New (recommended) structured fabric names by role
   // Avoid parsing fabricLayout prose.
   fabricsByRole?: FabricsByRole;

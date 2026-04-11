@@ -5,43 +5,33 @@ interface PricingCardProps {
   billingInterval: 'monthly' | 'yearly';
   isLoading: boolean;
   isSelected: boolean;
-  isHovered: boolean;
-  onHover: (tierId: string | null) => void;
+  hasSelection: boolean;
   onButtonClick: (action: 'register' | 'subscribe', tierId: string) => void;
 }
 
 /**
  * Individual pricing tier card component
- * Single Responsibility: Render single pricing card with hover states
+ * Single Responsibility: Render single pricing card with selection state
  */
 export default function PricingCard({
   tier,
   billingInterval,
   isLoading,
   isSelected,
-  isHovered,
-  onHover,
+  hasSelection,
   onButtonClick
 }: PricingCardProps) {
-  const getBadgeText = () => {
-    if (tier.popular && !isHovered) return 'Most Popular';
-    if (!isHovered) return null;
-    
-    const badges: Record<string, string> = {
-      free: 'Just Looking',
-      basic: 'Just Starting',
-      intermediate: 'Most Popular',
-      advanced: 'All In'
-    };
-    return badges[tier.id] || null;
-  };
+  const isDefaultPopular = tier.popular && !hasSelection;
+  const monthlyLimits = tier.patterns
+    .split('•')
+    .map((item) => item.trim().replace(/\/month\b/gi, '').trim())
+    .filter(Boolean);
 
-  const badgeText = getBadgeText();
+  const badgeText = isDefaultPopular ? 'Most Popular' : null;
 
   const getButtonClass = () => {
     if (isSelected) return 'bg-indigo-600 text-white';
-    if (isHovered) return 'bg-indigo-600 text-white';
-    if (tier.popular) return 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-400';
+    if (isDefaultPopular) return 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-indigo-400';
     return 'bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:bg-gray-300';
   };
 
@@ -53,14 +43,10 @@ export default function PricingCard({
 
   return (
     <div
-      onMouseEnter={() => onHover(tier.id)}
-      onMouseLeave={() => onHover(null)}
       className={`bg-white rounded-lg shadow-md p-6 relative transition-all duration-200 hover:shadow-xl hover:-translate-y-1 cursor-pointer ${
-        tier.popular && !isSelected && !isHovered ? 'ring-2 ring-indigo-500' : ''
+        isDefaultPopular ? 'ring-2 ring-indigo-500' : ''
       } ${
         isSelected ? 'ring-2 ring-indigo-600 shadow-xl -translate-y-1' : ''
-      } ${
-        isHovered ? 'ring-2 ring-indigo-500' : ''
       }`}
     >
       {badgeText && (
@@ -70,7 +56,6 @@ export default function PricingCard({
           </span>
         </div>
       )}
-
       <div className="text-center mb-6">
         <h3 className="text-2xl font-bold text-gray-900 mb-2">{tier.name}</h3>
 
@@ -93,8 +78,11 @@ export default function PricingCard({
           )}
         </div>
 
-        <div className="text-sm text-gray-600 mb-4">
-          {tier.patterns}
+        <div className="text-sm text-gray-600 mb-4" aria-label="Monthly usage limits">
+          <p className="font-medium text-gray-700">Monthly limits:</p>
+          {monthlyLimits.map((limit) => (
+            <p key={limit}>{limit}</p>
+          ))}
         </div>
       </div>
 

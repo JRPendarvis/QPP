@@ -1,7 +1,7 @@
 'use client';
 
 import { useDropzone } from 'react-dropzone';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { processImageFiles, formatMB } from '@/utils/imageCompression';
 import { alertTooLarge, alertSkipped } from '@/utils/fabricValidation';
@@ -20,6 +20,13 @@ export default function FabricDropzone({
   totalSize
 }: FabricDropzoneProps) {
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [showCameraButton, setShowCameraButton] = useState(false);
+
+  useEffect(() => {
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const hasTouch = navigator.maxTouchPoints > 0;
+    setShowCameraButton(coarsePointer || hasTouch);
+  }, []);
 
   const handleDrop = async (acceptedFiles: File[]) => {
     const { validFiles, skippedCount, tooLargeFiles } = await processImageFiles(acceptedFiles);
@@ -124,9 +131,9 @@ export default function FabricDropzone({
         )}
       </div>
       
-      {/* Camera Button for Mobile/Tablet Only */}
-      {currentCount < maxFiles && (
-        <div className="mt-4 flex justify-center md:hidden">
+      {/* Camera button for touch devices (phone + tablet) */}
+      {showCameraButton && currentCount < maxFiles && (
+        <div className="mt-4 flex justify-center">
           <button
             onClick={handleCameraClick}
             type="button"

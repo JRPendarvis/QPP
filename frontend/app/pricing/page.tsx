@@ -17,7 +17,6 @@ import FAQSection from '@/components/pricing/FAQSection';
 export default function PricingPage() {
   const { user, loading } = useAuth();
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
-  const [hoveredTier, setHoveredTier] = useState<string | null>(null);
   const { loadingTier, selectedTier, handleButtonClick } = useCheckout(user);
 
   if (loading) {
@@ -46,7 +45,7 @@ export default function PricingPage() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <p className="text-xl max-w-3xl mx-auto mb-4" style={{color: '#1F2937'}}>
-            Start with our free tier and upgrade anytime to unlock more patterns, advanced features, and priority support.
+            Start free and upgrade anytime to unlock more monthly pattern generations, more monthly downloads, advanced features, and priority support.
           </p>
 
           {/* Billing Toggle */}
@@ -62,8 +61,7 @@ export default function PricingPage() {
               billingInterval={billingInterval}
               isLoading={loadingTier === tier.id}
               isSelected={selectedTier === tier.id}
-              isHovered={hoveredTier === tier.id}
-              onHover={setHoveredTier}
+              hasSelection={Boolean(selectedTier)}
               onButtonClick={(action, tierId) => handleButtonClick(action, tierId, billingInterval)}
             />
           ))}

@@ -11,6 +11,7 @@ interface FabricUploaderProps {
   removeFabric: (index: number) => void;
   clearAll: () => void;
   onReorder: (fromIdx: number, toIdx: number) => void;
+  onAIRearrange?: (assignments: { background?: string; primary?: string; secondary?: string; accent?: string }) => void;
   totalSize: number;
 }
 
@@ -23,6 +24,7 @@ const FabricUploader: React.FC<FabricUploaderProps> = ({
   removeFabric,
   clearAll,
   onReorder,
+  onAIRearrange,
   totalSize,
 }) => {
   return (
@@ -40,6 +42,7 @@ const FabricUploader: React.FC<FabricUploaderProps> = ({
           onRemove={removeFabric}
           onClearAll={clearAll}
           onReorder={onReorder}
+          onAIRearrange={onAIRearrange}
         />
       )}
     </div>
