@@ -19,9 +19,10 @@ export class InitialPromptBuilder {
     patternGuidance: string;
     targetSize: string;
     skillLevel: string;
+        yardageGuidance?: string;
   }): string {
     const { fabricCount, patternForSvg, patternInstruction, skillDescription, 
-            patternDescription, patternGuidance, targetSize, skillLevel } = params;
+          patternDescription, patternGuidance, targetSize, skillLevel, yardageGuidance } = params;
 
     return `You are an expert quilter with deep knowledge of fabric selection and color theory. I'm providing you with ${fabricCount} fabric images.
 
@@ -33,6 +34,7 @@ For reference, a "${patternForSvg}" pattern has these characteristics:
 ${patternDescription}
 
 ${patternGuidance}
+${yardageGuidance || ''}
 
 **STEP 1: ANALYZE EACH FABRIC**
 For EACH fabric image, identify:

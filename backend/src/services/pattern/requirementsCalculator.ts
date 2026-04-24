@@ -4,6 +4,11 @@ import { BorderConfiguration } from '../../types/Border';
 import { Fabric } from '../../types/ClaudeResponse';
 import { FabricRequirement } from '../../types/QuiltPattern';
 
+export interface RequirementsResult {
+  fabricRequirements: FabricRequirement[];
+  yardageWarnings: string[];
+}
+
 /**
  * Calculates fabric and border requirements for patterns
  */
@@ -20,8 +25,9 @@ export class RequirementsCalculator {
     borderCount: number,
     allFabricImages: string[],
     finalSize: string,
-    getBorderFabricName: (index: number, total: number, fabric: any) => string
-  ): FabricRequirement[] {
+    getBorderFabricName: (index: number, total: number, fabric: any) => string,
+    availableYardageByFabric?: Array<number | null>
+  ): RequirementsResult {
     // Calculate pattern fabric requirements
     const fabricInfo = patternFabrics.map((fabric, idx) => {
       const analysis = fabricAnalysis?.[idx];
@@ -57,7 +63,75 @@ export class RequirementsCalculator {
       });
     }
 
-    return fabricRequirements;
+    const constrained = this.applyAvailabilityConstraints(
+      fabricRequirements,
+      availableYardageByFabric,
+      patternFabrics.length,
+      borderCount
+    );
+
+    return {
+      fabricRequirements: constrained.fabricRequirements,
+      yardageWarnings: constrained.yardageWarnings,
+    };
+  }
+
+  private static applyAvailabilityConstraints(
+    requirements: FabricRequirement[],
+    availableYardageByFabric: Array<number | null> | undefined,
+    patternFabricCount: number,
+    borderCount: number
+  ): RequirementsResult {
+    if (!availableYardageByFabric || availableYardageByFabric.length === 0) {
+      return { fabricRequirements: requirements, yardageWarnings: [] };
+    }
+
+    const updated = [...requirements];
+    const warnings: string[] = [];
+
+    for (let i = 0; i < patternFabricCount; i++) {
+      const available = availableYardageByFabric[i];
+      if (available === null || available === undefined) {
+        continue;
+      }
+
+      const requirement = updated[i];
+      if (!requirement || requirement.yards <= available) {
+        continue;
+      }
+
+      const shortBy = Number((requirement.yards - available).toFixed(2));
+      warnings.push(`${requirement.role} exceeds available fabric by ${shortBy} yards. Requirement was limited to ${available} yards.`);
+      requirement.description = `${requirement.description} (limited to available ${available} yards)`;
+      requirement.yards = Number(available.toFixed(2));
+    }
+
+    if (borderCount > 0) {
+      const borderStartIdx = updated.length - borderCount;
+
+      for (let i = 0; i < borderCount; i++) {
+        const availableIdx = patternFabricCount + i;
+        const available = availableYardageByFabric[availableIdx];
+        if (available === null || available === undefined) {
+          continue;
+        }
+
+        const requirement = updated[borderStartIdx + i];
+        if (!requirement || requirement.yards <= available) {
+          continue;
+        }
+
+        const shortBy = Number((requirement.yards - available).toFixed(2));
+        warnings.push(`${requirement.role} exceeds available fabric by ${shortBy} yards. Requirement was limited to ${available} yards.`);
+        requirement.description = `${requirement.description} (limited to available ${available} yards)`;
+        requirement.yards = Number(available.toFixed(2));
+      }
+    }
+
+    return {
+      fabricRequirements: updated,
+      yardageWarnings: warnings,
+    };
   }
 
   /**

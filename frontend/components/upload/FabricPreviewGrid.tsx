@@ -8,6 +8,8 @@ import AutoCoordinateButton from './AutoCoordinateButton';
 export interface FabricPreviewGridProps {
   previews: string[];
   fabrics: File[];
+  availableYardages?: Array<number | undefined>;
+  onYardageChange?: (index: number, yardage: number | undefined) => void;
   onRemove: (index: number) => void;
   onClearAll: () => void;
   onReorder: (fromIdx: number, toIdx: number) => void;
@@ -25,6 +27,8 @@ import { FABRIC_ROLES } from '../../app/helpers/fabricRoles';
 interface FabricCardProps {
   preview: string;
   fabric: File | undefined;
+  availableYardage?: number;
+  onYardageChange?: (yardage: number | undefined) => void;
   label: string;
   index: number;
   draggedIdx: number | null;
@@ -36,6 +40,8 @@ interface FabricCardProps {
 const FabricCard: React.FC<FabricCardProps> = ({
   preview,
   fabric,
+  availableYardage,
+  onYardageChange,
   label,
   index,
   draggedIdx,
@@ -107,12 +113,39 @@ const FabricCard: React.FC<FabricCardProps> = ({
     <p className="mt-2 sm:mt-1 text-sm sm:text-xs text-gray-700 truncate text-center">
       <span className="font-medium">{fabric?.name || `Fabric ${index + 1}`}</span>
     </p>
+    {onYardageChange && (
+      <div className="mt-2">
+        <label className="block text-xs font-medium text-gray-600 mb-1">
+          Available Yards
+        </label>
+        <input
+          type="number"
+          min={0.25}
+          step={0.25}
+          value={availableYardage ?? ''}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (!raw) {
+              onYardageChange(undefined);
+              return;
+            }
+
+            const parsed = Number.parseFloat(raw);
+            onYardageChange(Number.isFinite(parsed) && parsed > 0 ? parsed : undefined);
+          }}
+          placeholder="e.g. 0.5"
+          className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+      </div>
+    )}
   </div>
 );
 
 export default function FabricPreviewGrid({
   previews,
   fabrics,
+  availableYardages,
+  onYardageChange,
   onRemove,
   onClearAll,
   onReorder,
@@ -167,6 +200,8 @@ export default function FabricPreviewGrid({
               key={index}
               preview={preview}
               fabric={fabrics[index]}
+              availableYardage={availableYardages?.[index]}
+              onYardageChange={onYardageChange ? (yardage) => onYardageChange(index, yardage) : undefined}
               label={label}
               index={index}
               draggedIdx={draggedIdx}

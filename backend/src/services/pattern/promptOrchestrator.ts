@@ -47,7 +47,8 @@ export class PromptOrchestrator {
     skillLevel: string,
     patternId: string | undefined,
     roleAssignments?: any,
-    quiltSize?: string
+    quiltSize?: string,
+    availableYardageByFabric?: Array<number | null>
   ): Promise<string> {
     if (!roleAssignments) {
       return PromptBuilder.buildPrompt(
@@ -56,7 +57,8 @@ export class PromptOrchestrator {
         patternInstruction,
         skillLevel,
         patternId,
-        quiltSize
+        quiltSize,
+        availableYardageByFabric
       );
     }
 
@@ -70,7 +72,8 @@ export class PromptOrchestrator {
         patternForSvg,
         skillLevel,
         patternId,
-        quiltSize
+        quiltSize,
+        availableYardageByFabric
       );
     }
 
@@ -80,7 +83,8 @@ export class PromptOrchestrator {
       patternInstruction,
       skillLevel,
       patternId,
-      quiltSize
+      quiltSize,
+      availableYardageByFabric
     );
   }
 }

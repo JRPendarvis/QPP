@@ -7,11 +7,13 @@ import { InstructionGenerationService } from './instructionGenerationService';
 import { PatternRepository } from '../../repositories/patternRepository';
 import { normalizePatternId } from '../../utils/patternNormalization';
 import { BorderConfiguration } from '../../types/Border';
+import { YardageFeasibilityService } from './yardageFeasibilityService';
 
 export interface GeneratePatternRequest {
   userId: string;
   images: string[];
   imageTypes: string[];
+  availableYardageByFabric?: Array<number | null>;
   skillLevel?: string;
   challengeMe?: boolean;
   selectedPattern?: string;
@@ -50,10 +52,33 @@ export class PatternGenerationService {
   }
 
   async generate(request: GeneratePatternRequest): Promise<GeneratePatternResult> {
-    const { userId, images, imageTypes, skillLevel, challengeMe, selectedPattern, roleAssignments, quiltSize, borderConfiguration } = request;
+    const {
+      userId,
+      images,
+      imageTypes,
+      availableYardageByFabric,
+      skillLevel,
+      challengeMe,
+      selectedPattern,
+      roleAssignments,
+      quiltSize,
+      borderConfiguration,
+    } = request;
 
     const patternToUse = normalizePatternId(selectedPattern);
-    console.log(`📋 Pattern to use: "${patternToUse}" (from: "${selectedPattern}")`);
+    console.log(`📋 Pattern to use: "${patternToUse}" (from: "${selectedPattern}")`)
+
+    // Determine feasible quilt size given available yardage constraints.
+    // Border fabrics are at the end of the array; exclude them from the count.
+    const borderCount = borderConfiguration?.enabled ? borderConfiguration.borders.length : 0;
+    const patternFabricCount = images.length - borderCount;
+    const feasibility = YardageFeasibilityService.checkFeasibility(
+      quiltSize,
+      patternToUse,
+      patternFabricCount,
+      availableYardageByFabric?.slice(0, patternFabricCount)
+    );
+    const effectiveQuiltSize = feasibility.feasibleSize;
 
     // Validate user subscription and limits
     const { user, tierConfig } = await this.subscriptionValidator.validateUser(userId);
@@ -68,9 +93,22 @@ export class PatternGenerationService {
       targetSkillLevel,
       patternToUse,
       roleAssignments,
-      quiltSize,
-      borderConfiguration
+      effectiveQuiltSize,
+      borderConfiguration,
+      availableYardageByFabric
     );
+
+    // Attach size adjustment info when yardage constraints reduced the quilt size
+    if (feasibility.wasReduced) {
+      pattern = {
+        ...pattern,
+        sizeAdjustment: {
+          originalSize: feasibility.originalSize,
+          adjustedSize: feasibility.feasibleSize,
+          reason: feasibility.reason,
+        },
+      };
+    }
 
     // Generate deterministic instructions when supported
     pattern = await this.instructionService.generateInstructions(pattern, patternToUse, roleAssignments);

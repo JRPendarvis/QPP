@@ -13,12 +13,14 @@ export class PatternRequestValidator {
     userId?: string;
     images: any[];
     skillLevel?: string;
+    availableYardageByFabric?: Array<number | null>;
   }): { statusCode: number; message: string } | null {
     return (
       PatternValidators.validateUserId(request.userId) ||
       PatternValidators.validateImages(request.images) ||
       PatternValidators.validateImageSizes(request.images) ||
-      PatternValidators.validateSkillLevel(request.skillLevel)
+      PatternValidators.validateSkillLevel(request.skillLevel) ||
+      PatternValidators.validateAvailableYardage(request.availableYardageByFabric, request.images?.length ?? 0)
     );
   }
 

@@ -50,9 +50,10 @@ describe('RequirementsCalculator', () => {
         () => 'Border'
       );
 
-      expect(result).toHaveLength(2);
-      expect(result[0].role).toBe('Fabric 1');
-      expect(result[0].yards).toBe(2.5);
+      expect(result.fabricRequirements).toHaveLength(2);
+      expect(result.fabricRequirements[0].role).toBe('Fabric 1');
+      expect(result.fabricRequirements[0].yards).toBe(2.5);
+      expect(result.yardageWarnings).toEqual([]);
     });
 
     it('should include border requirements when borders enabled', () => {
@@ -83,9 +84,9 @@ describe('RequirementsCalculator', () => {
       );
 
       // Should have pattern fabric + 2 border fabrics
-      expect(result.length).toBeGreaterThan(1);
-      expect(result.some(r => r.role === 'Inner Border')).toBe(true);
-      expect(result.some(r => r.role === 'Outer Border')).toBe(true);
+      expect(result.fabricRequirements.length).toBeGreaterThan(1);
+      expect(result.fabricRequirements.some(r => r.role === 'Inner Border')).toBe(true);
+      expect(result.fabricRequirements.some(r => r.role === 'Outer Border')).toBe(true);
     });
 
     it('should not add border requirements when borders disabled', () => {
@@ -110,8 +111,8 @@ describe('RequirementsCalculator', () => {
         () => 'Border'
       );
 
-      expect(result).toHaveLength(1);
-      expect(result[0].role).toBe('Fabric 1');
+      expect(result.fabricRequirements).toHaveLength(1);
+      expect(result.fabricRequirements[0].role).toBe('Fabric 1');
     });
 
     it('should handle undefined fabric analysis', () => {
@@ -131,7 +132,7 @@ describe('RequirementsCalculator', () => {
         () => 'Border'
       );
 
-      expect(result).toHaveLength(1);
+      expect(result.fabricRequirements).toHaveLength(1);
     });
 
     it('should use default quilt size when not specified', () => {
@@ -151,7 +152,7 @@ describe('RequirementsCalculator', () => {
         () => 'Border'
       );
 
-      expect(result).toHaveLength(1);
+      expect(result.fabricRequirements).toHaveLength(1);
     });
 
     it('should format border requirements correctly', () => {
@@ -176,7 +177,7 @@ describe('RequirementsCalculator', () => {
         () => 'Border'
       );
 
-      const borderReq = result.find(r => r.role === 'Border');
+      const borderReq = result.fabricRequirements.find(r => r.role === 'Border');
       expect(borderReq).toBeDefined();
       expect(borderReq?.description).toContain('Border fabric -');
     });

@@ -21,6 +21,7 @@ export class PatternService {
     const response = await api.post<PatternGenerationResponse>('/api/patterns/generate', {
       fabrics: fabricsWithTypes.map(f => f.data),
       fabricTypes: fabricsWithTypes.map(f => f.type),
+      availableYardageByFabric: request.availableYardageByFabric,
       skillLevel: request.skillLevel,
       challengeMe: request.challengeMe,
       selectedPattern: request.selectedPattern || 'auto',

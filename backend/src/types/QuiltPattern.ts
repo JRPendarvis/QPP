@@ -38,6 +38,14 @@ export interface QuiltPattern {
   
   // Fabric yardage requirements
   fabricRequirements?: FabricRequirement[];
+  yardageWarnings?: string[];
+
+  // When yardage constraints forced a smaller quilt size
+  sizeAdjustment?: {
+    originalSize: string;
+    adjustedSize: string;
+    reason: string;
+  };
 
   // Border configuration and dimensions
   borderConfiguration?: BorderConfiguration;

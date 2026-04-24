@@ -18,9 +18,10 @@ export class RoleSwapPromptBuilder {
     patternGuidance: string;
     skillDescription: string;
     targetSize: string;
+        yardageGuidance?: string;
   }): string {
     const { patternForSvg, fabricSummary, rolesSummary, patternDescription, 
-            patternGuidance, skillDescription, targetSize } = params;
+          patternGuidance, skillDescription, targetSize, yardageGuidance } = params;
 
     return `You are an expert quilter. The user has selected custom fabric role assignments for a "${patternForSvg}" pattern.
 
@@ -34,6 +35,7 @@ ${rolesSummary}
 ${patternDescription}
 
 ${patternGuidance}
+${yardageGuidance || ''}
 
 **SKILL LEVEL:** ${skillDescription}
 

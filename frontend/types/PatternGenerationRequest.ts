@@ -6,6 +6,7 @@ import { Border } from './Border';
 
 export interface PatternGenerationRequest {
   fabrics: File[];
+  availableYardageByFabric?: Array<number | null>;
   skillLevel: string;
   challengeMe: boolean;
   selectedPattern?: string;

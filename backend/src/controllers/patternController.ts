@@ -36,6 +36,7 @@ export class PatternController {
         roleAssignments,
         quiltSize,
         borderConfiguration,
+        availableYardageByFabric,
       } = body as any;
 
       const images = fabricImages || fabrics;
@@ -48,6 +49,7 @@ export class PatternController {
         userId,
         images,
         skillLevel,
+        availableYardageByFabric,
       });
 
       if (validationError) {
@@ -69,6 +71,7 @@ export class PatternController {
         roleAssignments,
         quiltSize,
         borderConfiguration,
+        availableYardageByFabric,
       });
 
       console.log('🎯 [PatternController] Result to send to client:', {

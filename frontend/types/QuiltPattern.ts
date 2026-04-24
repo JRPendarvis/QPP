@@ -14,6 +14,12 @@ export interface QuiltPattern {
   instructions: string[];
   visualSvg: string;
   fabricRequirements?: FabricRequirement[];
+  yardageWarnings?: string[];
+  sizeAdjustment?: {
+    originalSize: string;
+    adjustedSize: string;
+    reason: string;
+  };
   
   // Border configuration and dimensions
   borderConfiguration?: BorderConfiguration;

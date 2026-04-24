@@ -60,6 +60,49 @@ export class PatternValidators {
     return null;
   }
 
+  static validateAvailableYardage(
+    availableYardageByFabric: unknown,
+    imageCount: number
+  ): ValidationError | null {
+    if (availableYardageByFabric === undefined) {
+      return null;
+    }
+
+    if (!Array.isArray(availableYardageByFabric)) {
+      return {
+        success: false,
+        message: 'availableYardageByFabric must be an array',
+        statusCode: 400,
+      };
+    }
+
+    if (availableYardageByFabric.length !== imageCount) {
+      return {
+        success: false,
+        message: 'availableYardageByFabric must match the number of uploaded fabrics',
+        statusCode: 400,
+      };
+    }
+
+    const hasInvalidValue = availableYardageByFabric.some((yards) => {
+      if (yards === null || yards === undefined) {
+        return false;
+      }
+
+      return typeof yards !== 'number' || Number.isNaN(yards) || yards <= 0;
+    });
+
+    if (hasInvalidValue) {
+      return {
+        success: false,
+        message: 'Each yardage value must be a positive number or null',
+        statusCode: 400,
+      };
+    }
+
+    return null;
+  }
+
   static validateUserId(userId?: string): ValidationError | null {
     if (!userId) {
       return {

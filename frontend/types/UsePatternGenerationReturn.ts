@@ -26,6 +26,7 @@ export interface UsePatternGenerationReturn {
   clearAll: () => void;
   resetPattern: () => void;
   generatePattern: (
+    availableYardageByFabric: Array<number | null> | undefined,
     userSkillLevel: string,
     challengeMe: boolean,
     selectedPattern?: string,

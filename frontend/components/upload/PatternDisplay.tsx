@@ -23,6 +23,12 @@ interface QuiltPattern {
     description: string;
     inches?: number;
   }>;
+  yardageWarnings?: string[];
+  sizeAdjustment?: {
+    originalSize: string;
+    adjustedSize: string;
+    reason: string;
+  };
 }
 
 interface Usage {
@@ -171,6 +177,30 @@ export default function PatternDisplay({
               Always verify fabric availability before cutting!
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Size Adjustment Notice */}
+      {pattern.sizeAdjustment && (
+        <div className="bg-blue-50 border border-blue-300 rounded-lg p-6">
+          <h3 className="text-xl font-bold text-blue-900 mb-2">Quilt Size Adjusted for Your Fabric</h3>
+          <p className="text-blue-900">{pattern.sizeAdjustment.reason}</p>
+          <p className="text-sm text-blue-700 mt-2">
+            Your pattern was designed as a <strong>{pattern.sizeAdjustment.adjustedSize}</strong> instead
+            of the requested <strong>{pattern.sizeAdjustment.originalSize}</strong> so it fits within
+            your available yardage.
+          </p>
+        </div>
+      )}
+
+      {pattern.yardageWarnings && pattern.yardageWarnings.length > 0 && (
+        <div className="bg-amber-50 border border-amber-300 rounded-lg p-6">
+          <h3 className="text-xl font-bold text-amber-900 mb-3">Fabric Availability Notes</h3>
+          <ul className="list-disc pl-5 space-y-1 text-amber-900">
+            {pattern.yardageWarnings.map((warning, idx) => (
+              <li key={idx}>{warning}</li>
+            ))}
+          </ul>
         </div>
       )}
 

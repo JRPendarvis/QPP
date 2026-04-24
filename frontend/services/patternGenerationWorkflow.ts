@@ -14,6 +14,7 @@ export class PatternGenerationWorkflow {
    */
   static async execute(
     fabrics: File[],
+    availableYardageByFabric: Array<number | null> | undefined,
     userSkillLevel: string,
     challengeMe: boolean,
     selectedPattern: string | undefined,
@@ -31,6 +32,7 @@ export class PatternGenerationWorkflow {
     try {
       const response = await PatternService.generatePattern({
         fabrics,
+        availableYardageByFabric,
         skillLevel: userSkillLevel,
         challengeMe,
         selectedPattern,

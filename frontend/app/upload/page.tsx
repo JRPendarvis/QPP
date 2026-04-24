@@ -31,6 +31,7 @@ export default function UploadPage() {
   const [challengeMe, setChallengeMe] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
+  const [availableYardages, setAvailableYardages] = useState<Array<number | undefined>>([]);
   const [quiltSize, setQuiltSize] = useState<string>('');
 
   // Border state management
@@ -123,6 +124,20 @@ export default function UploadPage() {
     }
   }, [patternChoice, selectedPattern]);
 
+  useEffect(() => {
+    setAvailableYardages((prev) => {
+      if (prev.length === fabrics.length) {
+        return prev;
+      }
+
+      if (prev.length > fabrics.length) {
+        return prev.slice(0, fabrics.length);
+      }
+
+      return [...prev, ...Array(fabrics.length - prev.length).fill(undefined)];
+    });
+  }, [fabrics.length]);
+
   const handleFabricReorder = (fromIdx: number, toIdx: number) => {
     if (fromIdx === toIdx) return;
     const newFabrics = [...fabrics];
@@ -131,8 +146,12 @@ export default function UploadPage() {
     const newPreviews = [...previews];
     const [movedPreview] = newPreviews.splice(fromIdx, 1);
     newPreviews.splice(toIdx, 0, movedPreview);
+    const newYardages = [...availableYardages];
+    const [movedYardage] = newYardages.splice(fromIdx, 1);
+    newYardages.splice(toIdx, 0, movedYardage);
     setFabrics(newFabrics);
     setPreviews(newPreviews);
+    setAvailableYardages(newYardages);
   };
 
   const handleAIRearrange = (assignments: { background?: string; primary?: string; secondary?: string; accent?: string }) => {
@@ -169,9 +188,24 @@ export default function UploadPage() {
     // Reorder fabrics and previews based on the new order
     const newFabrics = orderedIndices.map(i => fabrics[i]);
     const newPreviews = orderedIndices.map(i => previews[i]);
+    const newYardages = orderedIndices.map(i => availableYardages[i]);
 
     setFabrics(newFabrics);
     setPreviews(newPreviews);
+    setAvailableYardages(newYardages);
+  };
+
+  const handleYardageChange = (index: number, yardage: number | undefined) => {
+    setAvailableYardages((prev) => {
+      const next = [...prev];
+      next[index] = yardage;
+      return next;
+    });
+  };
+
+  const handleRemoveFabric = (index: number) => {
+    removeFabric(index);
+    setAvailableYardages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleGenerate = async () => {
@@ -179,6 +213,7 @@ export default function UploadPage() {
     setGenerating(true);
     try {
       await generatePattern(
+        availableYardages.map((yards) => (typeof yards === 'number' ? yards : null)),
         currentSkill,
         challengeMe,
         patternChoice === 'manual' ? selectedPattern : undefined,
@@ -397,7 +432,9 @@ export default function UploadPage() {
                   <FabricPreviewGrid
                     previews={previews}
                     fabrics={fabrics}
-                    onRemove={removeFabric}
+                    availableYardages={availableYardages}
+                    onYardageChange={handleYardageChange}
+                    onRemove={handleRemoveFabric}
                     onClearAll={clearAll}
                     onReorder={handleFabricReorder}
                     onAIRearrange={handleAIRearrange}

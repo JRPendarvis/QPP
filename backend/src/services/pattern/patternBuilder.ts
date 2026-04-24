@@ -24,7 +24,8 @@ export class PatternBuilder {
     patternDifficulty: string,
     fabricImages: string[],
     quiltSize?: string,
-    borderConfiguration?: BorderConfiguration
+    borderConfiguration?: BorderConfiguration,
+    availableYardageByFabric?: Array<number | null>
   ): QuiltPattern {
     // Allocate fabrics between pattern and border
     const { patternImages, borderImages } = FabricAssembler.allocateFabrics(
@@ -68,7 +69,7 @@ export class PatternBuilder {
     const finalSize = SizeResolver.getDisplaySize(quiltSize, parsedResponse.estimatedSize);
 
     // Calculate fabric requirements
-    const fabricRequirements = RequirementsCalculator.calculateAllRequirements(
+    const { fabricRequirements, yardageWarnings } = RequirementsCalculator.calculateAllRequirements(
       quiltSize,
       patternForSvg,
       patternFabrics,
@@ -77,7 +78,8 @@ export class PatternBuilder {
       borderImages.length,
       fabricImages,
       finalSize,
-      PatternMetadataFormatter.getBorderFabricName
+      PatternMetadataFormatter.getBorderFabricName,
+      availableYardageByFabric
     );
 
     // Compute accurate fabric layout
@@ -119,6 +121,7 @@ export class PatternBuilder {
       visualSvg: visualSvg,
       ...(quiltSize && { requestedQuiltSize: quiltSize }),
       fabricRequirements: fabricRequirements,
+      ...(yardageWarnings.length > 0 && { yardageWarnings }),
       fabricImages: fabricImages,
       ...(borderConfiguration && { borderConfiguration }),
       ...(borderDimensions && { borderDimensions }),

@@ -54,13 +54,15 @@ export class PromptFormatter {
     patternInstruction: string,
     skillLevel: string,
     patternId?: string,
-    quiltSize?: string
+    quiltSize?: string,
+    availableYardageByFabric?: Array<number | null>
   ): string {
     const skillDescription = SkillLevelResolver.getDescription(skillLevel);
     const patternPrompt = patternId ? getPatternPrompt(normalizePatternId(patternId)) : null;
     const patternDescription = PatternDescriptionResolver.getDescription(patternForSvg, patternPrompt);
     const patternGuidance = PatternGuidanceFormatter.buildFullGuidance(patternForSvg, patternPrompt);
     const targetSize = QuiltSizeMapper.getFormattedSize(quiltSize);
+    const yardageGuidance = this.buildYardageGuidance(availableYardageByFabric);
 
     return InitialPromptBuilder.build({
       fabricCount,
@@ -71,6 +73,7 @@ export class PromptFormatter {
       patternGuidance,
       targetSize,
       skillLevel,
+      yardageGuidance,
     });
   }
 
@@ -90,7 +93,8 @@ export class PromptFormatter {
     patternForSvg: string,
     skillLevel: string,
     patternId?: string,
-    quiltSize?: string
+    quiltSize?: string,
+    availableYardageByFabric?: Array<number | null>
   ): string {
     const skillDescription = SkillLevelResolver.getDescription(skillLevel);
     const patternPrompt = patternId ? getPatternPrompt(normalizePatternId(patternId)) : null;
@@ -99,6 +103,7 @@ export class PromptFormatter {
     const rolesSummary = FabricSummaryBuilder.buildRolesSummary(newRoleAssignments);
     const patternGuidance = PatternGuidanceFormatter.buildRoleSwapGuidance(patternPrompt);
     const targetSize = QuiltSizeMapper.getFormattedSize(quiltSize);
+    const yardageGuidance = this.buildYardageGuidance(availableYardageByFabric);
 
     return RoleSwapPromptBuilder.build({
       patternForSvg,
@@ -108,6 +113,28 @@ export class PromptFormatter {
       patternGuidance,
       skillDescription,
       targetSize,
+      yardageGuidance,
     });
+  }
+
+  private buildYardageGuidance(availableYardageByFabric?: Array<number | null>): string {
+    if (!availableYardageByFabric || availableYardageByFabric.length === 0) {
+      return '';
+    }
+
+    const constrainedFabrics = availableYardageByFabric
+      .map((yards, index) => {
+        if (yards === null || yards === undefined) {
+          return null;
+        }
+        return `- Fabric ${index + 1}: ${yards} yards available`;
+      })
+      .filter((line): line is string => !!line);
+
+    if (constrainedFabrics.length === 0) {
+      return '';
+    }
+
+    return `\n\n**FABRIC AVAILABILITY CONSTRAINTS**\nThe quilter has limited yardage for these fabrics. Design the quilt to stay within these limits:\n${constrainedFabrics.join('\n')}`;
   }
 }
