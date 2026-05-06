@@ -69,6 +69,9 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
         <Link href={ROUTES.PRICING} onClick={handleClick} className={linkClass}>
           Pricing
         </Link>
+        <Link href={ROUTES.BLOCK_DESIGNER} onClick={handleClick} className={linkClass}>
+          Block Designer
+        </Link>
         {user ? (
           <>
             <Link href={ROUTES.DASHBOARD} onClick={handleClick} className={linkClass}>
@@ -129,6 +132,9 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
       </Link>
       <Link href={ROUTES.PRICING} onClick={handleClick} className={linkClass}>
         Pricing
+      </Link>
+      <Link href={ROUTES.BLOCK_DESIGNER} onClick={handleClick} className={linkClass}>
+        Block Designer
       </Link>
       {user ? (
         <>

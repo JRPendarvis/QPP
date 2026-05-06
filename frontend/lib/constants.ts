@@ -12,6 +12,8 @@ export const ROUTES = {
   PROFILE: '/profile',
   PRICING: '/pricing',
   UPLOAD: '/upload',
+  BLOCK_DESIGNER: '/block-designer',
+  MY_BLOCK_DESIGNS: '/my-block-designs',
 } as const;
 
 export const UI_CONSTANTS = {
