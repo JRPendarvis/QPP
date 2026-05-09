@@ -14,6 +14,7 @@ export const ROUTES = {
   UPLOAD: '/upload',
   BLOCK_DESIGNER: '/block-designer',
   MY_BLOCK_DESIGNS: '/my-block-designs',
+  FABRICS: '/fabrics',
 } as const;
 
 export const UI_CONSTANTS = {

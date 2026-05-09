@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+export const dynamic = 'force-dynamic';
+
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Navigation from '@/components/Navigation';
@@ -8,6 +10,7 @@ import BlockDesignerCanvas, { BlockRegion, FabricOption } from '@/components/blo
 import { PATTERN_OPTIONS } from '@/app/helpers/patternHelpers';
 import { useBlockDesignLibrary } from '@/hooks/useBlockDesignLibrary';
 import blockDesignService from '@/services/blockDesignService';
+import fabricService, { FabricRecord } from '@/services/fabricService';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PatternMeta {
@@ -268,6 +271,22 @@ const ASSEMBLY_INSTRUCTIONS: Record<string, AssemblyInstructions> = {
 
 function getAssemblyInstructions(patternId: string): AssemblyInstructions | null {
   return ASSEMBLY_INSTRUCTIONS[patternId] ?? null;
+}
+
+function isPersistablePreviewUrl(url: unknown): url is string {
+  if (typeof url !== 'string' || url.length === 0) return false;
+  // Blob URLs are session-scoped and become invalid after reload.
+  return url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://');
+}
+
+function sanitizeLoadedFabrics(input: FabricOption[]): FabricOption[] {
+  return input.map((fabric) => {
+    if (!isPersistablePreviewUrl(fabric.previewUrl)) {
+      const { previewUrl: _ignored, ...rest } = fabric;
+      return rest;
+    }
+    return fabric;
+  });
 }
 
 const ROTATIONS: Array<0 | 90 | 180 | 270> = [0, 90, 180, 270];
@@ -743,11 +762,12 @@ function getBaseRegions(patternId: string): BlockRegion[] {
   ];
 }
 
-export default function BlockDesignerPage() {
+function BlockDesignerPageContent() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { saveDesign, updateDesign } = useBlockDesignLibrary();
   const searchParams = useSearchParams();
+  const designId = searchParams.get('design');
   const [currentDesignId, setCurrentDesignId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
@@ -758,23 +778,65 @@ export default function BlockDesignerPage() {
 
   const [fabrics, setFabrics] = useState<FabricOption[]>(DEFAULT_FABRICS);
   const [fabricPreviews, setFabricPreviews] = useState<(string | null)[]>(Array(9).fill(null));
+  const [libraryFabrics, setLibraryFabrics] = useState<FabricRecord[]>([]);
   const [globalRotation, setGlobalRotation] = useState<0 | 90 | 180 | 270>(0);
   const [regions, setRegions] = useState<BlockRegion[]>(() => getBaseRegions('simple-squares'));
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  useEffect(() => {
+    if (authLoading || !user) return;
+    let cancelled = false;
+
+    fabricService.list()
+      .then((items) => {
+        if (!cancelled) setLibraryFabrics(items);
+      })
+      .catch(() => {
+        if (!cancelled) setLibraryFabrics([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user]);
+
   // Load a saved design when ?design=<id> is present in the URL
   useEffect(() => {
-    const designId = searchParams.get('design');
+    if (authLoading) return;
+
+    if (designId && !user) {
+      toast.error('Please log in to edit saved block designs');
+      router.push('/login');
+      return;
+    }
+
     if (!designId) return;
     let cancelled = false;
     blockDesignService.getById(designId)
       .then((saved) => {
         if (cancelled) return;
+
+        const normalizeArray = <T,>(value: unknown): T[] => {
+          if (Array.isArray(value)) return value as T[];
+          if (typeof value === 'string') {
+            try {
+              const parsed = JSON.parse(value);
+              return Array.isArray(parsed) ? (parsed as T[]) : [];
+            } catch {
+              return [];
+            }
+          }
+          return [];
+        };
+
+        const loadedRegions = normalizeArray<BlockRegion>(saved.regions);
+        const loadedFabrics = sanitizeLoadedFabrics(normalizeArray<FabricOption>(saved.fabrics));
+
         setCurrentDesignId(saved.id);
         setSelectedPatternId(saved.patternId);
-        setRegions(saved.regions as BlockRegion[]);
+        setRegions(loadedRegions.length > 0 ? loadedRegions : getBaseRegions(saved.patternId));
         setGlobalRotation((saved.globalRotation as 0 | 90 | 180 | 270) ?? 0);
-        const loadedFabrics = (saved.fabrics as FabricOption[]);
+        setFabricPreviews(Array(9).fill(null));
         setFabrics((prev) => {
           const next = [...prev];
           loadedFabrics.forEach((f, i) => { if (i < next.length) next[i] = { ...next[i], ...f }; });
@@ -784,8 +846,7 @@ export default function BlockDesignerPage() {
       })
       .catch(() => toast.error('Could not load design'));
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [authLoading, designId, user, router]);
 
   const maxFabrics = selectedPattern?.maxFabrics || 4;
   const activeFabrics = fabrics.slice(0, maxFabrics);
@@ -811,7 +872,13 @@ export default function BlockDesignerPage() {
         patternId: selectedPatternId,
         patternName: selectedPattern.name,
         globalRotation,
-        fabrics: activeFabrics,
+        fabrics: activeFabrics.map((fabric) => {
+          if (!isPersistablePreviewUrl(fabric.previewUrl)) {
+            const { previewUrl: _ignored, ...rest } = fabric;
+            return rest;
+          }
+          return fabric;
+        }),
         regions,
       };
 
@@ -856,7 +923,12 @@ export default function BlockDesignerPage() {
       const next = [...current];
       const target = next[fabricIndex];
       if (!target) return current;
-      next[fabricIndex] = { ...target, previewUrl: url };
+      next[fabricIndex] = {
+        ...target,
+        previewUrl: url,
+        imageUrl: undefined,
+        libraryFabricId: undefined,
+      };
       return next;
     });
   };
@@ -872,8 +944,35 @@ export default function BlockDesignerPage() {
       const next = [...current];
       const target = next[fabricIndex];
       if (!target) return current;
-      const { previewUrl: _removed, ...rest } = target;
+      const { previewUrl: _removed, imageUrl: _removedImage, ...rest } = target;
       next[fabricIndex] = rest;
+      return next;
+    });
+  };
+
+  const handleApplyLibraryFabric = (fabricIndex: number, selectedId: string) => {
+    const source = libraryFabrics.find((item) => item.id === selectedId);
+    if (!source) return;
+
+    setFabricPreviews((prev) => {
+      const next = [...prev];
+      if (next[fabricIndex]) URL.revokeObjectURL(next[fabricIndex]!);
+      next[fabricIndex] = null;
+      return next;
+    });
+
+    setFabrics((current) => {
+      const next = [...current];
+      const target = next[fabricIndex];
+      if (!target) return current;
+      next[fabricIndex] = {
+        ...target,
+        name: source.name,
+        color: source.color,
+        imageUrl: source.imageUrl || undefined,
+        previewUrl: undefined,
+        libraryFabricId: source.id,
+      };
       return next;
     });
   };
@@ -1046,14 +1145,39 @@ export default function BlockDesignerPage() {
                 {activeFabrics.map((fabric, index) => (
                   <div key={fabric.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50/80">
                     <label className="block text-sm text-gray-700 mb-2">Fabric {index + 1}</label>
+
+                    {libraryFabrics.length > 0 && (
+                      <div className="mb-2 flex gap-2 items-center">
+                        <select
+                          value={fabric.libraryFabricId || ''}
+                          onChange={(event) => handleApplyLibraryFabric(index, event.target.value)}
+                          className="flex-1 border border-gray-300 rounded px-2 py-1 text-xs"
+                        >
+                          <option value="">Select from library</option>
+                          {libraryFabrics.map((savedFabric) => (
+                            <option key={savedFabric.id} value={savedFabric.id}>
+                              {savedFabric.name} ({savedFabric.yardageAvailable.toFixed(2)} yd)
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => router.push('/fabrics')}
+                          className="text-xs text-indigo-700 hover:text-indigo-900"
+                        >
+                          Manage
+                        </button>
+                      </div>
+                    )}
+
                     <div className="flex gap-2 items-start">
                       {/* Photo thumbnail or color picker */}
                       <div className="relative shrink-0">
-                        {fabricPreviews[index] ? (
+                        {fabricPreviews[index] || fabric.imageUrl ? (
                           <div className="relative w-14 h-10">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={fabricPreviews[index]!}
+                              src={fabricPreviews[index] || fabric.imageUrl}
                               alt={`Fabric ${index + 1} photo`}
                               className="w-14 h-10 object-cover rounded border border-gray-300"
                             />
@@ -1123,5 +1247,13 @@ export default function BlockDesignerPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function BlockDesignerPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+      <BlockDesignerPageContent />
+    </Suspense>
   );
 }

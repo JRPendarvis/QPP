@@ -72,6 +72,9 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
         <Link href={ROUTES.BLOCK_DESIGNER} onClick={handleClick} className={linkClass}>
           Block Designer
         </Link>
+        <Link href={ROUTES.FABRICS} onClick={handleClick} className={linkClass}>
+          Fabric Library
+        </Link>
         {user ? (
           <>
             <Link href={ROUTES.DASHBOARD} onClick={handleClick} className={linkClass}>
@@ -135,6 +138,9 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
       </Link>
       <Link href={ROUTES.BLOCK_DESIGNER} onClick={handleClick} className={linkClass}>
         Block Designer
+      </Link>
+      <Link href={ROUTES.FABRICS} onClick={handleClick} className={linkClass}>
+        Fabric Library
       </Link>
       {user ? (
         <>

@@ -1,6 +1,19 @@
 import { useState, useCallback } from 'react';
 import blockDesignService, { BlockDesignListItem, SavedBlockDesign } from '@/services/blockDesignService';
+import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
+
+function getErrorMessage(err: unknown, fallback: string): string {
+  const axiosError = err as AxiosError<{ message?: string }>;
+  const status = axiosError?.response?.status;
+  const apiMessage = axiosError?.response?.data?.message;
+
+  if (status === 401) {
+    return 'Please log in to manage block designs';
+  }
+
+  return apiMessage || (err instanceof Error ? err.message : fallback);
+}
 
 export function useBlockDesignLibrary() {
   const [designs, setDesigns] = useState<BlockDesignListItem[]>([]);
@@ -14,7 +27,7 @@ export function useBlockDesignLibrary() {
       const result = await blockDesignService.list();
       setDesigns(result);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to fetch block designs';
+      const message = getErrorMessage(err, 'Failed to fetch block designs');
       setError(message);
       toast.error(message);
     } finally {
@@ -38,7 +51,7 @@ export function useBlockDesignLibrary() {
         toast.success('Design saved!');
         return result;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to save design';
+        const message = getErrorMessage(err, 'Failed to save design');
         setError(message);
         toast.error(message);
         throw err;
@@ -66,7 +79,7 @@ export function useBlockDesignLibrary() {
         toast.success('Design updated!');
         return result;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to update design';
+        const message = getErrorMessage(err, 'Failed to update design');
         setError(message);
         toast.error(message);
         throw err;
@@ -83,7 +96,7 @@ export function useBlockDesignLibrary() {
         setDesigns((prev) => prev.filter((d) => d.id !== designId));
         toast.success('Design deleted');
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to delete design';
+        const message = getErrorMessage(err, 'Failed to delete design');
         setError(message);
         toast.error(message);
         throw err;
@@ -104,7 +117,7 @@ export function useBlockDesignLibrary() {
         toast.success('Design duplicated!');
         return result;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to duplicate design';
+        const message = getErrorMessage(err, 'Failed to duplicate design');
         setError(message);
         toast.error(message);
         throw err;

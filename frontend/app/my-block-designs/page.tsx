@@ -4,19 +4,30 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import { useBlockDesignLibrary } from '@/hooks/useBlockDesignLibrary';
+import { useAuth } from '@/contexts/AuthContext';
+import { ROUTES } from '@/lib/constants';
 import toast from 'react-hot-toast';
 
 export default function MyBlockDesignsPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const { designs, loading, fetchDesigns, deleteDesign, duplicateDesign } = useBlockDesignLibrary();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      toast.error('Please log in to view your block designs');
+      router.push(ROUTES.LOGIN);
+      return;
+    }
+
     fetchDesigns();
-  }, [fetchDesigns]);
+  }, [authLoading, user, fetchDesigns, router]);
 
   const handleEdit = (designId: string) => {
-    router.push(`/block-designer?design=${designId}`);
+    router.push(`/block-designer?design=${encodeURIComponent(designId)}`);
   };
 
   const handleDelete = async (designId: string) => {
@@ -48,7 +59,7 @@ export default function MyBlockDesignsPage() {
             <p className="text-gray-600">View and manage your saved block designs</p>
           </div>
 
-          {loading ? (
+          {authLoading || loading ? (
             <div className="flex items-center justify-center py-16">
               <p className="text-gray-500">Loading designs...</p>
             </div>

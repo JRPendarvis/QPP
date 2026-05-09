@@ -6,7 +6,9 @@ export interface FabricOption {
   id: string;
   name: string;
   color: string;
+  imageUrl?: string;
   previewUrl?: string;
+  libraryFabricId?: string;
 }
 
 export interface BlockRegion {
@@ -87,6 +89,7 @@ export default function BlockDesignerCanvas({
                 const fabric = fabrics[region.fabricIndex] || fabrics[0];
                 const patternRotation = normalizedRotation(globalRotation + region.rotation);
                 const id = buildPatternId(region.id);
+                const textureUrl = fabric?.previewUrl || fabric?.imageUrl;
 
                 return (
                   <pattern
@@ -97,9 +100,9 @@ export default function BlockDesignerCanvas({
                     patternUnits="userSpaceOnUse"
                     patternTransform={`rotate(${patternRotation} 50 50)`}
                   >
-                    {fabric?.previewUrl ? (
+                    {textureUrl ? (
                       <image
-                        href={fabric.previewUrl}
+                        href={textureUrl}
                         x="0"
                         y="0"
                         width="8"
