@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
-import fabricService, { FabricRecord, FabricUsage, QuiltAvailability } from '@/services/fabricService';
+import { FabricRecord, FabricUsage, QuiltAvailability } from '@/services/fabricService';
+import { FabricGateway, defaultFabricGateway } from '@/services/fabric/fabricGateway';
 
 function getApiErrorMessage(error: unknown, fallback: string): string {
   const axiosError = error as AxiosError<{ message?: string }>;
@@ -9,7 +10,7 @@ function getApiErrorMessage(error: unknown, fallback: string): string {
   return apiMessage || (error instanceof Error ? error.message : fallback);
 }
 
-export function useFabricLibrary() {
+export function useFabricLibrary(gateway: FabricGateway = defaultFabricGateway) {
   const [fabrics, setFabrics] = useState<FabricRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [limit, setLimit] = useState<number | null>(null);
@@ -17,7 +18,7 @@ export function useFabricLibrary() {
   const fetchFabrics = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await fabricService.list();
+      const result = await gateway.list();
       setFabrics(result);
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Failed to load fabrics'));
@@ -25,7 +26,7 @@ export function useFabricLibrary() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [gateway]);
 
   const createFabric = useCallback(async (data: {
     name: string;
@@ -37,7 +38,7 @@ export function useFabricLibrary() {
     tags?: unknown;
   }) => {
     try {
-      const result = await fabricService.create(data);
+      const result = await gateway.create(data);
       setFabrics((prev) => [result.fabric, ...prev]);
       setLimit(result.limit);
       toast.success('Fabric saved');
@@ -46,7 +47,7 @@ export function useFabricLibrary() {
       toast.error(getApiErrorMessage(error, 'Failed to save fabric'));
       throw error;
     }
-  }, []);
+  }, [gateway]);
 
   const updateFabric = useCallback(async (fabricId: string, data: Partial<{
     name: string;
@@ -59,7 +60,7 @@ export function useFabricLibrary() {
     tags: unknown;
   }>) => {
     try {
-      const updated = await fabricService.update(fabricId, data);
+      const updated = await gateway.update(fabricId, data);
       setFabrics((prev) => prev.map((fabric) => (fabric.id === fabricId ? updated : fabric)));
       toast.success('Fabric updated');
       return updated;
@@ -67,20 +68,20 @@ export function useFabricLibrary() {
       toast.error(getApiErrorMessage(error, 'Failed to update fabric'));
       throw error;
     }
-  }, []);
+  }, [gateway]);
 
   const checkUsage = useCallback(async (fabricId: string): Promise<FabricUsage> => {
     try {
-      return await fabricService.usage(fabricId);
+      return await gateway.usage(fabricId);
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Failed to check usage'));
       throw error;
     }
-  }, []);
+  }, [gateway]);
 
   const deleteFabric = useCallback(async (fabricId: string, force = false) => {
     try {
-      const result = await fabricService.delete(fabricId, force);
+      const result = await gateway.delete(fabricId, force);
       setFabrics((prev) => prev.filter((fabric) => fabric.id !== fabricId));
       toast.success('Fabric deleted');
       return result;
@@ -88,16 +89,16 @@ export function useFabricLibrary() {
       toast.error(getApiErrorMessage(error, 'Failed to delete fabric'));
       throw error;
     }
-  }, []);
+  }, [gateway]);
 
   const checkAvailability = useCallback(async (requirements: Array<{ fabricId: string; requiredYardage: number }>): Promise<QuiltAvailability> => {
     try {
-      return await fabricService.checkAvailability(requirements);
+      return await gateway.checkAvailability(requirements);
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Failed to check fabric availability'));
       throw error;
     }
-  }, []);
+  }, [gateway]);
 
   const commitQuilt = useCallback(async (
     requirements: Array<{ fabricId: string; requiredYardage: number }>,
@@ -105,14 +106,14 @@ export function useFabricLibrary() {
     quiltName?: string
   ) => {
     try {
-      await fabricService.commitQuilt(requirements, mode, quiltName);
+      await gateway.commitQuilt(requirements, mode, quiltName);
       toast.success(mode === 'reserve' ? 'Fabric reserved for quilt' : 'Fabric consumed');
       await fetchFabrics();
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Failed to commit quilt fabric usage'));
       throw error;
     }
-  }, [fetchFabrics]);
+  }, [fetchFabrics, gateway]);
 
   const usageStats = useMemo(() => ({
     used: fabrics.length,

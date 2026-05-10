@@ -1,23 +1,22 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import fabricService, { FabricRecord, QuiltAvailability } from '../fabricService';
-
-jest.mock('@/lib/api');
-
-const mockApi = axios as jest.Mocked<typeof axios>;
-// Properly mock the api module
-const mockAxios = require('@/lib/api').default || require('@/lib/api');
-
-const mockApi = {
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
-};
 
 jest.mock('@/lib/api', () => ({
   __esModule: true,
-  default: mockApi,
+  default: {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+  },
 }));
+
+const mockApi = require('@/lib/api').default as {
+  get: jest.Mock;
+  post: jest.Mock;
+  put: jest.Mock;
+  delete: jest.Mock;
+};
 
 describe('FabricService', () => {
   beforeEach(() => {

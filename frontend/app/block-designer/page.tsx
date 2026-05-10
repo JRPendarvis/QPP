@@ -2,16 +2,12 @@
 
 export const dynamic = 'force-dynamic';
 
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { Suspense, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import BlockDesignerCanvas, { BlockRegion, FabricOption } from '@/components/block-designer/BlockDesignerCanvas';
 import { PATTERN_OPTIONS } from '@/app/helpers/patternHelpers';
-import { useBlockDesignLibrary } from '@/hooks/useBlockDesignLibrary';
-import blockDesignService from '@/services/blockDesignService';
-import fabricService, { FabricRecord } from '@/services/fabricService';
-import { useAuth } from '@/contexts/AuthContext';
+import { useBlockDesignerPageModel } from '@/hooks/useBlockDesignerPageModel';
 
 interface PatternMeta {
   id: string;
@@ -764,243 +760,38 @@ function getBaseRegions(patternId: string): BlockRegion[] {
 
 function BlockDesignerPageContent() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
-  const { saveDesign, updateDesign } = useBlockDesignLibrary();
-  const searchParams = useSearchParams();
-  const designId = searchParams.get('design');
-  const [currentDesignId, setCurrentDesignId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
-
   const patterns = useMemo(() => getAllPatterns(), []);
-  const [selectedPatternId, setSelectedPatternId] = useState<string>('simple-squares');
-  const selectedPattern = patterns.find((pattern) => pattern.id === selectedPatternId) || patterns[0];
-
-  const [fabrics, setFabrics] = useState<FabricOption[]>(DEFAULT_FABRICS);
-  const [fabricPreviews, setFabricPreviews] = useState<(string | null)[]>(Array(9).fill(null));
-  const [libraryFabrics, setLibraryFabrics] = useState<FabricRecord[]>([]);
-  const [globalRotation, setGlobalRotation] = useState<0 | 90 | 180 | 270>(0);
-  const [regions, setRegions] = useState<BlockRegion[]>(() => getBaseRegions('simple-squares'));
-  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  useEffect(() => {
-    if (authLoading || !user) return;
-    let cancelled = false;
-
-    fabricService.list()
-      .then((items) => {
-        if (!cancelled) setLibraryFabrics(items);
-      })
-      .catch(() => {
-        if (!cancelled) setLibraryFabrics([]);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [authLoading, user]);
-
-  // Load a saved design when ?design=<id> is present in the URL
-  useEffect(() => {
-    if (authLoading) return;
-
-    if (designId && !user) {
-      toast.error('Please log in to edit saved block designs');
-      router.push('/login');
-      return;
-    }
-
-    if (!designId) return;
-    let cancelled = false;
-    blockDesignService.getById(designId)
-      .then((saved) => {
-        if (cancelled) return;
-
-        const normalizeArray = <T,>(value: unknown): T[] => {
-          if (Array.isArray(value)) return value as T[];
-          if (typeof value === 'string') {
-            try {
-              const parsed = JSON.parse(value);
-              return Array.isArray(parsed) ? (parsed as T[]) : [];
-            } catch {
-              return [];
-            }
-          }
-          return [];
-        };
-
-        const loadedRegions = normalizeArray<BlockRegion>(saved.regions);
-        const loadedFabrics = sanitizeLoadedFabrics(normalizeArray<FabricOption>(saved.fabrics));
-
-        setCurrentDesignId(saved.id);
-        setSelectedPatternId(saved.patternId);
-        setRegions(loadedRegions.length > 0 ? loadedRegions : getBaseRegions(saved.patternId));
-        setGlobalRotation((saved.globalRotation as 0 | 90 | 180 | 270) ?? 0);
-        setFabricPreviews(Array(9).fill(null));
-        setFabrics((prev) => {
-          const next = [...prev];
-          loadedFabrics.forEach((f, i) => { if (i < next.length) next[i] = { ...next[i], ...f }; });
-          return next;
-        });
-        toast.success(`Loaded "${saved.name}"`);
-      })
-      .catch(() => toast.error('Could not load design'));
-    return () => { cancelled = true; };
-  }, [authLoading, designId, user, router]);
-
-  const maxFabrics = selectedPattern?.maxFabrics || 4;
-  const activeFabrics = fabrics.slice(0, maxFabrics);
-
-  const handleSaveDesign = async () => {
-    if (!user) {
-      toast.error('Please log in to save designs');
-      return;
-    }
-
-    if (!selectedPattern) {
-      toast.error('No pattern selected');
-      return;
-    }
-
-    const designName = prompt('Design name:', `${selectedPattern.name} Design`);
-    if (!designName) return;
-
-    setIsSaving(true);
-    try {
-      const data = {
-        name: designName.trim(),
-        patternId: selectedPatternId,
-        patternName: selectedPattern.name,
-        globalRotation,
-        fabrics: activeFabrics.map((fabric) => {
-          if (!isPersistablePreviewUrl(fabric.previewUrl)) {
-            const { previewUrl: _ignored, ...rest } = fabric;
-            return rest;
-          }
-          return fabric;
-        }),
-        regions,
-      };
-
-      if (currentDesignId) {
-        await updateDesign(currentDesignId, data);
-      } else {
-        const result = await saveDesign(data);
-        setCurrentDesignId(result.id);
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleLoadDesign = () => {
-    router.push('/my-block-designs');
-  };
-
-  const handleDuplicateDesign = () => {
-    if (!currentDesignId) {
-      toast.error('Save a design first');
-      return;
-    }
-    toast('Duplicate feature coming soon');
-  };
-
-  const resetForPattern = (patternId: string) => {
-    setSelectedPatternId(patternId);
-    setRegions(getBaseRegions(patternId));
-    setGlobalRotation(0);
-  };
-
-  const handleFabricPhotoUpload = (fabricIndex: number, file: File) => {
-    const url = URL.createObjectURL(file);
-    setFabricPreviews((prev) => {
-      const next = [...prev];
-      if (next[fabricIndex]) URL.revokeObjectURL(next[fabricIndex]!);
-      next[fabricIndex] = url;
-      return next;
-    });
-    setFabrics((current) => {
-      const next = [...current];
-      const target = next[fabricIndex];
-      if (!target) return current;
-      next[fabricIndex] = {
-        ...target,
-        previewUrl: url,
-        imageUrl: undefined,
-        libraryFabricId: undefined,
-      };
-      return next;
-    });
-  };
-
-  const handleFabricPhotoClear = (fabricIndex: number) => {
-    setFabricPreviews((prev) => {
-      const next = [...prev];
-      if (next[fabricIndex]) URL.revokeObjectURL(next[fabricIndex]!);
-      next[fabricIndex] = null;
-      return next;
-    });
-    setFabrics((current) => {
-      const next = [...current];
-      const target = next[fabricIndex];
-      if (!target) return current;
-      const { previewUrl: _removed, imageUrl: _removedImage, ...rest } = target;
-      next[fabricIndex] = rest;
-      return next;
-    });
-  };
-
-  const handleApplyLibraryFabric = (fabricIndex: number, selectedId: string) => {
-    const source = libraryFabrics.find((item) => item.id === selectedId);
-    if (!source) return;
-
-    setFabricPreviews((prev) => {
-      const next = [...prev];
-      if (next[fabricIndex]) URL.revokeObjectURL(next[fabricIndex]!);
-      next[fabricIndex] = null;
-      return next;
-    });
-
-    setFabrics((current) => {
-      const next = [...current];
-      const target = next[fabricIndex];
-      if (!target) return current;
-      next[fabricIndex] = {
-        ...target,
-        name: source.name,
-        color: source.color,
-        imageUrl: source.imageUrl || undefined,
-        previewUrl: undefined,
-        libraryFabricId: source.id,
-      };
-      return next;
-    });
-  };
-
-  const handleFabricChange = (fabricIndex: number, field: 'name' | 'color', value: string) => {
-    setFabrics((current) => {
-      const next = [...current];
-      const target = next[fabricIndex];
-      if (!target) return current;
-      next[fabricIndex] = {
-        ...target,
-        [field]: value,
-      };
-      return next;
-    });
-  };
-
-  const handleRegionFabricChange = (regionId: string, fabricIndex: number) => {
-    setRegions((current) => current.map((region) => (
-      region.id === regionId ? { ...region, fabricIndex } : region
-    )));
-  };
-
-  const handleRegionRotationChange = (regionId: string, rotation: 0 | 90 | 180 | 270) => {
-    setRegions((current) => current.map((region) => (
-      region.id === regionId ? { ...region, rotation } : region
-    )));
-  };
+  const {
+    currentDesignId,
+    isSaving,
+    isInstructionsOpen,
+    selectedPatternId,
+    selectedPattern,
+    fabricPreviews,
+    libraryFabrics,
+    globalRotation,
+    regions,
+    fileInputRefs,
+    activeFabrics,
+    setGlobalRotation,
+    setIsInstructionsOpen,
+    handleSaveDesign,
+    handleLoadDesign,
+    handleDuplicateDesign,
+    resetForPattern,
+    handleFabricPhotoUpload,
+    handleFabricPhotoClear,
+    handleApplyLibraryFabric,
+    handleFabricChange,
+    handleRegionFabricChange,
+    handleRegionRotationChange,
+  } = useBlockDesignerPageModel({
+    patterns,
+    defaultPatternId: 'simple-squares',
+    defaultFabrics: DEFAULT_FABRICS,
+    getBaseRegions,
+    sanitizeLoadedFabrics,
+  });
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #FEF2F2 0%, #F0FDFA 45%, #FFFBEB 100%)' }} suppressHydrationWarning>
