@@ -3,7 +3,6 @@
 import Navigation from '@/components/Navigation';
 import FabricCreateForm from '@/components/fabrics/FabricCreateForm';
 import FabricLibraryList from '@/components/fabrics/FabricLibraryList';
-import QuiltFabricCheckPanel from '@/components/fabrics/QuiltFabricCheckPanel';
 import { useFabricsPageModel } from '@/hooks/useFabricsPageModel';
 
 export default function FabricsPage() {
@@ -15,17 +14,10 @@ export default function FabricsPage() {
     selectedFabricId,
     deletingId,
     usageWarning,
-    quiltName,
-    requirements,
-    availabilityResult,
     setSelectedFabricId,
-    setQuiltName,
-    setRequirements,
     handleCreate,
     handleDelete,
     handleQuickUpdateYardage,
-    runAvailabilityCheck,
-    handleStartQuilt,
   } = useFabricsPageModel();
 
   return (
@@ -37,7 +29,7 @@ export default function FabricsPage() {
           <div className="bg-white border border-gray-200 rounded-xl p-5">
             <h1 className="text-2xl font-bold text-gray-900">Fabric Library</h1>
             <p className="text-sm text-gray-600 mt-1">
-              Save, organize, and reuse your fabrics across blocks and quilts.
+              Save, organize, and reuse your fabrics across blocks and quilts. Add fabrics by taking a photo or uploading one you already have.
             </p>
             <p className="text-sm font-medium text-gray-800 mt-3">
               Saved fabrics: {usageStats.used}{usageStats.limit ? ` / ${usageStats.limit}` : ''}
@@ -63,18 +55,6 @@ export default function FabricsPage() {
               onQuickUpdateYardage={handleQuickUpdateYardage}
             />
           </div>
-
-          <QuiltFabricCheckPanel
-            fabrics={fabrics}
-            selectedFabricId={selectedFabricId}
-            quiltName={quiltName}
-            requirements={requirements}
-            availabilityResult={availabilityResult}
-            onQuiltNameChange={setQuiltName}
-            onRequirementsChange={setRequirements}
-            onRunAvailabilityCheck={runAvailabilityCheck}
-            onStartQuilt={handleStartQuilt}
-          />
         </div>
       </section>
     </div>

@@ -7,7 +7,7 @@ describe('FabricCreateForm', () => {
     render(<FabricCreateForm loading={false} onCreate={onCreate} />);
 
     fireEvent.change(screen.getByPlaceholderText('Fabric name'), { target: { value: 'Ruby Cotton' } });
-    fireEvent.change(screen.getByPlaceholderText('Yardage'), { target: { value: '1.75' } });
+    fireEvent.change(screen.getByLabelText('Yardage Available'), { target: { value: '1.75' } });
 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Save Fabric' }));
