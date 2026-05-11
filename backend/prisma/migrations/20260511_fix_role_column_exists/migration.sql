@@ -1,6 +1,9 @@
--- AlterTable - Check if column exists before adding (idempotent)
+-- This migration handles the case where the role column already exists in production
+-- The 20260428201007 migration failed because the column was already present
+
 DO $$
 BEGIN
+  -- Only add role column if it doesn't exist
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_name='users' AND column_name='role'
@@ -9,9 +12,11 @@ BEGIN
   END IF;
 END $$;
 
--- CreateTable - Check if table exists before creating (idempotent)
+-- The block_designs table should already exist if the previous migration partially applied
+-- So we check if it exists before creating
 DO $$
 BEGIN
+  -- Create block_designs table if it doesn't exist
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.tables 
     WHERE table_name='block_designs'
