@@ -12,6 +12,49 @@ export interface PricingTier {
   buttonAction: 'register' | 'subscribe';
 }
 
+export interface FabricHoldAddonOption {
+  id: 'none' | '3' | '10' | '25' | '50';
+  label: string;
+  images: number;
+  price: {
+    monthly: number;
+    annual: number;
+  };
+}
+
+export const fabricHoldAddonOptions: FabricHoldAddonOption[] = [
+  {
+    id: 'none',
+    label: 'No image saving',
+    images: 0,
+    price: { monthly: 0, annual: 0 }
+  },
+  {
+    id: '3',
+    label: 'Starter image saving',
+    images: 3,
+    price: { monthly: 0, annual: 0 }
+  },
+  {
+    id: '10',
+    label: 'Fabric Hold 10',
+    images: 10,
+    price: { monthly: 2.99, annual: 29.0 }
+  },
+  {
+    id: '25',
+    label: 'Fabric Hold 25',
+    images: 25,
+    price: { monthly: 5.99, annual: 59.0 }
+  },
+  {
+    id: '50',
+    label: 'Fabric Hold 50',
+    images: 50,
+    price: { monthly: 9.99, annual: 99.0 }
+  }
+];
+
 export const pricingTiers: PricingTier[] = [
   {
     name: 'Free',

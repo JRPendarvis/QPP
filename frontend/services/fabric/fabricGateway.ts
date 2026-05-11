@@ -1,7 +1,7 @@
-import fabricService, { FabricRecord, FabricUsage, QuiltAvailability } from '@/services/fabricService';
+import fabricService, { FabricListData, FabricRecord, FabricUsage, QuiltAvailability } from '@/services/fabricService';
 
 export type FabricGateway = {
-  list: () => Promise<FabricRecord[]>;
+  list: () => Promise<FabricListData>;
   create: (data: {
     name: string;
     color: string;

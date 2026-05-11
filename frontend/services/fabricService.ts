@@ -41,10 +41,21 @@ export interface QuiltAvailability {
   breakdown: AvailabilityBreakdown[];
 }
 
+export interface FabricListData {
+  fabrics: FabricRecord[];
+  limit: number | null;
+  used: number;
+}
+
 class FabricService {
-  async list(): Promise<FabricRecord[]> {
+  async list(): Promise<FabricListData> {
     const response = await api.get('/api/fabrics');
-    return response.data?.data?.fabrics ?? [];
+    const data = response.data?.data;
+    return {
+      fabrics: data?.fabrics ?? [],
+      limit: typeof data?.limit === 'number' ? data.limit : null,
+      used: typeof data?.used === 'number' ? data.used : (data?.fabrics?.length ?? 0),
+    };
   }
 
   async create(data: {

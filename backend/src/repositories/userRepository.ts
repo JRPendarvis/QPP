@@ -11,6 +11,8 @@ export interface UserProfileData {
   subscriptionTier: string;
   billingInterval: string | null;
   subscriptionStatus: string;
+  fabricHoldTier: string;
+  fabricImageLimit: number;
   skillLevel: string;
   generationsThisMonth: number;
   downloadsThisMonth: number;
@@ -46,6 +48,8 @@ export class UserRepository {
         subscriptionTier: true,
         billingInterval: true,
         subscriptionStatus: true,
+        fabricHoldTier: true,
+        fabricImageLimit: true,
         skillLevel: true,
         generationsThisMonth: true,
         downloadsThisMonth: true,
@@ -76,6 +80,8 @@ export class UserRepository {
         subscriptionTier: true,
         billingInterval: true,
         subscriptionStatus: true,
+        fabricHoldTier: true,
+        fabricImageLimit: true,
         skillLevel: true,
         generationsThisMonth: true,
         downloadsThisMonth: true,

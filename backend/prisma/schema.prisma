@@ -26,6 +26,8 @@ model User {
     subscriptionStatus   String    @default("active")
     billingInterval      String? // 'monthly' | 'yearly'
     currentPeriodEnd     DateTime?
+    fabricHoldTier       String    @default("none")
+    fabricImageLimit     Int       @default(0)
 
     // Usage tracking
     downloadsThisMonth   Int           @default(0)

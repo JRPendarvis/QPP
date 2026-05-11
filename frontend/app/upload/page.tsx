@@ -136,8 +136,8 @@ export default function UploadPage() {
 
     void fabricService
       .list()
-      .then((items) => {
-        if (!cancelled) setSavedFabrics(items.filter((item) => Boolean(item.imageUrl)));
+      .then((result) => {
+        if (!cancelled) setSavedFabrics(result.fabrics.filter((item) => Boolean(item.imageUrl)));
       })
       .catch(() => {
         if (!cancelled) setSavedFabrics([]);

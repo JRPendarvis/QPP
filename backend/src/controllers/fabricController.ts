@@ -26,8 +26,8 @@ export async function listFabrics(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const fabrics = await fabricInventoryService.listFabrics(userId);
-    ResponseHelper.success(res, 200, 'Fabrics fetched', { fabrics });
+    const data = await fabricInventoryService.listFabrics(userId);
+    ResponseHelper.success(res, 200, 'Fabrics fetched', data);
   } catch (error) {
     handleControllerError(res, error, 'Failed to fetch fabrics');
   }
@@ -68,12 +68,11 @@ export async function createFabric(req: Request, res: Response): Promise<void> {
   } catch (error) {
     if (error instanceof FabricServiceError && error.statusCode === 403) {
       const userId = getUserId(req) as string;
-      const fabrics = await fabricInventoryService.listFabrics(userId);
-      const limit = fabrics.length <= 3 ? 3 : 10;
+      const current = await fabricInventoryService.listFabrics(userId);
       res.status(403).json({
         success: false,
         message: error.message,
-        data: { limit, used: fabrics.length },
+        data: { limit: current.limit, used: current.used },
       });
       return;
     }

@@ -1,5 +1,3 @@
-import { useRouter } from 'next/navigation';
-
 interface TierInfo {
   name: string;
   price: number;
@@ -28,8 +26,6 @@ export default function AccountInfoSection({
   onNameChange,
   onCancelSubscription,
 }: AccountInfoSectionProps) {
-  const router = useRouter();
-
   return (
     <div>
       <h3 className="text-lg font-medium text-gray-900 mb-4">Account Information</h3>
@@ -70,16 +66,6 @@ export default function AccountInfoSection({
             </p>
             {subscriptionTier !== 'free' && (
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => router.push('/pricing')}
-                  className="text-sm hover:underline"
-                  style={{color: '#2C7A7B'}}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#236B6C'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#2C7A7B'}
-                >
-                  Manage Subscription
-                </button>
                 {subscriptionStatus !== 'cancel_at_period_end' && (
                   <button
                     type="button"

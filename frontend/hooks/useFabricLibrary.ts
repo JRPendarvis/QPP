@@ -19,7 +19,8 @@ export function useFabricLibrary(gateway: FabricGateway = defaultFabricGateway) 
     setLoading(true);
     try {
       const result = await gateway.list();
-      setFabrics(result);
+      setFabrics(result.fabrics);
+      setLimit(result.limit);
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Failed to load fabrics'));
       throw error;

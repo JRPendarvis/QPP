@@ -24,8 +24,26 @@ export class FabricInventoryService {
     this.prisma = prismaClient || new PrismaClient();
   }
 
-  private getFabricLimit(subscriptionTier?: string): number {
-    return subscriptionTier === 'free' || !subscriptionTier ? 3 : 10;
+  private getFabricLimit(subscriptionTier?: string, fabricImageLimit?: number, badge?: string | null): number {
+    if (badge === 'founder') {
+      return 50;
+    }
+
+    if (Number.isFinite(fabricImageLimit) && (fabricImageLimit as number) >= 0) {
+      return Number(fabricImageLimit);
+    }
+
+    // Backward compatibility for users created before add-on entitlements.
+    return subscriptionTier === 'free' || !subscriptionTier ? 0 : 3;
+  }
+
+  async getUserFabricLimit(userId: string): Promise<number> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { subscriptionTier: true, fabricImageLimit: true, badge: true },
+    });
+
+    return this.getFabricLimit(user?.subscriptionTier, user?.fabricImageLimit, user?.badge);
   }
 
   private extractLinkedFabricIds(fabricsJson: unknown): string[] {
@@ -50,6 +68,22 @@ export class FabricInventoryService {
   }
 
   async listFabrics(userId: string) {
+    const [fabrics, limit] = await Promise.all([
+      this.prisma.fabric.findMany({
+        where: { userId, archivedAt: null },
+        orderBy: { updatedAt: 'desc' },
+      }),
+      this.getUserFabricLimit(userId),
+    ]);
+
+    return {
+      fabrics,
+      limit,
+      used: fabrics.length,
+    };
+  }
+
+  async getFabricsOnly(userId: string) {
     return this.prisma.fabric.findMany({
       where: { userId, archivedAt: null },
       orderBy: { updatedAt: 'desc' },
@@ -71,14 +105,18 @@ export class FabricInventoryService {
   async createFabric(userId: string, payload: CreateFabricPayload) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { subscriptionTier: true },
+      select: { subscriptionTier: true, fabricImageLimit: true, badge: true },
     });
 
-    const limit = this.getFabricLimit(user?.subscriptionTier);
+    const limit = this.getFabricLimit(user?.subscriptionTier, user?.fabricImageLimit, user?.badge);
 
     const existingCount = await this.prisma.fabric.count({
       where: { userId, archivedAt: null },
     });
+
+    if (limit <= 0) {
+      throw new FabricServiceError('Fabric image saving is not enabled for your plan. Add Fabric Hold to save fabrics.', 403);
+    }
 
     if (existingCount >= limit) {
       throw new FabricServiceError(`Fabric limit reached (${limit}). Upgrade to save more fabrics.`, 403);

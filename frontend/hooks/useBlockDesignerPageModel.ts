@@ -56,8 +56,8 @@ export function useBlockDesignerPageModel({
 
     void fabricService
       .list()
-      .then((items) => {
-        if (!cancelled) setLibraryFabrics(items);
+      .then((result) => {
+        if (!cancelled) setLibraryFabrics(result.fabrics);
       })
       .catch(() => {
         if (!cancelled) setLibraryFabrics([]);
