@@ -3,6 +3,7 @@
 import Stripe from 'stripe';
 import { SubscriptionDataProcessor } from './subscriptionDataProcessor';
 import { StripeApiExecutor } from './stripeApiExecutor';
+import { FabricHoldTier } from '../../config/stripe.config';
 
 export interface SubscriptionUpdateData {
   subscriptionTier: string;
@@ -11,6 +12,8 @@ export interface SubscriptionUpdateData {
   stripeCustomerId: string;
   stripeSubscriptionId: string;
   currentPeriodEnd: Date;
+  fabricHoldTier: FabricHoldTier;
+  fabricImageLimit: number;
 }
 
 export interface SubscriptionStatusUpdate {
@@ -23,6 +26,8 @@ export interface SubscriptionCancellationData {
   subscriptionStatus: string;
   stripeSubscriptionId: null;
   billingInterval: null;
+  fabricHoldTier: FabricHoldTier;
+  fabricImageLimit: number;
 }
 
 /**
@@ -55,7 +60,7 @@ export class SubscriptionService {
     }
 
     const subscription = await this.stripeApi.retrieveSubscription(subscriptionId);
-    const { tier, interval } = SubscriptionDataProcessor.extractMetadata(session.metadata);
+    const { tier, interval, fabricHoldTier, fabricImageLimit } = SubscriptionDataProcessor.extractMetadata(session.metadata);
     
     // Safely get current_period_end
     const subData = subscription as unknown as { current_period_end?: number };
@@ -71,7 +76,9 @@ export class SubscriptionService {
         subscriptionTier: tier,
         subscriptionStatus: subscription.status,
         billingInterval: interval,
-        currentPeriodEnd: periodEnd
+        currentPeriodEnd: periodEnd,
+        fabricHoldTier,
+        fabricImageLimit,
       }
     };
   }

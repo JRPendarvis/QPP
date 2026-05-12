@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import { SubscriptionService } from './subscriptionService';
 import { StripeRepository } from '../../repositories/stripeRepository';
+import { SubscriptionDataProcessor } from './subscriptionDataProcessor';
 
 /**
  * Service for handling Stripe webhook events
@@ -20,6 +21,15 @@ export class StripeWebhookEventHandler {
    * Updates user subscription data after successful checkout
    */
   async handleCheckoutComplete(session: Stripe.Checkout.Session): Promise<void> {
+    if (session.metadata?.addonOnly === 'true') {
+      const userId = session.client_reference_id;
+      if (!userId) return;
+
+      const { fabricHoldTier, fabricImageLimit } = SubscriptionDataProcessor.extractMetadata(session.metadata);
+      await this.stripeRepository.updateFabricAddonEntitlement(userId, fabricHoldTier, fabricImageLimit);
+      return;
+    }
+
     const result = await this.subscriptionService.processCheckoutComplete(session);
     if (!result) return;
 

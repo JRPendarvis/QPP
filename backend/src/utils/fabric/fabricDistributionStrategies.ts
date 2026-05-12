@@ -59,7 +59,8 @@ export class DefaultDistribution implements IDistributionStrategy {
     const distributions: Record<number, number[]> = {
       2: [0.60, 0.40],
       3: [0.45, 0.35, 0.20],
-      4: [0.40, 0.30, 0.20, 0.10]
+      // Keep four-fabric defaults even so yardage matches equal block usage layouts.
+      4: [0.25, 0.25, 0.25, 0.25]
     };
 
     if (distributions[fabricCount]) {

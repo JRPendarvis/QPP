@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon --exec tsx src/index.ts",
     "build": "prisma generate && tsc",
-    "start": "node scripts/production-safety-check.js && npx prisma migrate resolve --rolled-back 20260114163851_add_pattern_library_and_feedback_resolved || true && npx prisma migrate deploy && node dist/index.js",
+    "start": "node scripts/production-safety-check.js && npx prisma migrate resolve --rolled-back 20260114163851_add_pattern_library_and_feedback_resolved || true && npx prisma migrate resolve --rolled-back 20260428201007_add_role_field || true && npx prisma migrate deploy && node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
