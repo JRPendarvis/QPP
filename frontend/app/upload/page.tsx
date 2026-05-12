@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import { useBorderState } from '@/hooks/useBorderState';
 import Navigation from '@/components/Navigation';
@@ -22,9 +23,10 @@ import TShirtConfigSection, { TShirtConfig, DEFAULT_TSHIRT_CONFIG } from '@/comp
 
 import { useUserProfile, usePatternSelection } from './utils/hooks';
 import { validateFabricCount, getFabricValidationMessage } from './utils/validation';
-import { PatternChoice, PatternDetails } from './utils/types';
+import { PatternChoice } from './utils/types';
 import { getBorderName } from '@/utils/borderNaming';
 import { formatFabricRange, SKILL_LEVELS } from '@/app/helpers/patternHelpers';
+import fabricService, { FabricRecord } from '@/services/fabricService';
 
 export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
@@ -35,6 +37,9 @@ export default function UploadPage() {
   const [generating, setGenerating] = useState(false);
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
   const [quiltSize, setQuiltSize] = useState<string>('');
+  const [savedFabrics, setSavedFabrics] = useState<FabricRecord[]>([]);
+  const [loadingSavedFabrics, setLoadingSavedFabrics] = useState(true);
+  const [addingSavedFabricId, setAddingSavedFabricId] = useState<string | null>(null);
 
   // Border state management
   const {
@@ -71,7 +76,7 @@ export default function UploadPage() {
 
   const selectedPatternDetails = useMemo(() => {
     if (patternChoice === 'manual' && selectedPattern) {
-      return availablePatterns.find((p: PatternDetails) => p.id === selectedPattern) || null;
+      return availablePatterns.find((p) => p.id === selectedPattern) || null;
     }
     return null;
   }, [patternChoice, selectedPattern, availablePatterns]);
@@ -112,22 +117,83 @@ export default function UploadPage() {
     }
   };
 
-  useEffect(() => {
-    if (patternChoice === 'manual' && selectedPattern) {
-      api.get(`/api/patterns/${selectedPattern}/fabric-roles`)
-        .then(response => {
-          if (response.data.success && response.data.data.fabricRoles) {
-            setFabricRoles(response.data.data.fabricRoles);
-          }
-        })
-        .catch(err => {
-          console.error('Failed to fetch fabric roles:', err);
-          setFabricRoles([]);
-        });
-    } else {
+  const handleSelectedPatternChange = (id: string) => {
+    setSelectedPattern(id);
+    if (!id) {
       setFabricRoles([]);
     }
+  };
+
+  useEffect(() => {
+    if (patternChoice !== 'manual' || !selectedPattern) {
+      return;
+    }
+
+    api.get(`/api/patterns/${selectedPattern}/fabric-roles`)
+      .then(response => {
+        if (response.data.success && response.data.data.fabricRoles) {
+          setFabricRoles(response.data.data.fabricRoles);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch fabric roles:', err);
+        setFabricRoles([]);
+      });
   }, [patternChoice, selectedPattern]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+
+    void fabricService
+      .list()
+      .then((result) => {
+        if (!cancelled) setSavedFabrics(result.fabrics.filter((item) => Boolean(item.imageUrl)));
+      })
+      .catch(() => {
+        if (!cancelled) setSavedFabrics([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSavedFabrics(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const handleAddSavedFabricToQuilt = async (fabric: FabricRecord) => {
+    if (!fabric.imageUrl) {
+      toast.error('This saved fabric does not have a photo.');
+      return;
+    }
+
+    if (fabrics.length >= effectiveMaxFabrics) {
+      toast.error(`Maximum ${effectiveMaxFabrics} fabrics reached for this quilt setup.`);
+      return;
+    }
+
+    setAddingSavedFabricId(fabric.id);
+    try {
+      const response = await fetch(fabric.imageUrl);
+      if (!response.ok) throw new Error('Unable to read saved fabric image');
+
+      const blob = await response.blob();
+      const mimeType = blob.type || 'image/jpeg';
+      const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
+      const safeName = fabric.name.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
+      const file = new File([blob], `${safeName || 'saved-fabric'}.${ext}`, { type: mimeType });
+
+      setFabrics((prev) => [...prev, file]);
+      setPreviews((prev) => [...prev, fabric.imageUrl as string]);
+      toast.success(`${fabric.name} added to quilt fabrics.`);
+    } catch {
+      toast.error('Could not add this saved fabric photo. Please upload it manually.');
+    } finally {
+      setAddingSavedFabricId(null);
+    }
+  };
 
   const handleFabricReorder = (fromIdx: number, toIdx: number) => {
     if (fromIdx === toIdx) return;
@@ -192,7 +258,7 @@ export default function UploadPage() {
         borderConfiguration.enabled ? borderConfiguration.borders : undefined
       );
       toast.dismiss(loadingToast);
-    } catch (error) {
+    } catch {
       toast.dismiss(loadingToast);
     } finally {
       setGenerating(false);
@@ -238,10 +304,10 @@ export default function UploadPage() {
             <>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <PatternSelectionSection
-                  patternChoice={patternChoice as 'auto' | 'manual' | 'tshirt'}
+                  patternChoice={patternChoice}
                   setPatternChoice={handlePatternChoiceChange}
                   selectedPattern={selectedPattern}
-                  setSelectedPattern={setSelectedPattern}
+                  setSelectedPattern={handleSelectedPatternChange}
                   availablePatterns={availablePatterns}
                   selectedPatternDetails={selectedPatternDetails}
                   formatFabricRange={formatFabricRange}
@@ -398,6 +464,51 @@ export default function UploadPage() {
                     totalSize={totalImageSize}
                     uploadLabel={patternChoice === 'tshirt' ? 'T-shirt photos' : 'fabric images'}
                   />
+
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div>
+                        <h3 className="text-base font-semibold text-gray-800">Or use saved fabrics from your library</h3>
+                        <p className="text-sm text-gray-600">Choose previously uploaded fabric photos to include in this quilt.</p>
+                      </div>
+                      <Link href="/fabrics" className="text-sm text-indigo-700 hover:text-indigo-800 font-medium">
+                        Manage Fabric Library
+                      </Link>
+                    </div>
+
+                    {loadingSavedFabrics ? (
+                      <p className="text-sm text-gray-600">Loading saved fabrics...</p>
+                    ) : savedFabrics.length === 0 ? (
+                      <p className="text-sm text-gray-600">No saved fabric photos yet. Add them in Fabric Library first.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {savedFabrics.map((fabric) => {
+                          const disabled = addingSavedFabricId === fabric.id || fabrics.length >= effectiveMaxFabrics;
+                          return (
+                            <div key={fabric.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={fabric.imageUrl || ''}
+                                alt={fabric.name}
+                                className="w-full h-24 object-cover rounded-md border border-gray-200"
+                              />
+                              <div className="mt-2 flex items-center justify-between gap-2">
+                                <p className="text-sm font-medium text-gray-800 truncate" title={fabric.name}>{fabric.name}</p>
+                                <button
+                                  type="button"
+                                  onClick={() => void handleAddSavedFabricToQuilt(fabric)}
+                                  disabled={disabled}
+                                  className="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-xs font-medium disabled:bg-gray-400"
+                                >
+                                  {addingSavedFabricId === fabric.id ? 'Adding...' : 'Use'}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 

@@ -10,6 +10,10 @@ export interface UserWithStripeData {
   email: string;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
+  subscriptionTier: string;
+  billingInterval: string | null;
+  fabricHoldTier: string;
+  fabricImageLimit: number;
 }
 
 /**
@@ -30,7 +34,11 @@ export class StripeRepository {
         id: true,
         email: true,
         stripeCustomerId: true,
-        stripeSubscriptionId: true
+        stripeSubscriptionId: true,
+        subscriptionTier: true,
+        billingInterval: true,
+        fabricHoldTier: true,
+        fabricImageLimit: true,
       }
     });
 
@@ -49,7 +57,11 @@ export class StripeRepository {
         id: true,
         email: true,
         stripeCustomerId: true,
-        stripeSubscriptionId: true
+        stripeSubscriptionId: true,
+        subscriptionTier: true,
+        billingInterval: true,
+        fabricHoldTier: true,
+        fabricImageLimit: true,
       }
     });
 
@@ -111,5 +123,17 @@ export class StripeRepository {
     });
 
     console.log(`Database updated: user ${userId} marked for cancellation at period end`);
+  }
+
+  async updateFabricAddonEntitlement(userId: string, fabricHoldTier: string, fabricImageLimit: number): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        fabricHoldTier,
+        fabricImageLimit,
+      },
+    });
+
+    console.log(`Database updated: user ${userId} fabric add-on entitlement set to ${fabricHoldTier} (${fabricImageLimit})`);
   }
 }

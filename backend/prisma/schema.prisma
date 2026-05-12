@@ -26,12 +26,16 @@ model User {
     subscriptionStatus   String    @default("active")
     billingInterval      String? // 'monthly' | 'yearly'
     currentPeriodEnd     DateTime?
+    fabricHoldTier       String    @default("none")
+    fabricImageLimit     Int       @default(0)
 
     // Usage tracking
-    downloadsThisMonth   Int       @default(0)
-    generationsThisMonth Int       @default(0) // ✅ ADD THIS LINE
-    lastResetDate        DateTime  @default(now())
+    downloadsThisMonth   Int           @default(0)
+    generationsThisMonth Int           @default(0) // ✅ ADD THIS LINE
+    lastResetDate        DateTime      @default(now())
     patterns             Pattern[] // ✅ Add this line if missing
+    blockDesigns         BlockDesign[]
+    fabrics              Fabric[]
 
     // Quilter profile
     skillLevel    String         @default("beginner") // beginner, advanced_beginner, intermediate, advanced, expert
@@ -39,6 +43,7 @@ model User {
     role          String         @default("user") // 'user' or 'staff' (staff = unlimited access)
     feedbacks     Feedback[]
     feedbackVotes FeedbackVote[]
+    customBlocks  CustomBlock[] // User's saved block designs
 
     // Password reset
     resetToken       String?
@@ -49,6 +54,46 @@ model User {
     privacyAcceptedAt DateTime?
 
     @@map("users")
+}
+
+model Fabric {
+    id               String    @id @default(cuid())
+    userId           String
+    name             String
+    color            String
+    imageUrl         String?
+    type             String?
+    notes            String?
+    yardageAvailable Float     @default(0)
+    yardageReserved  Float     @default(0)
+    tags             Json?
+    archivedAt       DateTime?
+    createdAt        DateTime  @default(now())
+    updatedAt        DateTime  @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId, archivedAt])
+    @@index([userId, updatedAt])
+    @@map("fabrics")
+}
+
+model BlockDesign {
+    id             String   @id @default(cuid())
+    userId         String
+    name           String
+    patternId      String
+    patternName    String
+    globalRotation Int      @default(0)
+    fabrics        Json
+    regions        Json
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId, updatedAt])
+    @@map("block_designs")
 }
 
 model Pattern {
@@ -96,4 +141,24 @@ model FeedbackVote {
 
     @@unique([userId, feedbackId])
     @@map("feedback_votes")
+}
+
+// Custom block designs created by users
+model CustomBlock {
+    id          String   @id @default(cuid())
+    userId      String
+    name        String
+    description String?
+    blockSize   Int // Grid dimension (e.g., 9 for 3x3, 16 for 4x4, 25 for 5x5)
+    gridData    Json // 2D array of fabric role assignments: [[role, role, ...], ...]
+    thumbnail   String? // base64 preview image
+    isPublic    Boolean  @default(false) // Future: allow sharing blocks
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([userId, createdAt])
+    @@map("custom_blocks")
 }

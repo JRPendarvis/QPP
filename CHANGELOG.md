@@ -7,37 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added - 2026-02-08 - AI Coordination Features
-- **Skill-Level Pattern Matching**: "Let QPP Choose" now respects user skill level, prioritizing patterns at their expertise level (expert users get expert patterns)
-- **AI Fabric Coordination**: New AI-powered fabric role assignment using Claude Sonnet 4
-  - Auto-assigns fabric roles (background, primary, secondary, accent) based on color theory
-  - Analyzes 2-10 fabrics with intelligent role recommendations
-  - New API endpoint: `POST /api/patterns/auto-assign-roles`
-  - Frontend button component: `AutoCoordinateButton` with loading states
-- **Pattern Selection Enhancement**: `PatternSelector` service now uses exact skill-level filtering with fallback
-- **Comprehensive Test Coverage**: 51 new unit tests across 3 test suites
-  - 16 tests for pattern selection logic
-  - 18 tests for fabric coordination service
-  - 17 tests for controller integration
-  - All tests passing with extensive edge case coverage
+## [1.2.0] - 2026-01-31 - Visual Improvements & UI Cleanup
 
-### Changed - 2026-02-08 - Code Quality Improvements
-- **Test Code Optimization**: Reduced test duplication by 60% (~450 lines)
-  - Extracted shared mock patterns and test data factories
-  - Parameterized validation tests using `test.each()`
-  - Created reusable helper functions for mock setup
-- **Service Refactoring**: 
-  - Extracted 40-line AI prompt to dedicated `fabricCoordinationPrompt.ts` file
-  - Added type-safe validation helpers with improved error messages
-  - Better separation of concerns in `FabricCoordinationService`
-- **Type Safety**: Improved TypeScript type guards and validation throughout coordination features
+### Added (2026-01-31)
+- **Password Strength Indicator**: Real-time password validation with visual feedback
+  - 7-point scoring system (length 8/12/16, lowercase, uppercase, numbers, special characters)
+  - 4 strength levels: weak (red), fair (orange), good (green), strong (dark green)
+  - Color-coded progress bar with specific improvement suggestions
+  - Implemented on registration page and password reset page
+  - Uses `useMemo` for optimized performance
 
-### Technical Details
-- **New Services**: `FabricCoordinationService` - AI-powered fabric role coordination
-- **Enhanced Services**: `PatternSelector` - exact skill-level matching with fabric count filtering
-- **New Controller Methods**: `PatternController.autoAssignFabricRoles()`
-- **New Frontend Components**: `AutoCoordinateButton` with sparkles icon and toast notifications
-- **Branch**: `AI_coordination_features` (ready for merge)
+### Changed (2026-01-31)
+- **Brand-Consistent Background**: Replaced solid red (#B91C1C) with QuiltPlannerProBackGround.png across entire application
+  - Applied to 14+ page headers (upload, library, profile, home, pricing, feedback, legal, FAQ, dashboard, about, admin, terms, privacy)
+  - CSS: `backgroundSize: 'cover', backgroundPosition: 'center'` for responsive scaling
+  - Added Navigation component to Terms and Privacy pages for consistent layout
+  - Gradient backgrounds on page bodies: `linear-gradient(135deg, #FEF2F2 0%, #F0FDFA 50%, #FFFBEB 100%)`
+- **Pattern Preview Size**: Increased pattern card preview area from 192px (h-48) to 320px (h-80) for better visibility in pattern library
+
+### Fixed (2026-01-31)
+- **UI Cleanup - Duplicate Information Removal**:
+  - Removed duplicate fabric count display from pattern selector (shown in both upload section and info badge)
+  - Removed duplicate pattern name from selection badge (already visible in dropdown)
+  - Removed "Requires X-Y fabrics" text from info badge (requirements shown in dropdown)
+  - Pattern selection badge now only shows when fabrics are uploaded: "You have X fabric(s)" with color-coded validation
+  - Cleaner, less redundant user interface based on user feedback
+
+### Technical Notes (2026-01-31)
+- QuiltPlannerProBackGround.png: 2.2MB brand asset
+- Session commits: 7 commits covering visual improvements and UI cleanup
+- Branch workflow: Panel branch created for visual improvements, merged to main 3 times, currently on hold
+- Backend deployed to Railway successfully (port 3001, 6 migrations, cron jobs initialized)
 
 ## [1.1.0] - 2026-01-25 - SOLID Refactoring Release
 

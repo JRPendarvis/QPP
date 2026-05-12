@@ -7,9 +7,13 @@ import userRoutes from "./routes/userRoutes";
 import stripeRoutes from "./routes/stripeRoutes";
 import patternRoutes from "./routes/patternRoutes";
 import patternLibraryRoutes from "./routes/patternLibraryRoutes";
+import blockDesignRoutes from "./routes/blockDesignRoutes";
+import fabricRoutes from "./routes/fabricRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import debugRoutes from "./routes/debugRoutes";
+import customBlockRoutes from "./routes/customBlockRoutes";
+import patternTemplateRoutes from "./routes/patternTemplateRoutes";
 
 import { StripeWebhookController } from "./controllers/stripeWebhookController";
 import { initializeCronJobs } from "./jobs/cronJobs";
@@ -102,7 +106,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/patterns/library", patternLibraryRoutes);
 app.use("/api/patterns", patternRoutes);
+app.use("/api/block-designs", blockDesignRoutes);
+app.use("/api/fabrics", fabricRoutes);
+app.use("/api/pattern-templates", patternTemplateRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use("/api/blocks", customBlockRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/stripe", stripeRoutes);
 

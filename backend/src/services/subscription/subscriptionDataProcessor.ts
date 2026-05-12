@@ -1,7 +1,13 @@
+import { FabricHoldTier, resolveFabricImageLimit } from '../../config/stripe.config';
+
 /**
  * Service for processing Stripe subscription events into application data
  */
 export class SubscriptionDataProcessor {
+  private static isFabricHoldTier(value: string): value is FabricHoldTier {
+    return ['none', '3', '10', '25', '50'].includes(value);
+  }
+
   /**
    * Extract subscription metadata from checkout session
    * 
@@ -11,10 +17,16 @@ export class SubscriptionDataProcessor {
   static extractMetadata(metadata: Record<string, string> | null | undefined): {
     tier: string;
     interval: string;
+    fabricHoldTier: FabricHoldTier;
+    fabricImageLimit: number;
   } {
+    const requestedTier = metadata?.fabricHoldTier || '3';
+    const fabricHoldTier = this.isFabricHoldTier(requestedTier) ? requestedTier : '3';
     return {
       tier: metadata?.tier || 'basic',
-      interval: metadata?.interval || 'monthly'
+      interval: metadata?.interval || 'monthly',
+      fabricHoldTier,
+      fabricImageLimit: resolveFabricImageLimit(fabricHoldTier),
     };
   }
 
@@ -42,12 +54,16 @@ export class SubscriptionDataProcessor {
     subscriptionStatus: string;
     stripeSubscriptionId: null;
     billingInterval: null;
+    fabricHoldTier: FabricHoldTier;
+    fabricImageLimit: number;
   } {
     return {
       subscriptionTier: 'free',
       subscriptionStatus: 'canceled',
       stripeSubscriptionId: null,
-      billingInterval: null
+      billingInterval: null,
+      fabricHoldTier: 'none',
+      fabricImageLimit: 0,
     };
   }
 }
