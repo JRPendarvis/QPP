@@ -207,9 +207,6 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
           <Link href={ROUTES.DASHBOARD} onClick={handleClick} className={linkClass}>
             Dashboard
           </Link>
-          <Link href="/dashboard/block-designer" onClick={handleClick} className={linkClass}>
-            Block Designer
-          </Link>
           <Link href="/feedback" onClick={handleClick} className={linkClass}>
             Feedback
           </Link>

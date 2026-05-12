@@ -13,7 +13,12 @@ export function validateFabricCount(
   if (patternChoice === 'auto') {
     // Use user's skill level if available, otherwise default to 'beginner'
     const skillLevel = 'beginner';
-    const patterns: PatternDetails[] = getPatternsForSkillLevel(skillLevel);
+    const patterns: PatternDetails[] = getPatternsForSkillLevel(skillLevel).map((p) => ({
+      id: p.id,
+      name: p.name,
+      minFabrics: p.minFabrics ?? p.minColors,
+      maxFabrics: p.maxFabrics,
+    }));
     const valid = patterns.some((p) => patternFabricCount >= p.minFabrics && patternFabricCount <= p.maxFabrics);
     return valid;
   }
@@ -41,7 +46,12 @@ export function getFabricValidationMessage(
   if (patternChoice === 'auto') {
     // Use user's skill level if available, otherwise default to 'beginner'
     const skillLevel = 'beginner';
-    const patterns: PatternDetails[] = getPatternsForSkillLevel(skillLevel);
+    const patterns: PatternDetails[] = getPatternsForSkillLevel(skillLevel).map((p) => ({
+      id: p.id,
+      name: p.name,
+      minFabrics: p.minFabrics ?? p.minColors,
+      maxFabrics: p.maxFabrics,
+    }));
     // Assume minimum is 2 for auto mode
     if (patternFabricCount < 2) {
       const borderSuffix = borderCount > 0 ? ` (plus ${borderCount} for borders)` : '';

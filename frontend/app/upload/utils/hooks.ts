@@ -3,7 +3,12 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 import { UserProfile, PatternDetails } from './types';
-import { NEXT_LEVEL, getPatternsForSkillLevel } from '@/app/helpers/patternHelpers';
+import {
+  NEXT_LEVEL,
+  getPatternsForSkillLevel,
+  fetchAllPatterns,
+  PatternOption,
+} from '@/app/helpers/patternHelpers';
 
 export function useUserProfile() {
   const { user, loading } = useAuth();
@@ -45,20 +50,24 @@ export function useUserProfile() {
 export function usePatternSelection(profile: UserProfile | null, challengeMe: boolean) {
   const currentSkill = profile?.skillLevel || 'beginner';
   const targetSkill = challengeMe ? NEXT_LEVEL[currentSkill] : currentSkill;
-  const [allPatterns, setAllPatterns] = useState<PatternDetails[]>([]);
-  
+  const [allPatterns, setAllPatterns] = useState<PatternOption[]>([]);
+
   useEffect(() => {
-    import('@/app/helpers/patternHelpers').then(({ fetchAllPatterns }) => {
-      fetchAllPatterns().then(patterns => {
-        setAllPatterns(patterns as PatternDetails[]);
-      });
+    fetchAllPatterns().then((patterns) => {
+      setAllPatterns(patterns);
     });
   }, []);
-  
-  const availablePatterns = useMemo(() => {
+
+  const availablePatterns = useMemo<PatternDetails[]>(() => {
     return getPatternsForSkillLevel(targetSkill, allPatterns)
+      .map((pattern) => ({
+        id: pattern.id,
+        name: pattern.name,
+        minFabrics: pattern.minFabrics ?? pattern.minColors,
+        maxFabrics: pattern.maxFabrics,
+      }))
       .slice()
-      .sort((a: PatternDetails, b: PatternDetails) => a.name.localeCompare(b.name));
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [targetSkill, allPatterns]);
 
   return { currentSkill, targetSkill, availablePatterns };

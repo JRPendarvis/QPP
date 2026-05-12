@@ -8,7 +8,6 @@ import Navigation from '@/components/Navigation';
 import UploadHeader from '@/components/upload/UploadHeader';
 import PatternDisplay from '@/components/upload/PatternDisplay';
 import ErrorDisplay from '@/components/upload/ErrorDisplay';
-import BlockDesigner, { BlockData } from '@/components/BlockDesigner';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '@/lib/api';
 import {
@@ -22,23 +21,13 @@ import {
 
 import { useUserProfile, usePatternSelection } from './utils/hooks';
 import { validateFabricCount, getFabricValidationMessage } from './utils/validation';
-import { PatternChoice, PatternDetails } from './utils/types';
+import { PatternChoice } from './utils/types';
 import { getBorderName } from '@/utils/borderNaming';
 import { formatFabricRange, SKILL_LEVELS } from '@/app/helpers/patternHelpers';
 import fabricService, { FabricRecord } from '@/services/fabricService';
 
 export default function UploadPage() {
   const { user, loading, profile } = useUserProfile();
-  const [designMode, setDesignMode] = useState<'ai-pattern' | 'custom-block'>('ai-pattern');
-  const [selectedPatternTemplate, setSelectedPatternTemplate] = useState<string>('');
-  const [patternTemplates, setPatternTemplates] = useState<Array<{ id: string; name: string }>>([]);
-  const [loadingPatternTemplates, setLoadingPatternTemplates] = useState(true);
-  const [templateBlockData, setTemplateBlockData] = useState<{ 
-    gridSize: number; 
-    gridData: string[][]; 
-    svgTemplate?: string;
-    patternName?: string;
-  } | null>(null);
   const [patternChoice, setPatternChoice] = useState<PatternChoice>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
   const [challengeMe, setChallengeMe] = useState(false);
@@ -46,7 +35,7 @@ export default function UploadPage() {
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
   const [quiltSize, setQuiltSize] = useState<string>('');
   const [savedFabrics, setSavedFabrics] = useState<FabricRecord[]>([]);
-  const [loadingSavedFabrics, setLoadingSavedFabrics] = useState(false);
+  const [loadingSavedFabrics, setLoadingSavedFabrics] = useState(true);
   const [addingSavedFabricId, setAddingSavedFabricId] = useState<string | null>(null);
 
   // Border state management
@@ -83,7 +72,7 @@ export default function UploadPage() {
 
   const selectedPatternDetails = useMemo(() => {
     if (patternChoice === 'manual' && selectedPattern) {
-      return availablePatterns.find((p: PatternDetails) => p.id === selectedPattern) || null;
+      return availablePatterns.find((p) => p.id === selectedPattern) || null;
     }
     return null;
   }, [patternChoice, selectedPattern, availablePatterns]);
@@ -122,28 +111,34 @@ export default function UploadPage() {
     }
   };
 
-  useEffect(() => {
-    if (patternChoice === 'manual' && selectedPattern) {
-      api.get(`/api/patterns/${selectedPattern}/fabric-roles`)
-        .then(response => {
-          if (response.data.success && response.data.data.fabricRoles) {
-            setFabricRoles(response.data.data.fabricRoles);
-          }
-        })
-        .catch(err => {
-          console.error('Failed to fetch fabric roles:', err);
-          setFabricRoles([]);
-        });
-    } else {
+  const handleSelectedPatternChange = (id: string) => {
+    setSelectedPattern(id);
+    if (!id) {
       setFabricRoles([]);
     }
+  };
+
+  useEffect(() => {
+    if (patternChoice !== 'manual' || !selectedPattern) {
+      return;
+    }
+
+    api.get(`/api/patterns/${selectedPattern}/fabric-roles`)
+      .then(response => {
+        if (response.data.success && response.data.data.fabricRoles) {
+          setFabricRoles(response.data.data.fabricRoles);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch fabric roles:', err);
+        setFabricRoles([]);
+      });
   }, [patternChoice, selectedPattern]);
 
   useEffect(() => {
     if (!user) return;
 
     let cancelled = false;
-    setLoadingSavedFabrics(true);
 
     void fabricService
       .list()
@@ -257,7 +252,7 @@ export default function UploadPage() {
         borderConfiguration.enabled ? borderConfiguration.borders : undefined
       );
       toast.dismiss(loadingToast);
-    } catch (error) {
+    } catch {
       toast.dismiss(loadingToast);
     } finally {
       setGenerating(false);
@@ -269,52 +264,6 @@ export default function UploadPage() {
       handleFilesAdded(Array.from(files));
     } else {
       handleFilesAdded(files);
-    }
-  };
-
-  const handleBlockDesignComplete = async (blockData: BlockData) => {
-    setGenerating(true);
-    const loadingToast = toast.loading('Saving your block and generating pattern...');
-
-    try {
-      // First, save the block
-      const fabricAssignments = {
-        background: previews[0] || null,
-        primary: previews[1] || null,
-        secondary: previews[2] || null,
-        accent: previews[3] || null,
-      };
-
-      const blockResponse = await api.post('/api/blocks', {
-        ...blockData,
-        blockSize: templateBlockData ? templateBlockData.gridSize * templateBlockData.gridSize : 9,
-      });
-
-      if (!blockResponse.data.success) {
-        throw new Error('Failed to save block');
-      }
-
-      const savedBlock = blockResponse.data.data;
-
-      // Then generate a quilt pattern from it
-      const patternResponse = await api.post(`/api/blocks/${savedBlock.id}/generate-pattern`, {
-        quiltWidth: 5,
-        quiltHeight: 5,
-        fabricAssignments,
-      });
-
-      if (patternResponse.data.success) {
-        toast.success('Block saved and pattern generated!', { id: loadingToast });
-        // Redirect to library to view the pattern
-        setTimeout(() => {
-          window.location.href = '/library';
-        }, 1500);
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to generate pattern', { id: loadingToast });
-      console.error('Block generation error:', error);
-    } finally {
-      setGenerating(false);
     }
   };
 
@@ -344,72 +293,18 @@ export default function UploadPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow p-6">
           
-          {/* Design Mode Selection */}
-          <div className="mb-8 border-2 border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Choose Your Design Method</h2>
-            <div className="space-y-3">
-              <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50" 
-                style={{
-                  borderColor: designMode === 'ai-pattern' ? '#B91C1C' : '#E5E7EB',
-                  backgroundColor: designMode === 'ai-pattern' ? '#FEF2F2' : 'white'
-                }}>
-                <input
-                  type="radio"
-                  name="designMode"
-                  value="ai-pattern"
-                  checked={designMode === 'ai-pattern'}
-                  onChange={(e) => setDesignMode(e.target.value as 'ai-pattern' | 'custom-block')}
-                  className="mt-1 h-4 w-4 text-red-700 focus:ring-red-700"
-                  style={{accentColor: '#B91C1C'}}
-                />
-                <div className="ml-3">
-                  <div className="font-semibold text-gray-900">AI-Generated Quilt Pattern</div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Upload your fabrics and let AI create a complete quilt pattern from traditional designs
-                  </div>
-                </div>
-              </label>
-
-              <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50"
-                style={{
-                  borderColor: designMode === 'custom-block' ? '#B91C1C' : '#E5E7EB',
-                  backgroundColor: designMode === 'custom-block' ? '#FEF2F2' : 'white'
-                }}>
-                <input
-                  type="radio"
-                  name="designMode"
-                  value="custom-block"
-                  checked={designMode === 'custom-block'}
-                  onChange={(e) => setDesignMode(e.target.value as 'ai-pattern' | 'custom-block')}
-                  className="mt-1 h-4 w-4 text-red-700 focus:ring-red-700"
-                  style={{accentColor: '#B91C1C'}}
-                />
-                <div className="ml-3">
-                  <div className="font-semibold text-gray-900">Custom Block Design</div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Design your own quilt block in a grid, then use it to create a repeating quilt pattern
-                  </div>
-                </div>
-              </label>
-            </div>
-          </div>
-
           <ErrorDisplay error={error} />
 
           {!pattern && (
             <>
-              {designMode === 'ai-pattern' ? (
-                // AI Pattern Mode - Original Flow
-                <>
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                     <PatternSelectionSection
                       patternChoice={patternChoice}
                       setPatternChoice={handlePatternChoiceChange}
                       selectedPattern={selectedPattern}
-                      setSelectedPattern={setSelectedPattern}
+                      setSelectedPattern={handleSelectedPatternChange}
                       availablePatterns={availablePatterns}
                       selectedPatternDetails={selectedPatternDetails}
-                      fabricsLength={fabrics.length}
                       formatFabricRange={formatFabricRange}
                       challengeMe={challengeMe}
                       setChallengeMe={setChallengeMe}
@@ -626,106 +521,6 @@ export default function UploadPage() {
               <ValidationMessage 
                 message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} 
               />
-            </>
-              ) : (
-                // Custom Block Design Mode
-                <>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <div className="border-2 border-gray-200 rounded-lg p-4">
-                      <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 1: Choose Pattern Template</h2>
-                      <div className="space-y-3">
-                        <label className="block text-sm text-gray-600 mb-2">
-                          Select a pattern block to use as your starting template
-                        </label>
-                        {loadingPatternTemplates ? (
-                          <div className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-500">
-                            Loading pattern templates...
-                          </div>
-                        ) : (
-                          <select
-                            value={selectedPatternTemplate}
-                            onChange={(e) => setSelectedPatternTemplate(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                          >
-                            <option value="">Select a pattern block...</option>
-                            {patternTemplates.map((template) => (
-                              <option key={template.id} value={template.id}>
-                                {template.name}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                        <p className="text-sm text-gray-500 mt-2">
-                          {selectedPatternTemplate 
-                            ? `Use the ${patternTemplates.find(t => t.id === selectedPatternTemplate)?.name} block as your starting design`
-                            : 'Choose a pattern to load its block structure'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="border-2 border-gray-200 rounded-lg p-4">
-                      <h2 className="text-lg font-semibold text-gray-800 mb-3">
-                        Step 2: Upload Your Fabric Images
-                      </h2>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Upload 2-4 fabrics to use in your block design
-                      </p>
-                      <FabricDropzone
-                        onFilesAdded={handleFilesAddedWrapper}
-                        currentCount={fabrics.length}
-                        maxFiles={4}
-                        totalSize={totalImageSize}
-                      />
-                    </div>
-                  </div>
-
-                  {fabrics.length > 0 && (
-                    <div className="my-6">
-                      <FabricPreviewGrid
-                        previews={previews}
-                        fabrics={fabrics}
-                        onRemove={removeFabric}
-                        onClearAll={clearAll}
-                        onReorder={handleFabricReorder}
-                      />
-                    </div>
-                  )}
-
-                  {fabrics.length >= 2 && selectedPatternTemplate && templateBlockData && (
-                    <div className="mt-6">
-                      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-800 font-medium mb-2">
-                          📋 Pattern Template: {templateBlockData.patternName}
-                        </p>
-                        <p className="text-xs text-blue-700">
-                          Preview shows the actual pattern with your fabrics.
-                        </p>
-                      </div>
-
-                      {/* SVG Pattern Preview */}
-                      {templateBlockData.svgTemplate && fabrics.length >= 2 && (
-                        <div className="flex justify-center">
-                          <div className="border-4 border-gray-800 rounded-lg overflow-hidden" style={{ width: '300px', height: '300px' }}>
-                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}
-                              dangerouslySetInnerHTML={{
-                                __html: templateBlockData.svgTemplate
-                                  .replace(/COLOR1/g, previews[0] ? `url(#bg-${Date.now()})` : '#D1D5DB')
-                                  .replace(/COLOR2/g, previews[1] ? `url(#primary-${Date.now()})` : '#9CA3AF')
-                                  .replace(/COLOR3/g, previews[2] ? `url(#secondary-${Date.now()})` : '#FDE047')
-                                  .replace(/COLOR4/g, previews[3] ? `url(#accent-${Date.now()})` : '#F59E0B') +
-                                  (previews[0] ? `<defs><pattern id="bg-${Date.now()}" patternUnits="userSpaceOnUse" width="100" height="100"><image href="${previews[0]}" width="100" height="100"/></pattern></defs>` : '') +
-                                  (previews[1] ? `<defs><pattern id="primary-${Date.now()}" patternUnits="userSpaceOnUse" width="100" height="100"><image href="${previews[1]}" width="100" height="100"/></pattern></defs>` : '') +
-                                  (previews[2] ? `<defs><pattern id="secondary-${Date.now()}" patternUnits="userSpaceOnUse" width="100" height="100"><image href="${previews[2]}" width="100" height="100"/></pattern></defs>` : '') +
-                                  (previews[3] ? `<defs><pattern id="accent-${Date.now()}" patternUnits="userSpaceOnUse" width="100" height="100"><image href="${previews[3]}" width="100" height="100"/></pattern></defs>` : '')
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
             </>
           )}
 

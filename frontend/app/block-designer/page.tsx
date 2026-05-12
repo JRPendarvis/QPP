@@ -6,8 +6,42 @@ import { Suspense, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import BlockDesignerCanvas, { BlockRegion, FabricOption } from '@/components/block-designer/BlockDesignerCanvas';
-import { PATTERN_OPTIONS } from '@/app/helpers/patternHelpers';
 import { useBlockDesignerPageModel } from '@/hooks/useBlockDesignerPageModel';
+// PATTERN_OPTIONS: all block patterns grouped by skill level
+const PATTERN_OPTIONS: Record<string, { id: string; name: string; minFabrics: number; maxFabrics: number }[]> = {
+  beginner: [
+    { id: 'simple-squares',       name: 'Simple Squares',        minFabrics: 2, maxFabrics: 2 },
+    { id: 'strip-quilt',          name: 'Strip Quilt',           minFabrics: 3, maxFabrics: 3 },
+    { id: 'checkerboard',         name: 'Checkerboard',          minFabrics: 2, maxFabrics: 2 },
+    { id: 'rail-fence',           name: 'Rail Fence',            minFabrics: 3, maxFabrics: 3 },
+  ],
+  advanced_beginner: [
+    { id: 'four-patch',           name: 'Four Patch',            minFabrics: 2, maxFabrics: 3 },
+    { id: 'nine-patch',           name: 'Nine Patch',            minFabrics: 3, maxFabrics: 3 },
+    { id: 'half-square-triangles',name: 'Half-Square Triangles', minFabrics: 2, maxFabrics: 2 },
+    { id: 'hourglass',            name: 'Hourglass',             minFabrics: 2, maxFabrics: 2 },
+    { id: 'bow-tie',              name: 'Bow Tie',               minFabrics: 2, maxFabrics: 2 },
+  ],
+  intermediate: [
+    { id: 'flying-geese',         name: 'Flying Geese',          minFabrics: 2, maxFabrics: 2 },
+    { id: 'pinwheel',             name: 'Pinwheel',              minFabrics: 2, maxFabrics: 2 },
+    { id: 'log-cabin',            name: 'Log Cabin',             minFabrics: 3, maxFabrics: 5 },
+    { id: 'sawtooth-star',        name: 'Sawtooth Star',         minFabrics: 3, maxFabrics: 3 },
+    { id: 'ohio-star',            name: 'Ohio Star',             minFabrics: 3, maxFabrics: 3 },
+    { id: 'churn-dash',           name: 'Churn Dash',            minFabrics: 2, maxFabrics: 2 },
+    { id: 'mosaic-star',          name: 'Mosaic Star',           minFabrics: 4, maxFabrics: 4 },
+  ],
+  advanced: [
+    { id: 'lone-star',            name: 'Lone Star',             minFabrics: 3, maxFabrics: 3 },
+    { id: 'kaleidoscope-star',    name: 'Kaleidoscope Star',     minFabrics: 3, maxFabrics: 3 },
+    { id: 'new-york-beauty',      name: 'New York Beauty',       minFabrics: 4, maxFabrics: 4 },
+    { id: 'drunkards-path',       name: "Drunkard's Path",       minFabrics: 2, maxFabrics: 2 },
+  ],
+  expert: [
+    { id: 'grandmothers-flower-garden', name: "Grandmother's Flower Garden", minFabrics: 2, maxFabrics: 2 },
+    { id: 'pickle-dish',          name: 'Pickle Dish',           minFabrics: 3, maxFabrics: 3 },
+  ],
+};
 
 interface PatternMeta {
   id: string;
