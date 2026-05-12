@@ -20,8 +20,8 @@ export class SubscriptionDataProcessor {
     fabricHoldTier: FabricHoldTier;
     fabricImageLimit: number;
   } {
-    const requestedTier = metadata?.fabricHoldTier || '3';
-    const fabricHoldTier = this.isFabricHoldTier(requestedTier) ? requestedTier : '3';
+    const requestedTier = metadata?.fabricHoldTier || 'none';
+    const fabricHoldTier = this.isFabricHoldTier(requestedTier) ? requestedTier : 'none';
     return {
       tier: metadata?.tier || 'basic',
       interval: metadata?.interval || 'monthly',

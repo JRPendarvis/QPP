@@ -110,12 +110,27 @@ export class StripeCheckoutController {
       }
 
       const user = await this.stripeRepository.getUserById(userId);
-      if (!user || !user.stripeCustomerId) {
+      if (!user) {
         return res.status(400).json({ success: false, message: 'No active subscription' });
       }
 
+      let customerId = user.stripeCustomerId;
+      if (!customerId && user.stripeSubscriptionId) {
+        customerId = await this.subscriptionService.getCustomerIdFromSubscription(user.stripeSubscriptionId);
+        if (customerId) {
+          await this.stripeRepository.updateStripeCustomerId(userId, customerId);
+        }
+      }
+
+      if (!customerId) {
+        return res.status(400).json({
+          success: false,
+          message: 'No Stripe billing account linked yet. Please contact support to relink your subscription.',
+        });
+      }
+
       const returnUrl = `${process.env.FRONTEND_URL}/account`;
-      const session = await this.subscriptionService.createPortalSession(user.stripeCustomerId, returnUrl);
+      const session = await this.subscriptionService.createPortalSession(customerId, returnUrl);
 
       res.json({ success: true, url: session.url });
     } catch (error) {

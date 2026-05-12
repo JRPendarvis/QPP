@@ -86,7 +86,7 @@ export class CheckoutSessionFactory {
    * @returns Stripe checkout session
    */
   async createSession(request: CheckoutSessionRequest): Promise<Stripe.Checkout.Session> {
-    const { userId, userEmail, tier, interval, fabricHoldTier = '3' } = request;
+    const { userId, userEmail, tier, interval, fabricHoldTier = 'none' } = request;
 
     const priceId = STRIPE_PRICE_IDS[tier][interval];
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [{ price: priceId, quantity: 1 }];
