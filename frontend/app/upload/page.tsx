@@ -21,7 +21,7 @@ import {
 
 import { useUserProfile, usePatternSelection } from './utils/hooks';
 import { validateFabricCount, getFabricValidationMessage } from './utils/validation';
-import { PatternChoice, PatternDetails } from './utils/types';
+import { PatternChoice } from './utils/types';
 import { getBorderName } from '@/utils/borderNaming';
 import { formatFabricRange, SKILL_LEVELS } from '@/app/helpers/patternHelpers';
 import fabricService, { FabricRecord } from '@/services/fabricService';
@@ -35,7 +35,7 @@ export default function UploadPage() {
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
   const [quiltSize, setQuiltSize] = useState<string>('');
   const [savedFabrics, setSavedFabrics] = useState<FabricRecord[]>([]);
-  const [loadingSavedFabrics, setLoadingSavedFabrics] = useState(false);
+  const [loadingSavedFabrics, setLoadingSavedFabrics] = useState(true);
   const [addingSavedFabricId, setAddingSavedFabricId] = useState<string | null>(null);
 
   // Border state management
@@ -72,7 +72,7 @@ export default function UploadPage() {
 
   const selectedPatternDetails = useMemo(() => {
     if (patternChoice === 'manual' && selectedPattern) {
-      return availablePatterns.find((p: PatternDetails) => p.id === selectedPattern) || null;
+      return availablePatterns.find((p) => p.id === selectedPattern) || null;
     }
     return null;
   }, [patternChoice, selectedPattern, availablePatterns]);
@@ -111,28 +111,34 @@ export default function UploadPage() {
     }
   };
 
-  useEffect(() => {
-    if (patternChoice === 'manual' && selectedPattern) {
-      api.get(`/api/patterns/${selectedPattern}/fabric-roles`)
-        .then(response => {
-          if (response.data.success && response.data.data.fabricRoles) {
-            setFabricRoles(response.data.data.fabricRoles);
-          }
-        })
-        .catch(err => {
-          console.error('Failed to fetch fabric roles:', err);
-          setFabricRoles([]);
-        });
-    } else {
+  const handleSelectedPatternChange = (id: string) => {
+    setSelectedPattern(id);
+    if (!id) {
       setFabricRoles([]);
     }
+  };
+
+  useEffect(() => {
+    if (patternChoice !== 'manual' || !selectedPattern) {
+      return;
+    }
+
+    api.get(`/api/patterns/${selectedPattern}/fabric-roles`)
+      .then(response => {
+        if (response.data.success && response.data.data.fabricRoles) {
+          setFabricRoles(response.data.data.fabricRoles);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch fabric roles:', err);
+        setFabricRoles([]);
+      });
   }, [patternChoice, selectedPattern]);
 
   useEffect(() => {
     if (!user) return;
 
     let cancelled = false;
-    setLoadingSavedFabrics(true);
 
     void fabricService
       .list()
@@ -246,7 +252,7 @@ export default function UploadPage() {
         borderConfiguration.enabled ? borderConfiguration.borders : undefined
       );
       toast.dismiss(loadingToast);
-    } catch (error) {
+    } catch {
       toast.dismiss(loadingToast);
     } finally {
       setGenerating(false);
@@ -292,23 +298,23 @@ export default function UploadPage() {
           {!pattern && (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <PatternSelectionSection
-                  patternChoice={patternChoice}
-                  setPatternChoice={handlePatternChoiceChange}
-                  selectedPattern={selectedPattern}
-                  setSelectedPattern={setSelectedPattern}
-                  availablePatterns={availablePatterns}
-                  selectedPatternDetails={selectedPatternDetails}
-                  formatFabricRange={formatFabricRange}
-                  challengeMe={challengeMe}
-                  setChallengeMe={setChallengeMe}
-                  SKILL_LEVELS={SKILL_LEVELS}
-                  targetSkill={targetSkill}
-                  currentSkill={currentSkill}
-                />
+                    <PatternSelectionSection
+                      patternChoice={patternChoice}
+                      setPatternChoice={handlePatternChoiceChange}
+                      selectedPattern={selectedPattern}
+                      setSelectedPattern={handleSelectedPatternChange}
+                      availablePatterns={availablePatterns}
+                      selectedPatternDetails={selectedPatternDetails}
+                      formatFabricRange={formatFabricRange}
+                      challengeMe={challengeMe}
+                      setChallengeMe={setChallengeMe}
+                      SKILL_LEVELS={SKILL_LEVELS}
+                      targetSkill={targetSkill}
+                      currentSkill={currentSkill}
+                    />
 
-                <div className="border-2 border-gray-200 rounded-lg p-4">
-                  <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 2: Choose Quilt Size</h2>
+                    <div className="border-2 border-gray-200 rounded-lg p-4">
+                      <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 2: Choose Quilt Size</h2>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm text-gray-600 mb-2">

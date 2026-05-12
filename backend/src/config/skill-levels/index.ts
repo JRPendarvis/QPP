@@ -33,12 +33,12 @@ export const PATTERNS_BY_SKILL: Record<string, string[]> = {
     'nine-patch',
     'half-square-triangles',
     'hourglass',
+    'bow-tie',
   ],
   intermediate: [
     'flying-geese',
     'pinwheel',
     'log-cabin',
-    'bow-tie',
     'grandmothers-flower-garden',
     'mosaic-star',
   ],
