@@ -22,24 +22,30 @@ interface NavigationLinksProps {
  * Single Responsibility: Render navigation link structure
  */
 export default function NavigationLinks({ user, logout, isMobile = false, onLinkClick }: NavigationLinksProps) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const createMenuRef = useRef<HTMLDivElement>(null);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
+      if (createMenuRef.current && !createMenuRef.current.contains(event.target as Node)) {
+        setIsCreateMenuOpen(false);
+      }
+
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
       }
     };
 
-    if (isDropdownOpen) {
+    if (isCreateMenuOpen || isAccountMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isDropdownOpen]);
+  }, [isCreateMenuOpen, isAccountMenuOpen]);
 
   const linkClass = isMobile
     ? "px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
@@ -50,38 +56,60 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
     : "px-4 py-2 text-sm font-medium text-white rounded-md";
 
   const dropdownLinkClass = "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left";
+  const mobileSectionLabelClass = "px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-400";
+  const designMenuLabel = 'Quilt Studio';
+  const patternGeneratorLabel = 'Create a Pattern';
+  const blockDesignerLabel = 'Design a Block';
+  const fabricLibraryLabel = 'Fabric Stash';
+  const myPatternsLabel = 'Saved Patterns';
+  const myBlockDesignsLabel = 'Saved Blocks';
+  const profileLabel = 'Quilter Profile';
 
   const handleClick = () => {
     if (onLinkClick) onLinkClick();
-    setIsDropdownOpen(false);
+    setIsCreateMenuOpen(false);
+    setIsAccountMenuOpen(false);
   };
 
-  // Mobile view - keep original flat structure
   if (isMobile) {
     return (
       <>
+        <p className={mobileSectionLabelClass}>Explore</p>
         <Link href="/about" onClick={handleClick} className={linkClass}>
           About
         </Link>
         <Link href="/faq" onClick={handleClick} className={linkClass}>
           FAQ
         </Link>
-        <Link href={ROUTES.PRICING} onClick={handleClick} className={linkClass}>
-          Pricing
+
+        <p className={mobileSectionLabelClass}>{designMenuLabel}</p>
+        <Link href={ROUTES.UPLOAD} onClick={handleClick} className={linkClass}>
+          {patternGeneratorLabel}
         </Link>
         <Link href={ROUTES.BLOCK_DESIGNER} onClick={handleClick} className={linkClass}>
-          Block Designer
+          {blockDesignerLabel}
         </Link>
         <Link href={ROUTES.FABRICS} onClick={handleClick} className={linkClass}>
-          Fabric Library
+          {fabricLibraryLabel}
         </Link>
+        {user && (
+          <>
+            <Link href="/library" onClick={handleClick} className={linkClass}>
+              {myPatternsLabel}
+            </Link>
+            <Link href={ROUTES.MY_BLOCK_DESIGNS} onClick={handleClick} className={linkClass}>
+              {myBlockDesignsLabel}
+            </Link>
+          </>
+        )}
         {user ? (
           <>
+            <p className={mobileSectionLabelClass}>Account</p>
             <Link href={ROUTES.DASHBOARD} onClick={handleClick} className={linkClass}>
               Dashboard
             </Link>
-            <Link href="/library" onClick={handleClick} className={linkClass}>
-              My Patterns
+            <Link href={ROUTES.PRICING} onClick={handleClick} className={linkClass}>
+              Subscription
             </Link>
             <Link href="/feedback" onClick={handleClick} className={linkClass}>
               Feedback
@@ -92,7 +120,7 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
               </Link>
             )}
             <Link href="/profile" onClick={handleClick} className={linkClass}>
-              Profile
+              {profileLabel}
             </Link>
             <button
               onClick={() => {
@@ -124,7 +152,6 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
     );
   }
 
-  // Desktop view - with dropdown
   return (
     <>
       <Link href="/about" onClick={handleClick} className={linkClass}>
@@ -133,15 +160,48 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
       <Link href="/faq" onClick={handleClick} className={linkClass}>
         FAQ
       </Link>
-      <Link href={ROUTES.PRICING} onClick={handleClick} className={linkClass}>
-        Pricing
-      </Link>
-      <Link href={ROUTES.BLOCK_DESIGNER} onClick={handleClick} className={linkClass}>
-        Block Designer
-      </Link>
-      <Link href={ROUTES.FABRICS} onClick={handleClick} className={linkClass}>
-        Fabric Library
-      </Link>
+
+      <div className="relative" ref={createMenuRef}>
+        <button
+          onClick={() => setIsCreateMenuOpen(!isCreateMenuOpen)}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-md hover:bg-gray-50"
+        >
+          <span>{designMenuLabel}</span>
+          <svg
+            className={`w-4 h-4 transition-transform ${isCreateMenuOpen ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {isCreateMenuOpen && (
+          <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+            <Link href={ROUTES.UPLOAD} onClick={handleClick} className={dropdownLinkClass}>
+              {patternGeneratorLabel}
+            </Link>
+            <Link href={ROUTES.BLOCK_DESIGNER} onClick={handleClick} className={dropdownLinkClass}>
+              {blockDesignerLabel}
+            </Link>
+            <Link href={ROUTES.FABRICS} onClick={handleClick} className={dropdownLinkClass}>
+              {fabricLibraryLabel}
+            </Link>
+            {user && (
+              <>
+                <Link href="/library" onClick={handleClick} className={dropdownLinkClass}>
+                  {myPatternsLabel}
+                </Link>
+                <Link href={ROUTES.MY_BLOCK_DESIGNS} onClick={handleClick} className={dropdownLinkClass}>
+                  {myBlockDesignsLabel}
+                </Link>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
       {user ? (
         <>
           <Link href={ROUTES.DASHBOARD} onClick={handleClick} className={linkClass}>
@@ -150,19 +210,18 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
           <Link href="/feedback" onClick={handleClick} className={linkClass}>
             Feedback
           </Link>
-          
-          {/* Account Dropdown */}
-          <div className="relative" ref={dropdownRef}>
+
+          <div className="relative" ref={accountMenuRef}>
             <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-md hover:bg-gray-50"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span>{user.name || 'Account'}</span>
+              <span>{user.name || 'Quilter'}</span>
               <svg 
-                className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                className={`w-4 h-4 transition-transform ${isAccountMenuOpen ? 'rotate-180' : ''}`} 
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -171,7 +230,7 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
               </svg>
             </button>
 
-            {isDropdownOpen && (
+            {isAccountMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
                 {user.role === 'staff' && (
                   <>
@@ -185,11 +244,11 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
                     <hr className="my-1 border-gray-200" />
                   </>
                 )}
-                <Link href="/library" onClick={handleClick} className={dropdownLinkClass}>
-                  My Patterns
+                <Link href={ROUTES.PRICING} onClick={handleClick} className={dropdownLinkClass}>
+                  Subscription
                 </Link>
                 <Link href="/profile" onClick={handleClick} className={dropdownLinkClass}>
-                  Profile
+                  {profileLabel}
                 </Link>
                 <hr className="my-1 border-gray-200" />
                 <button
