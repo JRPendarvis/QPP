@@ -850,7 +850,7 @@ function BlockDesignerPageContent() {
                     <select
                       value={selectedPatternId}
                       onChange={(event) => resetForPattern(event.target.value)}
-                      className="w-full min-w-[280px] border border-gray-300 rounded-md px-3 py-2"
+                        className="w-full min-w-70 border border-gray-300 rounded-md px-3 py-2"
                     >
                       {patterns.map((pattern) => (
                         <option key={pattern.id} value={pattern.id}>
