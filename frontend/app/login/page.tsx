@@ -52,6 +52,8 @@ export default function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="email"
+                suppressHydrationWarning
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -69,6 +71,8 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="current-password"
+                suppressHydrationWarning
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -89,6 +93,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
+              suppressHydrationWarning
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50"
               style={{backgroundColor: '#B91C1C'}}
               onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#991B1B')}
