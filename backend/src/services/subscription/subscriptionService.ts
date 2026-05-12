@@ -127,4 +127,19 @@ export class SubscriptionService {
   async createPortalSession(customerId: string, returnUrl: string): Promise<Stripe.BillingPortal.Session> {
     return this.stripeApi.createPortalSession(customerId, returnUrl);
   }
+
+  /**
+   * Resolve Stripe customer ID from a subscription ID.
+   * Useful for legacy users where customer ID was not persisted.
+   */
+  async getCustomerIdFromSubscription(stripeSubscriptionId: string): Promise<string | null> {
+    const subscription = await this.stripeApi.retrieveSubscription(stripeSubscriptionId);
+    const customer = subscription.customer;
+
+    if (typeof customer === 'string') {
+      return customer;
+    }
+
+    return customer?.id ?? null;
+  }
 }

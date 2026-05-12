@@ -44,7 +44,7 @@ export default function FabricHoldSection({
         <div>
           <h2 className="text-lg font-medium text-gray-900">Fabric Image Tracking</h2>
           <p className="mt-1 text-sm text-gray-600">
-            Saved fabric images unlock on paid plans, and every paid subscription includes 3 image slots by default.
+            Saved fabric images are managed with a separate add-on on paid plans.
           </p>
         </div>
 
@@ -114,7 +114,7 @@ export default function FabricHoldSection({
       </div>
 
       <p className="text-xs text-gray-500">
-        Changes to the included 3-image tier update immediately. Paid upgrades open Stripe checkout and apply after payment completes.
+        You can change this add-on anytime. Free selections update immediately, and paid upgrades open Stripe checkout and apply after payment completes.
       </p>
     </section>
   );

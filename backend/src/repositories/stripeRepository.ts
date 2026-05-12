@@ -125,6 +125,15 @@ export class StripeRepository {
     console.log(`Database updated: user ${userId} marked for cancellation at period end`);
   }
 
+  async updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { stripeCustomerId },
+    });
+
+    console.log(`Database updated: user ${userId} stripeCustomerId linked`);
+  }
+
   async updateFabricAddonEntitlement(userId: string, fabricHoldTier: string, fabricImageLimit: number): Promise<void> {
     await prisma.user.update({
       where: { id: userId },
