@@ -20,11 +20,13 @@ import { initializeCronJobs } from "./jobs/cronJobs";
 import { SERVER_CONSTANTS, CORS_ORIGINS } from "./config/constants";
 import { sanitizeInput } from "./middleware/sanitization";
 import { requestLogger } from "./middleware/requestLogger";
+import backendPackage from "../package.json";
 
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || SERVER_CONSTANTS.DEFAULT_PORT;
+const appVersion = process.env.APP_VERSION || backendPackage.version;
 
 // Trust proxy only if running behind a trusted proxy (e.g., Railway, Heroku, Vercel)
 // Use environment variable or default to false for local/dev
@@ -95,6 +97,7 @@ app.get("/health", (_req: Request, res: Response) => {
   res.json({
     status: "ok",
     message: "QuiltPlannerPro API running",
+    version: appVersion,
     time: new Date().toISOString(),
   });
 });

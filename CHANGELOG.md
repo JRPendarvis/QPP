@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-05-16)
+- Centralized app version tracking with root scripts:
+  - `npm run version:show`
+  - `npm run version:sync`
+  - `npm run version:bump`
+- Shared pre-launch version format: `MAJOR.MINOR.BUILD` with 5-digit build values (e.g. `0.1.00003`).
+
+### Changed (2026-05-16)
+- Backend `/health` endpoint now includes `version` so deployed API versions are easy to verify.
+
 ## [1.2.0] - 2026-01-31 - Visual Improvements & UI Cleanup
 
 ### Added (2026-01-31)

@@ -1,6 +1,6 @@
 // src/services/patternSelector.ts
 
-import { getPatternsForSkillLevel } from '../../utils/skillLevelHelper';
+import { getSkillHierarchy } from '../../utils/skillLevelHelper';
 import { getPatternById, calculateFabricCountScore } from '../../config/quiltPatterns';
 import { normalizePatternId } from '../../utils/patternNormalization';
 import { PatternFormatter } from '../../utils/patternFormatter';
@@ -47,15 +47,15 @@ export class PatternSelector {
 
   /**
    * Auto-select best pattern for skill level and fabric count
-   * Prioritizes patterns at the user's exact skill level for better matching
+   * Prioritizes patterns at the user's exact skill level, then considers higher levels
    */
   private autoSelectPattern(skillLevel: string, fabricCount?: number): PatternSelectionResult {
     // First try: Get patterns at EXACT skill level (preferred for matching user expertise)
     let filteredPatterns = this.getFilteredPatternsForLevel(skillLevel, fabricCount, true);
 
-    // Fallback: If no patterns at exact level, try all accessible patterns (including lower levels)
+    // Fallback: If no exact matches, try patterns at this level and higher (never lower)
     if (filteredPatterns.length === 0) {
-      console.log(`[Pattern Selection] No patterns at exact ${skillLevel} level, trying all accessible patterns`);
+      console.log(`[Pattern Selection] No patterns at exact ${skillLevel} level, trying same-or-higher levels`);
       filteredPatterns = this.getFilteredPatternsForLevel(skillLevel, fabricCount, false);
     }
 
@@ -82,7 +82,7 @@ export class PatternSelector {
    * Get filtered patterns for a skill level with optional exact-level-only filter
    * @param skillLevel - User's skill level
    * @param fabricCount - Number of fabrics
-   * @param exactLevelOnly - If true, only return patterns at this exact skill level (not lower levels)
+   * @param exactLevelOnly - If true, only return patterns at this exact skill level
    */
   private getFilteredPatternsForLevel(skillLevel: string, fabricCount: number | undefined, exactLevelOnly: boolean): any[] {
     let availablePatternIds: string[];
@@ -91,8 +91,8 @@ export class PatternSelector {
       // Get patterns ONLY at this exact skill level
       availablePatternIds = PATTERNS_BY_SKILL[skillLevel] || [];
     } else {
-      // Get patterns at this level and all lower levels (fallback)
-      availablePatternIds = getPatternsForSkillLevel(skillLevel);
+      // Get patterns at this level and all higher levels (fallback)
+      availablePatternIds = this.getPatternsAtOrAboveSkillLevel(skillLevel);
     }
 
     let filteredPatterns = availablePatternIds
@@ -109,6 +109,26 @@ export class PatternSelector {
     }
 
     return filteredPatterns;
+  }
+
+  /**
+   * Get pattern IDs for the current skill level and all higher levels.
+   * Returns empty array when skill level is unknown to avoid unsafe downgrades.
+   */
+  private getPatternsAtOrAboveSkillLevel(skillLevel: string): string[] {
+    const hierarchy = getSkillHierarchy();
+    const skillIndex = hierarchy.indexOf(skillLevel);
+
+    if (skillIndex === -1) {
+      return [];
+    }
+
+    const patternIds: string[] = [];
+    for (let i = skillIndex; i < hierarchy.length; i++) {
+      patternIds.push(...(PATTERNS_BY_SKILL[hierarchy[i]] || []));
+    }
+
+    return patternIds;
   }
 
   /**

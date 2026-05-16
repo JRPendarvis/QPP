@@ -20,6 +20,23 @@ npm install
 npm run dev
 ```
 
+## App Versioning
+
+QuiltPlannerPro uses a shared pre-launch version format:
+
+`MAJOR.MINOR.BUILD` where BUILD is always 5 digits (example: `0.1.00003`).
+
+From the repository root:
+
+```bash
+npm run version:show         # show root/backend/frontend versions and sync status
+npm run version:sync         # sync backend/frontend to root version
+npm run version:bump         # default increment/build bump
+npm run version:bump:incr    # increment BUILD and sync all packages
+npm run version:bump:minor   # increment MINOR, reset BUILD to 00000
+npm run version:bump:major   # increment MAJOR, reset MINOR and BUILD
+```
+
 ### Frontend Setup
 
 ```bash

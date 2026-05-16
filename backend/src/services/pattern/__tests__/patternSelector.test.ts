@@ -1,10 +1,7 @@
 import { PatternSelector } from '../patternSelector';
-import { getPatternsForSkillLevel } from '../../../utils/skillLevelHelper';
 import { getPatternById, QuiltPattern } from '../../../config/quiltPatterns';
-import { PATTERNS_BY_SKILL } from '../../../config/skill-levels';
 
 // Mock dependencies
-jest.mock('../../../utils/skillLevelHelper');
 jest.mock('../../../config/quiltPatterns');
 jest.mock('../../../config/skill-levels', () => ({
   PATTERNS_BY_SKILL: {
@@ -16,7 +13,6 @@ jest.mock('../../../config/skill-levels', () => ({
   },
 }));
 
-const mockedGetPatternsForSkillLevel = getPatternsForSkillLevel as jest.MockedFunction<typeof getPatternsForSkillLevel>;
 const mockedGetPatternById = getPatternById as jest.MockedFunction<typeof getPatternById>;
 
 // Shared test data - reduces duplication
@@ -99,7 +95,6 @@ const createMockPattern = (overrides: Partial<QuiltPattern>): QuiltPattern => ({
 // Helper to setup pattern mocks
 const setupPatternMocks = (patternIds: string[], customPatterns?: Record<string, QuiltPattern>) => {
   const patterns = customPatterns || MOCK_PATTERNS;
-  mockedGetPatternsForSkillLevel.mockReturnValue(patternIds);
   mockedGetPatternById.mockImplementation((id: string) => patterns[id] || undefined);
 };
 
@@ -131,7 +126,7 @@ describe('PatternSelector', () => {
     it('should not call auto-selection when pattern is selected', () => {
       selector.selectPattern('intermediate', 'pinwheel', 4);
 
-      expect(mockedGetPatternsForSkillLevel).not.toHaveBeenCalled();
+      expect(mockedGetPatternById).not.toHaveBeenCalled();
     });
   });
 
@@ -142,11 +137,6 @@ describe('PatternSelector', () => {
     });
 
     it('should prioritize patterns at exact skill level for expert users', () => {
-      // Mock: Expert-level patterns available
-      mockedGetPatternsForSkillLevel.mockReturnValue([
-        'simple-squares', 'pinwheel', 'mariners-compass', 'storm-at-sea'
-      ]);
-
       const result = selector.selectPattern('expert', 'auto', 4);
 
       // Should select from expert patterns (mariners-compass or storm-at-sea)
@@ -154,21 +144,20 @@ describe('PatternSelector', () => {
       expect(result.patternInstruction).toContain('expert');
     });
 
-    it('should fall back to lower skill levels when no exact match exists', () => {
-      // Create custom patterns where expert patterns don't match fabric count of 2
+    it('should fall back to higher skill levels when no exact match exists', () => {
+      // Beginner exact patterns do not match fabric count of 6, so fallback should use higher levels
       const customPatterns = {
-        'mariners-compass': createMockPattern({ id: 'mariners-compass', skillLevel: 'expert', minColors: 6, maxFabrics: 8 }),
-        'storm-at-sea': createMockPattern({ id: 'storm-at-sea', skillLevel: 'expert', minColors: 6, maxFabrics: 8 }),
+        'simple-squares': createMockPattern({ id: 'simple-squares', skillLevel: 'beginner', minColors: 2, maxFabrics: 4 }),
+        checkerboard: createMockPattern({ id: 'checkerboard', skillLevel: 'beginner', minColors: 2, maxFabrics: 4 }),
         'pinwheel': MOCK_PATTERNS.pinwheel,
-        'simple-squares': MOCK_PATTERNS['simple-squares'],
+        'storm-at-sea': createMockPattern({ id: 'storm-at-sea', skillLevel: 'expert', minColors: 3, maxFabrics: 8 }),
       };
-      setupPatternMocks(['simple-squares', 'pinwheel', 'mariners-compass', 'storm-at-sea'], customPatterns);
+      setupPatternMocks(['simple-squares', 'checkerboard', 'pinwheel', 'storm-at-sea'], customPatterns);
 
-      const result = selector.selectPattern('expert', 'auto', 2);
+      const result = selector.selectPattern('beginner', 'auto', 6);
 
-      // Should fall back to lower level patterns that match fabric count
-      expect(result.patternId).toBeDefined();
-      expect(result.patternForSvg).toBeDefined();
+      // Should pick from higher-level patterns, not lower than beginner (none lower exists)
+      expect(result.patternId).toMatch(/pinwheel|storm-at-sea/);
     });
 
     it('should filter patterns by fabric count', () => {
@@ -231,8 +220,8 @@ describe('PatternSelector', () => {
     it('should work without fabricCount parameter', () => {
       const result = selector.selectPattern('intermediate', 'auto');
 
-      // Should not filter by fabric count
-      expect(result.patternId).toMatch(/pinwheel|storm-at-sea/);
+      // Should prioritize exact skill level before considering higher levels
+      expect(result.patternId).toBe('pinwheel');
       expect(result.patternForSvg).toBeDefined();
     });
   });
@@ -258,8 +247,6 @@ describe('PatternSelector', () => {
     });
 
     it('should handle unknown skill level gracefully', () => {
-      mockedGetPatternsForSkillLevel.mockReturnValue([]);
-
       const result = selector.selectPattern('unknown-level', 'auto', 4);
 
       expect(result.patternForSvg).toBe('');
@@ -268,46 +255,46 @@ describe('PatternSelector', () => {
 
     it('should exclude disabled patterns from auto-selection', () => {
       const customPatterns = {
-        'enabled-pattern': createMockPattern({ 
-          id: 'enabled-pattern', 
+        pinwheel: createMockPattern({ 
+          id: 'pinwheel', 
           skillLevel: 'intermediate', 
           minColors: 2, 
           maxFabrics: 6,
           enabled: true 
         }),
-        'disabled-pattern': createMockPattern({ 
-          id: 'disabled-pattern', 
+        'flying-geese': createMockPattern({ 
+          id: 'flying-geese', 
           skillLevel: 'intermediate', 
           minColors: 2, 
           maxFabrics: 6,
           enabled: false 
         }),
       };
-      setupPatternMocks(['enabled-pattern', 'disabled-pattern'], customPatterns);
+      setupPatternMocks(['pinwheel', 'flying-geese'], customPatterns);
 
       const result = selector.selectPattern('intermediate', 'auto', 4);
 
       // Should only select enabled pattern, never disabled one
-      expect(result.patternId).toBe('enabled-pattern');
-      expect(result.patternId).not.toBe('disabled-pattern');
+      expect(result.patternId).toBe('pinwheel');
+      expect(result.patternId).not.toBe('flying-geese');
     });
 
     it('should treat patterns without enabled property as enabled', () => {
       const customPatterns = {
-        'pattern-no-enabled-flag': createMockPattern({ 
-          id: 'pattern-no-enabled-flag', 
+        'simple-squares': createMockPattern({ 
+          id: 'simple-squares', 
           skillLevel: 'beginner', 
           minColors: 2, 
           maxFabrics: 6
           // enabled property not set - should default to enabled
         }),
       };
-      setupPatternMocks(['pattern-no-enabled-flag'], customPatterns);
+      setupPatternMocks(['simple-squares'], customPatterns);
 
       const result = selector.selectPattern('beginner', 'auto', 4);
 
       // Pattern without enabled flag should be selectable
-      expect(result.patternId).toBe('pattern-no-enabled-flag');
+      expect(result.patternId).toBe('simple-squares');
     });
   });
 
