@@ -55,4 +55,11 @@ router.get("/reset-stats", async (_req, res) => {
   }
 });
 
+// Complimentary Subscription Management
+router.post("/grant-complimentary", (req, res) => adminController.grantComplimentary(req, res));
+router.post("/grant-complimentary-bulk", (req, res) => adminController.grantComplimentaryBulk(req, res));
+router.get("/complimentary-subscribers", (req, res) => adminController.getComplimentarySubscribers(req, res));
+router.post("/extend-complimentary/:userId", (req, res) => adminController.extendComplimentary(req, res));
+router.delete("/revoke-complimentary/:userId", (req, res) => adminController.revokeComplimentary(req, res));
+
 export default router;
