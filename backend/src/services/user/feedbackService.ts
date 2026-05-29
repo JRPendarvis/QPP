@@ -23,6 +23,7 @@ export class FeedbackService {
    */
   async getFeedbackList(userId?: string): Promise<FeedbackWithVote[]> {
     const feedback = await prisma.feedback.findMany({
+      where: { resolved: false },
       orderBy: [{ votesCount: 'desc' }, { createdAt: 'desc' }],
     });
 
@@ -97,4 +98,12 @@ export class FeedbackService {
       return { voted: true, votesCount: updated.votesCount };
     }
   }
-}
+  /**
+   * Mark feedback as resolved (staff only)
+   */
+  async resolveFeedback(feedbackId: string): Promise<void> {
+    await prisma.feedback.update({
+      where: { id: feedbackId },
+      data: { resolved: true },
+    });
+  }}

@@ -84,4 +84,41 @@ export class FeedbackController {
       return ResponseHelper.serverError(res, 'Failed to toggle vote');
     }
   }
+
+  // POST /api/feedback/:id/resolve - mark as resolved (staff only)
+  async resolveFeedback(req: Request, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return ResponseHelper.unauthorizedError(res, 'Unauthorized');
+      }
+
+      // Check if user is staff
+      const { PrismaClient } = await import('@prisma/client');
+      const prisma = new PrismaClient();
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      });
+
+      if (!user || user.role !== 'staff') {
+        return ResponseHelper.unauthorizedError(res, 'Staff access required');
+      }
+
+      const { id } = req.params;
+
+      // Validate feedback ID
+      const validation = FeedbackValidator.validateFeedbackId(id);
+      if (!validation.valid) {
+        return ResponseHelper.validationError(res, validation.message!);
+      }
+
+      await feedbackService.resolveFeedback(id);
+
+      return ResponseHelper.success(res, 200, 'Feedback marked as resolved');
+    } catch (error) {
+      console.error('Resolve feedback error:', error);
+      return ResponseHelper.serverError(res, 'Failed to resolve feedback');
+    }
+  }
 }

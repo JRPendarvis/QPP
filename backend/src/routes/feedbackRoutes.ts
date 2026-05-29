@@ -15,4 +15,7 @@ router.post('/', authenticate, generalLimiter, (req, res) => controller.createFe
 // Toggle upvote (authenticated) — protect votes from abuse
 router.post('/:id/vote', authenticate, generalLimiter, (req, res) => controller.toggleVote(req, res));
 
+// Mark as resolved (staff only)
+router.post('/:id/resolve', authenticate, (req, res) => controller.resolveFeedback(req, res));
+
 export default router;

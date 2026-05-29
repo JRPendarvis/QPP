@@ -26,6 +26,9 @@ export default function FeedbackPage() {
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+
+  const isStaff = user?.role === 'staff';
 
   useEffect(() => {
     if (!loading && !user) {
@@ -99,6 +102,27 @@ export default function FeedbackPage() {
     }
   };
 
+  const handleResolve = async (feedbackId: string) => {
+    if (!confirm('Mark this feedback as resolved? It will be hidden from the list.')) {
+      return;
+    }
+
+    setResolvingId(feedbackId);
+    try {
+      const res = await api.post(`/api/feedback/${feedbackId}/resolve`);
+      if (res.data?.success) {
+        // Remove from list
+        setFeedbackList(prev => prev.filter(item => item.id !== feedbackId));
+        setFbMessage('Feedback marked as resolved');
+      }
+    } catch (err: any) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setFbError(error.response?.data?.message || 'Failed to resolve feedback');
+    } finally {
+      setResolvingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -131,6 +155,12 @@ export default function FeedbackPage() {
         {fbMessage && (
           <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
             {fbMessage}
+          </div>
+        )}
+        
+        {fbError && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {fbError}
           </div>
         )}
 
@@ -272,6 +302,17 @@ export default function FeedbackPage() {
                         Submitted {new Date(item.createdAt).toLocaleDateString()}
                       </p>
                     </div>
+
+                    {/* Staff Only: Resolve Button */}
+                    {isStaff && (
+                      <button
+                        onClick={() => handleResolve(item.id)}
+                        disabled={resolvingId === item.id}
+                        className="shrink-0 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {resolvingId === item.id ? 'Resolving...' : 'Mark Resolved'}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
