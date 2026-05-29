@@ -24,7 +24,12 @@ export class FabricInventoryService {
     this.prisma = prismaClient || new PrismaClient();
   }
 
-  private getFabricLimit(subscriptionTier?: string, fabricImageLimit?: number, badge?: string | null): number {
+  private getFabricLimit(subscriptionTier?: string, fabricImageLimit?: number, badge?: string | null, role?: string | null): number {
+    // Staff get unlimited fabric storage
+    if (role === 'staff') {
+      return Infinity;
+    }
+
     if (badge === 'founder') {
       return 50;
     }
@@ -40,10 +45,10 @@ export class FabricInventoryService {
   async getUserFabricLimit(userId: string): Promise<number> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { subscriptionTier: true, fabricImageLimit: true, badge: true },
+      select: { subscriptionTier: true, fabricImageLimit: true, badge: true, role: true },
     });
 
-    return this.getFabricLimit(user?.subscriptionTier, user?.fabricImageLimit, user?.badge);
+    return this.getFabricLimit(user?.subscriptionTier, user?.fabricImageLimit, user?.badge, user?.role);
   }
 
   private extractLinkedFabricIds(fabricsJson: unknown): string[] {
@@ -105,10 +110,10 @@ export class FabricInventoryService {
   async createFabric(userId: string, payload: CreateFabricPayload) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { subscriptionTier: true, fabricImageLimit: true, badge: true },
+      select: { subscriptionTier: true, fabricImageLimit: true, badge: true, role: true },
     });
 
-    const limit = this.getFabricLimit(user?.subscriptionTier, user?.fabricImageLimit, user?.badge);
+    const limit = this.getFabricLimit(user?.subscriptionTier, user?.fabricImageLimit, user?.badge, user?.role);
 
     const existingCount = await this.prisma.fabric.count({
       where: { userId, archivedAt: null },

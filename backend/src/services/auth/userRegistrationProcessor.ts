@@ -54,6 +54,7 @@ export class UserRegistrationProcessor {
   ) {
     const badge = this.determineBadge();
     const legalTimestamps = this.createLegalTimestamps(acceptTerms, acceptPrivacy);
+    const now = new Date();
 
     return {
       email,
@@ -62,6 +63,7 @@ export class UserRegistrationProcessor {
       subscriptionTier: 'free',
       subscriptionStatus: 'active',
       badge,
+      lastLoginAt: now, // Track first login on registration
       ...legalTimestamps
     };
   }

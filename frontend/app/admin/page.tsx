@@ -31,6 +31,7 @@ interface UserData {
   downloadsThisMonth: number;
   badge: string | null;
   createdAt: string;
+  lastLoginAt: string | null;
 }
 
 interface PatternData {
@@ -104,8 +105,10 @@ export default function AdminPage() {
       if (res.data?.success) {
         setUsers(res.data.data);
       }
-    } catch {
-      setError('Failed to load users');
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to load users';
+      console.error('Load users error:', err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -217,6 +220,11 @@ export default function AdminPage() {
   };
 
   const canGrantProAccess = (user: UserData): { canGrant: boolean; reason: string } => {
+    // Staff inherently have full Pro access
+    if (user.role === 'staff') {
+      return { canGrant: false, reason: 'Staff have full Pro access' };
+    }
+
     // Check if user has paid subscription
     if (user.stripeSubscriptionId) {
       return { canGrant: false, reason: 'Has paid subscription' };
@@ -319,6 +327,7 @@ export default function AdminPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tier</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Generations</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Downloads</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Login</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
@@ -339,6 +348,9 @@ export default function AdminPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.subscriptionTier}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.generationsThisMonth}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.downloadsThisMonth}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {canGrant ? (
                         <button

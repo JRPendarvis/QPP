@@ -59,6 +59,9 @@ model User {
     feedbackRequirementEndDate   DateTime?
     lastFeedbackSubmittedAt      DateTime?
 
+    // Login tracking
+    lastLoginAt DateTime?
+
     @@map("users")
 }
 

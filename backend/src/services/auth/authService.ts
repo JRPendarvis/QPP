@@ -90,6 +90,12 @@ export class AuthService {
       throw new Error('Invalid credentials');
     }
 
+    // Update last login timestamp
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() }
+    });
+
     // Generate JWT token
     const token = this.tokenManager.generate(user.id, user.email);
 

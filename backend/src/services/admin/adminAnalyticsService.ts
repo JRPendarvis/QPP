@@ -66,6 +66,7 @@ export class AdminAnalyticsService {
         downloadsThisMonth: true,
         badge: true,
         createdAt: true,
+        lastLoginAt: true,
       },
       orderBy: { createdAt: 'desc' },
     });
