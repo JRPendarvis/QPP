@@ -24,6 +24,9 @@ interface UserData {
   skillLevel: string;
   subscriptionTier: string;
   subscriptionStatus: string;
+  currentPeriodEnd: string | null;
+  stripeSubscriptionId: string | null;
+  stripeCustomerId: string | null;
   generationsThisMonth: number;
   downloadsThisMonth: number;
   badge: string | null;
@@ -77,6 +80,8 @@ export default function AdminPage() {
   const [feedback, setFeedback] = useState<FeedbackData[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'patterns' | 'feedback'>('overview');
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [grantingUserId, setGrantingUserId] = useState<string | null>(null);
 
   const loadOverview = useCallback(async () => {
     try {
@@ -172,10 +177,60 @@ export default function AdminPage() {
   const handleTabChange = async (tab: typeof activeTab) => {
     setActiveTab(tab);
     setError(null);
+    setSuccessMessage(null);
 
     if (tab === 'users' && users.length === 0) await loadUsers();
     if (tab === 'patterns' && patterns.length === 0) await loadPatterns();
     if (tab === 'feedback' && feedback.length === 0) await loadFeedback();
+  };
+
+  const handleGrantProSubscription = async (userEmail: string, userId: string) => {
+    if (!confirm(`Grant 6 months of Pro access to ${userEmail}?`)) {
+      return;
+    }
+
+    setGrantingUserId(userId);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const response = await api.post('/api/admin/grant-complimentary', {
+        email: userEmail,
+        tier: 'advanced',
+        durationMonths: 6,
+        reason: 'Admin granted 6-month Pro access'
+      });
+
+      if (response.data?.success) {
+        setSuccessMessage(`Successfully granted 6 months of Pro access to ${userEmail}`);
+        // Reload users to show updated subscription
+        await loadUsers();
+      } else {
+        setError(response.data?.message || 'Failed to grant subscription');
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to grant subscription';
+      setError(errorMessage);
+    } finally {
+      setGrantingUserId(null);
+    }
+  };
+
+  const canGrantProAccess = (user: UserData): { canGrant: boolean; reason: string } => {
+    // Check if user has paid subscription
+    if (user.stripeSubscriptionId) {
+      return { canGrant: false, reason: 'Has paid subscription' };
+    }
+
+    // Check if already has active Pro access
+    if (user.subscriptionTier === 'advanced' && user.currentPeriodEnd) {
+      const expiryDate = new Date(user.currentPeriodEnd);
+      if (expiryDate > new Date()) {
+        return { canGrant: false, reason: 'Already has Pro access' };
+      }
+    }
+
+    return { canGrant: true, reason: '' };
   };
 
   if (loading && !overview) {
@@ -207,6 +262,12 @@ export default function AdminPage() {
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
             {error}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+            {successMessage}
           </div>
         )}
 
@@ -258,10 +319,13 @@ export default function AdminPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tier</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Generations</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Downloads</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
+                {users.map((user) => {
+                  const { canGrant, reason } = canGrantProAccess(user);
+                  return (
                   <tr key={user.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.name || '-'}</td>
@@ -275,8 +339,22 @@ export default function AdminPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.subscriptionTier}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.generationsThisMonth}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.downloadsThisMonth}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {canGrant ? (
+                        <button
+                          onClick={() => handleGrantProSubscription(user.email, user.id)}
+                          disabled={grantingUserId === user.id}
+                          className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {grantingUserId === user.id ? 'Granting...' : 'Grant 6mo Pro'}
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-500 italic">{reason}</span>
+                      )}
+                    </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

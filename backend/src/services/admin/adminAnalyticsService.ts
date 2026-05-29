@@ -60,6 +60,8 @@ export class AdminAnalyticsService {
         subscriptionTier: true,
         subscriptionStatus: true,
         currentPeriodEnd: true,
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
         generationsThisMonth: true,
         downloadsThisMonth: true,
         badge: true,

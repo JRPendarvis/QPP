@@ -43,7 +43,14 @@ export class ComplimentarySubscriptionService {
     // Find or create user
     let user = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true, subscriptionTier: true },
+      select: { 
+        id: true, 
+        email: true, 
+        subscriptionTier: true,
+        stripeSubscriptionId: true,
+        stripeCustomerId: true,
+        subscriptionStatus: true,
+      },
     });
 
     if (!user) {
@@ -68,6 +75,11 @@ export class ComplimentarySubscriptionService {
 
       console.log(`[Complimentary] Created new user: ${email} (temp password required)`);
     } else {
+      // Check if user has an active paid subscription
+      if (user.stripeSubscriptionId) {
+        throw new Error(`User ${email} already has an active paid subscription. Cannot grant complimentary access.`);
+      }
+
       // Update existing user's subscription
       await prisma.user.update({
         where: { id: user.id },
