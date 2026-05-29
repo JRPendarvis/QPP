@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
 
 interface OverviewStats {
   totalUsers: number;
@@ -449,7 +448,6 @@ export default function AdminPage() {
             </table>
           </div>
         )}
-    <Footer />
   </div>
       </div>
     </div>
