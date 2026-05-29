@@ -7,6 +7,7 @@ import { InstructionGenerationService } from './instructionGenerationService';
 import { PatternRepository } from '../../repositories/patternRepository';
 import { normalizePatternId } from '../../utils/patternNormalization';
 import { BorderConfiguration } from '../../types/Border';
+import { FeedbackRequirementService } from '../admin/feedbackRequirementService';
 
 export interface GeneratePatternRequest {
   userId: string;
@@ -54,6 +55,17 @@ export class PatternGenerationService {
 
     const patternToUse = normalizePatternId(selectedPattern);
     console.log(`📋 Pattern to use: "${patternToUse}" (from: "${selectedPattern}")`);
+
+    // Check feedback requirement for complimentary subscribers
+    const feedbackStatus = await FeedbackRequirementService.checkFeedbackRequirement(userId);
+    if (!feedbackStatus.canGenerate) {
+      throw new Error(feedbackStatus.message);
+    }
+
+    // Log feedback reminder if approaching due date
+    if (feedbackStatus.isRequired && feedbackStatus.daysUntilRequired <= 7 && feedbackStatus.daysUntilRequired > 0) {
+      console.log(`⚠️ Feedback reminder: ${feedbackStatus.message}`);
+    }
 
     // Validate user subscription and limits
     const { user, tierConfig } = await this.subscriptionValidator.validateUser(userId);

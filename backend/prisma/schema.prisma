@@ -53,6 +53,12 @@ model User {
     termsAcceptedAt   DateTime?
     privacyAcceptedAt DateTime?
 
+    // Feedback requirement tracking (for complimentary subscriptions)
+    requiresMonthlyFeedback      Boolean   @default(false)
+    feedbackRequirementStartDate DateTime?
+    feedbackRequirementEndDate   DateTime?
+    lastFeedbackSubmittedAt      DateTime?
+
     @@map("users")
 }
 

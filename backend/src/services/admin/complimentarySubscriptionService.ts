@@ -69,8 +69,20 @@ export class ComplimentarySubscriptionService {
           // No Stripe IDs - this is complimentary
           stripeCustomerId: null,
           stripeSubscriptionId: null,
+          // Enable monthly feedback requirement
+          requiresMonthlyFeedback: true,
+          feedbackRequirementStartDate: new Date(),
+          feedbackRequirementEndDate: expiresAt,
+          lastFeedbackSubmittedAt: null,
         },
-        select: { id: true, email: true, subscriptionTier: true },
+        select: { 
+          id: true, 
+          email: true, 
+          subscriptionTier: true,
+          stripeSubscriptionId: true,
+          stripeCustomerId: true,
+          subscriptionStatus: true,
+        },
       });
 
       console.log(`[Complimentary] Created new user: ${email} (temp password required)`);
@@ -87,6 +99,10 @@ export class ComplimentarySubscriptionService {
           subscriptionTier: tier,
           subscriptionStatus: 'active',
           currentPeriodEnd: expiresAt,
+          // Enable monthly feedback requirement
+          requiresMonthlyFeedback: true,
+          feedbackRequirementStartDate: new Date(),
+          feedbackRequirementEndDate: expiresAt,
           // Keep existing Stripe IDs if they have them
         },
       });
@@ -96,6 +112,11 @@ export class ComplimentarySubscriptionService {
 
     // Log the grant for auditing
     console.log(`[Complimentary] Granted by: ${adminEmail} | User: ${email} | Tier: ${tier} | Duration: ${durationMonths}mo | Reason: ${reason || 'N/A'}`);
+
+    // User is guaranteed to be non-null at this point
+    if (!user) {
+      throw new Error('User creation/update failed unexpectedly');
+    }
 
     return {
       userId: user.id,

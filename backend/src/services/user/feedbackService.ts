@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { FeedbackRequirementService } from '../admin/feedbackRequirementService';
 
 const prisma = new PrismaClient();
 
@@ -53,6 +54,9 @@ export class FeedbackService {
         authorId: userId,
       },
     });
+
+    // Record feedback submission for requirement tracking
+    await FeedbackRequirementService.recordFeedbackSubmission(userId);
 
     // Get user info for notifications
     const user = await prisma.user.findUnique({ where: { id: userId } });
