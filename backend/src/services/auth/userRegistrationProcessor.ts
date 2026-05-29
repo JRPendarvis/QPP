@@ -63,7 +63,7 @@ export class UserRegistrationProcessor {
       subscriptionTier: 'free',
       subscriptionStatus: 'active',
       badge,
-      lastLoginAt: now, // Track first login on registration
+      lastLogIn: now, // Track first login on registration
       ...legalTimestamps
     };
   }

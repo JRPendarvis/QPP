@@ -31,7 +31,7 @@ interface UserData {
   downloadsThisMonth: number;
   badge: string | null;
   createdAt: string;
-  lastLoginAt: string | null;
+  lastLogIn: string | null;
 }
 
 interface PatternData {
@@ -349,7 +349,7 @@ export default function AdminPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.generationsThisMonth}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.downloadsThisMonth}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
+                      {user.lastLogIn ? new Date(user.lastLogIn).toLocaleDateString() : 'Never'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {canGrant ? (

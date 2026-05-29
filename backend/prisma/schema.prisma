@@ -60,7 +60,7 @@ model User {
     lastFeedbackSubmittedAt      DateTime?
 
     // Login tracking
-    lastLoginAt DateTime?
+    lastLogIn DateTime?
 
     @@map("users")
 }
