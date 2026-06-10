@@ -1,7 +1,7 @@
-import fabricService, { FabricListData, FabricRecord, FabricUsage, QuiltAvailability } from '@/services/fabricService';
+import fabricService, { FabricListData, FabricListFilters, FabricRecord, FabricUsage, QuiltAvailability } from '@/services/fabricService';
 
 export type FabricGateway = {
-  list: () => Promise<FabricListData>;
+  list: (filters?: FabricListFilters) => Promise<FabricListData>;
   create: (data: {
     name: string;
     color: string;
@@ -35,7 +35,7 @@ export type FabricGateway = {
 };
 
 export const defaultFabricGateway: FabricGateway = {
-  list: () => fabricService.list(),
+  list: (filters) => fabricService.list(filters),
   create: (data) => fabricService.create(data),
   update: (fabricId, data) => fabricService.update(fabricId, data),
   usage: (fabricId) => fabricService.usage(fabricId),

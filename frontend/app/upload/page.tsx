@@ -8,6 +8,7 @@ import Navigation from '@/components/Navigation';
 import UploadHeader from '@/components/upload/UploadHeader';
 import PatternDisplay from '@/components/upload/PatternDisplay';
 import ErrorDisplay from '@/components/upload/ErrorDisplay';
+import FabricSearchBar from '@/components/fabrics/FabricSearchBar';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '@/lib/api';
 import {
@@ -37,6 +38,19 @@ export default function UploadPage() {
   const [savedFabrics, setSavedFabrics] = useState<FabricRecord[]>([]);
   const [loadingSavedFabrics, setLoadingSavedFabrics] = useState(true);
   const [addingSavedFabricId, setAddingSavedFabricId] = useState<string | null>(null);
+  const [savedFabricSearch, setSavedFabricSearch] = useState('');
+
+  // Filter saved fabrics based on search
+  const filteredSavedFabrics = useMemo(() => {
+    if (!savedFabricSearch.trim()) return savedFabrics;
+    
+    const query = savedFabricSearch.toLowerCase();
+    return savedFabrics.filter((fabric) =>
+      fabric.name.toLowerCase().includes(query) ||
+      (fabric.type?.toLowerCase() || '').includes(query) ||
+      (fabric.notes?.toLowerCase() || '').includes(query)
+    );
+  }, [savedFabrics, savedFabricSearch]);
 
   // Border state management
   const {
@@ -465,8 +479,20 @@ export default function UploadPage() {
                     ) : savedFabrics.length === 0 ? (
                       <p className="text-sm text-gray-600">No saved fabric photos yet. Add them in Fabric Library first.</p>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {savedFabrics.map((fabric) => {
+                      <>
+                        {savedFabrics.length > 0 && (
+                          <div className="mb-4">
+                            <FabricSearchBar
+                              onSearchChange={setSavedFabricSearch}
+                              placeholder="Search your fabric library..."
+                            />
+                          </div>
+                        )}
+                        {filteredSavedFabrics.length === 0 ? (
+                          <p className="text-sm text-gray-600">No fabrics match your search.</p>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {filteredSavedFabrics.map((fabric) => {
                           const disabled = addingSavedFabricId === fabric.id || fabrics.length >= effectiveMaxFabrics;
                           return (
                             <div key={fabric.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
@@ -490,7 +516,9 @@ export default function UploadPage() {
                             </div>
                           );
                         })}
-                      </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

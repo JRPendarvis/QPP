@@ -16,10 +16,13 @@ export default function FabricsPage() {
     selectedFabricId,
     deletingId,
     usageWarning,
+    editingFabricId,
     setSelectedFabricId,
+    setEditingFabricId,
     handleCreate,
     handleDelete,
     handleQuickUpdateYardage,
+    handleEditFabric,
   } = useFabricsPageModel();
 
   return (
@@ -84,6 +87,9 @@ export default function FabricsPage() {
               onSelectFabric={setSelectedFabricId}
               onDeleteFabric={handleDelete}
               onQuickUpdateYardage={handleQuickUpdateYardage}
+              onEditFabric={handleEditFabric}
+              editingFabricId={editingFabricId}
+              setEditingFabricId={setEditingFabricId}
             />
           </div>
         </div>

@@ -47,9 +47,25 @@ export interface FabricListData {
   used: number;
 }
 
+export interface FabricListFilters {
+  search?: string;
+  type?: string;
+  minYardage?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
 class FabricService {
-  async list(): Promise<FabricListData> {
-    const response = await api.get('/api/fabrics');
+  async list(filters?: FabricListFilters): Promise<FabricListData> {
+    const params: Record<string, string> = {};
+    
+    if (filters?.search) params.search = filters.search;
+    if (filters?.type) params.type = filters.type;
+    if (filters?.minYardage) params.minYardage = filters.minYardage;
+    if (filters?.sortBy) params.sortBy = filters.sortBy;
+    if (filters?.sortOrder) params.sortOrder = filters.sortOrder;
+
+    const response = await api.get('/api/fabrics', { params });
     const data = response.data?.data;
     return {
       fabrics: data?.fabrics ?? [],

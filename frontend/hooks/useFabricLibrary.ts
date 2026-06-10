@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
-import { FabricRecord, FabricUsage, QuiltAvailability } from '@/services/fabricService';
+import { FabricRecord, FabricUsage, QuiltAvailability, FabricListFilters } from '@/services/fabricService';
 import { FabricGateway, defaultFabricGateway } from '@/services/fabric/fabricGateway';
 
 function getApiErrorMessage(error: unknown, fallback: string): string {
@@ -15,10 +15,10 @@ export function useFabricLibrary(gateway: FabricGateway = defaultFabricGateway) 
   const [loading, setLoading] = useState(false);
   const [limit, setLimit] = useState<number | null>(null);
 
-  const fetchFabrics = useCallback(async () => {
+  const fetchFabrics = useCallback(async (filters?: FabricListFilters) => {
     setLoading(true);
     try {
-      const result = await gateway.list();
+      const result = await gateway.list(filters);
       setFabrics(result.fabrics);
       setLimit(result.limit);
     } catch (error) {

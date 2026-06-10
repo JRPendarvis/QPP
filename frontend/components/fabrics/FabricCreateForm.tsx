@@ -3,6 +3,18 @@
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
+const FABRIC_TYPES = [
+  'Cotton',
+  'Flannel',
+  'Linen',
+  'Wool',
+  'Silk',
+  'Batik',
+  'Minky',
+  'Canvas',
+  'Other',
+];
+
 type FabricCreateData = {
   name: string;
   color: string;
@@ -35,7 +47,7 @@ export default function FabricCreateForm({ loading, onCreate }: FabricCreateForm
   const [name, setName] = useState('');
   const [yardage, setYardage] = useState('1');
   const [imageUrl, setImageUrl] = useState('');
-  const [type, setType] = useState('cotton');
+  const [type, setType] = useState('');
   const [notes, setNotes] = useState('');
   const defaultColor = '#9ca3af';
   const [isBatchUploading, setIsBatchUploading] = useState(false);
@@ -85,7 +97,7 @@ export default function FabricCreateForm({ loading, onCreate }: FabricCreateForm
     setName('');
     setYardage('1');
     setImageUrl('');
-    setType('cotton');
+    setType('');
     setNotes('');
   };
 
@@ -168,12 +180,22 @@ export default function FabricCreateForm({ loading, onCreate }: FabricCreateForm
           className="w-full border border-gray-300 rounded-md px-3 py-2"
         />
       </div>
-      <input
-        value={type}
-        onChange={(event) => setType(event.target.value)}
-        placeholder="Type (cotton, flannel...)"
-        className="w-full border border-gray-300 rounded-md px-3 py-2"
-      />
+      <div>
+        <label htmlFor="fabric-type" className="block text-sm font-medium text-gray-700 mb-1">Fabric Type</label>
+        <select
+          id="fabric-type"
+          value={type}
+          onChange={(event) => setType(event.target.value)}
+          className="w-full border border-gray-300 rounded-md px-3 py-2"
+        >
+          <option value="">Select type...</option>
+          {FABRIC_TYPES.map((fabricType) => (
+            <option key={fabricType} value={fabricType.toLowerCase()}>
+              {fabricType}
+            </option>
+          ))}
+        </select>
+      </div>
       <textarea
         value={notes}
         onChange={(event) => setNotes(event.target.value)}

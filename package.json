@@ -1,7 +1,7 @@
 {
   "name": "quiltplannerpro",
   "private": true,
-  "version": "0.2.00001",
+  "version": "0.2.00002",
   "scripts": {
     "version:show": "node scripts/version-manager.js show",
     "version:sync": "node scripts/version-manager.js sync",

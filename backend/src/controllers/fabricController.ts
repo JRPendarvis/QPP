@@ -26,7 +26,22 @@ export async function listFabrics(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const data = await fabricInventoryService.listFabrics(userId);
+    // Extract query parameters for search/filter/sort
+    const search = typeof req.query.search === 'string' ? req.query.search : undefined;
+    const type = typeof req.query.type === 'string' ? req.query.type : undefined;
+    const minYardage = typeof req.query.minYardage === 'string' ? parseFloat(req.query.minYardage) : undefined;
+    const sortBy = typeof req.query.sortBy === 'string' ? req.query.sortBy : undefined;
+    const sortOrder = typeof req.query.sortOrder === 'string' && ['asc', 'desc'].includes(req.query.sortOrder) 
+      ? req.query.sortOrder as 'asc' | 'desc' 
+      : undefined;
+
+    const data = await fabricInventoryService.listFabrics(userId, {
+      search,
+      type,
+      minYardage,
+      sortBy,
+      sortOrder,
+    });
     ResponseHelper.success(res, 200, 'Fabrics fetched', data);
   } catch (error) {
     handleControllerError(res, error, 'Failed to fetch fabrics');

@@ -72,11 +72,59 @@ export class FabricInventoryService {
     return ids;
   }
 
-  async listFabrics(userId: string) {
+  async listFabrics(userId: string, options?: {
+    search?: string;
+    type?: string;
+    minYardage?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
+    const where: any = { userId, archivedAt: null };
+
+    // Apply search filter (name or notes)
+    if (options?.search) {
+      where.OR = [
+        { name: { contains: options.search, mode: 'insensitive' } },
+        { notes: { contains: options.search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Apply type filter
+    if (options?.type) {
+      where.type = { equals: options.type, mode: 'insensitive' };
+    }
+
+    // Apply minimum yardage filter
+    if (options?.minYardage !== undefined && !isNaN(options.minYardage)) {
+      where.yardageAvailable = { gte: options.minYardage };
+    }
+
+    // Determine sort order
+    let orderBy: any = { updatedAt: 'desc' }; // Default sort
+    if (options?.sortBy) {
+      const sortOrder = options.sortOrder || 'asc';
+      switch (options.sortBy) {
+        case 'name':
+          orderBy = { name: sortOrder };
+          break;
+        case 'type':
+          orderBy = { type: sortOrder };
+          break;
+        case 'yardage':
+          orderBy = { yardageAvailable: sortOrder };
+          break;
+        case 'date':
+          orderBy = { updatedAt: sortOrder };
+          break;
+        default:
+          orderBy = { updatedAt: 'desc' };
+      }
+    }
+
     const [fabrics, limit] = await Promise.all([
       this.prisma.fabric.findMany({
-        where: { userId, archivedAt: null },
-        orderBy: { updatedAt: 'desc' },
+        where,
+        orderBy,
       }),
       this.getUserFabricLimit(userId),
     ]);

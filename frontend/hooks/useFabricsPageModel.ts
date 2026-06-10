@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/lib/constants';
 import { useFabricLibrary } from '@/hooks/useFabricLibrary';
+import { FabricListFilters } from '@/services/fabricService';
 
 export function useFabricsPageModel() {
   const { user, loading: authLoading } = useAuth();
@@ -22,6 +23,9 @@ export function useFabricsPageModel() {
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [usageWarning, setUsageWarning] = useState<string | null>(null);
+  const [searchFilters, setSearchFilters] = useState<FabricListFilters>({});
+  const [totalCount, setTotalCount] = useState(0);
+  const [editingFabricId, setEditingFabricId] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -32,6 +36,19 @@ export function useFabricsPageModel() {
 
     void fetchFabrics();
   }, [authLoading, user, router, fetchFabrics]);
+
+  // Update totalCount whenever fabrics change and no filters are applied
+  useEffect(() => {
+    const hasFilters = searchFilters.search || searchFilters.type || searchFilters.minYardage;
+    if (!hasFilters) {
+      setTotalCount(fabrics.length);
+    }
+  }, [fabrics.length, searchFilters]);
+
+  const handleSearchChange = useCallback(async (filters: FabricListFilters) => {
+    setSearchFilters(filters);
+    await fetchFabrics(filters);
+  }, [fetchFabrics]);
 
   const handleCreate = useCallback(async (data: {
     name: string;
@@ -71,6 +88,13 @@ export function useFabricsPageModel() {
     await updateFabric(fabricId, { yardageAvailable });
   }, [updateFabric]);
 
+  const handleEditFabric = useCallback(async (
+    fabricId: string,
+    updates: { name?: string; type?: string | null; notes?: string | null }
+  ) => {
+    await updateFabric(fabricId, updates);
+  }, [updateFabric]);
+
   return {
     authLoading,
     fabrics,
@@ -79,9 +103,13 @@ export function useFabricsPageModel() {
     selectedFabricId,
     deletingId,
     usageWarning,
+    totalCount,
+    editingFabricId,
     setSelectedFabricId,
+    setEditingFabricId,
     handleCreate,
     handleDelete,
     handleQuickUpdateYardage,
+    handleEditFabric,
   };
 }
