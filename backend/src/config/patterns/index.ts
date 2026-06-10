@@ -23,7 +23,7 @@ import MarinersCompass from './mariners-compass';
 import NewYorkBeauty from './new-york-beauty';
 import StormAtSea from './storm-at-sea';
 import DrunkardPath from './drunkards-path';
-import FeatheredStar from './mosaic-star';
+import MosaicStar from './mosaic-star';
 import GrandmothersFlowerGarden from './grandmothers-flower-garden';
 import DoubleWeddingRing from './double-wedding-ring';
 import PickleDish from './pickle-dish';
@@ -52,7 +52,7 @@ const patterns: Record<string, PatternDefinition> = {
   'new-york-beauty': NewYorkBeauty,
   'storm-at-sea': StormAtSea,
   'drunkards-path': DrunkardPath,
-  'mosaic-star': FeatheredStar,
+  'mosaic-star': MosaicStar,
   'grandmothers-flower-garden': GrandmothersFlowerGarden,
   'double-wedding-ring': DoubleWeddingRing,
   'pickle-dish': PickleDish,

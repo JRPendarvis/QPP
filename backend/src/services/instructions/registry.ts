@@ -8,7 +8,6 @@ import { churnDashPlan } from '../../config/patterns/churn-dash/plan';
 import { complexMedallionPlan } from '../../config/patterns/complex-medallion/plan';
 import { doubleWeddingRingPlan } from '../../config/patterns/double-wedding-ring/plan';
 import { drunkardsPathPlan } from '../../config/patterns/drunkards-path/plan';
-import { featheredStarPlan } from '../../config/patterns/feathered-star/plan';
 import { flyingGeesePlan } from '../../config/patterns/flying-geese/plan';
 import { fourPatchPlan } from '../../config/patterns/four-patch/plan';
 import { grandmothersFlowerGardenPlan } from '../../config/patterns/grandmothers-flower-garden/plan';
@@ -38,7 +37,6 @@ const plans: Record<string, InstructionPlan<any>> = {
   'complex-medallion': complexMedallionPlan,
   'double-wedding-ring': doubleWeddingRingPlan,
   'drunkards-path': drunkardsPathPlan,
-  'feathered-star': featheredStarPlan,
   'flying-geese': flyingGeesePlan,
   'four-patch': fourPatchPlan,
   'grandmothers-flower-garden': grandmothersFlowerGardenPlan,

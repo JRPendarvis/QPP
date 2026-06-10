@@ -28,7 +28,6 @@ backend/src/config/prompts/
 ├── new-york-beauty.prompt.ts         # TODO: Needs content
 ├── storm-at-sea.prompt.ts            # TODO: Needs content
 ├── drunkards-path.prompt.ts          # TODO: Needs content
-├── feathered-star.prompt.ts          # TODO: Needs content
 ├── grandmothers-flower-garden.prompt.ts  # TODO: Needs content
 ├── double-wedding-ring.prompt.ts     # TODO: Needs content
 ├── pickle-dish.prompt.ts             # TODO: Needs content
