@@ -54,6 +54,7 @@ const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
       
       const fabricData = fabricsWithTypes.map((fabric, index) => ({
         imageData: fabric.data, // Already base64 without prefix (handled by convertFilesToBase64)
+        imageType: fabric.type,
         fileName: fabrics[index].name,
       }));
 

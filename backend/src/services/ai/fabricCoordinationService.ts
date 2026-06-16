@@ -6,6 +6,7 @@ import { buildFabricCoordinationPrompt } from './prompts/fabricCoordinationPromp
 
 interface FabricAnalysis {
   imageData: string;
+  imageType?: string;
   fileName: string;
 }
 
@@ -18,6 +19,16 @@ interface CoordinationResponse {
 }
 
 type FabricRole = 'background' | 'primary' | 'secondary' | 'accent';
+
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+
+const normalizeImageType = (imageType?: string): 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' => {
+  const lowered = imageType?.toLowerCase();
+  if (lowered && ALLOWED_IMAGE_TYPES.has(lowered)) {
+    return lowered as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+  }
+  return 'image/jpeg';
+};
 
 /**
  * Validates a role assignment is a valid number within the fabric count
@@ -74,7 +85,11 @@ export class FabricCoordinationService {
     const prompt = buildFabricCoordinationPrompt(fabrics.length);
     
     const response = await this.client.messages.create({
+<<<<<<< HEAD
       model: FabricCoordinationService.MODEL,
+=======
+        model: 'claude-sonnet-4-6',
+>>>>>>> 0900b9d710fffae009884b2cf5b4a4a9b1480800
       max_tokens: 2000,
       messages: [{
         role: 'user',
@@ -83,11 +98,11 @@ export class FabricCoordinationService {
             type: 'text',
             text: prompt,
           },
-          ...fabrics.map((fabric, index) => ({
+          ...fabrics.map((fabric) => ({
             type: 'image' as const,
             source: {
               type: 'base64' as const,
-              media_type: 'image/jpeg' as const,
+              media_type: normalizeImageType(fabric.imageType),
               data: fabric.imageData,
             },
           })),
