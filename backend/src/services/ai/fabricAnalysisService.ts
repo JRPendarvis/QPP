@@ -27,7 +27,7 @@ export class FabricAnalysisService {
   ): Promise<FabricAnalysis[]> {
     try {
       const analysisStream = await anthropic.messages.stream({
-        model: 'claude-sonnet-4-20250514',
+        model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6',
         max_tokens: 2000,
         messages: [
           {

@@ -189,7 +189,11 @@ export class PatternController {
 
       // Validate fabric data structure
       const isValid = fabrics.every(
-        (fabric: any) => fabric.imageData && fabric.fileName && typeof fabric.imageData === 'string'
+        (fabric: any) =>
+          fabric.imageData &&
+          fabric.fileName &&
+          typeof fabric.imageData === 'string' &&
+          (!fabric.imageType || typeof fabric.imageType === 'string')
       );
 
       if (!isValid) {
