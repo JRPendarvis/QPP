@@ -49,6 +49,7 @@ const validateRequiredRoles = (parsed: CoordinationResponse, fabricCount: number
  */
 export class FabricCoordinationService {
   private client: Anthropic;
+  private static readonly MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
 
   constructor() {
     this.client = new Anthropic({
@@ -73,7 +74,7 @@ export class FabricCoordinationService {
     const prompt = buildFabricCoordinationPrompt(fabrics.length);
     
     const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: FabricCoordinationService.MODEL,
       max_tokens: 2000,
       messages: [{
         role: 'user',

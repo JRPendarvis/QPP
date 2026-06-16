@@ -6,6 +6,7 @@ import { FabricAnalysis } from '../../types/ClaudeResponse';
  * Service for analyzing fabric images using Claude API
  */
 export class FabricAnalysisService {
+  private static readonly MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
   private static readonly ANALYSIS_PROMPT = 
     `You are an expert quilter. For each uploaded fabric image, provide a JSON array with objects containing: fabricIndex, description, type (printed|solid), value (light|medium|dark), printScale (solid|small|medium|large), dominantColor (hex code). Do NOT assign roles. Example: [{"fabricIndex":1, ...}, ...]`;
 
@@ -27,7 +28,7 @@ export class FabricAnalysisService {
   ): Promise<FabricAnalysis[]> {
     try {
       const analysisStream = await anthropic.messages.stream({
-        model: 'claude-sonnet-4-20250514',
+        model: this.MODEL,
         max_tokens: 2000,
         messages: [
           {

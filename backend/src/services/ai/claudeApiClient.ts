@@ -6,7 +6,7 @@ import { PatternGenerationLogger } from '../pattern/patternGenerationLogger';
  * Client for making Claude API requests
  */
 export class ClaudeApiClient {
-  private static readonly MODEL = 'claude-sonnet-4-20250514';
+  private static readonly MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
   private static readonly MAX_TOKENS = 8000;
 
   /**

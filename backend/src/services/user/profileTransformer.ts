@@ -38,12 +38,27 @@ export class ProfileTransformer {
   transformProfile(user: UserProfileData, usage: UsageStats, tierConfig: any): ProfileResponse {
     return {
       ...user,
+      skillLevel: this.normalizeSkillLevel(user.skillLevel),
       usage,
       tierInfo: {
         name: tierConfig.name,
         price: this.getTierPrice(user.billingInterval, tierConfig),
       },
     };
+  }
+
+  /**
+   * Normalize subscription-tier aliases to canonical skill levels so
+   * the frontend never receives an invalid value.
+   */
+  private normalizeSkillLevel(skillLevel: string): string {
+    const aliases: Record<string, string> = {
+      basic: 'beginner',
+      hobbyist: 'beginner',
+      enthusiast: 'intermediate',
+      pro: 'advanced',
+    };
+    return aliases[skillLevel?.toLowerCase()] ?? skillLevel ?? 'beginner';
   }
 
   /**
