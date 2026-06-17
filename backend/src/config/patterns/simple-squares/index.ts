@@ -37,11 +37,14 @@ const SimpleSquares: PatternDefinition = {
     fabricColors: string[],
     opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
-    const blockIndex = opts.blockIndex ?? 0;
+    const row = opts.row ?? 0;
+    const col = opts.col ?? 0;
 
-    // Rotate through all colors - each block gets the next color in sequence
-    const color = fabricColors[blockIndex % fabricColors.length];
-    
+    // Offset each row by the row number so colors shift diagonally instead of
+    // repeating straight down — prevents a "rail fence" appearance when the
+    // fabric count equals the column count (e.g. 3 fabrics on a 3-col grid).
+    const color = fabricColors[(row + col) % fabricColors.length];
+
     return [color];
   }
 };

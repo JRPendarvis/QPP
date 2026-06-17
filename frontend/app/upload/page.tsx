@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import { useBorderState } from '@/hooks/useBorderState';
@@ -39,6 +39,10 @@ export default function UploadPage() {
   const [loadingSavedFabrics, setLoadingSavedFabrics] = useState(true);
   const [addingSavedFabricId, setAddingSavedFabricId] = useState<string | null>(null);
   const [savedFabricSearch, setSavedFabricSearch] = useState('');
+  const [liveUpdating, setLiveUpdating] = useState(false);
+  const [liveUpdateError, setLiveUpdateError] = useState<string | null>(null);
+  const [lastGeneratedFabricSignature, setLastGeneratedFabricSignature] = useState('');
+  const liveUpdateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Filter saved fabrics based on search
   const filteredSavedFabrics = useMemo(() => {
@@ -117,6 +121,18 @@ export default function UploadPage() {
     [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length, borderFabricsNeeded]
   );
 
+  const currentFabricSignature = useMemo(
+    () => fabrics.map((file) => `${file.name}-${file.size}-${file.lastModified}`).join('|'),
+    [fabrics]
+  );
+
+  const currentFabricLabels = useMemo(() => {
+    if (fabricRoles.length >= fabrics.length) {
+      return fabricRoles.slice(0, fabrics.length);
+    }
+    return fabrics.map((_, index) => `Fabric ${index + 1}`);
+  }, [fabricRoles, fabrics]);
+
   const handlePatternChoiceChange = (choice: PatternChoice) => {
     setPatternChoice(choice);
     if (choice === 'auto') {
@@ -171,12 +187,24 @@ export default function UploadPage() {
     };
   }, [user]);
 
-  const handleAddSavedFabricToQuilt = async (fabric: FabricRecord) => {
+  const buildFileFromSavedFabric = async (fabric: FabricRecord): Promise<File> => {
     if (!fabric.imageUrl) {
-      toast.error('This saved fabric does not have a photo.');
-      return;
+      throw new Error('This saved fabric does not have a photo.');
     }
 
+    const response = await fetch(fabric.imageUrl);
+    if (!response.ok) {
+      throw new Error('Unable to read saved fabric image');
+    }
+
+    const blob = await response.blob();
+    const mimeType = blob.type || 'image/jpeg';
+    const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
+    const safeName = fabric.name.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
+    return new File([blob], `${safeName || 'saved-fabric'}.${ext}`, { type: mimeType });
+  };
+
+  const handleAddSavedFabricToQuilt = async (fabric: FabricRecord) => {
     if (fabrics.length >= effectiveMaxFabrics) {
       toast.error(`Maximum ${effectiveMaxFabrics} fabrics reached for this quilt setup.`);
       return;
@@ -184,20 +212,39 @@ export default function UploadPage() {
 
     setAddingSavedFabricId(fabric.id);
     try {
-      const response = await fetch(fabric.imageUrl);
-      if (!response.ok) throw new Error('Unable to read saved fabric image');
-
-      const blob = await response.blob();
-      const mimeType = blob.type || 'image/jpeg';
-      const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
-      const safeName = fabric.name.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
-      const file = new File([blob], `${safeName || 'saved-fabric'}.${ext}`, { type: mimeType });
+      const file = await buildFileFromSavedFabric(fabric);
 
       setFabrics((prev) => [...prev, file]);
       setPreviews((prev) => [...prev, fabric.imageUrl as string]);
       toast.success(`${fabric.name} added to quilt fabrics.`);
-    } catch {
-      toast.error('Could not add this saved fabric photo. Please upload it manually.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not add this saved fabric photo. Please upload it manually.');
+    } finally {
+      setAddingSavedFabricId(null);
+    }
+  };
+
+  const handleReplaceFabricWithSaved = async (index: number, savedFabricId: string) => {
+    const selectedSavedFabric = savedFabrics.find((fabric) => fabric.id === savedFabricId);
+    if (!selectedSavedFabric) {
+      toast.error('Saved fabric not found.');
+      return;
+    }
+
+    setAddingSavedFabricId(selectedSavedFabric.id);
+    try {
+      const file = await buildFileFromSavedFabric(selectedSavedFabric);
+      handleReplaceFabricAt(index, file, false);
+
+      setPreviews((prev) => {
+        const updated = [...prev];
+        updated[index] = selectedSavedFabric.imageUrl || updated[index];
+        return updated;
+      });
+
+      toast.success(`${selectedSavedFabric.name} applied to ${currentFabricLabels[index] || `Fabric ${index + 1}`}.`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not replace with saved fabric.');
     } finally {
       setAddingSavedFabricId(null);
     }
@@ -213,6 +260,27 @@ export default function UploadPage() {
     newPreviews.splice(toIdx, 0, movedPreview);
     setFabrics(newFabrics);
     setPreviews(newPreviews);
+  };
+
+  const handleReplaceFabricAt = (index: number, file: File, showToast = true) => {
+    if (index < 0 || index >= fabrics.length) return;
+    const previewUrl = URL.createObjectURL(file);
+
+    setFabrics((prev) => {
+      const updated = [...prev];
+      updated[index] = file;
+      return updated;
+    });
+
+    setPreviews((prev) => {
+      const updated = [...prev];
+      updated[index] = previewUrl;
+      return updated;
+    });
+
+    if (showToast) {
+      toast.success(`Replaced ${currentFabricLabels[index] || `Fabric ${index + 1}`}`);
+    }
   };
 
   const handleAIRearrange = (assignments: { background?: string; primary?: string; secondary?: string; accent?: string }) => {
@@ -257,6 +325,7 @@ export default function UploadPage() {
   const handleGenerate = async () => {
     const loadingToast = toast.loading('Generating your quilt pattern! This may take a moment...');
     setGenerating(true);
+    setLiveUpdateError(null);
     try {
       await generatePattern(
         currentSkill,
@@ -265,6 +334,7 @@ export default function UploadPage() {
         quiltSize || undefined,
         borderConfiguration.enabled ? borderConfiguration.borders : undefined
       );
+      setLastGeneratedFabricSignature(currentFabricSignature);
       toast.dismiss(loadingToast);
     } catch {
       toast.dismiss(loadingToast);
@@ -280,6 +350,69 @@ export default function UploadPage() {
       handleFilesAdded(files);
     }
   };
+
+  useEffect(() => {
+    if (!pattern) {
+      setLiveUpdateError(null);
+      return;
+    }
+
+    if (currentFabricSignature === lastGeneratedFabricSignature) {
+      return;
+    }
+
+    if (!fabricCountValid || !!fabricValidationMessage) {
+      setLiveUpdateError(
+        fabricValidationMessage ||
+          'Cannot update pattern right now. Please adjust fabric count first.'
+      );
+      return;
+    }
+
+    if (liveUpdateDebounceRef.current) {
+      clearTimeout(liveUpdateDebounceRef.current);
+    }
+
+    liveUpdateDebounceRef.current = setTimeout(() => {
+      void (async () => {
+        setLiveUpdating(true);
+        setLiveUpdateError(null);
+        try {
+          await generatePattern(
+            currentSkill,
+            challengeMe,
+            patternChoice === 'manual' ? selectedPattern : undefined,
+            quiltSize || undefined,
+            borderConfiguration.enabled ? borderConfiguration.borders : undefined
+          );
+          setLastGeneratedFabricSignature(currentFabricSignature);
+        } catch {
+          setLiveUpdateError('Could not refresh pattern after fabric changes. Your previous pattern is still shown.');
+        } finally {
+          setLiveUpdating(false);
+        }
+      })();
+    }, 700);
+
+    return () => {
+      if (liveUpdateDebounceRef.current) {
+        clearTimeout(liveUpdateDebounceRef.current);
+      }
+    };
+  }, [
+    pattern,
+    currentFabricSignature,
+    lastGeneratedFabricSignature,
+    fabricCountValid,
+    fabricValidationMessage,
+    generatePattern,
+    currentSkill,
+    challengeMe,
+    patternChoice,
+    selectedPattern,
+    quiltSize,
+    borderConfiguration,
+  ]);
 
   if (loading || !profile) {
     return (
@@ -552,11 +685,21 @@ export default function UploadPage() {
             </>
           )}
 
-          {pattern && !generating && (
+          {pattern && (
             <PatternDisplay
               pattern={pattern}
               userTier={profile.subscriptionTier}
               usage={profile.usage}
+              fabrics={fabrics}
+              previews={previews}
+              fabricLabels={currentFabricLabels}
+              savedFabrics={savedFabrics}
+              liveUpdating={liveUpdating}
+              liveUpdateError={liveUpdateError}
+              onReplaceFabric={handleReplaceFabricAt}
+              onReplaceFabricWithSaved={handleReplaceFabricWithSaved}
+              onRemoveFabric={removeFabric}
+              onMoveFabric={handleFabricReorder}
               onStartOver={resetPattern}
             />
           )}

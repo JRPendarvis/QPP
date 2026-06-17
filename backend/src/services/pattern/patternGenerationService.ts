@@ -1,13 +1,13 @@
 // src/services/patternGenerationService.ts
 
-import { ClaudeService } from '../ai/claudeService';
-import { SubscriptionValidator, ValidatedUser } from '../subscription/subscriptionValidator';
+import { SubscriptionValidator } from '../subscription/subscriptionValidator';
 import { SkillLevelService } from '../user/skillLevelService';
 import { InstructionGenerationService } from './instructionGenerationService';
 import { PatternRepository } from '../../repositories/patternRepository';
 import { normalizePatternId } from '../../utils/patternNormalization';
 import { BorderConfiguration } from '../../types/Border';
 import { FeedbackRequirementService } from '../admin/feedbackRequirementService';
+import { DeterministicQuiltGenerationService } from './deterministicQuiltGenerationService';
 
 export interface GeneratePatternRequest {
   userId: string;
@@ -36,22 +36,22 @@ export interface GeneratePatternResult {
  * Follows Dependency Inversion: Depends on abstractions (services) not concrete implementations
  */
 export class PatternGenerationService {
-  private claudeService: ClaudeService;
   private subscriptionValidator: SubscriptionValidator;
   private skillLevelService: SkillLevelService;
   private instructionService: InstructionGenerationService;
   private patternRepository: PatternRepository;
+  private deterministicQuiltGenerationService: DeterministicQuiltGenerationService;
 
   constructor() {
-    this.claudeService = new ClaudeService();
     this.subscriptionValidator = new SubscriptionValidator();
     this.skillLevelService = new SkillLevelService();
     this.instructionService = new InstructionGenerationService();
     this.patternRepository = new PatternRepository();
+    this.deterministicQuiltGenerationService = new DeterministicQuiltGenerationService();
   }
 
   async generate(request: GeneratePatternRequest): Promise<GeneratePatternResult> {
-    const { userId, images, imageTypes, skillLevel, challengeMe, selectedPattern, roleAssignments, quiltSize, borderConfiguration } = request;
+    const { userId, images, skillLevel, challengeMe, selectedPattern, roleAssignments, quiltSize, borderConfiguration } = request;
 
     const patternToUse = normalizePatternId(selectedPattern);
     console.log(`📋 Pattern to use: "${patternToUse}" (from: "${selectedPattern}")`);
@@ -73,19 +73,18 @@ export class PatternGenerationService {
     // Determine target skill level (with optional challenge mode)
     const targetSkillLevel = this.skillLevelService.determineSkillLevel(skillLevel, user.skillLevel, challengeMe);
 
-    // Claude generates visual/design + metadata
-    let pattern: any = await this.claudeService.generateQuiltPattern(
+    let pattern: any = await this.deterministicQuiltGenerationService.generateQuiltPattern(
       images,
-      imageTypes,
       targetSkillLevel,
       patternToUse,
-      roleAssignments,
       quiltSize,
       borderConfiguration
     );
 
-    // Generate deterministic instructions when supported
-    pattern = await this.instructionService.generateInstructions(pattern, patternToUse, roleAssignments);
+    // Generate deterministic instructions when supported.
+    // In auto mode, deterministic generation resolves a concrete pattern id on the pattern object.
+    const resolvedPatternId = pattern?.patternId || patternToUse;
+    pattern = await this.instructionService.generateInstructions(pattern, resolvedPatternId, roleAssignments);
 
     // Save pattern and increment usage count
     const savedPattern = await this.patternRepository.savePattern({

@@ -6,9 +6,6 @@ import { PatternGenerationLogger } from '../pattern/patternGenerationLogger';
  * Client for making Claude API requests
  */
 export class ClaudeApiClient {
-<<<<<<< HEAD
-  private static readonly MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
-=======
   // Override via ANTHROPIC_MODEL env var to use any model your account supports.
   // Default falls back through known versioned model IDs in order of preference.
   private static readonly CANDIDATE_MODELS = [
@@ -17,8 +14,6 @@ export class ClaudeApiClient {
     'claude-opus-4-8',
     'claude-haiku-4-5-20251001',
   ].filter((m): m is string => Boolean(m?.trim()));
-
->>>>>>> 0900b9d710fffae009884b2cf5b4a4a9b1480800
   private static readonly MAX_TOKENS = 8000;
 
   static async generatePattern(
