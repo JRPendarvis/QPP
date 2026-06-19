@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface UploadSectionProps {
-  patternChoice: 'auto' | 'manual';
+  patternChoice: 'auto' | 'manual' | 'unique';
   selectedPatternDetails: { name: string; minFabrics: number; maxFabrics: number } | null;
   MIN_FABRICS: number;
   MAX_FABRICS: number;
@@ -29,6 +29,18 @@ const UploadSection: React.FC<UploadSectionProps> = ({
           <span className="font-medium text-indigo-600">
             {formatFabricRange(selectedPatternDetails.minFabrics, selectedPatternDetails.maxFabrics)}
           </span>
+          {borderFabricsNeeded > 0 && (
+            <>
+              {' + '}
+              <span className="font-medium text-purple-600">
+                {borderFabricsNeeded} for borders
+              </span>
+            </>
+          )}
+        </>
+      ) : patternChoice === 'unique' ? (
+        <>
+          AI Choose mode creates a unique quilt composition based on your skill level
           {borderFabricsNeeded > 0 && (
             <>
               {' + '}

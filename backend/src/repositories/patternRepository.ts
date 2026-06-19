@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 export interface SavePatternRequest {
   userId: string;
   patternData: any;
+  creditsUsed?: number;
 }
 
 export interface SavedPattern {
@@ -31,7 +32,7 @@ export class PatternRepository {
    * @returns Saved pattern with database ID
    */
   async savePattern(request: SavePatternRequest): Promise<SavedPattern> {
-    const { userId, patternData } = request;
+    const { userId, patternData, creditsUsed = 1 } = request;
 
     const savedPattern = await prisma.$transaction(async (tx) => {
       const newPattern = await tx.pattern.create({
@@ -45,7 +46,7 @@ export class PatternRepository {
       await tx.user.update({
         where: { id: userId },
         data: {
-          generationsThisMonth: { increment: 1 },
+          generationsThisMonth: { increment: creditsUsed },
         },
       });
 

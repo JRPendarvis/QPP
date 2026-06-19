@@ -45,4 +45,11 @@ export interface QuiltPattern {
   
   // All fabric images (base64) - includes pattern fabrics AND border fabrics
   fabricImages?: string[];
+
+  // Auto selection details (shown when QuiltPlannerPro chooses a pattern)
+  autoSelection?: {
+    selectedBy: 'ai' | 'deterministic';
+    reason?: string;
+    targetSkillLevel?: string;
+  };
 }

@@ -17,6 +17,11 @@ export interface UsePatternGenerationReturn {
   generating: boolean;
   pattern: QuiltPattern | null;
   error: string;
+  latestUsage: {
+    used: number;
+    limit: number;
+    remaining: number;
+  } | null;
   
   // Constants
   MAX_FABRICS: number;
@@ -31,5 +36,5 @@ export interface UsePatternGenerationReturn {
     selectedPattern?: string,
     quiltSize?: string,
     borders?: any
-  ) => Promise<void>;
+  ) => Promise<{ used: number; limit: number; remaining: number } | null>;
 }

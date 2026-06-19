@@ -18,6 +18,26 @@ export interface QuiltPattern {
   // Border configuration and dimensions
   borderConfiguration?: BorderConfiguration;
   borderDimensions?: BorderDimensions;
+
+  // Auto pattern selection details for "Let QuiltPlannerPro choose"
+  autoSelection?: {
+    selectedBy: 'ai' | 'deterministic';
+    reason?: string;
+    targetSkillLevel?: string;
+  };
+
+  // Selection rationale details for non-catalog unique generation.
+  selectionRationale?: {
+    mode: 'unique';
+    reason?: string;
+    targetSkillLevel?: string;
+  };
+
+  meta?: {
+    isUnique?: boolean;
+    uniqueVersion?: string;
+    localOnly?: boolean;
+  };
 }
 
 export interface FabricRequirement {

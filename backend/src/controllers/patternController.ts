@@ -6,6 +6,9 @@ import { PatternListService } from '../services/pattern/patternListService';
 import { PatternRequestValidator } from '../services/pattern/patternRequestValidator';
 import { PatternErrorHandler } from './helpers/patternErrorHandler';
 import { FabricCoordinationService } from '../services/ai/fabricCoordinationService';
+import { SubscriptionValidator } from '../services/subscription/subscriptionValidator';
+import { UserUsageRepository } from '../services/user/userUsageRepository';
+import { getCreditCost } from '../config/credits.config';
 import {
   logPatternGenerationRequest,
   buildDebugInfo,
@@ -15,11 +18,15 @@ export class PatternController {
   private pdfService: PDFService;
   private generationService: PatternGenerationService;
   private downloadService: PatternDownloadService;
+  private subscriptionValidator: SubscriptionValidator;
+  private userUsageRepository: UserUsageRepository;
 
   constructor() {
     this.pdfService = new PDFService();
     this.generationService = new PatternGenerationService();
     this.downloadService = new PatternDownloadService();
+    this.subscriptionValidator = new SubscriptionValidator();
+    this.userUsageRepository = new UserUsageRepository();
   }
 
   async generatePattern(req: Request, res: Response) {
@@ -33,6 +40,7 @@ export class PatternController {
         skillLevel,
         challengeMe,
         selectedPattern,
+        forceUnique,
         roleAssignments,
         quiltSize,
         borderConfiguration,
@@ -57,7 +65,14 @@ export class PatternController {
         });
       }
 
-      const normalizedPattern = PatternRequestValidator.normalizePattern(selectedPattern);
+      const normalizedPattern = forceUnique
+        ? 'unique'
+        : PatternRequestValidator.normalizePattern(selectedPattern);
+      console.log('[PatternController] Pattern normalization:', {
+        selectedPattern,
+        forceUnique,
+        normalizedPattern,
+      });
 
       const result = await this.generationService.generate({
         userId: userId!,
@@ -79,6 +94,22 @@ export class PatternController {
       });
 
       res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      return PatternErrorHandler.handleGenerationError(error, res);
+    }
+  }
+
+  async generateUniquePattern(req: Request, res: Response) {
+    try {
+      const body = req.body ?? {};
+      const forcedBody = {
+        ...body,
+        selectedPattern: 'unique',
+        forceUnique: true,
+      };
+
+      req.body = forcedBody;
+      return this.generatePattern(req, res);
     } catch (error) {
       return PatternErrorHandler.handleGenerationError(error, res);
     }
@@ -163,7 +194,12 @@ export class PatternController {
    */
   async autoAssignFabricRoles(req: Request, res: Response) {
     try {
+      const userId = req.user?.userId;
       const { fabrics } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
 
       // Validation
       if (!fabrics || !Array.isArray(fabrics)) {
@@ -205,16 +241,49 @@ export class PatternController {
 
       console.log(`[PatternController] Auto-assigning roles for ${fabrics.length} fabrics`);
 
+      const creditsRequired = getCreditCost('fabricCoordination');
+      const { user, tierConfig } = await this.subscriptionValidator.validateUser(userId, creditsRequired);
+
       const coordinationService = new FabricCoordinationService();
       const roleAssignments = await coordinationService.autoAssignRoles(fabrics);
+
+      let creditsUsed = user.generationsThisMonth;
+      if (user.role !== 'staff') {
+        const updatedUsage = await this.userUsageRepository.incrementCreditsUsed(user.id, creditsRequired);
+        creditsUsed = updatedUsage.generationsThisMonth;
+      }
+
+      const creditsRemaining = tierConfig.creditsPerMonth === Infinity
+        ? Infinity
+        : Math.max(0, tierConfig.creditsPerMonth - creditsUsed);
 
       res.json({
         success: true,
         data: roleAssignments,
         message: 'Fabric roles automatically coordinated',
+        usage: {
+          credits: {
+            used: creditsUsed,
+            limit: tierConfig.creditsPerMonth,
+            remaining: creditsRemaining,
+          },
+        },
       });
     } catch (error) {
       console.error('[PatternController] Auto-assign fabric roles error:', error);
+
+      if (error instanceof Error) {
+        if (error.message === 'USER_NOT_FOUND') {
+          return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        if (error.message === 'SUBSCRIPTION_EXPIRED') {
+          return res.status(403).json({ success: false, message: 'Your subscription has expired. Please renew to continue.' });
+        }
+        if (error.message === 'GENERATION_LIMIT_REACHED') {
+          return res.status(403).json({ success: false, message: "You've reached your monthly credit limit. Upgrade your plan for more credits!" });
+        }
+      }
+
       const message = error instanceof Error ? error.message : 'Failed to auto-assign fabric roles';
       
       res.status(500).json({

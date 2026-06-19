@@ -8,8 +8,8 @@ interface PatternOption {
 }
 
 export interface PatternSelectionSectionProps {
-  patternChoice: 'auto' | 'manual';
-  setPatternChoice: (choice: 'auto' | 'manual') => void;
+  patternChoice: 'auto' | 'manual' | 'unique';
+  setPatternChoice: (choice: 'auto' | 'manual' | 'unique') => void;
   selectedPattern: string;
   setSelectedPattern: (id: string) => void;
   availablePatterns: PatternOption[];
@@ -91,6 +91,24 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
           )}
         </div>
       </label>
+      <label className="flex items-start cursor-pointer">
+        <input
+          type="radio"
+          name="patternChoice"
+          value="unique"
+          checked={patternChoice === 'unique'}
+          onChange={() => setPatternChoice('unique')}
+          className="mt-1 mr-3"
+        />
+        <div>
+          <div className="font-medium text-gray-900">
+            AI Unique Pattern
+          </div>
+          <div className="text-sm text-gray-600">
+            Generate a unique quilt at your skill level without selecting a predefined pattern.
+          </div>
+        </div>
+      </label>
     </div>
     {/* Challenge Me Checkbox */}
     <label className="flex items-center cursor-pointer p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
@@ -112,6 +130,7 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
         </div>
       </div>
     </label>
+
   </div>
 );
 

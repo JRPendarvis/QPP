@@ -5,7 +5,7 @@ export interface UserProfile {
     used: number;
     limit: number;
     remaining: number;
-    generations: {
+    credits: {
       used: number;
       limit: number;
       remaining: number;
@@ -25,4 +25,4 @@ export interface PatternDetails {
   maxFabrics: number;
 }
 
-export type PatternChoice = 'auto' | 'manual';
+export type PatternChoice = 'auto' | 'manual' | 'unique';

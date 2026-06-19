@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import PatternVisualization from './PatternVisualization';
 import PatternMetadata from './PatternMetadata';
@@ -30,10 +30,72 @@ interface QuiltPattern {
     description: string;
     inches?: number;
   }>;
+  autoSelection?: {
+    selectedBy: 'ai' | 'deterministic';
+    reason?: string;
+    targetSkillLevel?: string;
+  };
+  selectionRationale?: {
+    mode: 'unique';
+    reason?: string;
+    targetSkillLevel?: string;
+  };
+  meta?: {
+    isUnique?: boolean;
+    uniqueVersion?: string;
+    localOnly?: boolean;
+  };
+}
+
+const DEFAULT_REQUIREMENT_ROLES = ['Background', 'Primary', 'Secondary', 'Accent'];
+
+function buildDisplayFabricRequirements(pattern: QuiltPattern, fabricCount: number) {
+  if (pattern.fabricRequirements && pattern.fabricRequirements.length > 0) {
+    return pattern.fabricRequirements;
+  }
+
+  const requirementCount = Math.max(1, Math.min(fabricCount || 4, DEFAULT_REQUIREMENT_ROLES.length));
+  const splits = [0.45, 0.3, 0.15, 0.1];
+  const estimatedTotalYards = 4.5;
+
+  return Array.from({ length: requirementCount }, (_, index) => {
+    const role = DEFAULT_REQUIREMENT_ROLES[index] || `Fabric ${index + 1}`;
+    const split = splits[index] || (1 / requirementCount);
+
+    return {
+      role,
+      yards: Math.max(0.25, Number((estimatedTotalYards * split).toFixed(2))),
+      description: `${role} fabric for this quilt layout.`,
+    };
+  });
+}
+
+function parseEstimatedSize(value?: string): { width: number; height: number } | null {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.toLowerCase().replace(/inches|inch|"/g, '').trim();
+  const match = normalized.match(/(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/);
+  if (!match) {
+    return null;
+  }
+
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  if (!Number.isFinite(width) || !Number.isFinite(height)) {
+    return null;
+  }
+
+  return { width, height };
+}
+
+function formatEstimatedSize(width: number, height: number): string {
+  return `${Math.max(20, Math.round(width))}x${Math.max(20, Math.round(height))} inches`;
 }
 
 interface Usage {
-  generations: {
+  credits: {
     used: number;
     limit: number;
     remaining: number;
@@ -49,11 +111,13 @@ interface Usage {
 
 interface PatternDisplayProps {
   pattern: QuiltPattern;
+  generatedFromUniqueMode?: boolean;
   userTier: string;
   usage?: Usage;
   fabrics: File[];
   previews: string[];
   fabricLabels?: string[];
+  fabricLibraryRefs?: Array<{ fabricId: string; name: string; yardageAvailable: number } | null>;
   savedFabrics: SavedFabricOption[];
   liveUpdating?: boolean;
   liveUpdateError?: string | null;
@@ -66,11 +130,13 @@ interface PatternDisplayProps {
 
 export default function PatternDisplay({
   pattern,
+  generatedFromUniqueMode = false,
   userTier,
   usage,
   fabrics,
   previews,
   fabricLabels,
+  fabricLibraryRefs = [],
   savedFabrics,
   liveUpdating = false,
   liveUpdateError = null,
@@ -88,10 +154,98 @@ export default function PatternDisplay({
   const hasDownloadsRemaining = usage?.downloads?.remaining
     ? usage.downloads.remaining > 0
     : true;
+  const isLocalFallback = Boolean(pattern.meta?.localOnly);
+  const displayDescription = pattern.description?.trim() || 'A custom quilt layout generated from your selected fabrics and skill level.';
+  const displayFabricRequirements = buildDisplayFabricRequirements(pattern, previews.length);
+  const availabilityCheck = useMemo(() => {
+    const mapped = displayFabricRequirements
+      .map((requirement, index) => {
+        const libraryFabric = fabricLibraryRefs[index];
+        if (!libraryFabric) {
+          return null;
+        }
+
+        const shortageYards = Math.max(0, Number((requirement.yards - libraryFabric.yardageAvailable).toFixed(2)));
+
+        return {
+          role: requirement.role,
+          requiredYards: requirement.yards,
+          availableYards: libraryFabric.yardageAvailable,
+          shortageYards,
+          name: libraryFabric.name,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+    if (mapped.length === 0) {
+      return null;
+    }
+
+    const totalRequired = Number(mapped.reduce((sum, item) => sum + item.requiredYards, 0).toFixed(2));
+    const totalAvailable = Number(mapped.reduce((sum, item) => sum + item.availableYards, 0).toFixed(2));
+    const totalShortage = Number(mapped.reduce((sum, item) => sum + item.shortageYards, 0).toFixed(2));
+
+    return {
+      mapped,
+      totalRequired,
+      totalAvailable,
+      totalShortage,
+      hasShortage: totalShortage > 0,
+      hasPartialCoverage: mapped.length < displayFabricRequirements.length,
+    };
+  }, [displayFabricRequirements, fabricLibraryRefs]);
+  const fitToAvailable = useMemo(() => {
+    if (!availabilityCheck || !availabilityCheck.hasShortage) {
+      return null;
+    }
+
+    const ratioValues = availabilityCheck.mapped
+      .filter((item) => item.requiredYards > 0)
+      .map((item) => item.availableYards / item.requiredYards);
+
+    if (ratioValues.length === 0) {
+      return null;
+    }
+
+    const fitRatio = Math.max(0.35, Math.min(1, Math.min(...ratioValues)));
+    const fittedRequirements = displayFabricRequirements.map((requirement, index) => {
+      const mapped = availabilityCheck.mapped.find((item) => item.role === requirement.role);
+      if (!mapped) {
+        return {
+          ...requirement,
+          yards: Math.max(0.25, Number((requirement.yards * fitRatio).toFixed(2))),
+        };
+      }
+
+      return {
+        ...requirement,
+        yards: Math.max(0.25, Number(Math.min(requirement.yards, mapped.availableYards).toFixed(2))),
+      };
+    });
+
+    const parsedSize = parseEstimatedSize(pattern.estimatedSize);
+    const dimensionScale = Math.sqrt(fitRatio);
+    const fittedSize = parsedSize
+      ? formatEstimatedSize(parsedSize.width * dimensionScale, parsedSize.height * dimensionScale)
+      : pattern.estimatedSize;
+
+    return {
+      fitRatio,
+      fittedRequirements,
+      fittedSize,
+    };
+  }, [availabilityCheck, displayFabricRequirements, pattern.estimatedSize]);
+  const activeFabricRequirements = fitToAvailable?.fittedRequirements || displayFabricRequirements;
+  const activeEstimatedSize = fitToAvailable?.fittedSize || pattern.estimatedSize;
+
+  const shouldShowAutoSelection = Boolean(pattern.autoSelection) && !generatedFromUniqueMode && !pattern.meta?.isUnique;
+  const shouldShowUniqueRationale = (generatedFromUniqueMode || pattern.meta?.isUnique) && Boolean(pattern.selectionRationale);
 
   const handleDownload = async () => {
     if (!pattern.id) {
-      setError('Cannot download: No pattern ID available');
+      setError(isLocalFallback
+        ? 'Download unavailable for local fallback preview. Regenerate to create a downloadable pattern.'
+        : 'Cannot download: No pattern ID available');
       return;
     }
 
@@ -151,10 +305,47 @@ export default function PatternDisplay({
         <h2 className="text-3xl font-bold text-gray-800 mb-2">
           🎉 Your Custom Pattern is Ready!
         </h2>
+        {pattern.meta?.isUnique && (
+          <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-sm font-semibold mb-2">
+            Unique Quilt
+          </span>
+        )}
         <p className="text-gray-600">
           Review your pattern below or download the complete PDF with full instructions
         </p>
       </div>
+
+      {shouldShowAutoSelection && (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+          <p className="text-sm font-semibold text-indigo-900 mb-1">
+            Why QuiltPlannerPro chose this pattern
+          </p>
+          <p className="text-sm text-indigo-800">
+            {pattern.autoSelection.reason || 'Pattern selected using deterministic logic based on your fabrics and skill level.'}
+          </p>
+          {pattern.autoSelection.targetSkillLevel && (
+            <p className="text-xs text-indigo-700 mt-1">
+              Target skill level used: {pattern.autoSelection.targetSkillLevel}
+            </p>
+          )}
+        </div>
+      )}
+
+      {shouldShowUniqueRationale && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+          <p className="text-sm font-semibold text-emerald-900 mb-1">
+            Why QuiltPlannerPro generated this unique quilt
+          </p>
+          <p className="text-sm text-emerald-800">
+            {pattern.selectionRationale?.reason || 'Generated from your fabrics and skill level without using a catalog pattern.'}
+          </p>
+          {pattern.selectionRationale?.targetSkillLevel && (
+            <p className="text-xs text-emerald-700 mt-1">
+              Target skill level used: {pattern.selectionRationale.targetSkillLevel}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Error States */}
       <ErrorStates error={error} patternData={pattern} />
@@ -306,20 +497,29 @@ export default function PatternDisplay({
       {/* Pattern Metadata */}
       <PatternMetadata
         difficulty={pattern.difficulty}
-        estimatedSize={pattern.estimatedSize}
-        description={pattern.description}
+        estimatedSize={activeEstimatedSize}
+        description={displayDescription}
         fabricLayout={pattern.fabricLayout}
       />
 
+      {fitToAvailable && (
+        <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+          <p className="text-sm font-semibold text-teal-900 mb-1">Auto-fit to your available fabric</p>
+          <p className="text-sm text-teal-800">
+            Requirements were scaled to match mapped library yardage. Estimated quilt size was adjusted to approximately {fitToAvailable.fittedSize}.
+          </p>
+        </div>
+      )}
+
       {/* Fabric Requirements */}
-      {pattern.fabricRequirements && pattern.fabricRequirements.length > 0 && (
+      {activeFabricRequirements.length > 0 && (
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h3 className="text-2xl font-bold text-gray-800 mb-4">🧵 Fabric Requirements</h3>
           <p className="text-sm text-gray-600 mb-4">
             Fabric amounts based on 42" usable width with 15% extra for seam allowances
           </p>
           <div className="space-y-3">
-            {pattern.fabricRequirements.map((req, idx) => (
+            {activeFabricRequirements.map((req, idx) => (
               <div key={idx} className="flex justify-between items-center border-b border-gray-200 pb-2">
                 <div className="flex-1">
                   <span className="font-semibold text-gray-800">{req.role}:</span>
@@ -340,6 +540,45 @@ export default function PatternDisplay({
         </div>
       )}
 
+      {availabilityCheck && (
+        <div className={`rounded-lg border p-6 ${availabilityCheck.hasShortage ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'}`}>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">Fabric Availability Check</h3>
+          <p className="text-sm text-gray-700 mb-4">
+            Compared required yardage to the Fabric Library items currently mapped to your quilt.
+          </p>
+          <div className="space-y-2 mb-4">
+            {availabilityCheck.mapped.map((item, index) => (
+              <div key={`${item.role}-${index}`} className="flex justify-between items-center text-sm border-b border-gray-200 pb-2">
+                <span className="text-gray-800">
+                  <strong>{item.role}</strong> ({item.name})
+                </span>
+                <span className={item.shortageYards > 0 ? 'text-amber-700 font-semibold' : 'text-emerald-700 font-semibold'}>
+                  Need {item.requiredYards.toFixed(2)} yd | Have {item.availableYards.toFixed(2)} yd
+                  {item.shortageYards > 0 ? ` | Short ${item.shortageYards.toFixed(2)} yd` : ' | Enough'}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-gray-800">
+            Total required: <strong>{availabilityCheck.totalRequired.toFixed(2)} yd</strong> | Total available: <strong>{availabilityCheck.totalAvailable.toFixed(2)} yd</strong>
+          </p>
+          {availabilityCheck.hasShortage ? (
+            <p className="text-sm text-amber-800 mt-2 font-medium">
+              You are short by {availabilityCheck.totalShortage.toFixed(2)} yd across mapped fabrics. Consider swapping fabrics, changing quilt size, or adding yardage.
+            </p>
+          ) : (
+            <p className="text-sm text-emerald-800 mt-2 font-medium">
+              Great news: mapped fabrics have enough yardage for the current requirement estimate.
+            </p>
+          )}
+          {availabilityCheck.hasPartialCoverage && (
+            <p className="text-xs text-gray-600 mt-2">
+              Some quilt fabrics were uploaded directly (not selected from Fabric Library), so their available yardage could not be verified.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Pattern Instructions */}
       <PatternInstructions
         instructions={pattern.instructions}
@@ -353,6 +592,7 @@ export default function PatternDisplay({
         onDownload={handleDownload}
         downloading={downloading}
         patternId={pattern.id}
+        isLocalFallback={isLocalFallback}
         userTier={userTier}
         downloadsRemaining={usage?.downloads?.remaining}
       />

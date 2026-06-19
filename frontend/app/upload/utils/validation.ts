@@ -9,7 +9,7 @@ export function validateFabricCount(
 ): boolean {
   // Subtract border fabrics to get pattern fabric count
   const patternFabricCount = Math.max(0, fabricsLength - borderCount);
-  if (patternChoice === 'auto') {
+  if (patternChoice === 'auto' || patternChoice === 'unique') {
     // Auto mode delegates exact pattern compatibility to backend selection logic.
     return patternFabricCount >= 2;
   }
@@ -34,8 +34,8 @@ export function getFabricValidationMessage(
 ): string | null {
   // Subtract border fabrics to get pattern fabric count
   const patternFabricCount = Math.max(0, fabricsLength - borderCount);
-  if (patternChoice === 'auto') {
-    // Assume minimum is 2 for auto mode
+  if (patternChoice === 'auto' || patternChoice === 'unique') {
+    // Assume minimum is 2 for auto and unique mode
     if (patternFabricCount < 2) {
       const borderSuffix = borderCount > 0 ? ` (plus ${borderCount} for borders)` : '';
       return `Upload at least 2 fabrics for the pattern${borderSuffix}`;

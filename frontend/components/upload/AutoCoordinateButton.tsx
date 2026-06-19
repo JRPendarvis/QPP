@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 interface AutoCoordinateButtonProps {
   fabrics: File[];
   onRearrange?: (assignments: FabricCoordination) => void;
+  onUsageUpdate?: (usage: { used: number; limit: number; remaining: number }) => void;
 }
 
 export interface FabricCoordination {
@@ -31,6 +32,7 @@ const SparklesIcon = () => (
 const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
   fabrics,
   onRearrange,
+  onUsageUpdate,
 }) => {
   const [isCoordinating, setIsCoordinating] = useState(false);
 
@@ -66,6 +68,10 @@ const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
 
       if (response.data.success) {
         const assignments = response.data.data;
+        const usage = response.data.usage?.credits;
+        if (usage && onUsageUpdate) {
+          onUsageUpdate(usage);
+        }
         
         // Rearrange fabrics if handler provided
         if (onRearrange) {

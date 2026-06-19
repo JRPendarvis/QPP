@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import { useBorderState } from '@/hooks/useBorderState';
 import Navigation from '@/components/Navigation';
@@ -26,8 +27,10 @@ import { PatternChoice } from './utils/types';
 import { getBorderName } from '@/utils/borderNaming';
 import { formatFabricRange, SKILL_LEVELS } from '@/app/helpers/patternHelpers';
 import fabricService, { FabricRecord } from '@/services/fabricService';
+import { processImageFiles } from '@/utils/imageCompression';
 
 export default function UploadPage() {
+  const router = useRouter();
   const { user, loading, profile } = useUserProfile();
   const [patternChoice, setPatternChoice] = useState<PatternChoice>('auto');
   const [selectedPattern, setSelectedPattern] = useState<string>('');
@@ -42,7 +45,10 @@ export default function UploadPage() {
   const [liveUpdating, setLiveUpdating] = useState(false);
   const [liveUpdateError, setLiveUpdateError] = useState<string | null>(null);
   const [lastGeneratedFabricSignature, setLastGeneratedFabricSignature] = useState('');
+  const [fabricLibraryRefs, setFabricLibraryRefs] = useState<Array<{ fabricId: string; name: string; yardageAvailable: number } | null>>([]);
   const liveUpdateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousCreditPercentRef = useRef<number | null>(null);
+  const shownCreditAlertsRef = useRef<Set<number>>(new Set());
 
   // Filter saved fabrics based on search
   const filteredSavedFabrics = useMemo(() => {
@@ -80,7 +86,62 @@ export default function UploadPage() {
     setFabrics,
     setPreviews,
     generatePattern,
+    latestUsage,
   } = usePatternGeneration();
+
+  const maybeAlertCreditThreshold = useCallback((usage: { used: number; limit: number; remaining: number } | null | undefined) => {
+    if (!usage) return;
+    if (!Number.isFinite(usage.limit) || usage.limit <= 0) return;
+
+    const remainingPercent = (usage.remaining / usage.limit) * 100;
+    const previousPercent = previousCreditPercentRef.current;
+    previousCreditPercentRef.current = remainingPercent;
+
+    const thresholds = [50, 25, 10, 5];
+    const crossed = thresholds.filter((threshold) => {
+      if (shownCreditAlertsRef.current.has(threshold)) return false;
+      if (previousPercent === null) return remainingPercent <= threshold;
+      return previousPercent > threshold && remainingPercent <= threshold;
+    });
+
+    if (crossed.length === 0) return;
+
+    const triggeredThreshold = crossed[crossed.length - 1];
+    shownCreditAlertsRef.current.add(triggeredThreshold);
+
+    const toastId = `credit-threshold-${triggeredThreshold}`;
+
+    if (triggeredThreshold <= 25) {
+      toast((t) => (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium">
+            Credit alert: {triggeredThreshold}% remaining ({usage.remaining} credits left).
+          </p>
+          <button
+            type="button"
+            className="self-start px-3 py-1.5 rounded-md bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700"
+            onClick={() => {
+              toast.dismiss(t.id);
+              router.push('/pricing');
+            }}
+          >
+            Upgrade Plan
+          </button>
+        </div>
+      ), {
+        id: toastId,
+        icon: '⚠️',
+        duration: 8000,
+      });
+      return;
+    }
+
+    toast(`Credit alert: ${triggeredThreshold}% remaining (${usage.remaining} credits left).`, {
+      id: toastId,
+      icon: '⚠️',
+      duration: 6000,
+    });
+  }, [router]);
 
   const totalImageSize = fabrics && fabrics.length > 0
     ? fabrics.reduce((sum, f) => sum + (f.size || 0), 0)
@@ -95,9 +156,13 @@ export default function UploadPage() {
     return null;
   }, [patternChoice, selectedPattern, availablePatterns]);
 
-  // Calculate effective max fabrics including border fabrics
+  // Backend enforces an absolute max total fabric upload count.
+  // Pattern and border requirements must fit within this cap.
   const borderFabricsNeeded = borderConfiguration.enabled ? borderConfiguration.borders.length : 0;
-  const effectiveMaxFabrics = (selectedPatternDetails?.maxFabrics ?? MAX_FABRICS) + borderFabricsNeeded;
+  const effectiveMaxFabrics = Math.min(
+    MAX_FABRICS,
+    (selectedPatternDetails?.maxFabrics ?? MAX_FABRICS) + borderFabricsNeeded
+  );
 
   const fabricCountValid = useMemo(
     () => validateFabricCount(
@@ -121,6 +186,15 @@ export default function UploadPage() {
     [patternChoice, selectedPattern, selectedPatternDetails, fabrics.length, borderFabricsNeeded]
   );
 
+  const maxTotalFabricsMessage = useMemo(() => {
+    if (fabrics.length <= MAX_FABRICS) {
+      return null;
+    }
+    return `Maximum ${MAX_FABRICS} total fabrics allowed (including borders). Please remove ${fabrics.length - MAX_FABRICS}.`;
+  }, [fabrics.length, MAX_FABRICS]);
+
+  const generationValidationMessage = fabricValidationMessage || maxTotalFabricsMessage;
+
   const currentFabricSignature = useMemo(
     () => fabrics.map((file) => `${file.name}-${file.size}-${file.lastModified}`).join('|'),
     [fabrics]
@@ -133,9 +207,38 @@ export default function UploadPage() {
     return fabrics.map((_, index) => `Fabric ${index + 1}`);
   }, [fabricRoles, fabrics]);
 
+  const deriveUniqueQuiltSizeFromAvailableYardage = useCallback((explicitQuiltSize?: string): string | undefined => {
+    if (explicitQuiltSize) {
+      return explicitQuiltSize;
+    }
+
+    const mappedRefs = fabricLibraryRefs.filter((item): item is NonNullable<typeof item> => Boolean(item));
+    if (mappedRefs.length < 2) {
+      return undefined;
+    }
+
+    const totalAvailableYards = mappedRefs.reduce((sum, item) => sum + (item.yardageAvailable || 0), 0);
+    if (!Number.isFinite(totalAvailableYards) || totalAvailableYards <= 0) {
+      return undefined;
+    }
+
+    const sizeByRequiredYards = [
+      { size: 'king', requiredYards: 9.7 },
+      { size: 'queen', requiredYards: 8.3 },
+      { size: 'full', requiredYards: 6.95 },
+      { size: 'twin', requiredYards: 5.75 },
+      { size: 'lap', requiredYards: 3.15 },
+      { size: 'baby', requiredYards: 1.85 },
+    ] as const;
+
+    const safetyBufferedYards = totalAvailableYards * 0.9;
+    const matched = sizeByRequiredYards.find((entry) => safetyBufferedYards >= entry.requiredYards);
+    return matched?.size;
+  }, [fabricLibraryRefs]);
+
   const handlePatternChoiceChange = (choice: PatternChoice) => {
     setPatternChoice(choice);
-    if (choice === 'auto') {
+    if (choice !== 'manual') {
       setSelectedPattern('');
       setFabricRoles([]);
     }
@@ -201,7 +304,15 @@ export default function UploadPage() {
     const mimeType = blob.type || 'image/jpeg';
     const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
     const safeName = fabric.name.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
-    return new File([blob], `${safeName || 'saved-fabric'}.${ext}`, { type: mimeType });
+    const rawFile = new File([blob], `${safeName || 'saved-fabric'}.${ext}`, { type: mimeType });
+
+    // Keep saved-fabric imports aligned with dropzone uploads (<=5MB after compression).
+    const { validFiles } = await processImageFiles([rawFile]);
+    if (validFiles.length === 0) {
+      throw new Error('Saved fabric image is too large to use (must be 5MB or less after compression).');
+    }
+
+    return validFiles[0];
   };
 
   const handleAddSavedFabricToQuilt = async (fabric: FabricRecord) => {
@@ -216,6 +327,14 @@ export default function UploadPage() {
 
       setFabrics((prev) => [...prev, file]);
       setPreviews((prev) => [...prev, fabric.imageUrl as string]);
+      setFabricLibraryRefs((prev) => [
+        ...prev,
+        {
+          fabricId: fabric.id,
+          name: fabric.name,
+          yardageAvailable: fabric.yardageAvailable,
+        },
+      ]);
       toast.success(`${fabric.name} added to quilt fabrics.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not add this saved fabric photo. Please upload it manually.');
@@ -234,11 +353,30 @@ export default function UploadPage() {
     setAddingSavedFabricId(selectedSavedFabric.id);
     try {
       const file = await buildFileFromSavedFabric(selectedSavedFabric);
-      handleReplaceFabricAt(index, file, false);
+
+      if (index < 0 || index >= fabrics.length) {
+        return;
+      }
+
+      setFabrics((prev) => {
+        const updated = [...prev];
+        updated[index] = file;
+        return updated;
+      });
 
       setPreviews((prev) => {
         const updated = [...prev];
         updated[index] = selectedSavedFabric.imageUrl || updated[index];
+        return updated;
+      });
+
+      setFabricLibraryRefs((prev) => {
+        const updated = [...prev];
+        updated[index] = {
+          fabricId: selectedSavedFabric.id,
+          name: selectedSavedFabric.name,
+          yardageAvailable: selectedSavedFabric.yardageAvailable,
+        };
         return updated;
       });
 
@@ -258,29 +396,49 @@ export default function UploadPage() {
     const newPreviews = [...previews];
     const [movedPreview] = newPreviews.splice(fromIdx, 1);
     newPreviews.splice(toIdx, 0, movedPreview);
+    const newRefs = [...fabricLibraryRefs];
+    const [movedRef] = newRefs.splice(fromIdx, 1);
+    newRefs.splice(toIdx, 0, movedRef);
     setFabrics(newFabrics);
     setPreviews(newPreviews);
+    setFabricLibraryRefs(newRefs);
   };
 
   const handleReplaceFabricAt = (index: number, file: File, showToast = true) => {
     if (index < 0 || index >= fabrics.length) return;
-    const previewUrl = URL.createObjectURL(file);
 
-    setFabrics((prev) => {
-      const updated = [...prev];
-      updated[index] = file;
-      return updated;
-    });
+    void (async () => {
+      const { validFiles } = await processImageFiles([file]);
+      if (validFiles.length === 0) {
+        toast.error('This image is too large. Please choose an image that can be compressed below 5MB.');
+        return;
+      }
 
-    setPreviews((prev) => {
-      const updated = [...prev];
-      updated[index] = previewUrl;
-      return updated;
-    });
+      const processedFile = validFiles[0];
+      const previewUrl = URL.createObjectURL(processedFile);
 
-    if (showToast) {
-      toast.success(`Replaced ${currentFabricLabels[index] || `Fabric ${index + 1}`}`);
-    }
+      setFabrics((prev) => {
+        const updated = [...prev];
+        updated[index] = processedFile;
+        return updated;
+      });
+
+      setPreviews((prev) => {
+        const updated = [...prev];
+        updated[index] = previewUrl;
+        return updated;
+      });
+
+      setFabricLibraryRefs((prev) => {
+        const updated = [...prev];
+        updated[index] = null;
+        return updated;
+      });
+
+      if (showToast) {
+        toast.success(`Replaced ${currentFabricLabels[index] || `Fabric ${index + 1}`}`);
+      }
+    })();
   };
 
   const handleAIRearrange = (assignments: { background?: string; primary?: string; secondary?: string; accent?: string }) => {
@@ -317,23 +475,64 @@ export default function UploadPage() {
     // Reorder fabrics and previews based on the new order
     const newFabrics = orderedIndices.map(i => fabrics[i]);
     const newPreviews = orderedIndices.map(i => previews[i]);
+    const newRefs = orderedIndices.map(i => fabricLibraryRefs[i] || null);
 
     setFabrics(newFabrics);
     setPreviews(newPreviews);
+    setFabricLibraryRefs(newRefs);
   };
 
+  const handleRemoveFabricAt = (index: number) => {
+    removeFabric(index);
+    setFabricLibraryRefs((prev) => prev.filter((_, currentIndex) => currentIndex !== index));
+  };
+
+  useEffect(() => {
+    setFabricLibraryRefs((prev) => {
+      if (prev.length === fabrics.length) {
+        return prev;
+      }
+      if (prev.length > fabrics.length) {
+        return prev.slice(0, fabrics.length);
+      }
+      return [...prev, ...Array.from({ length: fabrics.length - prev.length }, () => null)];
+    });
+  }, [fabrics.length]);
+
   const handleGenerate = async () => {
+    if (generationValidationMessage) {
+      toast.error(generationValidationMessage);
+      return;
+    }
+
     const loadingToast = toast.loading('Generating your quilt pattern! This may take a moment...');
     setGenerating(true);
     setLiveUpdateError(null);
     try {
-      await generatePattern(
+      const patternOverride = patternChoice === 'unique'
+        ? 'unique'
+        : patternChoice === 'manual'
+          ? selectedPattern
+          : undefined;
+      const effectiveQuiltSize = patternChoice === 'unique'
+        ? deriveUniqueQuiltSizeFromAvailableYardage(quiltSize || undefined)
+        : (quiltSize || undefined);
+
+      if (patternChoice === 'unique' && !quiltSize && effectiveQuiltSize) {
+        toast(`Using ${effectiveQuiltSize} size based on available library yardage.`, {
+          icon: '🧵',
+          duration: 4000,
+        });
+      }
+
+      const usage = await generatePattern(
         currentSkill,
         challengeMe,
-        patternChoice === 'manual' ? selectedPattern : undefined,
-        quiltSize || undefined,
+        patternOverride,
+        effectiveQuiltSize,
         borderConfiguration.enabled ? borderConfiguration.borders : undefined
       );
+      maybeAlertCreditThreshold(usage);
       setLastGeneratedFabricSignature(currentFabricSignature);
       toast.dismiss(loadingToast);
     } catch {
@@ -352,6 +551,14 @@ export default function UploadPage() {
   };
 
   useEffect(() => {
+    maybeAlertCreditThreshold(profile?.usage?.credits);
+  }, [profile?.usage?.credits?.used, profile?.usage?.credits?.remaining, profile?.usage?.credits?.limit, maybeAlertCreditThreshold]);
+
+  useEffect(() => {
+    maybeAlertCreditThreshold(latestUsage);
+  }, [latestUsage?.used, latestUsage?.remaining, latestUsage?.limit, maybeAlertCreditThreshold]);
+
+  useEffect(() => {
     if (!pattern) {
       setLiveUpdateError(null);
       return;
@@ -361,9 +568,9 @@ export default function UploadPage() {
       return;
     }
 
-    if (!fabricCountValid || !!fabricValidationMessage) {
+    if (!fabricCountValid || !!generationValidationMessage) {
       setLiveUpdateError(
-        fabricValidationMessage ||
+        generationValidationMessage ||
           'Cannot update pattern right now. Please adjust fabric count first.'
       );
       return;
@@ -378,11 +585,20 @@ export default function UploadPage() {
         setLiveUpdating(true);
         setLiveUpdateError(null);
         try {
+          const patternOverride = patternChoice === 'unique'
+            ? 'unique'
+            : patternChoice === 'manual'
+              ? selectedPattern
+              : undefined;
+          const effectiveQuiltSize = patternChoice === 'unique'
+            ? deriveUniqueQuiltSizeFromAvailableYardage(quiltSize || undefined)
+            : (quiltSize || undefined);
+
           await generatePattern(
             currentSkill,
             challengeMe,
-            patternChoice === 'manual' ? selectedPattern : undefined,
-            quiltSize || undefined,
+            patternOverride,
+            effectiveQuiltSize,
             borderConfiguration.enabled ? borderConfiguration.borders : undefined
           );
           setLastGeneratedFabricSignature(currentFabricSignature);
@@ -404,13 +620,14 @@ export default function UploadPage() {
     currentFabricSignature,
     lastGeneratedFabricSignature,
     fabricCountValid,
-    fabricValidationMessage,
+    generationValidationMessage,
     generatePattern,
     currentSkill,
     challengeMe,
     patternChoice,
     selectedPattern,
     quiltSize,
+    deriveUniqueQuiltSizeFromAvailableYardage,
     borderConfiguration,
   ]);
 
@@ -659,7 +876,7 @@ export default function UploadPage() {
 
               <GenerateButton
                 onClick={handleGenerate}
-                disabled={generating || !fabricCountValid || !!fabricValidationMessage}
+                disabled={generating || !fabricCountValid || !!generationValidationMessage}
                 generating={generating}
                 fabricCount={fabrics.length}
               />
@@ -669,10 +886,11 @@ export default function UploadPage() {
                   <FabricPreviewGrid
                     previews={previews}
                     fabrics={fabrics}
-                    onRemove={removeFabric}
+                    onRemove={handleRemoveFabricAt}
                     onClearAll={clearAll}
                     onReorder={handleFabricReorder}
                     onAIRearrange={handleAIRearrange}
+                    onUsageUpdate={maybeAlertCreditThreshold}
                     fabricRoles={fabricRoles.length > 0 ? fabricRoles : undefined}
                     borderConfiguration={borderConfiguration}
                   />
@@ -680,7 +898,7 @@ export default function UploadPage() {
               )}
 
               <ValidationMessage 
-                message={fabricValidationMessage && fabrics.length > 0 ? fabricValidationMessage : null} 
+                message={generationValidationMessage && fabrics.length > 0 ? generationValidationMessage : null} 
               />
             </>
           )}
@@ -688,6 +906,7 @@ export default function UploadPage() {
           {pattern && (
             <PatternDisplay
               pattern={pattern}
+              generatedFromUniqueMode={patternChoice === 'unique'}
               userTier={profile.subscriptionTier}
               usage={profile.usage}
               fabrics={fabrics}
@@ -698,8 +917,9 @@ export default function UploadPage() {
               liveUpdateError={liveUpdateError}
               onReplaceFabric={handleReplaceFabricAt}
               onReplaceFabricWithSaved={handleReplaceFabricWithSaved}
-              onRemoveFabric={removeFabric}
+              onRemoveFabric={handleRemoveFabricAt}
               onMoveFabric={handleFabricReorder}
+              fabricLibraryRefs={fabricLibraryRefs}
               onStartOver={resetPattern}
             />
           )}

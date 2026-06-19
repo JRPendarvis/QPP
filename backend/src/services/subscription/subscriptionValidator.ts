@@ -18,7 +18,7 @@ export interface ValidatedUser {
     role: string;
   };
   tierConfig: {
-    generationsPerMonth: number;
+    creditsPerMonth: number;
     downloadsPerMonth: number;
   };
 }
@@ -28,7 +28,7 @@ export interface ValidatedUser {
  * Single Responsibility: User subscription validation only
  */
 export class SubscriptionValidator {
-  async validateUser(userId: string): Promise<ValidatedUser> {
+  async validateUser(userId: string, requiredCredits = 1): Promise<ValidatedUser> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -51,7 +51,7 @@ export class SubscriptionValidator {
     // Staff users bypass all limits
     if (user.role === 'staff') {
       const tierConfig = {
-        generationsPerMonth: Infinity,
+        creditsPerMonth: Infinity,
         downloadsPerMonth: Infinity,
       };
       return { user, tierConfig };
@@ -66,7 +66,7 @@ export class SubscriptionValidator {
 
     const tierConfig = SUBSCRIPTION_TIERS[user.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS];
 
-    if (user.generationsThisMonth >= tierConfig.generationsPerMonth) {
+    if (user.generationsThisMonth + requiredCredits > tierConfig.creditsPerMonth) {
       throw new Error('GENERATION_LIMIT_REACHED');
     }
 

@@ -13,7 +13,7 @@ interface ProfileData {
   skillLevel: string;
   badge: string | null;
   usage?: {
-    generations: { used: number; limit: number; remaining: number };
+    credits: { used: number; limit: number; remaining: number };
     downloads: { used: number; limit: number; remaining: number };
     daysUntilReset: number;
   };
