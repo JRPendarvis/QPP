@@ -2,7 +2,6 @@
 
 import { useDropzone } from 'react-dropzone';
 import { useEffect, useRef, useState } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
 import { processImageFiles, formatMB } from '@/utils/imageCompression';
 import { alertTooLarge, alertSkipped } from '@/utils/fabricValidation';
 
@@ -20,28 +19,48 @@ export default function FabricDropzone({
   totalSize
 }: FabricDropzoneProps) {
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const [showCameraButton, setShowCameraButton] = useState(false);
+  const cameraVideoRef = useRef<HTMLVideoElement>(null);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+
+  const stopCameraStream = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
+    }
+  };
 
   useEffect(() => {
-    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
-    const hasTouch = navigator.maxTouchPoints > 0;
-    setShowCameraButton(coarsePointer || hasTouch);
-  }, []);
+    return () => {
+      stopCameraStream();
+    };
+  }, [cameraStream]);
+
+  const processAndAddFiles = async (files: File[]) => {
+    if (files.length === 0) return;
+
+    try {
+      const { validFiles, skippedCount, tooLargeFiles } = await processImageFiles(files);
+
+      if (tooLargeFiles.length > 0) {
+        alertTooLarge(tooLargeFiles);
+      }
+
+      if (skippedCount > 0) {
+        alertSkipped();
+      }
+
+      if (validFiles.length > 0) {
+        onFilesAdded(validFiles);
+      }
+    } catch (error) {
+      console.error('Error processing images:', error);
+      onFilesAdded(files);
+    }
+  };
 
   const handleDrop = async (acceptedFiles: File[]) => {
-    const { validFiles, skippedCount, tooLargeFiles } = await processImageFiles(acceptedFiles);
-
-    if (tooLargeFiles.length > 0) {
-      alertTooLarge(tooLargeFiles);
-    }
-
-    if (skippedCount > 0) {
-      alertSkipped();
-    }
-
-    if (validFiles.length > 0) {
-      onFilesAdded(validFiles);
-    }
+    await processAndAddFiles(acceptedFiles);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -55,44 +74,77 @@ export default function FabricDropzone({
 
   const handleCameraClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    cameraInputRef.current?.click();
+    if (!navigator.mediaDevices?.getUserMedia) {
+      cameraInputRef.current?.click();
+      return;
+    }
+
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' },
+      },
+      audio: false,
+    })
+      .then((stream) => {
+        setCameraStream(stream);
+        setCameraModalOpen(true);
+      })
+      .catch((error) => {
+        console.warn('Direct camera access unavailable, falling back to file picker.', error);
+        cameraInputRef.current?.click();
+      });
   };
 
   const handleCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      try {
-        const { validFiles, skippedCount, tooLargeFiles } = await processImageFiles(Array.from(files));
-
-        if (tooLargeFiles.length > 0) {
-          alertTooLarge(tooLargeFiles);
-        }
-
-        if (skippedCount > 0) {
-          alertSkipped();
-        }
-
-        if (validFiles.length > 0) {
-          onFilesAdded(validFiles);
-        }
-      } catch (error) {
-        console.error('Error compressing images:', error);
-        onFilesAdded(Array.from(files));
-      }
+      await processAndAddFiles(Array.from(files));
     }
   };
 
+  const handleCaptureFromVideo = async () => {
+    const video = cameraVideoRef.current;
+    if (!video) return;
+
+    const width = video.videoWidth;
+    const height = video.videoHeight;
+    if (!width || !height) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    context.drawImage(video, 0, 0, width, height);
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+
+      const photoFile = new File([blob], `camera-capture-${Date.now()}.jpg`, {
+        type: 'image/jpeg',
+      });
+
+      await processAndAddFiles([photoFile]);
+      setCameraModalOpen(false);
+      stopCameraStream();
+    }, 'image/jpeg', 0.92);
+  };
+
+  useEffect(() => {
+    if (!cameraModalOpen || !cameraStream || !cameraVideoRef.current) return;
+
+    cameraVideoRef.current.srcObject = cameraStream;
+    cameraVideoRef.current.play().catch((error) => {
+      console.warn('Unable to autoplay camera preview.', error);
+    });
+  }, [cameraModalOpen, cameraStream]);
+
   return (
     <div>
-      <Toaster position="bottom-right" />
       <div
-        {...getRootProps({
-          onClick: () => {
-            if (currentCount < maxFiles) {
-              toast('We are opening your file manager. \nPlease be patient!');
-            }
-          },
-        })}
+        {...getRootProps()}
         className={`border-2 border-dashed rounded-lg p-8 sm:p-12 text-center cursor-pointer transition-colors min-h-[200px] flex flex-col items-center justify-center ${
           currentCount >= maxFiles
             ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
@@ -132,7 +184,7 @@ export default function FabricDropzone({
       </div>
       
       {/* Camera button for touch devices (phone + tablet) */}
-      {showCameraButton && currentCount < maxFiles && (
+      {currentCount < maxFiles && (
         <div className="mt-4 flex justify-center">
           <button
             onClick={handleCameraClick}
@@ -172,12 +224,58 @@ export default function FabricDropzone({
           />
         </div>
       )}
-      {showCameraButton && currentCount < maxFiles && (
-        <p className="mt-2 text-xs text-gray-500 text-center">Tip: Use Open Camera for a quick fabric snapshot on tablet or phone.</p>
+      {currentCount < maxFiles && (
+        <p className="mt-2 text-xs text-gray-500 text-center">Tip: Use Open Camera for a quick fabric snapshot.</p>
       )}
       <div className="mt-2 text-xs text-gray-500 text-center">
         Total uploaded image size: {formatMB(totalSize)}
       </div>
+
+      {cameraModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => {
+              setCameraModalOpen(false);
+              stopCameraStream();
+            }}
+          />
+          <div className="relative w-full max-w-lg rounded-xl bg-white p-4 shadow-xl">
+            <h3 className="text-base font-semibold text-gray-900">Camera Preview</h3>
+            <p className="mt-1 text-sm text-gray-600">Capture a fabric photo, then we will add it to your uploads.</p>
+            <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-black">
+              <video
+                ref={cameraVideoRef}
+                className="w-full h-auto"
+                playsInline
+                muted
+                autoPlay
+              />
+            </div>
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setCameraModalOpen(false);
+                  stopCameraStream();
+                }}
+                className="px-3 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  void handleCaptureFromVideo();
+                }}
+                className="px-3 py-2 rounded-md bg-teal-600 text-sm font-medium text-white hover:bg-teal-700"
+              >
+                Capture Photo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

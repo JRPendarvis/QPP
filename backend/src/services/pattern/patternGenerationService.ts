@@ -213,6 +213,11 @@ export class PatternGenerationService {
 
     const cols = colsBySkill[normalizedSkill] || 8;
     const rows = rowsBySkill[normalizedSkill] || 10;
+    const finishedBlockWidth = Math.round((dimensions.widthIn / cols) * 4) / 4;
+    const finishedBlockHeight = Math.round((dimensions.heightIn / rows) * 4) / 4;
+    const cutBlockWidth = Math.round((finishedBlockWidth + 0.5) * 4) / 4;
+    const cutBlockHeight = Math.round((finishedBlockHeight + 0.5) * 4) / 4;
+    const totalBlocks = cols * rows;
     const width = 300;
     const height = 400;
     const cellW = width / cols;
@@ -251,11 +256,31 @@ export class PatternGenerationService {
       difficulty: targetSkillLevel,
       estimatedSize,
       instructions: [
+        'OVERVIEW',
+        `Finished quilt size: ${dimensions.widthIn}" x ${dimensions.heightIn}" with a ${rows} x ${cols} block grid (${totalBlocks} total blocks).`,
+        `Finished block size: ${finishedBlockWidth}" x ${finishedBlockHeight}".`,
+        '',
+        'CUTTING',
+        `Cut each base block at ${cutBlockWidth}" x ${cutBlockHeight}" (includes 1/4" seam allowance).`,
+        `Cut ${totalBlocks} base blocks and sort them into your role groups before piecing.`,
         'Sort your uploaded fabrics by value and contrast before cutting.',
-        'Cut strips and units according to the fabric requirements shown.',
+        '',
+        'PATTERN TYPES USED',
+        'Simple Squares: Piece full square units and keep seam direction consistent by row.',
+        'Half-Square Triangles: Stitch diagonal units in mirrored pairs so directional flow stays balanced.',
+        'Diamond Points: Center and square each diamond unit before adding to rows.',
+        '',
+        'PIECING',
+        `Assemble ${rows} rows with ${cols} blocks per row; alternate pressing direction by row for easier nesting.`,
         'Lay out the quilt sections on a design wall to confirm visual balance.',
-        'Piece sections in small batches and press seams consistently.',
-        'Assemble sections into rows, then join rows to finish the quilt top.',
+        '',
+        'ROW ASSEMBLY',
+        `Assemble each row left-to-right (${cols} blocks per row) and label rows before joining.`,
+        '',
+        'QUILT ASSEMBLY',
+        `Join rows to finish the quilt center and square to ${dimensions.widthIn}" x ${dimensions.heightIn}" before quilting.`,
+        '',
+        'FINISHING',
         'Layer with batting and backing, quilt as desired, then bind.',
       ],
       visualSvg,

@@ -2,6 +2,8 @@ import { BorderConfiguration } from '../../types/Border';
 import { ClaudeResponse, FabricAnalysis } from '../../types/ClaudeResponse';
 import { QuiltPattern } from '../../types/QuiltPattern';
 import { getPatternById } from '../../config/quiltPatterns';
+import { PATTERNS_BY_SKILL } from '../../config/skill-levels';
+import { getSkillHierarchy } from '../../utils/skillLevelHelper';
 import { PromptBuilder } from './promptBuilder';
 import { PatternBuilder } from './patternBuilder';
 import { SizeResolver } from './sizeResolver';
@@ -40,16 +42,34 @@ export class DeterministicQuiltGenerationService {
       patternFabricImages.length
     );
 
-    if (!patternId || !DeterministicQuiltGenerationService.SUPPORTED_PATTERNS.has(patternId)) {
-      throw new Error(`Deterministic generation is not supported for pattern "${selectedPattern}"`);
+    let resolvedPatternId = patternId;
+    let resolvedPatternForSvg = patternForSvg;
+
+    if (!resolvedPatternId || !DeterministicQuiltGenerationService.SUPPORTED_PATTERNS.has(resolvedPatternId)) {
+      const fallbackPatternId = this.findSupportedFallbackPattern(skillLevel, patternFabricImages.length);
+      if (!fallbackPatternId) {
+        throw new Error(`Deterministic generation is not supported for pattern "${selectedPattern}"`);
+      }
+
+      const fallbackPattern = getPatternById(fallbackPatternId);
+      resolvedPatternId = fallbackPatternId;
+      resolvedPatternForSvg = fallbackPattern?.name || fallbackPatternId;
+
+      console.warn('[DeterministicQuiltGenerationService] Falling back to supported deterministic pattern.', {
+        requestedPattern: selectedPattern,
+        autoSelectedPattern: patternId,
+        fallbackPatternId,
+        skillLevel,
+        fabricCount: patternFabricImages.length,
+      });
     }
 
-    const parsedResponse = await this.buildResponse(patternId, patternForSvg, patternFabricImages, quiltSize);
-    const patternDifficulty = getPatternById(patternId)?.skillLevel || skillLevel;
+    const parsedResponse = await this.buildResponse(resolvedPatternId, resolvedPatternForSvg, patternFabricImages, quiltSize);
+    const patternDifficulty = getPatternById(resolvedPatternId)?.skillLevel || skillLevel;
 
     const pattern = PatternBuilder.build(
       parsedResponse,
-      patternForSvg,
+      resolvedPatternForSvg,
       patternDifficulty,
       fabricImages,
       quiltSize,
@@ -57,9 +77,37 @@ export class DeterministicQuiltGenerationService {
     );
 
     // Keep the resolved pattern id so downstream services can stay deterministic in auto mode.
-    pattern.patternId = patternId;
+    pattern.patternId = resolvedPatternId;
 
     return pattern;
+  }
+
+  private findSupportedFallbackPattern(skillLevel: string, fabricCount: number): string | undefined {
+    const hierarchy = getSkillHierarchy();
+    const skillIndex = hierarchy.indexOf(skillLevel);
+    const startIndex = skillIndex === -1 ? 0 : skillIndex;
+
+    for (let i = startIndex; i < hierarchy.length; i += 1) {
+      const ids = PATTERNS_BY_SKILL[hierarchy[i]] || [];
+      for (const id of ids) {
+        if (!DeterministicQuiltGenerationService.SUPPORTED_PATTERNS.has(id)) {
+          continue;
+        }
+
+        const pattern = getPatternById(id);
+        if (!pattern || pattern.enabled === false) {
+          continue;
+        }
+
+        const min = typeof pattern.minColors === 'number' ? pattern.minColors : 0;
+        const max = typeof pattern.maxFabrics === 'number' ? pattern.maxFabrics : Number.MAX_SAFE_INTEGER;
+        if (fabricCount >= min && fabricCount <= max) {
+          return id;
+        }
+      }
+    }
+
+    return undefined;
   }
 
   private async buildResponse(

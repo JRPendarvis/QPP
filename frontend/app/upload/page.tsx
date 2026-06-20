@@ -534,11 +534,27 @@ export default function UploadPage() {
   };
 
   const handleAIRearrange = (assignments: { background?: string; primary?: string; secondary?: string; accent?: string }) => {
-    // Create a map of filename to index for quick lookup
-    const fabricIndexMap = new Map<string, number>();
+    // Create a map of filename to ALL matching indices to support duplicate filenames.
+    const fabricIndexMap = new Map<string, number[]>();
     fabrics.forEach((fabric, index) => {
-      fabricIndexMap.set(fabric.name, index);
+      const key = fabric.name.trim().toLowerCase();
+      const existing = fabricIndexMap.get(key) || [];
+      existing.push(index);
+      fabricIndexMap.set(key, existing);
     });
+
+    const resolveIndexForName = (filename?: string): number | undefined => {
+      if (!filename) return undefined;
+
+      const key = filename.trim().toLowerCase();
+      const indices = fabricIndexMap.get(key);
+      if (!indices || indices.length === 0) {
+        return undefined;
+      }
+
+      // Consume the next unused index for this name.
+      return indices.shift();
+    };
 
     // Build ordered list of indices based on AI recommendations
     const orderedIndices: number[] = [];
@@ -549,7 +565,7 @@ export default function UploadPage() {
     for (const role of roles) {
       const filename = assignments[role];
       if (filename) {
-        const index = fabricIndexMap.get(filename);
+        const index = resolveIndexForName(filename);
         if (index !== undefined && !usedIndices.has(index)) {
           orderedIndices.push(index);
           usedIndices.add(index);

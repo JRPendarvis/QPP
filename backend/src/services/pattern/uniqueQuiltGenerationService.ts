@@ -9,6 +9,7 @@ import sharp from 'sharp';
 export class UniqueQuiltGenerationService {
   private static readonly DEFAULT_COLORS = ['#E5E7EB', '#C084FC', '#34D399', '#F59E0B', '#60A5FA', '#F87171'];
   private static readonly ROLE_NAMES = ['Background', 'Primary', 'Secondary', 'Accent'];
+  private static readonly SEAM_ALLOWANCE_IN = 0.25;
 
   async generateUniqueQuiltPattern(
     fabricImages: string[],
@@ -25,13 +26,18 @@ export class UniqueQuiltGenerationService {
     const allColors = await this.extractDominantColors(fabricImages);
     const dimensions = QuiltSizeCatalog.resolveDimensions(quiltSize);
     const estimatedSize = QuiltSizeCatalog.formatDisplaySize(dimensions);
+    const normalizedSkill = this.normalizeSkillLevel(skillLevel);
+    const grid = this.getGridForSkill(normalizedSkill);
+    const seed = this.randomInt(1_000_000, 9_999_999);
+    const variantCounts = this.calculateVariantCounts(seed, grid.rows, grid.cols);
 
     const visualSvg = this.buildUniqueSvg(
       patternFabricImages,
       patternColors,
-      this.normalizeSkillLevel(skillLevel),
+      normalizedSkill,
       borderConfiguration,
-      allColors
+      allColors,
+      seed
     );
 
     const fabricRequirements = this.buildFabricRequirements(
@@ -40,8 +46,6 @@ export class UniqueQuiltGenerationService {
       patternColors,
       borderConfiguration
     );
-
-    const normalizedSkill = this.normalizeSkillLevel(skillLevel);
 
     return {
       patternId: 'unique',
@@ -55,7 +59,15 @@ export class UniqueQuiltGenerationService {
       },
       difficulty: this.capitalize(normalizedSkill),
       estimatedSize,
-      instructions: this.buildUniqueInstructions(normalizedSkill),
+      instructions: this.buildUniqueInstructions(
+        normalizedSkill,
+        dimensions.widthIn,
+        dimensions.heightIn,
+        grid.cols,
+        grid.rows,
+        borderConfiguration,
+        variantCounts
+      ),
       visualSvg,
       requestedQuiltSize: quiltSize,
       fabricRequirements,
@@ -84,19 +96,15 @@ export class UniqueQuiltGenerationService {
     colors: string[],
     skillLevel: 'beginner' | 'intermediate' | 'advanced',
     borderConfiguration?: BorderConfiguration,
-    allColors?: string[]
+    allColors?: string[],
+    seed?: number
   ): string {
     const width = 300;
     const height = 400;
     const palette = colors.length > 0 ? colors : UniqueQuiltGenerationService.DEFAULT_COLORS;
-    const seed = this.randomInt(1_000_000, 9_999_999);
+    const resolvedSeed = seed ?? this.randomInt(1_000_000, 9_999_999);
 
-    const complexityBySkill: Record<'beginner' | 'intermediate' | 'advanced', { cols: number; rows: number }> = {
-      beginner: { cols: 6, rows: 8 },
-      intermediate: { cols: 8, rows: 10 },
-      advanced: { cols: 10, rows: 12 },
-    };
-    const grid = complexityBySkill[skillLevel];
+    const grid = this.getGridForSkill(skillLevel);
     const cellW = width / grid.cols;
     const cellH = height / grid.rows;
 
@@ -108,7 +116,7 @@ export class UniqueQuiltGenerationService {
       for (let col = 0; col < grid.cols; col += 1) {
         const x = col * cellW;
         const y = row * cellH;
-        const tileSeed = seed + row * 997 + col * 383;
+        const tileSeed = resolvedSeed + row * 997 + col * 383;
         const c1 = palette[(row + col) % palette.length];
         const c2 = palette[(row * 2 + col + 1) % palette.length];
         const c3 = palette[(row + col * 3 + 2) % palette.length];
@@ -203,7 +211,7 @@ export class UniqueQuiltGenerationService {
     const splits = [0.45, 0.3, 0.15, 0.1];
     const roleCount = Math.max(1, Math.min(patternColors.length, UniqueQuiltGenerationService.ROLE_NAMES.length));
 
-    const requirements = Array.from({ length: roleCount }, (_, index) => {
+    const requirements: Array<{ role: string; yards: number; description: string; inches?: number }> = Array.from({ length: roleCount }, (_, index) => {
       const split = splits[index] || (1 / roleCount);
       const yards = Math.max(0.25, Number((totalYards * split).toFixed(2)));
       return {
@@ -229,21 +237,105 @@ export class UniqueQuiltGenerationService {
     return requirements;
   }
 
-  private buildUniqueInstructions(skillLevel: 'beginner' | 'intermediate' | 'advanced'): string[] {
+  private buildUniqueInstructions(
+    skillLevel: 'beginner' | 'intermediate' | 'advanced',
+    quiltWidthIn: number,
+    quiltHeightIn: number,
+    cols: number,
+    rows: number,
+    borderConfiguration: BorderConfiguration | undefined,
+    variantCounts: { simpleSquares: number; halfSquareTriangles: number; diamondPoints: number }
+  ): string[] {
     const complexityNotes: Record<'beginner' | 'intermediate' | 'advanced', string> = {
       beginner: 'Use chain piecing in short rows to keep assembly simple and organized.',
       intermediate: 'Build and label sections before final assembly to keep orientation consistent.',
       advanced: 'Assemble in quadrants and verify directional seams before joining all sections.',
     };
 
+    const finishedBlockWidth = this.roundToQuarter(quiltWidthIn / cols);
+    const finishedBlockHeight = this.roundToQuarter(quiltHeightIn / rows);
+    const cutBlockWidth = this.roundToQuarter(finishedBlockWidth + (UniqueQuiltGenerationService.SEAM_ALLOWANCE_IN * 2));
+    const cutBlockHeight = this.roundToQuarter(finishedBlockHeight + (UniqueQuiltGenerationService.SEAM_ALLOWANCE_IN * 2));
+    const totalBlocks = cols * rows;
+
+    const borderSummary = borderConfiguration?.enabled && borderConfiguration.borders.length > 0
+      ? `Add ${borderConfiguration.borders.length} border${borderConfiguration.borders.length === 1 ? '' : 's'} after the quilt center is assembled.`
+      : 'No borders configured for this layout.';
+
     return [
+      'OVERVIEW',
+      `Finished quilt size: ${this.formatNumber(quiltWidthIn)}" x ${this.formatNumber(quiltHeightIn)}" with a ${rows} x ${cols} block grid (${totalBlocks} total blocks).`,
+      `Finished block size: ${this.formatNumber(finishedBlockWidth)}" x ${this.formatNumber(finishedBlockHeight)}".`,
+      '',
+      'CUTTING',
+      `Cut each base block at ${this.formatNumber(cutBlockWidth)}" x ${this.formatNumber(cutBlockHeight)}" (includes 1/4" seam allowance on all sides).`,
+      `Cutting plan: Cut ${totalBlocks} base rectangles and sort into Background/Primary/Secondary/Accent groups using the fabric requirements yardage table.`,
       'Sort fabrics by value (light, medium, dark) before cutting to preserve contrast in the unique layout.',
-      'Cut strips and units according to the fabric requirements section for your selected quilt size.',
-      'Arrange sections on a design wall and photograph placement before sewing.',
+      '',
+      'PATTERN TYPES USED',
+      `Simple Squares (${variantCounts.simpleSquares} blocks): Piece as full square units and keep seam direction consistent within each row.`,
+      `Half-Square Triangles (${variantCounts.halfSquareTriangles} blocks): Pair two fabrics and stitch on the diagonal seam line so triangles stay mirrored where possible.`,
+      `Diamond Points (${variantCounts.diamondPoints} blocks): Center the diamond motif in each block and trim/square the unit before row assembly.`,
+      '',
+      'PIECING',
+      `Piece ${rows} rows with ${cols} blocks per row. Press seams in alternating directions for adjacent rows so intersections nest cleanly.`,
+      'Arrange blocks on a design wall and photograph placement before final stitching to preserve the intended value flow.',
       complexityNotes[skillLevel],
-      'Press seams consistently and square each section before final joins.',
+      '',
+      'ROW ASSEMBLY',
+      `Assemble each row left-to-right (${cols} blocks per row), then staystitch row edges if bias seams are present from triangle blocks.`,
+      'Label rows from top to bottom before joining to preserve layout order.',
+      '',
+      'QUILT ASSEMBLY',
+      `Join rows in sequence to complete the quilt center, then square to ${this.formatNumber(quiltWidthIn)}" x ${this.formatNumber(quiltHeightIn)}" before quilting.`,
+      '',
+      'BORDERS',
+      borderSummary,
+      '',
+      'FINISHING',
       'Complete quilt top, layer with batting/backing, quilt as desired, then bind.',
     ];
+  }
+
+  private getGridForSkill(skillLevel: 'beginner' | 'intermediate' | 'advanced'): { cols: number; rows: number } {
+    const complexityBySkill: Record<'beginner' | 'intermediate' | 'advanced', { cols: number; rows: number }> = {
+      beginner: { cols: 6, rows: 8 },
+      intermediate: { cols: 8, rows: 10 },
+      advanced: { cols: 10, rows: 12 },
+    };
+
+    return complexityBySkill[skillLevel];
+  }
+
+  private calculateVariantCounts(seed: number, rows: number, cols: number): { simpleSquares: number; halfSquareTriangles: number; diamondPoints: number } {
+    let simpleSquares = 0;
+    let halfSquareTriangles = 0;
+    let diamondPoints = 0;
+
+    for (let row = 0; row < rows; row += 1) {
+      for (let col = 0; col < cols; col += 1) {
+        const tileSeed = seed + row * 997 + col * 383;
+        const variant = tileSeed % 3;
+
+        if (variant === 0) {
+          simpleSquares += 1;
+        } else if (variant === 1) {
+          halfSquareTriangles += 1;
+        } else {
+          diamondPoints += 1;
+        }
+      }
+    }
+
+    return { simpleSquares, halfSquareTriangles, diamondPoints };
+  }
+
+  private roundToQuarter(value: number): number {
+    return Math.round(value * 4) / 4;
+  }
+
+  private formatNumber(value: number): string {
+    return Number.isInteger(value) ? `${value}` : value.toFixed(2).replace(/\.00$/, '');
   }
 
   private async extractDominantColors(fabricImages: string[]): Promise<string[]> {

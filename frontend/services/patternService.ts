@@ -65,7 +65,7 @@ export class PatternService {
       response = await api.post<PatternGenerationResponse>(endpoint, payload);
     } catch (error) {
       const axiosError = error as AxiosError;
-      const shouldFallbackToLegacyUniqueRoute = forceUnique && axiosError?.response?.status === 404;
+      const shouldFallbackToLegacyUniqueRoute = forceUnique && [404, 500, 502, 503].includes(axiosError?.response?.status || 0);
 
       if (!shouldFallbackToLegacyUniqueRoute) {
         throw error;
