@@ -45,7 +45,8 @@ export default function UploadPage() {
   const [liveUpdating, setLiveUpdating] = useState(false);
   const [liveUpdateError, setLiveUpdateError] = useState<string | null>(null);
   const [lastGeneratedFabricSignature, setLastGeneratedFabricSignature] = useState('');
-  const [fabricLibraryRefs, setFabricLibraryRefs] = useState<Array<{ fabricId: string; name: string; yardageAvailable: number } | null>>([]);
+  const [fabricYardageRefs, setFabricYardageRefs] = useState<Array<{ fabricId?: string; name: string; yardageAvailable: number | null; isLibrary: boolean } | null>>([]);
+  const [generationAdjustmentSummary, setGenerationAdjustmentSummary] = useState<string[]>([]);
   const liveUpdateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousCreditPercentRef = useRef<number | null>(null);
   const shownCreditAlertsRef = useRef<Set<number>>(new Set());
@@ -207,34 +208,119 @@ export default function UploadPage() {
     return fabrics.map((_, index) => `Fabric ${index + 1}`);
   }, [fabricRoles, fabrics]);
 
-  const deriveUniqueQuiltSizeFromAvailableYardage = useCallback((explicitQuiltSize?: string): string | undefined => {
-    if (explicitQuiltSize) {
-      return explicitQuiltSize;
-    }
+  const buildUniqueStashPlan = useCallback((explicitQuiltSize?: string) => {
+    const borderCount = borderConfiguration.enabled ? borderConfiguration.borders.length : 0;
+    const patternCount = Math.max(0, fabrics.length - borderCount);
+    const patternFabrics = fabrics.slice(0, patternCount);
+    const borderFabrics = fabrics.slice(patternCount);
+    const patternPreviews = previews.slice(0, patternCount);
+    const borderPreviews = previews.slice(patternCount);
+    const patternYardageRefs = fabricYardageRefs.slice(0, patternCount);
+    const borderYardageRefs = fabricYardageRefs.slice(patternCount);
 
-    const mappedRefs = fabricLibraryRefs.filter((item): item is NonNullable<typeof item> => Boolean(item));
-    if (mappedRefs.length < 2) {
-      return undefined;
-    }
+    const roleCount = Math.max(1, Math.min(patternCount || 1, 4));
+    const splitSeed = [0.45, 0.3, 0.15, 0.1];
+    const splits = Array.from({ length: roleCount }, (_, idx) => splitSeed[idx] || (1 / roleCount));
 
-    const totalAvailableYards = mappedRefs.reduce((sum, item) => sum + (item.yardageAvailable || 0), 0);
-    if (!Number.isFinite(totalAvailableYards) || totalAvailableYards <= 0) {
-      return undefined;
-    }
+    const zipped = patternFabrics.map((fabric, index) => ({
+      fabric,
+      preview: patternPreviews[index],
+      yardageRef: patternYardageRefs[index] || {
+        name: fabric.name,
+        yardageAvailable: null,
+        isLibrary: false,
+      },
+      originalIndex: index,
+    }));
 
-    const sizeByRequiredYards = [
-      { size: 'king', requiredYards: 9.7 },
-      { size: 'queen', requiredYards: 8.3 },
-      { size: 'full', requiredYards: 6.95 },
-      { size: 'twin', requiredYards: 5.75 },
-      { size: 'lap', requiredYards: 3.15 },
-      { size: 'baby', requiredYards: 1.85 },
+    const sortedPattern = [...zipped].sort((a, b) => {
+      const aYardage = a.yardageRef?.yardageAvailable;
+      const bYardage = b.yardageRef?.yardageAvailable;
+
+      if (aYardage === null && bYardage === null) return a.originalIndex - b.originalIndex;
+      if (aYardage === null) return 1;
+      if (bYardage === null) return -1;
+      return bYardage - aYardage;
+    });
+
+    const wasReordered = sortedPattern.some((entry, index) => entry.originalIndex !== index);
+
+    const sizeCatalog = [
+      { key: 'baby', label: 'baby', width: 36, height: 52 },
+      { key: 'lap', label: 'lap', width: 50, height: 65 },
+      { key: 'default', label: 'default', width: 60, height: 72 },
+      { key: 'twin', label: 'twin', width: 66, height: 90 },
+      { key: 'full', label: 'full', width: 80, height: 90 },
+      { key: 'queen', label: 'queen', width: 90, height: 95 },
+      { key: 'king', label: 'king', width: 105, height: 95 },
     ] as const;
 
-    const safetyBufferedYards = totalAvailableYards * 0.9;
-    const matched = sizeByRequiredYards.find((entry) => safetyBufferedYards >= entry.requiredYards);
-    return matched?.size;
-  }, [fabricLibraryRefs]);
+    const byAreaDesc = [...sizeCatalog].sort((a, b) => (b.width * b.height) - (a.width * a.height));
+    const explicitSizeKey = explicitQuiltSize || 'default';
+    const explicitTarget = sizeCatalog.find((entry) => entry.key === explicitSizeKey) || sizeCatalog.find((entry) => entry.key === 'default')!;
+    const explicitArea = explicitTarget.width * explicitTarget.height;
+    const candidates = byAreaDesc.filter((entry) => (entry.width * entry.height) <= explicitArea);
+
+    const fitsCandidate = (candidate: (typeof sizeCatalog)[number]) => {
+      const totalYards = (candidate.width * candidate.height / 1296) * 1.25;
+
+      for (let idx = 0; idx < roleCount; idx += 1) {
+        const required = Math.max(0.25, Number((totalYards * splits[idx]).toFixed(2)));
+        const available = sortedPattern[idx]?.yardageRef?.yardageAvailable;
+
+        if (available !== null && available !== undefined && required > available) {
+          return false;
+        }
+      }
+
+      return true;
+    };
+
+    const fittingSize = candidates.find((candidate) => fitsCandidate(candidate));
+    if (!fittingSize) {
+      const smallest = [...candidates].sort((a, b) => (a.width * a.height) - (b.width * b.height))[0];
+      return {
+        isPossible: false,
+        reason: smallest
+          ? `Not enough entered yardage to satisfy even ${smallest.label} size. Increase yardage for constrained roles or leave blank to buy as needed.`
+          : 'Could not determine a valid size from current constraints.',
+      } as const;
+    }
+
+    const plannedFabrics = [...sortedPattern.map((entry) => entry.fabric), ...borderFabrics];
+    const plannedPreviews = [...sortedPattern.map((entry) => entry.preview), ...borderPreviews];
+    const plannedYardageRefs = [...sortedPattern.map((entry) => entry.yardageRef), ...borderYardageRefs];
+    const sizeKeyForApi = fittingSize.key === 'default' ? undefined : fittingSize.key;
+    const wasSizeAdjusted = fittingSize.key !== explicitSizeKey;
+    const buyAsNeededRoles: string[] = [];
+
+    for (let idx = 0; idx < roleCount; idx += 1) {
+      if (sortedPattern[idx]?.yardageRef?.yardageAvailable === null || sortedPattern[idx]?.yardageRef?.yardageAvailable === undefined) {
+        const role = ['Background', 'Primary', 'Secondary', 'Accent'][idx] || `Fabric ${idx + 1}`;
+        buyAsNeededRoles.push(role);
+      }
+    }
+
+    const notes: string[] = [];
+    if (wasReordered) {
+      notes.push('Reordered fabrics so larger available yardage is assigned to higher-usage roles (Background, Primary, Secondary, Accent).');
+    }
+    if (wasSizeAdjusted) {
+      notes.push(`Reduced quilt size from ${explicitTarget.label} to ${fittingSize.label} so required yardage does not exceed your entered amounts.`);
+    }
+    if (buyAsNeededRoles.length > 0) {
+      notes.push(`Roles treated as buy-as-needed because yardage was left blank: ${buyAsNeededRoles.join(', ')}.`);
+    }
+
+    return {
+      isPossible: true,
+      plannedFabrics,
+      plannedPreviews,
+      plannedYardageRefs,
+      effectiveQuiltSize: sizeKeyForApi,
+      notes,
+    } as const;
+  }, [borderConfiguration, fabrics, previews, fabricYardageRefs]);
 
   const handlePatternChoiceChange = (choice: PatternChoice) => {
     setPatternChoice(choice);
@@ -327,12 +413,13 @@ export default function UploadPage() {
 
       setFabrics((prev) => [...prev, file]);
       setPreviews((prev) => [...prev, fabric.imageUrl as string]);
-      setFabricLibraryRefs((prev) => [
+      setFabricYardageRefs((prev) => [
         ...prev,
         {
           fabricId: fabric.id,
           name: fabric.name,
           yardageAvailable: fabric.yardageAvailable,
+          isLibrary: true,
         },
       ]);
       toast.success(`${fabric.name} added to quilt fabrics.`);
@@ -370,12 +457,13 @@ export default function UploadPage() {
         return updated;
       });
 
-      setFabricLibraryRefs((prev) => {
+      setFabricYardageRefs((prev) => {
         const updated = [...prev];
         updated[index] = {
           fabricId: selectedSavedFabric.id,
           name: selectedSavedFabric.name,
           yardageAvailable: selectedSavedFabric.yardageAvailable,
+          isLibrary: true,
         };
         return updated;
       });
@@ -396,12 +484,12 @@ export default function UploadPage() {
     const newPreviews = [...previews];
     const [movedPreview] = newPreviews.splice(fromIdx, 1);
     newPreviews.splice(toIdx, 0, movedPreview);
-    const newRefs = [...fabricLibraryRefs];
+    const newRefs = [...fabricYardageRefs];
     const [movedRef] = newRefs.splice(fromIdx, 1);
     newRefs.splice(toIdx, 0, movedRef);
     setFabrics(newFabrics);
     setPreviews(newPreviews);
-    setFabricLibraryRefs(newRefs);
+    setFabricYardageRefs(newRefs);
   };
 
   const handleReplaceFabricAt = (index: number, file: File, showToast = true) => {
@@ -429,9 +517,13 @@ export default function UploadPage() {
         return updated;
       });
 
-      setFabricLibraryRefs((prev) => {
+      setFabricYardageRefs((prev) => {
         const updated = [...prev];
-        updated[index] = null;
+        updated[index] = {
+          name: processedFile.name,
+          yardageAvailable: null,
+          isLibrary: false,
+        };
         return updated;
       });
 
@@ -475,29 +567,84 @@ export default function UploadPage() {
     // Reorder fabrics and previews based on the new order
     const newFabrics = orderedIndices.map(i => fabrics[i]);
     const newPreviews = orderedIndices.map(i => previews[i]);
-    const newRefs = orderedIndices.map(i => fabricLibraryRefs[i] || null);
+    const newRefs = orderedIndices.map(i => fabricYardageRefs[i] || null);
 
     setFabrics(newFabrics);
     setPreviews(newPreviews);
-    setFabricLibraryRefs(newRefs);
+    setFabricYardageRefs(newRefs);
   };
 
   const handleRemoveFabricAt = (index: number) => {
     removeFabric(index);
-    setFabricLibraryRefs((prev) => prev.filter((_, currentIndex) => currentIndex !== index));
+    setFabricYardageRefs((prev) => prev.filter((_, currentIndex) => currentIndex !== index));
+  };
+
+  const handleUpdateFabricYardage = (index: number, value: string) => {
+    setFabricYardageRefs((prev) => {
+      const updated = [...prev];
+      const existing = updated[index] || {
+        name: fabrics[index]?.name || `Fabric ${index + 1}`,
+        yardageAvailable: null,
+        isLibrary: false,
+      };
+
+      const trimmed = value.trim();
+      if (!trimmed) {
+        updated[index] = {
+          ...existing,
+          yardageAvailable: null,
+        };
+        return updated;
+      }
+
+      const parsed = Number(trimmed);
+      updated[index] = {
+        ...existing,
+        yardageAvailable: Number.isFinite(parsed) && parsed >= 0 ? parsed : null,
+      };
+      return updated;
+    });
+  };
+
+  const handleClearAll = () => {
+    clearAll();
+    setFabricYardageRefs([]);
   };
 
   useEffect(() => {
-    setFabricLibraryRefs((prev) => {
-      if (prev.length === fabrics.length) {
+    setFabricYardageRefs((prev) => {
+      const next = fabrics.map((fabric, index) => {
+        const existing = prev[index];
+        if (existing) {
+          return {
+            ...existing,
+            name: fabric.name || existing.name,
+          };
+        }
+
+        return {
+          name: fabric.name,
+          yardageAvailable: null,
+          isLibrary: false,
+        };
+      });
+
+      if (
+        prev.length === next.length &&
+        prev.every((item, index) => {
+          const candidate = next[index];
+          return item?.name === candidate?.name
+            && item?.yardageAvailable === candidate?.yardageAvailable
+            && item?.isLibrary === candidate?.isLibrary
+            && item?.fabricId === candidate?.fabricId;
+        })
+      ) {
         return prev;
       }
-      if (prev.length > fabrics.length) {
-        return prev.slice(0, fabrics.length);
-      }
-      return [...prev, ...Array.from({ length: fabrics.length - prev.length }, () => null)];
+
+      return next;
     });
-  }, [fabrics.length]);
+  }, [fabrics]);
 
   const handleGenerate = async () => {
     if (generationValidationMessage) {
@@ -514,15 +661,33 @@ export default function UploadPage() {
         : patternChoice === 'manual'
           ? selectedPattern
           : undefined;
-      const effectiveQuiltSize = patternChoice === 'unique'
-        ? deriveUniqueQuiltSizeFromAvailableYardage(quiltSize || undefined)
-        : (quiltSize || undefined);
+      let effectiveQuiltSize = quiltSize || undefined;
+      let fabricsForGeneration = fabrics;
 
-      if (patternChoice === 'unique' && !quiltSize && effectiveQuiltSize) {
-        toast(`Using ${effectiveQuiltSize} size based on available library yardage.`, {
-          icon: '🧵',
-          duration: 4000,
-        });
+      if (patternChoice === 'unique') {
+        const plan = buildUniqueStashPlan(quiltSize || undefined);
+        if (!plan.isPossible) {
+          toast.error(plan.reason);
+          toast.dismiss(loadingToast);
+          setGenerating(false);
+          return;
+        }
+
+        fabricsForGeneration = plan.plannedFabrics;
+        effectiveQuiltSize = plan.effectiveQuiltSize;
+        setFabrics(plan.plannedFabrics);
+        setPreviews(plan.plannedPreviews);
+        setFabricYardageRefs(plan.plannedYardageRefs);
+        setGenerationAdjustmentSummary(plan.notes);
+
+        if (plan.notes.length > 0) {
+          toast(plan.notes.join(' '), {
+            icon: '🧵',
+            duration: 5000,
+          });
+        }
+      } else {
+        setGenerationAdjustmentSummary([]);
       }
 
       const usage = await generatePattern(
@@ -530,10 +695,11 @@ export default function UploadPage() {
         challengeMe,
         patternOverride,
         effectiveQuiltSize,
-        borderConfiguration.enabled ? borderConfiguration.borders : undefined
+        borderConfiguration.enabled ? borderConfiguration.borders : undefined,
+        fabricsForGeneration
       );
       maybeAlertCreditThreshold(usage);
-      setLastGeneratedFabricSignature(currentFabricSignature);
+      setLastGeneratedFabricSignature(fabricsForGeneration.map((file) => `${file.name}-${file.size}-${file.lastModified}`).join('|'));
       toast.dismiss(loadingToast);
     } catch {
       toast.dismiss(loadingToast);
@@ -590,18 +756,34 @@ export default function UploadPage() {
             : patternChoice === 'manual'
               ? selectedPattern
               : undefined;
-          const effectiveQuiltSize = patternChoice === 'unique'
-            ? deriveUniqueQuiltSizeFromAvailableYardage(quiltSize || undefined)
-            : (quiltSize || undefined);
+          let effectiveQuiltSize = quiltSize || undefined;
+          let fabricsForGeneration = fabrics;
+
+          if (patternChoice === 'unique') {
+            const plan = buildUniqueStashPlan(quiltSize || undefined);
+            if (!plan.isPossible) {
+              setLiveUpdateError(plan.reason);
+              setLiveUpdating(false);
+              return;
+            }
+
+            fabricsForGeneration = plan.plannedFabrics;
+            effectiveQuiltSize = plan.effectiveQuiltSize;
+            setFabrics(plan.plannedFabrics);
+            setPreviews(plan.plannedPreviews);
+            setFabricYardageRefs(plan.plannedYardageRefs);
+            setGenerationAdjustmentSummary(plan.notes);
+          }
 
           await generatePattern(
             currentSkill,
             challengeMe,
             patternOverride,
             effectiveQuiltSize,
-            borderConfiguration.enabled ? borderConfiguration.borders : undefined
+            borderConfiguration.enabled ? borderConfiguration.borders : undefined,
+            fabricsForGeneration
           );
-          setLastGeneratedFabricSignature(currentFabricSignature);
+          setLastGeneratedFabricSignature(fabricsForGeneration.map((file) => `${file.name}-${file.size}-${file.lastModified}`).join('|'));
         } catch {
           setLiveUpdateError('Could not refresh pattern after fabric changes. Your previous pattern is still shown.');
         } finally {
@@ -627,9 +809,17 @@ export default function UploadPage() {
     patternChoice,
     selectedPattern,
     quiltSize,
-    deriveUniqueQuiltSizeFromAvailableYardage,
+    buildUniqueStashPlan,
+    fabrics,
+    setFabrics,
+    setPreviews,
     borderConfiguration,
   ]);
+
+  const handleStartOver = () => {
+    setGenerationAdjustmentSummary([]);
+    resetPattern();
+  };
 
   if (loading || !profile) {
     return (
@@ -887,12 +1077,14 @@ export default function UploadPage() {
                     previews={previews}
                     fabrics={fabrics}
                     onRemove={handleRemoveFabricAt}
-                    onClearAll={clearAll}
+                    onClearAll={handleClearAll}
                     onReorder={handleFabricReorder}
                     onAIRearrange={handleAIRearrange}
                     onUsageUpdate={maybeAlertCreditThreshold}
                     fabricRoles={fabricRoles.length > 0 ? fabricRoles : undefined}
                     borderConfiguration={borderConfiguration}
+                    fabricYardageRefs={fabricYardageRefs}
+                    onUpdateYardage={handleUpdateFabricYardage}
                   />
                 </div>
               )}
@@ -919,8 +1111,9 @@ export default function UploadPage() {
               onReplaceFabricWithSaved={handleReplaceFabricWithSaved}
               onRemoveFabric={handleRemoveFabricAt}
               onMoveFabric={handleFabricReorder}
-              fabricLibraryRefs={fabricLibraryRefs}
-              onStartOver={resetPattern}
+              fabricYardageRefs={fabricYardageRefs}
+              generationAdjustmentSummary={generationAdjustmentSummary}
+              onStartOver={handleStartOver}
             />
           )}
         </div>

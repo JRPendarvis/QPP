@@ -138,6 +138,7 @@ export default function FabricDropzone({
             onClick={handleCameraClick}
             type="button"
             className="flex items-center justify-center gap-3 px-8 py-4 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 active:bg-teal-800 transition-colors shadow-lg min-h-12 min-w-[200px]"
+            aria-label="Open camera to take a fabric photo"
           >
             <svg
               className="h-6 w-6"
@@ -158,7 +159,7 @@ export default function FabricDropzone({
                 d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-            <span className="text-base">Take Photo</span>
+            <span className="text-base">Open Camera</span>
           </button>
           <input
             ref={cameraInputRef}
@@ -170,6 +171,9 @@ export default function FabricDropzone({
             multiple={currentCount < maxFiles - 1}
           />
         </div>
+      )}
+      {showCameraButton && currentCount < maxFiles && (
+        <p className="mt-2 text-xs text-gray-500 text-center">Tip: Use Open Camera for a quick fabric snapshot on tablet or phone.</p>
       )}
       <div className="mt-2 text-xs text-gray-500 text-center">
         Total uploaded image size: {formatMB(totalSize)}

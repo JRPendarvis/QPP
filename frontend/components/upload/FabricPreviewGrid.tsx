@@ -11,6 +11,8 @@ export interface FabricPreviewGridProps {
   onRemove: (index: number) => void;
   onClearAll: () => void;
   onReorder: (fromIdx: number, toIdx: number) => void;
+  fabricYardageRefs?: Array<{ yardageAvailable: number | null } | null>;
+  onUpdateYardage?: (index: number, value: string) => void;
   onAIRearrange?: (assignments: { background?: string; primary?: string; secondary?: string; accent?: string }) => void;
   onUsageUpdate?: (usage: { used: number; limit: number; remaining: number }) => void;
   fabricRoles?: string[]; // Optional pattern-specific fabric roles
@@ -32,6 +34,8 @@ interface FabricCardProps {
   setDraggedIdx: (idx: number | null) => void;
   onRemove: (index: number) => void;
   onReorder: (fromIdx: number, toIdx: number) => void;
+  yardageValue?: number | null;
+  onUpdateYardage?: (index: number, value: string) => void;
 }
 
 const FabricCard: React.FC<FabricCardProps> = ({
@@ -43,6 +47,8 @@ const FabricCard: React.FC<FabricCardProps> = ({
   setDraggedIdx,
   onRemove,
   onReorder,
+  yardageValue,
+  onUpdateYardage,
 }) => (
   <div
     className={`relative group ${draggedIdx === index ? 'opacity-60' : ''}`}
@@ -108,6 +114,19 @@ const FabricCard: React.FC<FabricCardProps> = ({
     <p className="mt-2 sm:mt-1 text-sm sm:text-xs text-gray-700 truncate text-center">
       <span className="font-medium">{fabric?.name || `Fabric ${index + 1}`}</span>
     </p>
+    <div className="mt-2">
+      <label className="block text-[11px] text-gray-600 mb-1">Yardage On Hand (yd)</label>
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        value={yardageValue ?? ''}
+        onChange={(event) => onUpdateYardage?.(index, event.target.value)}
+        placeholder="Leave blank to buy as needed"
+        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+      />
+      <p className="text-[10px] text-gray-500 mt-1">Blank = buying this fabric, show required amount only.</p>
+    </div>
   </div>
 );
 
@@ -117,12 +136,16 @@ export default function FabricPreviewGrid({
   onRemove,
   onClearAll,
   onReorder,
+  fabricYardageRefs,
+  onUpdateYardage,
   onAIRearrange,
   onUsageUpdate,
   fabricRoles,
   borderConfiguration,
 }: FabricPreviewGridProps) {
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const enteredYardageCount = (fabricYardageRefs || []).filter((entry) => entry?.yardageAvailable !== null).length;
+  const buyAsNeededCount = Math.max(0, fabrics.length - enteredYardageCount);
   
   // Use pattern-specific roles if provided, otherwise fall back to generic roles
   const roles = fabricRoles || FABRIC_ROLES;
@@ -136,9 +159,14 @@ export default function FabricPreviewGrid({
   return (
     <div className="mt-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-        <h3 className="text-xl sm:text-lg font-semibold">
-          Uploaded Fabrics ({fabrics.length})
-        </h3>
+        <div>
+          <h3 className="text-xl sm:text-lg font-semibold">
+            Uploaded Fabrics ({fabrics.length})
+          </h3>
+          <p className="text-xs text-gray-600 mt-1">
+            Stash-limited: {enteredYardageCount} | Buy-as-needed: {buyAsNeededCount}
+          </p>
+        </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <AutoCoordinateButton fabrics={fabrics} onRearrange={onAIRearrange} onUsageUpdate={onUsageUpdate} />
           <button
@@ -175,13 +203,15 @@ export default function FabricPreviewGrid({
               setDraggedIdx={setDraggedIdx}
               onRemove={onRemove}
               onReorder={onReorder}
+              yardageValue={fabricYardageRefs?.[index]?.yardageAvailable ?? null}
+              onUpdateYardage={onUpdateYardage}
             />
           );
         })}
       </div>
       {/* Larger, more readable hint text on mobile */}
       <p className="mt-4 sm:mt-2 text-sm sm:text-xs text-gray-500 text-center sm:text-left">
-        Drag and drop to reorder fabrics. Use <strong>AI Coordinate Colors</strong> to let our AI suggest optimal fabric roles for your quilt.
+        Drag and drop to reorder fabrics. Enter yardage to enforce stash limits, or leave blank to treat that fabric as buy-as-needed.
       </p>
     </div>
   );

@@ -214,7 +214,7 @@ export default function FabricCreateForm({ loading, onCreate }: FabricCreateForm
               onClick={() => cameraInputRef.current?.click()}
               className="px-3 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Take Photo
+              Open Camera
             </button>
           )}
           <button
@@ -222,9 +222,10 @@ export default function FabricCreateForm({ loading, onCreate }: FabricCreateForm
             onClick={() => galleryInputRef.current?.click()}
             className="px-3 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Upload Existing Photo
+            Choose From Library
           </button>
         </div>
+        <p className="text-xs text-gray-500">Use Open Camera for a new fabric photo, or Choose From Library for an existing image.</p>
 
         {canUseCameraCapture && (
           <input

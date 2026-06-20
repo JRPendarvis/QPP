@@ -75,7 +75,7 @@ export function usePatternGeneration(): UsePatternGenerationReturn {
    * @param borders - Optional border configuration
    */
   const generatePattern = useCallback(
-    async (userSkillLevel: string, challengeMe: boolean, selectedPattern?: string, quiltSize?: string, borders?: any) => {
+    async (userSkillLevel: string, challengeMe: boolean, selectedPattern?: string, quiltSize?: string, borders?: any, fabricsOverride?: File[]) => {
       const callbacks = WorkflowCallbackFactory.createPatternCallbacks(
         setGenerating,
         setError,
@@ -83,7 +83,7 @@ export function usePatternGeneration(): UsePatternGenerationReturn {
       );
       
       const usage = await PatternGenerationWorkflow.execute(
-        fabricState.fabrics,
+        fabricsOverride || fabricState.fabrics,
         userSkillLevel,
         challengeMe,
         selectedPattern,

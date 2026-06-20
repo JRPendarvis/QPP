@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import PatternVisualization from './PatternVisualization';
 import PatternMetadata from './PatternMetadata';
@@ -117,7 +117,8 @@ interface PatternDisplayProps {
   fabrics: File[];
   previews: string[];
   fabricLabels?: string[];
-  fabricLibraryRefs?: Array<{ fabricId: string; name: string; yardageAvailable: number } | null>;
+  fabricYardageRefs?: Array<{ name: string; yardageAvailable: number | null } | null>;
+  generationAdjustmentSummary?: string[];
   savedFabrics: SavedFabricOption[];
   liveUpdating?: boolean;
   liveUpdateError?: string | null;
@@ -136,7 +137,8 @@ export default function PatternDisplay({
   fabrics,
   previews,
   fabricLabels,
-  fabricLibraryRefs = [],
+  fabricYardageRefs = [],
+  generationAdjustmentSummary = [],
   savedFabrics,
   liveUpdating = false,
   liveUpdateError = null,
@@ -150,6 +152,15 @@ export default function PatternDisplay({
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedSavedByIndex, setSelectedSavedByIndex] = useState<Record<number, string>>({});
+  const [canUseCameraCapture, setCanUseCameraCapture] = useState(false);
+  const galleryInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const cameraInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  useEffect(() => {
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const hasTouch = navigator.maxTouchPoints > 0;
+    setCanUseCameraCapture(coarsePointer || hasTouch);
+  }, []);
 
   const hasDownloadsRemaining = usage?.downloads?.remaining
     ? usage.downloads.remaining > 0
@@ -158,26 +169,28 @@ export default function PatternDisplay({
   const displayDescription = pattern.description?.trim() || 'A custom quilt layout generated from your selected fabrics and skill level.';
   const displayFabricRequirements = buildDisplayFabricRequirements(pattern, previews.length);
   const availabilityCheck = useMemo(() => {
-    const mapped = displayFabricRequirements
-      .map((requirement, index) => {
-        const libraryFabric = fabricLibraryRefs[index];
-        if (!libraryFabric) {
-          return null;
-        }
+    const mapped: Array<{ role: string; requiredYards: number; availableYards: number; shortageYards: number; name: string }> = [];
+    const buyAsNeededRoles: string[] = [];
 
-        const shortageYards = Math.max(0, Number((requirement.yards - libraryFabric.yardageAvailable).toFixed(2)));
+    displayFabricRequirements.forEach((requirement, index) => {
+      const yardageRef = fabricYardageRefs[index];
+      if (!yardageRef || yardageRef.yardageAvailable === null) {
+        buyAsNeededRoles.push(requirement.role);
+        return;
+      }
 
-        return {
-          role: requirement.role,
-          requiredYards: requirement.yards,
-          availableYards: libraryFabric.yardageAvailable,
-          shortageYards,
-          name: libraryFabric.name,
-        };
-      })
-      .filter((item): item is NonNullable<typeof item> => Boolean(item));
+      const shortageYards = Math.max(0, Number((requirement.yards - yardageRef.yardageAvailable).toFixed(2)));
+      mapped.push({
+        role: requirement.role,
+        requiredYards: requirement.yards,
+        availableYards: yardageRef.yardageAvailable,
+        shortageYards,
+        name: yardageRef.name,
+      });
+    });
 
-    if (mapped.length === 0) {
+    const buyAsNeededCount = buyAsNeededRoles.length;
+    if (mapped.length === 0 && buyAsNeededCount <= 0) {
       return null;
     }
 
@@ -192,8 +205,10 @@ export default function PatternDisplay({
       totalShortage,
       hasShortage: totalShortage > 0,
       hasPartialCoverage: mapped.length < displayFabricRequirements.length,
+      buyAsNeededCount,
+      buyAsNeededRoles,
     };
-  }, [displayFabricRequirements, fabricLibraryRefs]);
+  }, [displayFabricRequirements, fabricYardageRefs]);
   const fitToAvailable = useMemo(() => {
     if (!availabilityCheck || !availabilityCheck.hasShortage) {
       return null;
@@ -237,6 +252,71 @@ export default function PatternDisplay({
   }, [availabilityCheck, displayFabricRequirements, pattern.estimatedSize]);
   const activeFabricRequirements = fitToAvailable?.fittedRequirements || displayFabricRequirements;
   const activeEstimatedSize = fitToAvailable?.fittedSize || pattern.estimatedSize;
+  const activeAvailabilityCheck = useMemo(() => {
+    const mapped: Array<{ role: string; requiredYards: number; availableYards: number; shortageYards: number; name: string }> = [];
+    const buyAsNeededRoles: string[] = [];
+
+    activeFabricRequirements.forEach((requirement, index) => {
+      const yardageRef = fabricYardageRefs[index];
+      if (!yardageRef || yardageRef.yardageAvailable === null) {
+        buyAsNeededRoles.push(requirement.role);
+        return;
+      }
+
+      const shortageYards = Math.max(0, Number((requirement.yards - yardageRef.yardageAvailable).toFixed(2)));
+      mapped.push({
+        role: requirement.role,
+        requiredYards: requirement.yards,
+        availableYards: yardageRef.yardageAvailable,
+        shortageYards,
+        name: yardageRef.name,
+      });
+    });
+
+    const buyAsNeededCount = buyAsNeededRoles.length;
+    if (mapped.length === 0 && buyAsNeededCount <= 0) {
+      return null;
+    }
+
+    const totalRequired = Number(mapped.reduce((sum, item) => sum + item.requiredYards, 0).toFixed(2));
+    const totalAvailable = Number(mapped.reduce((sum, item) => sum + item.availableYards, 0).toFixed(2));
+    const totalShortage = Number(mapped.reduce((sum, item) => sum + item.shortageYards, 0).toFixed(2));
+
+    return {
+      mapped,
+      totalRequired,
+      totalAvailable,
+      totalShortage,
+      hasShortage: totalShortage > 0,
+      hasPartialCoverage: mapped.length < activeFabricRequirements.length,
+      buyAsNeededCount,
+      buyAsNeededRoles,
+    };
+  }, [activeFabricRequirements, fabricYardageRefs]);
+  const requirementStatuses = useMemo(() => {
+    return activeFabricRequirements.map((requirement, index) => {
+      const yardageRef = fabricYardageRefs[index];
+      if (!yardageRef || yardageRef.yardageAvailable === null) {
+        return {
+          mode: 'buy' as const,
+          text: 'Buy as needed',
+        };
+      }
+
+      const shortage = Math.max(0, Number((requirement.yards - yardageRef.yardageAvailable).toFixed(2)));
+      if (shortage > 0) {
+        return {
+          mode: 'short' as const,
+          text: `Have ${yardageRef.yardageAvailable.toFixed(2)} yd | Short ${shortage.toFixed(2)} yd`,
+        };
+      }
+
+      return {
+        mode: 'enough' as const,
+        text: `Have ${yardageRef.yardageAvailable.toFixed(2)} yd | Enough`,
+      };
+    });
+  }, [activeFabricRequirements, fabricYardageRefs]);
 
   const shouldShowAutoSelection = Boolean(pattern.autoSelection) && !generatedFromUniqueMode && !pattern.meta?.isUnique;
   const shouldShowUniqueRationale = (generatedFromUniqueMode || pattern.meta?.isUnique) && Boolean(pattern.selectionRationale);
@@ -347,6 +427,17 @@ export default function PatternDisplay({
         </div>
       )}
 
+      {generationAdjustmentSummary.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm font-semibold text-blue-900 mb-2">Automatic stash-fit adjustments</p>
+          <div className="space-y-1">
+            {generationAdjustmentSummary.map((note, index) => (
+              <p key={index} className="text-sm text-blue-800">• {note}</p>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Error States */}
       <ErrorStates error={error} patternData={pattern} />
 
@@ -404,11 +495,53 @@ export default function PatternDisplay({
                     </p>
 
                     <div className="space-y-2">
-                      <label className="w-full inline-flex justify-center items-center px-3 py-2 rounded-md bg-indigo-600 text-white text-xs font-medium cursor-pointer hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-gray-400">
-                        Replace
+                      <div className={`grid gap-2 ${canUseCameraCapture ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        <button
+                          type="button"
+                          disabled={liveUpdating}
+                          onClick={() => galleryInputRefs.current[index]?.click()}
+                          className="w-full inline-flex justify-center items-center px-3 py-2 rounded-md bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                        >
+                          Choose From Library
+                        </button>
+                        {canUseCameraCapture && (
+                          <button
+                            type="button"
+                            disabled={liveUpdating}
+                            onClick={() => cameraInputRefs.current[index]?.click()}
+                            className="w-full inline-flex justify-center items-center px-3 py-2 rounded-md bg-teal-600 text-white text-xs font-medium hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                          >
+                            Open Camera
+                          </button>
+                        )}
+                      </div>
+                      {canUseCameraCapture && (
+                        <p className="text-[11px] text-gray-500">Use Open Camera for a fresh shot, or Choose From Library for an existing photo.</p>
+                      )}
+                      <input
+                        ref={(el) => {
+                          galleryInputRefs.current[index] = el;
+                        }}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={liveUpdating}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) {
+                            onReplaceFabric(index, file);
+                          }
+                          event.currentTarget.value = '';
+                        }}
+                      />
+                      {canUseCameraCapture && (
                         <input
+                          ref={(el) => {
+                            cameraInputRefs.current[index] = el;
+                          }}
                           type="file"
                           accept="image/*"
+                          capture="environment"
                           className="hidden"
                           disabled={liveUpdating}
                           onChange={(event) => {
@@ -419,7 +552,7 @@ export default function PatternDisplay({
                             event.currentTarget.value = '';
                           }}
                         />
-                      </label>
+                      )}
 
                       <div className="space-y-1">
                         <select
@@ -506,7 +639,7 @@ export default function PatternDisplay({
         <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
           <p className="text-sm font-semibold text-teal-900 mb-1">Auto-fit to your available fabric</p>
           <p className="text-sm text-teal-800">
-            Requirements were scaled to match mapped library yardage. Estimated quilt size was adjusted to approximately {fitToAvailable.fittedSize}.
+            Requirements were scaled to match your entered yardage. Estimated quilt size was adjusted to approximately {fitToAvailable.fittedSize}.
           </p>
         </div>
       )}
@@ -524,6 +657,15 @@ export default function PatternDisplay({
                 <div className="flex-1">
                   <span className="font-semibold text-gray-800">{req.role}:</span>
                   <span className="text-gray-600 ml-2 text-sm">{req.description}</span>
+                  <p className={`text-xs mt-1 ${
+                    requirementStatuses[idx]?.mode === 'short'
+                      ? 'text-amber-700'
+                      : requirementStatuses[idx]?.mode === 'enough'
+                        ? 'text-emerald-700'
+                        : 'text-gray-500'
+                  }`}>
+                    {requirementStatuses[idx]?.text}
+                  </p>
                 </div>
                 <span className="font-bold text-indigo-600 ml-4 whitespace-nowrap">
                   {req.inches ? `${req.inches}"` : `${req.yards} yards`}
@@ -544,10 +686,10 @@ export default function PatternDisplay({
         <div className={`rounded-lg border p-6 ${availabilityCheck.hasShortage ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'}`}>
           <h3 className="text-xl font-bold text-gray-800 mb-2">Fabric Availability Check</h3>
           <p className="text-sm text-gray-700 mb-4">
-            Compared required yardage to the Fabric Library items currently mapped to your quilt.
+            Compared required yardage to your entered yardage values for uploaded fabrics.
           </p>
           <div className="space-y-2 mb-4">
-            {availabilityCheck.mapped.map((item, index) => (
+            {activeAvailabilityCheck.mapped.map((item, index) => (
               <div key={`${item.role}-${index}`} className="flex justify-between items-center text-sm border-b border-gray-200 pb-2">
                 <span className="text-gray-800">
                   <strong>{item.role}</strong> ({item.name})
@@ -559,21 +701,33 @@ export default function PatternDisplay({
               </div>
             ))}
           </div>
-          <p className="text-sm text-gray-800">
-            Total required: <strong>{availabilityCheck.totalRequired.toFixed(2)} yd</strong> | Total available: <strong>{availabilityCheck.totalAvailable.toFixed(2)} yd</strong>
-          </p>
-          {availabilityCheck.hasShortage ? (
+          {activeAvailabilityCheck.mapped.length > 0 && (
+            <p className="text-sm text-gray-800">
+              Total required: <strong>{activeAvailabilityCheck.totalRequired.toFixed(2)} yd</strong> | Total available: <strong>{activeAvailabilityCheck.totalAvailable.toFixed(2)} yd</strong>
+            </p>
+          )}
+          {activeAvailabilityCheck.hasShortage ? (
             <p className="text-sm text-amber-800 mt-2 font-medium">
-              You are short by {availabilityCheck.totalShortage.toFixed(2)} yd across mapped fabrics. Consider swapping fabrics, changing quilt size, or adding yardage.
+              You are short by {activeAvailabilityCheck.totalShortage.toFixed(2)} yd across mapped fabrics. Consider swapping fabrics, changing quilt size, or adding yardage.
             </p>
           ) : (
             <p className="text-sm text-emerald-800 mt-2 font-medium">
-              Great news: mapped fabrics have enough yardage for the current requirement estimate.
+              Great news: entered yardage is enough for the current requirement estimate.
             </p>
           )}
-          {availabilityCheck.hasPartialCoverage && (
+          {activeAvailabilityCheck.buyAsNeededCount > 0 && (
+            <p className="text-sm text-gray-700 mt-2">
+              {activeAvailabilityCheck.buyAsNeededCount} fabric role(s) are set to buy-as-needed (blank yardage), so the app is showing how much you need rather than enforcing limits.
+            </p>
+          )}
+          {activeAvailabilityCheck.buyAsNeededRoles.length > 0 && (
+            <p className="text-xs text-gray-600 mt-1">
+              Buy-as-needed roles: {activeAvailabilityCheck.buyAsNeededRoles.join(', ')}.
+            </p>
+          )}
+          {activeAvailabilityCheck.hasPartialCoverage && (
             <p className="text-xs text-gray-600 mt-2">
-              Some quilt fabrics were uploaded directly (not selected from Fabric Library), so their available yardage could not be verified.
+              You can enter yardage on each uploaded fabric card to enforce stash limits, or leave blank to buy as needed.
             </p>
           )}
         </div>

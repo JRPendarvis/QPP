@@ -64,7 +64,22 @@ export class PatternGenerationWorkflow {
     });
   }
 
-  private static async buildClientUniqueFallbackPattern(userSkillLevel: string, fabrics: File[]): Promise<QuiltPattern> {
+  private static resolveQuiltSizeEstimate(quiltSize?: string): { totalYards: number; estimatedSize: string } {
+    const key = (quiltSize || 'default').toLowerCase();
+    const map: Record<string, { totalYards: number; estimatedSize: string }> = {
+      baby: { totalYards: 1.85, estimatedSize: '36x52 inches' },
+      lap: { totalYards: 3.15, estimatedSize: '50x65 inches' },
+      twin: { totalYards: 5.75, estimatedSize: '66x90 inches' },
+      full: { totalYards: 6.95, estimatedSize: '80x90 inches' },
+      queen: { totalYards: 8.3, estimatedSize: '90x95 inches' },
+      king: { totalYards: 9.7, estimatedSize: '105x95 inches' },
+      default: { totalYards: 4.5, estimatedSize: '60x72 inches' },
+    };
+
+    return map[key] || map.default;
+  }
+
+  private static async buildClientUniqueFallbackPattern(userSkillLevel: string, fabrics: File[], quiltSize?: string): Promise<QuiltPattern> {
     const normalizedSkill = (userSkillLevel || 'beginner').toLowerCase();
     const width = 300;
     const height = 400;
@@ -122,7 +137,8 @@ export class PatternGenerationWorkflow {
     const roleNames = ['Background', 'Primary', 'Secondary', 'Accent'];
     const requirementCount = Math.max(1, Math.min(validFabricUrls.length || fabrics.length || 4, roleNames.length));
     const defaultSplits = [0.45, 0.3, 0.15, 0.1];
-    const estimatedTotalYards = 4.5;
+    const sizeEstimate = this.resolveQuiltSizeEstimate(quiltSize);
+    const estimatedTotalYards = sizeEstimate.totalYards;
     const fabricRequirements = Array.from({ length: requirementCount }, (_, index) => {
       const split = defaultSplits[index] || (1 / requirementCount);
       const yards = Math.max(0.25, Number((estimatedTotalYards * split).toFixed(2)));
@@ -141,7 +157,7 @@ export class PatternGenerationWorkflow {
       description: `A one-of-a-kind quilt composition generated at ${userSkillLevel} level from your uploaded fabrics.`,
       fabricLayout: 'Client fallback: non-catalog unique layout generated to preserve unique mode behavior.',
       difficulty: userSkillLevel,
-      estimatedSize: '60×72 inches',
+      estimatedSize: sizeEstimate.estimatedSize,
       instructions: [
         'Sort your selected fabrics by value and contrast.',
         'Cut strips and units according to your required layout.',
@@ -169,6 +185,7 @@ export class PatternGenerationWorkflow {
     selectedPattern: string | undefined,
     userSkillLevel: string,
     fabrics: File[],
+    quiltSize: string | undefined,
     response: PatternGenerationResponse
   ): PatternGenerationResponse {
     if (!this.isUniqueRequest(selectedPattern)) {
@@ -191,7 +208,7 @@ export class PatternGenerationWorkflow {
         success: true,
         data: {
           ...(response.data || {}),
-          pattern: await this.buildClientUniqueFallbackPattern(userSkillLevel, fabrics),
+          pattern: await this.buildClientUniqueFallbackPattern(userSkillLevel, fabrics, quiltSize),
         },
       };
     }
@@ -229,7 +246,7 @@ export class PatternGenerationWorkflow {
         borders,
       });
 
-      const uniqueSafeResponse = await this.coerceUniqueResponse(selectedPattern, userSkillLevel, fabrics, response);
+      const uniqueSafeResponse = await this.coerceUniqueResponse(selectedPattern, userSkillLevel, fabrics, quiltSize, response);
 
       this.handleResponse(uniqueSafeResponse, callbacks);
       return uniqueSafeResponse.data?.usage || null;
@@ -239,7 +256,7 @@ export class PatternGenerationWorkflow {
       const isServer500 = axiosError?.response?.status === 500;
 
       if (isUniqueMode && isServer500) {
-        const fallbackPattern = await this.buildClientUniqueFallbackPattern(userSkillLevel, fabrics);
+        const fallbackPattern = await this.buildClientUniqueFallbackPattern(userSkillLevel, fabrics, quiltSize);
         callbacks.onSuccess(fallbackPattern);
         callbacks.onError('Unique mode temporarily used a local fallback due to server error.');
         return null;

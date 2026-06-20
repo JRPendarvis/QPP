@@ -35,6 +35,7 @@ export interface UsePatternGenerationReturn {
     challengeMe: boolean,
     selectedPattern?: string,
     quiltSize?: string,
-    borders?: any
+    borders?: any,
+    fabricsOverride?: File[]
   ) => Promise<{ used: number; limit: number; remaining: number } | null>;
 }
