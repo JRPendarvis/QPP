@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePatternGeneration } from '@/hooks/usePatternGeneration';
 import { useBorderState } from '@/hooks/useBorderState';
@@ -9,7 +8,6 @@ import Navigation from '@/components/Navigation';
 import UploadHeader from '@/components/upload/UploadHeader';
 import PatternDisplay from '@/components/upload/PatternDisplay';
 import ErrorDisplay from '@/components/upload/ErrorDisplay';
-import FabricSearchBar from '@/components/fabrics/FabricSearchBar';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '@/lib/api';
 import {
@@ -17,16 +15,24 @@ import {
   ValidationMessage,
   GenerateButton,
   PatternSelectionSection,
+  QuiltSizeSection,
   UploadSection,
+  SavedFabricLibrarySection,
   FabricDropzone,
 } from '@/components/upload';
 
+import {
+  CREDIT_ALERT_THRESHOLDS,
+  UNIQUE_ROLE_LABELS,
+  UNIQUE_SIZE_CATALOG,
+  UNIQUE_SPLIT_SEED,
+} from './utils/constants';
+import { useSavedFabricLibrary } from './utils/useSavedFabricLibrary';
 import { useUserProfile, usePatternSelection } from './utils/hooks';
+import { prepareGenerationRequest } from './utils/generation';
 import { validateFabricCount, getFabricValidationMessage } from './utils/validation';
-import { PatternChoice } from './utils/types';
-import { getBorderName } from '@/utils/borderNaming';
+import { FabricYardageRef, PatternChoice } from './utils/types';
 import { formatFabricRange, SKILL_LEVELS } from '@/app/helpers/patternHelpers';
-import fabricService, { FabricRecord } from '@/services/fabricService';
 import { processImageFiles } from '@/utils/imageCompression';
 
 export default function UploadPage() {
@@ -38,30 +44,14 @@ export default function UploadPage() {
   const [generating, setGenerating] = useState(false);
   const [fabricRoles, setFabricRoles] = useState<string[]>([]);
   const [quiltSize, setQuiltSize] = useState<string>('');
-  const [savedFabrics, setSavedFabrics] = useState<FabricRecord[]>([]);
-  const [loadingSavedFabrics, setLoadingSavedFabrics] = useState(true);
-  const [addingSavedFabricId, setAddingSavedFabricId] = useState<string | null>(null);
-  const [savedFabricSearch, setSavedFabricSearch] = useState('');
   const [liveUpdating, setLiveUpdating] = useState(false);
   const [liveUpdateError, setLiveUpdateError] = useState<string | null>(null);
   const [lastGeneratedFabricSignature, setLastGeneratedFabricSignature] = useState('');
-  const [fabricYardageRefs, setFabricYardageRefs] = useState<Array<{ fabricId?: string; name: string; yardageAvailable: number | null; isLibrary: boolean } | null>>([]);
+  const [fabricYardageRefs, setFabricYardageRefs] = useState<Array<FabricYardageRef | null>>([]);
   const [generationAdjustmentSummary, setGenerationAdjustmentSummary] = useState<string[]>([]);
   const liveUpdateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousCreditPercentRef = useRef<number | null>(null);
   const shownCreditAlertsRef = useRef<Set<number>>(new Set());
-
-  // Filter saved fabrics based on search
-  const filteredSavedFabrics = useMemo(() => {
-    if (!savedFabricSearch.trim()) return savedFabrics;
-    
-    const query = savedFabricSearch.toLowerCase();
-    return savedFabrics.filter((fabric) =>
-      fabric.name.toLowerCase().includes(query) ||
-      (fabric.type?.toLowerCase() || '').includes(query) ||
-      (fabric.notes?.toLowerCase() || '').includes(query)
-    );
-  }, [savedFabrics, savedFabricSearch]);
 
   // Border state management
   const {
@@ -98,7 +88,7 @@ export default function UploadPage() {
     const previousPercent = previousCreditPercentRef.current;
     previousCreditPercentRef.current = remainingPercent;
 
-    const thresholds = [50, 25, 10, 5];
+    const thresholds = [...CREDIT_ALERT_THRESHOLDS];
     const crossed = thresholds.filter((threshold) => {
       if (shownCreditAlertsRef.current.has(threshold)) return false;
       if (previousPercent === null) return remainingPercent <= threshold;
@@ -208,6 +198,24 @@ export default function UploadPage() {
     return fabrics.map((_, index) => `Fabric ${index + 1}`);
   }, [fabricRoles, fabrics]);
 
+  const {
+    savedFabrics,
+    loadingSavedFabrics,
+    addingSavedFabricId,
+    filteredSavedFabrics,
+    setSavedFabricSearch,
+    handleAddSavedFabricToQuilt,
+    handleReplaceFabricWithSaved,
+  } = useSavedFabricLibrary({
+    user,
+    fabricsLength: fabrics.length,
+    effectiveMaxFabrics,
+    currentFabricLabels,
+    setFabrics,
+    setPreviews,
+    setFabricYardageRefs,
+  });
+
   const buildUniqueStashPlan = useCallback((explicitQuiltSize?: string) => {
     const borderCount = borderConfiguration.enabled ? borderConfiguration.borders.length : 0;
     const patternCount = Math.max(0, fabrics.length - borderCount);
@@ -219,7 +227,7 @@ export default function UploadPage() {
     const borderYardageRefs = fabricYardageRefs.slice(patternCount);
 
     const roleCount = Math.max(1, Math.min(patternCount || 1, 4));
-    const splitSeed = [0.45, 0.3, 0.15, 0.1];
+    const splitSeed = [...UNIQUE_SPLIT_SEED];
     const splits = Array.from({ length: roleCount }, (_, idx) => splitSeed[idx] || (1 / roleCount));
 
     const zipped = patternFabrics.map((fabric, index) => ({
@@ -245,15 +253,7 @@ export default function UploadPage() {
 
     const wasReordered = sortedPattern.some((entry, index) => entry.originalIndex !== index);
 
-    const sizeCatalog = [
-      { key: 'baby', label: 'baby', width: 36, height: 52 },
-      { key: 'lap', label: 'lap', width: 50, height: 65 },
-      { key: 'default', label: 'default', width: 60, height: 72 },
-      { key: 'twin', label: 'twin', width: 66, height: 90 },
-      { key: 'full', label: 'full', width: 80, height: 90 },
-      { key: 'queen', label: 'queen', width: 90, height: 95 },
-      { key: 'king', label: 'king', width: 105, height: 95 },
-    ] as const;
+    const sizeCatalog = [...UNIQUE_SIZE_CATALOG];
 
     const byAreaDesc = [...sizeCatalog].sort((a, b) => (b.width * b.height) - (a.width * a.height));
     const explicitSizeKey = explicitQuiltSize || 'default';
@@ -296,7 +296,7 @@ export default function UploadPage() {
 
     for (let idx = 0; idx < roleCount; idx += 1) {
       if (sortedPattern[idx]?.yardageRef?.yardageAvailable === null || sortedPattern[idx]?.yardageRef?.yardageAvailable === undefined) {
-        const role = ['Background', 'Primary', 'Secondary', 'Accent'][idx] || `Fabric ${idx + 1}`;
+        const role = UNIQUE_ROLE_LABELS[idx] || `Fabric ${idx + 1}`;
         buyAsNeededRoles.push(role);
       }
     }
@@ -353,128 +353,6 @@ export default function UploadPage() {
         setFabricRoles([]);
       });
   }, [patternChoice, selectedPattern]);
-
-  useEffect(() => {
-    if (!user) return;
-
-    let cancelled = false;
-
-    void fabricService
-      .list()
-      .then((result) => {
-        if (!cancelled) setSavedFabrics(result.fabrics.filter((item) => Boolean(item.imageUrl)));
-      })
-      .catch(() => {
-        if (!cancelled) setSavedFabrics([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingSavedFabrics(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
-
-  const buildFileFromSavedFabric = async (fabric: FabricRecord): Promise<File> => {
-    if (!fabric.imageUrl) {
-      throw new Error('This saved fabric does not have a photo.');
-    }
-
-    const response = await fetch(fabric.imageUrl);
-    if (!response.ok) {
-      throw new Error('Unable to read saved fabric image');
-    }
-
-    const blob = await response.blob();
-    const mimeType = blob.type || 'image/jpeg';
-    const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
-    const safeName = fabric.name.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
-    const rawFile = new File([blob], `${safeName || 'saved-fabric'}.${ext}`, { type: mimeType });
-
-    // Keep saved-fabric imports aligned with dropzone uploads (<=5MB after compression).
-    const { validFiles } = await processImageFiles([rawFile]);
-    if (validFiles.length === 0) {
-      throw new Error('Saved fabric image is too large to use (must be 5MB or less after compression).');
-    }
-
-    return validFiles[0];
-  };
-
-  const handleAddSavedFabricToQuilt = async (fabric: FabricRecord) => {
-    if (fabrics.length >= effectiveMaxFabrics) {
-      toast.error(`Maximum ${effectiveMaxFabrics} fabrics reached for this quilt setup.`);
-      return;
-    }
-
-    setAddingSavedFabricId(fabric.id);
-    try {
-      const file = await buildFileFromSavedFabric(fabric);
-
-      setFabrics((prev) => [...prev, file]);
-      setPreviews((prev) => [...prev, fabric.imageUrl as string]);
-      setFabricYardageRefs((prev) => [
-        ...prev,
-        {
-          fabricId: fabric.id,
-          name: fabric.name,
-          yardageAvailable: fabric.yardageAvailable,
-          isLibrary: true,
-        },
-      ]);
-      toast.success(`${fabric.name} added to quilt fabrics.`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not add this saved fabric photo. Please upload it manually.');
-    } finally {
-      setAddingSavedFabricId(null);
-    }
-  };
-
-  const handleReplaceFabricWithSaved = async (index: number, savedFabricId: string) => {
-    const selectedSavedFabric = savedFabrics.find((fabric) => fabric.id === savedFabricId);
-    if (!selectedSavedFabric) {
-      toast.error('Saved fabric not found.');
-      return;
-    }
-
-    setAddingSavedFabricId(selectedSavedFabric.id);
-    try {
-      const file = await buildFileFromSavedFabric(selectedSavedFabric);
-
-      if (index < 0 || index >= fabrics.length) {
-        return;
-      }
-
-      setFabrics((prev) => {
-        const updated = [...prev];
-        updated[index] = file;
-        return updated;
-      });
-
-      setPreviews((prev) => {
-        const updated = [...prev];
-        updated[index] = selectedSavedFabric.imageUrl || updated[index];
-        return updated;
-      });
-
-      setFabricYardageRefs((prev) => {
-        const updated = [...prev];
-        updated[index] = {
-          fabricId: selectedSavedFabric.id,
-          name: selectedSavedFabric.name,
-          yardageAvailable: selectedSavedFabric.yardageAvailable,
-          isLibrary: true,
-        };
-        return updated;
-      });
-
-      toast.success(`${selectedSavedFabric.name} applied to ${currentFabricLabels[index] || `Fabric ${index + 1}`}.`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not replace with saved fabric.');
-    } finally {
-      setAddingSavedFabricId(null);
-    }
-  };
 
   const handleFabricReorder = (fromIdx: number, toIdx: number) => {
     if (fromIdx === toIdx) return;
@@ -672,32 +550,29 @@ export default function UploadPage() {
     setGenerating(true);
     setLiveUpdateError(null);
     try {
-      const patternOverride = patternChoice === 'unique'
-        ? 'unique'
-        : patternChoice === 'manual'
-          ? selectedPattern
-          : undefined;
-      let effectiveQuiltSize = quiltSize || undefined;
-      let fabricsForGeneration = fabrics;
+      const generationRequest = prepareGenerationRequest({
+        patternChoice,
+        selectedPattern,
+        quiltSize,
+        fabrics,
+        buildUniqueStashPlan,
+      });
 
-      if (patternChoice === 'unique') {
-        const plan = buildUniqueStashPlan(quiltSize || undefined);
-        if (!plan.isPossible) {
-          toast.error(plan.reason);
-          toast.dismiss(loadingToast);
-          setGenerating(false);
-          return;
-        }
+      if (generationRequest.blockingReason) {
+        toast.error(generationRequest.blockingReason);
+        toast.dismiss(loadingToast);
+        setGenerating(false);
+        return;
+      }
 
-        fabricsForGeneration = plan.plannedFabrics;
-        effectiveQuiltSize = plan.effectiveQuiltSize;
-        setFabrics(plan.plannedFabrics);
-        setPreviews(plan.plannedPreviews);
-        setFabricYardageRefs(plan.plannedYardageRefs);
-        setGenerationAdjustmentSummary(plan.notes);
+      if (generationRequest.uniquePlan) {
+        setFabrics(generationRequest.uniquePlan.plannedFabrics);
+        setPreviews(generationRequest.uniquePlan.plannedPreviews);
+        setFabricYardageRefs(generationRequest.uniquePlan.plannedYardageRefs);
+        setGenerationAdjustmentSummary(generationRequest.uniquePlan.notes);
 
-        if (plan.notes.length > 0) {
-          toast(plan.notes.join(' '), {
+        if (generationRequest.uniquePlan.notes.length > 0) {
+          toast(generationRequest.uniquePlan.notes.join(' '), {
             icon: '🧵',
             duration: 5000,
           });
@@ -709,13 +584,13 @@ export default function UploadPage() {
       const usage = await generatePattern(
         currentSkill,
         challengeMe,
-        patternOverride,
-        effectiveQuiltSize,
+        generationRequest.patternOverride,
+        generationRequest.effectiveQuiltSize,
         borderConfiguration.enabled ? borderConfiguration.borders : undefined,
-        fabricsForGeneration
+        generationRequest.fabricsForGeneration
       );
       maybeAlertCreditThreshold(usage);
-      setLastGeneratedFabricSignature(fabricsForGeneration.map((file) => `${file.name}-${file.size}-${file.lastModified}`).join('|'));
+      setLastGeneratedFabricSignature(generationRequest.fabricsForGeneration.map((file) => `${file.name}-${file.size}-${file.lastModified}`).join('|'));
       toast.dismiss(loadingToast);
     } catch {
       toast.dismiss(loadingToast);
@@ -767,39 +642,36 @@ export default function UploadPage() {
         setLiveUpdating(true);
         setLiveUpdateError(null);
         try {
-          const patternOverride = patternChoice === 'unique'
-            ? 'unique'
-            : patternChoice === 'manual'
-              ? selectedPattern
-              : undefined;
-          let effectiveQuiltSize = quiltSize || undefined;
-          let fabricsForGeneration = fabrics;
+          const generationRequest = prepareGenerationRequest({
+            patternChoice,
+            selectedPattern,
+            quiltSize,
+            fabrics,
+            buildUniqueStashPlan,
+          });
 
-          if (patternChoice === 'unique') {
-            const plan = buildUniqueStashPlan(quiltSize || undefined);
-            if (!plan.isPossible) {
-              setLiveUpdateError(plan.reason);
-              setLiveUpdating(false);
-              return;
-            }
+          if (generationRequest.blockingReason) {
+            setLiveUpdateError(generationRequest.blockingReason);
+            setLiveUpdating(false);
+            return;
+          }
 
-            fabricsForGeneration = plan.plannedFabrics;
-            effectiveQuiltSize = plan.effectiveQuiltSize;
-            setFabrics(plan.plannedFabrics);
-            setPreviews(plan.plannedPreviews);
-            setFabricYardageRefs(plan.plannedYardageRefs);
-            setGenerationAdjustmentSummary(plan.notes);
+          if (generationRequest.uniquePlan) {
+            setFabrics(generationRequest.uniquePlan.plannedFabrics);
+            setPreviews(generationRequest.uniquePlan.plannedPreviews);
+            setFabricYardageRefs(generationRequest.uniquePlan.plannedYardageRefs);
+            setGenerationAdjustmentSummary(generationRequest.uniquePlan.notes);
           }
 
           await generatePattern(
             currentSkill,
             challengeMe,
-            patternOverride,
-            effectiveQuiltSize,
+            generationRequest.patternOverride,
+            generationRequest.effectiveQuiltSize,
             borderConfiguration.enabled ? borderConfiguration.borders : undefined,
-            fabricsForGeneration
+            generationRequest.fabricsForGeneration
           );
-          setLastGeneratedFabricSignature(fabricsForGeneration.map((file) => `${file.name}-${file.size}-${file.lastModified}`).join('|'));
+          setLastGeneratedFabricSignature(generationRequest.fabricsForGeneration.map((file) => `${file.name}-${file.size}-${file.lastModified}`).join('|'));
         } catch {
           setLiveUpdateError('Could not refresh pattern after fabric changes. Your previous pattern is still shown.');
         } finally {
@@ -883,119 +755,16 @@ export default function UploadPage() {
                       currentSkill={currentSkill}
                     />
 
-                    <div className="border-2 border-gray-200 rounded-lg p-4">
-                      <h2 className="text-lg font-semibold mb-3 text-gray-800">Step 2: Choose Quilt Size</h2>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-2">
-                        Choose your desired quilt size (optional)
-                      </label>
-                      <select
-                        value={quiltSize}
-                        onChange={(e) => setQuiltSize(e.target.value)}
-                        className="w-full border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-red-700 transition-colors"
-                      >
-                        <option value="">Default (60×72 inches)</option>
-                        <option value="baby">Baby (36×52 inches)</option>
-                        <option value="lap">Lap/Throw (50×65 inches)</option>
-                        <option value="twin">Twin (66×90 inches)</option>
-                        <option value="full">Full/Double (80×90 inches)</option>
-                        <option value="queen">Queen (90×95 inches)</option>
-                        <option value="king">King (105×95 inches)</option>
-                      </select>
-                      {quiltSize && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          Selected: {quiltSize.charAt(0).toUpperCase() + quiltSize.slice(1)} size
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Border Configuration */}
-                    <div className="pt-4 border-t border-gray-200">
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="text-sm font-medium text-gray-700">
-                          Would you like to add borders?
-                        </label>
-                        <button
-                          onClick={() => toggleBorders(!borderConfiguration.enabled)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            borderConfiguration.enabled ? 'bg-indigo-600' : 'bg-gray-200'
-                          }`}
-                          aria-label="Toggle borders"
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              borderConfiguration.enabled ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
-                      </div>
-
-                      {borderConfiguration.enabled && (
-                        <div className="space-y-3 mt-3">
-                          {/* Border list */}
-                          {borderConfiguration.borders.sort((a, b) => a.order - b.order).map((border, index) => {
-                            const borderName = getBorderName(border.order, borderConfiguration.borders.length);
-                            
-                            return (
-                              <div key={border.id} className="p-3 bg-gray-50 rounded-lg">
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm font-semibold text-gray-700">{borderName}</span>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => reorderBorder(border.id, 'up')}
-                                    disabled={index === 0}
-                                    className="p-1 text-gray-500 hover:text-indigo-600 disabled:opacity-30 disabled:cursor-not-allowed text-xs"
-                                    aria-label="Move up"
-                                  >
-                                    ↑
-                                  </button>
-                                  <button
-                                    onClick={() => reorderBorder(border.id, 'down')}
-                                    disabled={index === borderConfiguration.borders.length - 1}
-                                    className="p-1 text-gray-500 hover:text-indigo-600 disabled:opacity-30 disabled:cursor-not-allowed text-xs"
-                                    aria-label="Move down"
-                                  >
-                                    ↓
-                                  </button>
-                                  <button
-                                    onClick={() => removeBorder(border.id)}
-                                    className="p-1 text-red-500 hover:text-red-700 text-xs"
-                                    aria-label="Remove"
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                              </div>
-                              <div>
-                                <label className="block text-xs text-gray-600 mb-1">Width (inches)</label>
-                                <input
-                                  type="number"
-                                  min={0.5}
-                                  max={12}
-                                  step={0.5}
-                                  value={border.width}
-                                  onChange={(e) => updateBorder(border.id, { width: parseFloat(e.target.value) })}
-                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                              </div>
-                            </div>
-                          );})}
-
-                          {/* Add border button */}
-                          {borderConfiguration.borders.length < 3 && (
-                            <button
-                              onClick={() => addBorder(0)}
-                              className="w-full py-2 px-3 text-sm border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-colors"
-                            >
-                              + Add Border ({borderConfiguration.borders.length}/3)
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                    <QuiltSizeSection
+                      quiltSize={quiltSize}
+                      setQuiltSize={setQuiltSize}
+                      borderConfiguration={borderConfiguration}
+                      toggleBorders={toggleBorders}
+                      addBorder={addBorder}
+                      removeBorder={removeBorder}
+                      updateBorder={updateBorder}
+                      reorderBorder={reorderBorder}
+                    />
 
                 <div className="border-2 border-gray-200 rounded-lg p-4">
                   <h2 className="text-lg font-semibold text-gray-800 mb-3">
@@ -1019,64 +788,16 @@ export default function UploadPage() {
                     totalSize={totalImageSize}
                   />
 
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <div>
-                        <h3 className="text-base font-semibold text-gray-800">Or use saved fabrics from your library</h3>
-                        <p className="text-sm text-gray-600">Choose previously uploaded fabric photos to include in this quilt.</p>
-                      </div>
-                      <Link href="/fabrics" className="text-sm text-indigo-700 hover:text-indigo-800 font-medium">
-                        Manage Fabric Library
-                      </Link>
-                    </div>
-
-                    {loadingSavedFabrics ? (
-                      <p className="text-sm text-gray-600">Loading saved fabrics...</p>
-                    ) : savedFabrics.length === 0 ? (
-                      <p className="text-sm text-gray-600">No saved fabric photos yet. Add them in Fabric Library first.</p>
-                    ) : (
-                      <>
-                        {savedFabrics.length > 0 && (
-                          <div className="mb-4">
-                            <FabricSearchBar
-                              onSearchChange={setSavedFabricSearch}
-                              placeholder="Search your fabric library..."
-                            />
-                          </div>
-                        )}
-                        {filteredSavedFabrics.length === 0 ? (
-                          <p className="text-sm text-gray-600">No fabrics match your search.</p>
-                        ) : (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {filteredSavedFabrics.map((fabric) => {
-                          const disabled = addingSavedFabricId === fabric.id || fabrics.length >= effectiveMaxFabrics;
-                          return (
-                            <div key={fabric.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={fabric.imageUrl || ''}
-                                alt={fabric.name}
-                                className="w-full h-24 object-cover rounded-md border border-gray-200"
-                              />
-                              <div className="mt-2 flex items-center justify-between gap-2">
-                                <p className="text-sm font-medium text-gray-800 truncate" title={fabric.name}>{fabric.name}</p>
-                                <button
-                                  type="button"
-                                  onClick={() => void handleAddSavedFabricToQuilt(fabric)}
-                                  disabled={disabled}
-                                  className="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-xs font-medium disabled:bg-gray-400"
-                                >
-                                  {addingSavedFabricId === fabric.id ? 'Adding...' : 'Use'}
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
+                  <SavedFabricLibrarySection
+                    loadingSavedFabrics={loadingSavedFabrics}
+                    savedFabrics={savedFabrics}
+                    filteredSavedFabrics={filteredSavedFabrics}
+                    addingSavedFabricId={addingSavedFabricId}
+                    currentFabricCount={fabrics.length}
+                    effectiveMaxFabrics={effectiveMaxFabrics}
+                    onSearchChange={setSavedFabricSearch}
+                    onAddSavedFabricToQuilt={(fabric) => void handleAddSavedFabricToQuilt(fabric)}
+                  />
                 </div>
               </div>
 
@@ -1124,7 +845,7 @@ export default function UploadPage() {
               liveUpdating={liveUpdating}
               liveUpdateError={liveUpdateError}
               onReplaceFabric={handleReplaceFabricAt}
-              onReplaceFabricWithSaved={handleReplaceFabricWithSaved}
+              onReplaceFabricWithSaved={(index, savedFabricId) => handleReplaceFabricWithSaved(index, savedFabricId, fabrics)}
               onRemoveFabric={handleRemoveFabricAt}
               onMoveFabric={handleFabricReorder}
               fabricYardageRefs={fabricYardageRefs}

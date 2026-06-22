@@ -95,7 +95,7 @@ export default function UsageStatsSection({ usage, subscriptionTier }: UsageStat
               ⭐ Free Tier Limits
             </p>
             <p className="text-sm mb-3" style={{color: '#4B5563'}}>
-              • 1 credit per month (resets monthly)<br />
+              • 3 credits per month (resets monthly)<br />
               • 1 PDF download per month (resets monthly)<br />
               Upgrade for more!
             </p>

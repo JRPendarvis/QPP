@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+import { SUBSCRIPTION_TIERS } from '../../config/stripe.config';
 
 const prisma = new PrismaClient();
+const TIER_ORDER = ['free', 'basic', 'intermediate', 'advanced'] as const;
 
 /**
  * Service for admin analytics queries
@@ -120,7 +122,7 @@ export class AdminAnalyticsService {
    * Get monthly usage statistics grouped by subscription tier
    */
   static async getUsageStatsByTier() {
-    return prisma.user.groupBy({
+    const grouped = await prisma.user.groupBy({
       by: ['subscriptionTier'],
       _count: { id: true },
       _sum: {
@@ -128,5 +130,39 @@ export class AdminAnalyticsService {
         downloadsThisMonth: true,
       },
     });
+
+    return grouped
+      .map((row) => {
+        const tierKey = row.subscriptionTier as keyof typeof SUBSCRIPTION_TIERS;
+        const tierConfig = SUBSCRIPTION_TIERS[tierKey];
+        const users = row._count.id ?? 0;
+        const creditsConsumedThisMonth = row._sum.generationsThisMonth ?? 0;
+        const downloadsThisMonth = row._sum.downloadsThisMonth ?? 0;
+        const creditsPerUser = tierConfig?.creditsPerMonth ?? null;
+        const tierCreditCapacity =
+          typeof creditsPerUser === 'number' && Number.isFinite(creditsPerUser)
+            ? users * creditsPerUser
+            : null;
+        const utilizationPercent =
+          tierCreditCapacity && tierCreditCapacity > 0
+            ? Number(((creditsConsumedThisMonth / tierCreditCapacity) * 100).toFixed(1))
+            : null;
+
+        return {
+          subscriptionTier: row.subscriptionTier,
+          tierName: tierConfig?.name ?? row.subscriptionTier,
+          users,
+          creditsPerUser,
+          creditsConsumedThisMonth,
+          downloadsThisMonth,
+          tierCreditCapacity,
+          utilizationPercent,
+        };
+      })
+      .sort((a, b) => {
+        const left = TIER_ORDER.indexOf(a.subscriptionTier as typeof TIER_ORDER[number]);
+        const right = TIER_ORDER.indexOf(b.subscriptionTier as typeof TIER_ORDER[number]);
+        return (left === -1 ? Number.MAX_SAFE_INTEGER : left) - (right === -1 ? Number.MAX_SAFE_INTEGER : right);
+      });
   }
 }

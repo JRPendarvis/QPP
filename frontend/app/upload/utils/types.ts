@@ -25,4 +25,11 @@ export interface PatternDetails {
   maxFabrics: number;
 }
 
+export interface FabricYardageRef {
+  fabricId?: string;
+  name: string;
+  yardageAvailable: number | null;
+  isLibrary: boolean;
+}
+
 export type PatternChoice = 'auto' | 'manual' | 'unique';

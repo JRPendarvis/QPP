@@ -1,5 +1,7 @@
 export { default as PatternSelectionSection } from './PatternSelectionSection';
+export { default as QuiltSizeSection } from './QuiltSizeSection';
 export { default as UploadSection } from './UploadSection';
+export { default as SavedFabricLibrarySection } from './SavedFabricLibrarySection';
 export { default as FabricDropzone } from './FabricDropzone';
 export { default as FabricPreviewGrid } from './FabricPreviewGrid';
 export { default as ValidationMessage } from './ValidationMessage';

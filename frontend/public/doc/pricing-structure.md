@@ -1,32 +1,69 @@
-# Quilt Planner Pro Pricing Structure
+# QuiltPlannerPro Pricing Structure
 
-**Last Updated: December 14, 2025**
+**Last Updated: June 20, 2026**
 
 ## Official Pricing Tiers
 
 ### Free Tier
 - **Cost:** $0
 - **Billing:** None
-- **Patterns:** 1 lifetime pattern
-- **Features:** Basic pattern generation, Standard patterns only, Community support
+- **AI Credits:** 3 per month
+- **Pattern Generation:** Unlimited (procedural, no AI required)
+- **Pattern Downloads:** 1 per month
+- **Features:** Unlimited quilt generation, 3 AI fabric coordination uses/month
 
 ### Hobbyist Tier
 - **Monthly:** $5.99/month
-- **Annual:** $59.99/year (save $11.89 - ~17% discount)
-- **Patterns:** 2 per month
-- **Features:** Skill level matching, Advanced patterns, Priority email support
+- **Annual:** $59.99/year (save $11.89 - ~16.5% discount)
+- **AI Credits:** 15 per month
+- **Pattern Generation:** Unlimited
+- **Pattern Downloads:** 2 per month
+- **Features:** All Free features + 15 AI fabric coordination uses/month
 
 ### Enthusiast Tier
 - **Monthly:** $9.99/month
-- **Annual:** $94.99/year (save $24.89 - ~21% discount)
-- **Patterns:** 10 per month
-- **Features:** All Hobbyist features, Expert-level patterns, Priority support, Advanced customization, PDF downloads
+- **Annual:** $94.99/year (save $24.89 - ~20.8% discount)
+- **AI Credits:** 40 per month
+- **Pattern Generation:** Unlimited
+- **Pattern Downloads:** 10 per month
+- **Features:** All Hobbyist features + 40 AI fabric coordination uses/month + priority support
 
 ### Pro Tier
 - **Monthly:** $19.99/month
-- **Annual:** $199.99/year (save $39.89 - ~17% discount)
-- **Patterns:** 25 per month
-- **Features:** Everything included, Commercial use rights, API access (coming soon), Dedicated support
+- **Annual:** $199.99/year (save $39.89 - ~16.6% discount)
+- **AI Credits:** 75 per month
+- **Pattern Generation:** Unlimited
+- **Pattern Downloads:** 25 per month
+- **Features:** Everything + 75 AI fabric coordination uses/month + commercial use rights + API access (future)
+
+## Credit Model
+
+### Rule: No AI = No Credits
+Credits are consumed only by AI-powered actions. Procedural/deterministic actions are always free.
+
+| Action | Credits | Notes |
+|---|---|---|
+| Pattern generation (standard) | 0 | Procedural — no AI |
+| Pattern generation (unique quilt) | 0 | Procedural — no AI |
+| Fabric image upload / storage | 0 | Not AI |
+| Pattern selection / lookup | 0 | Not AI |
+| **Fabric coordination** (AI role assign) | **1** | Claude assigns background/primary/secondary/accent |
+
+### Monthly Credit Allotments
+| Tier | Credits/Month |
+|---|---|
+| Free | 3 |
+| Hobbyist | 15 |
+| Enthusiast | 40 |
+| Pro | 75 |
+
+Credits **do not roll over** — they reset at the start of each billing period.
+
+### Fabric Hold (Saved Fabric Images)
+All tiers include 3 free saved fabric image slots. Additional storage is available as a paid add-on:
+- Fabric Hold 10: $2.99/month or $29.00/year
+- Fabric Hold 25: $5.99/month or $59.00/year
+- Fabric Hold 50: $9.99/month or $99.00/year
 
 ## Pricing Logic
 
@@ -73,12 +110,12 @@
 **Compared to other quilt pattern generators:**
 - Most charge $30-50 for single pattern books
 - Digital competitors: $15-30/month with limited features
-- QuiltPlannerPro: $5.99-19.99 for unlimited AI-generated custom patterns
+- QuiltPlannerPro: $5.99-19.99 for monthly AI-generated custom pattern generation and downloads
 
 **Value Proposition:**
 - Hobbyist tier = 1 pattern book per year in traditional quilting
 - Enthusiast tier = 2-3 pattern books per year
-- Pro tier = unlimited patterns (thousands of dollars in traditional patterns)
+- Pro tier = high-volume monthly generation and downloads for power users
 
 ## Pricing Psychology
 
@@ -161,7 +198,7 @@ Small incremental increases encourage upgrades
 - "Start free, upgrade anytime"
 - "Save 17-21% with annual billing"
 - "Cancel anytime, no questions asked"
-- "All plans include AI-powered pattern generation"
+- "All plans include AI-powered pattern generation with monthly generation and download limits"
 
 **Value Props:**
 - Hobbyist: "Perfect for weekend quilters"

@@ -187,7 +187,7 @@ export class PatternGenerationWorkflow {
     fabrics: File[],
     quiltSize: string | undefined,
     response: PatternGenerationResponse
-  ): PatternGenerationResponse {
+  ): Promise<PatternGenerationResponse> {
     if (!this.isUniqueRequest(selectedPattern)) {
       return response;
     }

@@ -67,28 +67,28 @@ export function resolveFabricHoldStripePriceId(
 export const SUBSCRIPTION_TIERS = {
   free: {
     name: 'Free',
-    creditsPerMonth: 1,
+      creditsPerMonth: 3,
     downloadsPerMonth: 1,
     includedFabricHoldImages: 0,
     price: { monthly: 0, yearly: 0 },
   },
   basic: {
     name: 'Hobbyist',
-    creditsPerMonth: 20,
+      creditsPerMonth: 15,
     downloadsPerMonth: 2,
     includedFabricHoldImages: 0,
     price: { monthly: 5.99, yearly: 59.99 },
   },
   intermediate: {
     name: 'Enthusiast',
-    creditsPerMonth: 50,
+      creditsPerMonth: 40,
     downloadsPerMonth: 10,
     includedFabricHoldImages: 0,
     price: { monthly: 9.99, yearly: 94.99 },
   },
   advanced: {
     name: 'Pro',
-    creditsPerMonth: 100,
+      creditsPerMonth: 75,
     downloadsPerMonth: 25,
     includedFabricHoldImages: 0,
     price: { monthly: 19.99, yearly: 199.99 },

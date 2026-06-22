@@ -1,18 +1,20 @@
 import { Response } from 'express';
 
 export class ResponseHelper {
-  static success(res: Response, statusCode: number, message: string, data?: any) {
+  static success(res: Response, statusCode: number, message: string, data?: any, extra?: Record<string, unknown>) {
     return res.status(statusCode).json({
       success: true,
       message,
-      ...(data && { data })
+      ...(data !== undefined && { data }),
+      ...(extra || {})
     });
   }
 
-  static error(res: Response, statusCode: number, message: string) {
+  static error(res: Response, statusCode: number, message: string, extra?: Record<string, unknown>) {
     return res.status(statusCode).json({
       success: false,
-      message
+      message,
+      ...(extra || {})
     });
   }
 

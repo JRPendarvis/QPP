@@ -32,11 +32,11 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'What are the subscription tiers and pricing?',
-    answer: 'We offer 4 tiers: Free ($0/month - 1 credit, 1 download), Hobbyist ($5.99/month or $59.99/year - 20 credits, 2 downloads), Enthusiast ($9.99/month or $94.99/year - 50 credits, 10 downloads), and Pro ($19.99/month or $199.99/year - 100 credits, 25 downloads). Fabric Hold is available separately as a stash add-on.'
+    answer: 'We offer 4 tiers: Free ($0/month - 3 credits, 1 download), Hobbyist ($5.99/month or $59.99/year - 15 credits, 2 downloads), Enthusiast ($9.99/month or $94.99/year - 40 credits, 10 downloads), and Pro ($19.99/month or $199.99/year - 75 credits, 25 downloads). Paid plans include Starter Fabric Hold (3 saved images), and larger Fabric Hold tiers are available as add-ons.'
   },
   {
     question: 'Is there a free trial or free tier?',
-    answer: 'Yes! Our Free tier lets you try Quilt Planner Pro with no credit card required. You get 1 credit and 1 download to test the app and see if it\'s right for you. Your generated quilts stay in your Library even if you don\'t download them right away.',
+    answer: 'Yes! Our Free tier lets you try Quilt Planner Pro with no credit card required. You get 3 credits and 1 download each month to test the app and see if it\'s right for you. Your generated quilts stay in your Library even if you don\'t download them right away.',
   },
   {
     question: 'Can I save money with annual billing?',
@@ -44,7 +44,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'How many credits do I get?',
-    answer: 'Credit limits depend on your subscription tier: Free (1/month), Hobbyist (20/month), Enthusiast (50/month), or Pro (100/month).'
+    answer: 'Credit limits depend on your subscription tier: Free (3/month), Hobbyist (15/month), Enthusiast (40/month), or Pro (75/month). Credits reset monthly and do not roll over.'
   },
   {
     question: 'Can I download my patterns?',

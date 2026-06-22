@@ -7,32 +7,39 @@ The prompt system has been refactored to support pattern-specific guidance while
 
 ```
 backend/src/config/prompts/
-├── index.ts                          # Main exports and pattern prompt registry
-├── churn-dash.prompt.ts              # ✅ Complete example
-├── simple-squares.prompt.ts          # ✅ Complete example
-├── strip-quilt.prompt.ts             # TODO: Needs content
-├── checkerboard.prompt.ts            # TODO: Needs content
-├── rail-fence.prompt.ts              # TODO: Needs content
-├── four-patch.prompt.ts              # TODO: Needs content
-├── nine-patch.prompt.ts              # TODO: Needs content
-├── half-square-triangles.prompt.ts   # TODO: Needs content
-├── hourglass.prompt.ts               # TODO: Needs content
-├── bow-tie.prompt.ts                 # TODO: Needs content
-├── flying-geese.prompt.ts            # TODO: Needs content
-├── pinwheel.prompt.ts                # TODO: Needs content
-├── log-cabin.prompt.ts               # TODO: Needs content
-├── sawtooth-star.prompt.ts           # TODO: Needs content
-├── ohio-star.prompt.ts               # TODO: Needs content
-├── lone-star.prompt.ts               # TODO: Needs content
-├── mariners-compass.prompt.ts        # TODO: Needs content
-├── new-york-beauty.prompt.ts         # TODO: Needs content
-├── storm-at-sea.prompt.ts            # TODO: Needs content
-├── drunkards-path.prompt.ts          # TODO: Needs content
-├── grandmothers-flower-garden.prompt.ts  # TODO: Needs content
-├── double-wedding-ring.prompt.ts     # TODO: Needs content
-├── pickle-dish.prompt.ts             # TODO: Needs content
-└── complex-medallion.prompt.ts       # TODO: Needs content
+├── index.ts                          # Prompt interface + registry
+└── README.md                         # Architecture notes for prompt handling
+
+backend/src/config/patterns/
+├── simple-squares/prompt.ts
+├── strip-quilt/prompt.ts
+├── checkerboard/prompt.ts
+├── rail-fence/prompt.ts
+├── four-patch/prompt.ts
+├── nine-patch/prompt.ts
+├── half-square-triangles/prompt.ts
+├── hourglass/prompt.ts
+├── bow-tie/prompt.ts
+├── flying-geese/prompt.ts
+├── pinwheel/prompt.ts
+├── log-cabin/prompt.ts
+├── sawtooth-star/prompt.ts
+├── ohio-star/prompt.ts
+├── kaleidoscope-star/prompt.ts
+├── churn-dash/prompt.ts
+├── lone-star/prompt.ts
+├── mariners-compass/prompt.ts
+├── new-york-beauty/prompt.ts
+├── storm-at-sea/prompt.ts
+├── drunkards-path/prompt.ts
+├── mosaic-star/prompt.ts
+├── grandmothers-flower-garden/prompt.ts
+├── double-wedding-ring/prompt.ts
+├── pickle-dish/prompt.ts
+└── complex-medallion/prompt.ts
 ```
+
+All registered patterns currently have a colocated `prompt.ts` file under their pattern directory.
 
 ## Pattern Prompt Interface
 
@@ -132,11 +139,11 @@ Avoid these mistakes:
 ## Migration Path
 
 ### Phase 1: ✅ COMPLETE
-- Created infrastructure (prompts directory, interface, registry)
-- Updated promptBuilder.ts to support pattern-specific prompts
-- Updated claudeService.ts to pass patternId
-- Created stub files for all 25 patterns
-- Completed 2 example patterns (Churn Dash, Simple Squares)
+- Created prompt registry infrastructure and shared interface
+- Updated prompt builder flow to support pattern-specific prompts
+- Updated Claude generation flow to pass `patternId`
+- Colocated prompt files with each pattern definition under `backend/src/config/patterns/*/prompt.ts`
+- Registered all current pattern prompts in the prompt registry
 
 ### Phase 2: TODO
 - Fill in pattern-specific prompts for remaining 23 patterns

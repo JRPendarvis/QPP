@@ -15,6 +15,13 @@ interface SavedFabricOption {
   imageUrl?: string | null;
 }
 
+interface FabricRequirement {
+  role: string;
+  yards: number;
+  description: string;
+  inches?: number;
+}
+
 interface QuiltPattern {
   id?: string;
   patternName: string;
@@ -24,12 +31,7 @@ interface QuiltPattern {
   estimatedSize: string;
   instructions: string[];
   visualSvg: string;
-  fabricRequirements?: Array<{
-    role: string;
-    yards: number;
-    description: string;
-    inches?: number;
-  }>;
+  fabricRequirements?: FabricRequirement[];
   autoSelection?: {
     selectedBy: 'ai' | 'deterministic';
     reason?: string;
@@ -49,7 +51,7 @@ interface QuiltPattern {
 
 const DEFAULT_REQUIREMENT_ROLES = ['Background', 'Primary', 'Secondary', 'Accent'];
 
-function buildDisplayFabricRequirements(pattern: QuiltPattern, fabricCount: number) {
+function buildDisplayFabricRequirements(pattern: QuiltPattern, fabricCount: number): FabricRequirement[] {
   if (pattern.fabricRequirements && pattern.fabricRequirements.length > 0) {
     return pattern.fabricRequirements;
   }
@@ -318,7 +320,8 @@ export default function PatternDisplay({
     });
   }, [activeFabricRequirements, fabricYardageRefs]);
 
-  const shouldShowAutoSelection = Boolean(pattern.autoSelection) && !generatedFromUniqueMode && !pattern.meta?.isUnique;
+  const autoSelection = pattern.autoSelection;
+  const shouldShowAutoSelection = Boolean(autoSelection) && !generatedFromUniqueMode && !pattern.meta?.isUnique;
   const shouldShowUniqueRationale = (generatedFromUniqueMode || pattern.meta?.isUnique) && Boolean(pattern.selectionRationale);
 
   const handleDownload = async () => {
@@ -395,17 +398,17 @@ export default function PatternDisplay({
         </p>
       </div>
 
-      {shouldShowAutoSelection && (
+      {shouldShowAutoSelection && autoSelection && (
         <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
           <p className="text-sm font-semibold text-indigo-900 mb-1">
             Why QuiltPlannerPro chose this pattern
           </p>
           <p className="text-sm text-indigo-800">
-            {pattern.autoSelection.reason || 'Pattern selected using deterministic logic based on your fabrics and skill level.'}
+            {autoSelection.reason || 'Pattern selected using deterministic logic based on your fabrics and skill level.'}
           </p>
-          {pattern.autoSelection.targetSkillLevel && (
+          {autoSelection.targetSkillLevel && (
             <p className="text-xs text-indigo-700 mt-1">
-              Target skill level used: {pattern.autoSelection.targetSkillLevel}
+              Target skill level used: {autoSelection.targetSkillLevel}
             </p>
           )}
         </div>
@@ -682,8 +685,8 @@ export default function PatternDisplay({
         </div>
       )}
 
-      {availabilityCheck && (
-        <div className={`rounded-lg border p-6 ${availabilityCheck.hasShortage ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'}`}>
+      {activeAvailabilityCheck && (
+        <div className={`rounded-lg border p-6 ${activeAvailabilityCheck.hasShortage ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'}`}>
           <h3 className="text-xl font-bold text-gray-800 mb-2">Fabric Availability Check</h3>
           <p className="text-sm text-gray-700 mb-4">
             Compared required yardage to your entered yardage values for uploaded fabrics.
