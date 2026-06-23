@@ -5,7 +5,7 @@
  * All pattern prompts should use the createPatternPrompt() factory to ensure type safety.
  */
 
-import type { PatternPrompt } from '../../../types/PatternPrompt';
+import type { PatternPrompt } from '../../types/PatternPrompt';
 
 /**
  * Factory function to create a pattern prompt with proper type checking.
@@ -24,6 +24,16 @@ export function createPatternPrompt(data: PatternPrompt): PatternPrompt {
     commonMistakes: data.commonMistakes,
   };
 }
+
+// Backward-compatible export consumed by promptSchema.ts.
+export const PATTERN_PROMPT_CREATION_GUIDE = {
+  steps: [
+    'Create prompt file under backend/src/config/patterns/{pattern-id}/prompt.ts',
+    'Use createPatternPrompt() with all required fields',
+    'Keep content specific to pattern geometry and fabric roles',
+    'Include practical cutting and assembly notes for quilters',
+  ],
+} as const;
 
 /**
  * Checklist for creating new pattern prompts:
