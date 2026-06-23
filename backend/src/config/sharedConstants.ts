@@ -75,7 +75,6 @@ export const BILLING_INTERVALS = {
  */
 export const CREDIT_COSTS = {
   FABRIC_COORDINATION: 1, // auto-assign-roles action
-  UNIQUE_GENERATION: 3,   // placeholder for future unique quilt feature
 } as const;
 
 /**

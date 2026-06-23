@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import axios from 'axios';
 import { convertFilesToBase64 } from '@/lib/fileUtils';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -76,7 +77,7 @@ const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
         // Rearrange fabrics if handler provided
         if (onRearrange) {
           onRearrange(assignments);
-          toast.success('✨ Fabrics automatically coordinated and rearranged!', { duration: 4000 });
+          toast.success('Fabrics automatically coordinated and rearranged!', { duration: 4000 });
         } else {
           // Fallback: just show coordination results
           const coordinationMessage = formatCoordinationMessage(assignments, fabrics);
@@ -88,7 +89,12 @@ const AutoCoordinateButton: React.FC<AutoCoordinateButtonProps> = ({
     } catch (error) {
       toast.dismiss(loadingToast);
       console.error('Auto-coordinate error:', error);
-      toast.error('Failed to auto-coordinate fabrics. Please try again.');
+
+      const responseMessage = axios.isAxiosError(error)
+        ? (error.response?.data as { message?: string } | undefined)?.message
+        : undefined;
+
+      toast.error(responseMessage || 'Failed to auto-coordinate fabrics. Please try again.');
     } finally {
       setIsCoordinating(false);
     }
@@ -143,7 +149,10 @@ function formatCoordinationMessage(
     parts.push(`Accent: ${assignments.accent}`);
   }
 
-  return `✨ Fabric Coordination: ${parts.join(' | ')}`;
+  return `âœ¨ Fabric Coordination: ${parts.join(' | ')}`;
 }
 
 export default AutoCoordinateButton;
+
+
+

@@ -113,7 +113,6 @@ interface Usage {
 
 interface PatternDisplayProps {
   pattern: QuiltPattern;
-  generatedFromUniqueMode?: boolean;
   userTier: string;
   usage?: Usage;
   fabrics: File[];
@@ -133,7 +132,6 @@ interface PatternDisplayProps {
 
 export default function PatternDisplay({
   pattern,
-  generatedFromUniqueMode = false,
   userTier,
   usage,
   fabrics,
@@ -321,8 +319,8 @@ export default function PatternDisplay({
   }, [activeFabricRequirements, fabricYardageRefs]);
 
   const autoSelection = pattern.autoSelection;
-  const shouldShowAutoSelection = Boolean(autoSelection) && !generatedFromUniqueMode && !pattern.meta?.isUnique;
-  const shouldShowUniqueRationale = (generatedFromUniqueMode || pattern.meta?.isUnique) && Boolean(pattern.selectionRationale);
+  const shouldShowAutoSelection = Boolean(autoSelection) && !pattern.meta?.isUnique;
+  const shouldShowUniqueRationale = pattern.meta?.isUnique && Boolean(pattern.selectionRationale);
 
   const handleDownload = async () => {
     if (!pattern.id) {
