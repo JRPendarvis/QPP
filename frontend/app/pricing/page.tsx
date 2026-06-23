@@ -45,7 +45,7 @@ export default function PricingPage() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <p className="text-xl max-w-3xl mx-auto mb-4" style={{color: '#1F2937'}}>
-            Start free and upgrade anytime to unlock more monthly credits, more monthly downloads, advanced features, and priority support. Paid plans include Starter Fabric Hold (3 saved images), and you can upgrade Fabric Hold to 10, 25, or 50 images as an add-on.
+            Start free and upgrade anytime to unlock more monthly credits, higher download limits, advanced features, and priority support. Paid plans include Starter Fabric Hold (3 saved images), and you can upgrade Fabric Hold to 10, 25, or 50 images as an add-on.
           </p>
 
           {/* Billing Toggle */}

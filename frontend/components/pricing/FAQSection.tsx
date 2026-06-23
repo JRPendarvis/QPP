@@ -18,7 +18,7 @@ export default function FAQSection() {
     },
     {
       question: 'Is there a free trial?',
-      answer: 'We offer a free tier instead of a trial. You can start without a credit card and get 3 monthly credits plus 1 monthly download.'
+      answer: 'We offer a free tier instead of a trial. You can start without a credit card and get 3 monthly credits plus 1 lifetime download.'
     }
   ];
 

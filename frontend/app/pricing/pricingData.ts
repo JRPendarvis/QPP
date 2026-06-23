@@ -60,12 +60,12 @@ export const pricingTiers: PricingTier[] = [
     name: 'Free',
     id: 'free',
     price: { monthly: 0, annual: 0 },
-    patterns: '3 credits/month • 1 download/month',
+    patterns: '3 credits/month • 1 lifetime download',
     features: [
       '3 AI credits per month',
       'Unlimited quilt generation',
       'Standard patterns only',
-      '1 downloadable pattern per month',
+      '1 downloadable pattern (lifetime total)',
       'Fabric Hold add-on available after upgrading',
       'Community support'
     ],

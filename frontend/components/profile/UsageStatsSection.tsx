@@ -96,7 +96,7 @@ export default function UsageStatsSection({ usage, subscriptionTier }: UsageStat
             </p>
             <p className="text-sm mb-3" style={{color: '#4B5563'}}>
               • 3 credits per month (resets monthly)<br />
-              • 1 PDF download per month (resets monthly)<br />
+              • 1 PDF download lifetime total (does not reset)<br />
               Upgrade for more!
             </p>
             <button

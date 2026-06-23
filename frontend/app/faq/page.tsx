@@ -12,7 +12,7 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: 'How does Quilt Planner Pro work?',
-    answer: 'Simply upload 2-8 photos of your fabrics, select your skill level, and our system generates a custom quilt design with step-by-step instructions.',
+    answer: 'Upload 2-8 photos of your fabrics, choose your skill level, and generate a quilt pattern with step-by-step instructions. Pattern generation is procedural and does not consume AI credits.',
   },
   {
     question: 'What image formats are supported?',
@@ -20,7 +20,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'How many fabrics can I upload?',
-    answer: 'You can upload between 2 and 8 fabric images per pattern generation. This range gives the AI enough variety to create interesting designs while keeping patterns manageable.',
+    answer: 'You can upload between 2 and 8 fabric images per pattern generation. This range gives enough variety for strong pattern outcomes while keeping layouts practical to sew.',
   },
   {
     question: 'Can I choose a specific pattern type?',
@@ -32,11 +32,11 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'What are the subscription tiers and pricing?',
-    answer: 'We offer 4 tiers: Free ($0/month - 3 credits, 1 download), Hobbyist ($5.99/month or $59.99/year - 15 credits, 2 downloads), Enthusiast ($9.99/month or $94.99/year - 40 credits, 10 downloads), and Pro ($19.99/month or $199.99/year - 75 credits, 25 downloads). Paid plans include Starter Fabric Hold (3 saved images), and larger Fabric Hold tiers are available as add-ons.'
+    answer: 'We offer 4 tiers: Free ($0/month - 3 credits, 1 lifetime download), Hobbyist ($5.99/month or $59.99/year - 15 credits, 2 downloads/month), Enthusiast ($9.99/month or $94.99/year - 40 credits, 10 downloads/month), and Pro ($19.99/month or $199.99/year - 75 credits, 25 downloads/month). Paid plans include Starter Fabric Hold (3 saved images), and larger Fabric Hold tiers are available as add-ons.'
   },
   {
     question: 'Is there a free trial or free tier?',
-    answer: 'Yes! Our Free tier lets you try Quilt Planner Pro with no credit card required. You get 3 credits and 1 download each month to test the app and see if it\'s right for you. Your generated quilts stay in your Library even if you don\'t download them right away.',
+    answer: 'Yes! Our Free tier lets you try Quilt Planner Pro with no credit card required. You get 3 credits each month and 1 lifetime PDF download. Your generated quilts stay in your Library even if you don\'t download them right away.',
   },
   {
     question: 'Can I save money with annual billing?',
@@ -44,11 +44,15 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'How many credits do I get?',
-    answer: 'Credit limits depend on your subscription tier: Free (3/month), Hobbyist (15/month), Enthusiast (40/month), or Pro (75/month). Credits reset monthly and do not roll over.'
+    answer: 'Credit limits depend on your subscription tier: Free (3/month), Hobbyist (15/month), Enthusiast (40/month), or Pro (75/month). Credits reset on a 30-day cycle and do not roll over.'
+  },
+  {
+    question: 'What actions use AI credits?',
+    answer: 'Only AI-powered actions consume credits. Fabric coordination (auto-assigning background/primary/secondary/accent roles) uses credits. Pattern generation, uploads, and standard pattern selection do not use AI credits.'
   },
   {
     question: 'Can I download my patterns?',
-    answer: 'Yes! All subscription tiers allow you to download your patterns as PDFs. Download limits vary by tier: Free (1), Hobbyist (2/month), Enthusiast (10/month), Pro (25/month).',
+    answer: 'Yes! All subscription tiers allow you to download your patterns as PDFs. Download limits vary by tier: Free (1 lifetime), Hobbyist (2/month), Enthusiast (10/month), Pro (25/month).',
   },
   {
     question: 'What is the Fabric Hold add-on?',
@@ -72,7 +76,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'Can I upgrade or downgrade my subscription?',
-    answer: 'Yes, you can change your subscription tier at any time from your Profile page. Upgrades take effect immediately and you\'ll be prorated for the remaining time. Downgrades take effect at the next billing cycle, so you keep your current benefits until then.',
+    answer: 'Yes. You can change your subscription from your Profile page using Stripe checkout/portal. Cancellations are scheduled for the end of your current billing period, and upgrade/downgrade timing is shown in Stripe during checkout/management.',
   },
   {
     question: 'How can I cancel my subscription?',

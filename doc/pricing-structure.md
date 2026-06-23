@@ -9,7 +9,7 @@
 - **Billing:** None
 - **AI Credits:** 3 per month
 - **Pattern Generation:** Unlimited (procedural, no AI required)
-- **Pattern Downloads:** 1 per month
+- **Pattern Downloads:** 1 lifetime total
 - **Features:** Unlimited quilt generation, 3 AI fabric coordination uses/month
 
 ### Hobbyist Tier
