@@ -87,7 +87,7 @@ export class FeedbackService {
       return { voted: false, votesCount: updated.votesCount };
     } else {
       // Add vote
-      const [vote, updated] = await prisma.$transaction([
+      const [_vote, updated] = await prisma.$transaction([
         prisma.feedbackVote.create({ data: { userId, feedbackId } }),
         prisma.feedback.update({ 
           where: { id: feedbackId }, 

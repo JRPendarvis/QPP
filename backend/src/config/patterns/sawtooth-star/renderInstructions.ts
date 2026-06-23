@@ -23,7 +23,6 @@ export function renderInstructions(
   const blocksDown = Math.max(1, Math.round(quiltSize.heightIn / finishedBlockIn));
   const blockCount = blocksAcross * blocksDown;
 
-  const hstCutIn = unitFinishedIn + 0.875;
   const squareCutIn = unitFinishedIn + 0.5;
 
   lines.push(DISCLAIMER);

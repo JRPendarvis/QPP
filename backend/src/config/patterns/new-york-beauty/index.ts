@@ -1,6 +1,7 @@
 import { PatternDefinition } from '../../../types/PatternDefinition';
 import { NEW_YORK_BEAUTY_TEMPLATE } from './template';
 import { NEW_YORK_BEAUTY_PROMPT } from './prompt';
+import { createStablePositional } from '../colorAssignmentStrategies';
 
 const NewYorkBeauty: PatternDefinition = {
   id: 'new-york-beauty',
@@ -41,60 +42,10 @@ const NewYorkBeauty: PatternDefinition = {
   ],
 
   /**
-   * New York Beauty (Corner Fan) color assignments:
-   *
-   * fabricColors[0] = Background
-   * fabricColors[1] = Fan Base (curved band / wedge field)
-   * fabricColors[2] = Fan Wedges (repeating wedge slices)
-   * fabricColors[3] = Corner Quarter-Circle (anchor)
-   * fabricColors[4] = Alternate Fan Wedges (optional)
-   * fabricColors[5] = Alternate Fan Base (optional)
-   * fabricColors[6] = Wedge Accent (optional)
-   * fabricColors[7] = Extra Contrast (optional)
-   *
-   * Notes:
-   * - We keep colors consistent (no per-block randomization) for alignment realism.
-   * - If fewer fabrics are supplied, we fall back in a predictable way.
-   *
-   * Returns (always): [
-   *  background,
-   *  fanBase,
-   *  fanWedges,
-   *  corner,
-   *  altFanWedges,
-   *  altFanBase,
-   *  wedgeAccent,
-   *  extraContrast
-   * ]
+   * New York Beauty (Corner Fan) - stable positional colors.
+   * Fan base, wedges, and corner stay consistent across blocks for alignment.
    */
-  getColors: (
-    fabricColors: string[],
-    opts: { blockIndex?: number; row?: number; col?: number } = {}
-  ): string[] => {
-    const background = fabricColors[0];
-
-    const fanBase = fabricColors[1] || background;
-    const fanWedges = fabricColors[2] || fanBase;
-
-    const corner = fabricColors[3] || fanBase;
-
-    const altFanWedges = fabricColors[4] || fanWedges;
-    const altFanBase = fabricColors[5] || fanBase;
-
-    const wedgeAccent = fabricColors[6] || altFanWedges;
-    const extraContrast = fabricColors[7] || fanWedges;
-
-    return [
-      background,
-      fanBase,
-      fanWedges,
-      corner,
-      altFanWedges,
-      altFanBase,
-      wedgeAccent,
-      extraContrast,
-    ];
-  },
+  getColors: createStablePositional,
 };
 
 export default NewYorkBeauty;

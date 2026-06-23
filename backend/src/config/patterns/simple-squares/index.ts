@@ -1,6 +1,7 @@
 import { PatternDefinition } from '../../../types/PatternDefinition';
 import { SIMPLE_SQUARES_TEMPLATE } from './template';
 import { SIMPLE_SQUARES_PROMPT } from './prompt';
+import { createDiagonalRotation } from '../colorAssignmentStrategies';
 
 const SimpleSquares: PatternDefinition = {
   id: 'simple-squares',
@@ -23,30 +24,14 @@ const SimpleSquares: PatternDefinition = {
   ],
   
   /**
-   * Simple Squares - each block is a single solid square
-   * fabricColors[0] = Background (or first color)
-   * fabricColors[1-7] = Primary, Secondary, Accent, Contrast, Additional colors
+   * Simple Squares - each block is a single solid square.
+   * Rotates through all available colors by diagonal position (row + col)
+   * to create organic patchwork and prevent banding effects.
    * 
-   * Rotates through all available colors block by block to create patchwork effect
    * With 1 fabric: All blocks same color (solid quilt)
-   * With 2+ fabrics: Blocks rotate through colors for scrappy patchwork look
-   * 
-   * Returns: [square_color]
+   * With 2+ fabrics: Blocks rotate through colors for scrappy look
    */
-  getColors: (
-    fabricColors: string[],
-    opts: { blockIndex?: number; row?: number; col?: number } = {}
-  ): string[] => {
-    const row = opts.row ?? 0;
-    const col = opts.col ?? 0;
-
-    // Offset each row by the row number so colors shift diagonally instead of
-    // repeating straight down — prevents a "rail fence" appearance when the
-    // fabric count equals the column count (e.g. 3 fabrics on a 3-col grid).
-    const color = fabricColors[(row + col) % fabricColors.length];
-
-    return [color];
-  }
+  getColors: createDiagonalRotation,
 };
 
 export default SimpleSquares;

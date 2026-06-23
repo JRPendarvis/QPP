@@ -55,7 +55,7 @@ export class ResponseParser {
   /**
    * Logs parsed response details for debugging
    */
-  private static logParsedResponse(response: ClaudeResponse): void {
+  private static logParsedResponse(_response: ClaudeResponse): void {
     // Logging disabled for production
   }
 }

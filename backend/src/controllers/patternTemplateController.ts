@@ -6,7 +6,7 @@ type FabricRole = string;
 /**
  * Get list of available pattern templates for block design
  */
-export const getPatternTemplates = async (req: Request, res: Response) => {
+export const getPatternTemplates = async (_req: Request, res: Response) => {
   try {
     const allPatterns = getAllPatterns();
     

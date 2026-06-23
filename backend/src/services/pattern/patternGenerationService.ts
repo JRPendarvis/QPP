@@ -57,7 +57,7 @@ export class PatternGenerationService {
   }
 
   async generate(request: GeneratePatternRequest): Promise<GeneratePatternResult> {
-    const { userId, images, imageTypes, skillLevel, challengeMe, selectedPattern, roleAssignments, quiltSize, borderConfiguration } = request;
+    const { userId, images, skillLevel, challengeMe, selectedPattern, roleAssignments, quiltSize, borderConfiguration } = request;
     const creditsRequired = getCreditCost('patternGeneration');
 
     const patternToUse = normalizePatternId(selectedPattern);

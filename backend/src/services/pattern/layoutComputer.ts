@@ -99,7 +99,7 @@ export class LayoutComputer {
    */
   private static extractDescriptiveElements(
     claudeLayout: string,
-    fabricNames: string[]
+    _fabricNames: string[]
   ): string | null {
     if (!claudeLayout) return null;
 

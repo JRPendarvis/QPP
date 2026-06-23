@@ -1,5 +1,5 @@
 // types/QuiltPattern.ts
-import { Border, BorderConfiguration, BorderDimensions } from './Border';
+import { BorderConfiguration, BorderDimensions } from './Border';
 
 export type FabricsByRole = {
   background?: string;

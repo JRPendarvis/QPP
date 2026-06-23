@@ -153,7 +153,7 @@ export class PatternController {
     }
   }
 
-  async listPatterns(req: Request, res: Response) {
+  async listPatterns(_req: Request, res: Response) {
     try {
       const patterns = PatternListService.getAvailablePatterns();
       res.json({ success: true, data: patterns });

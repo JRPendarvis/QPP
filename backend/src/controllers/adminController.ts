@@ -12,7 +12,7 @@ export class AdminController {
    * GET /api/admin/overview
    * Overall platform statistics
    */
-  async getOverview(req: Request, res: Response): Promise<void> {
+  async getOverview(_req: Request, res: Response): Promise<void> {
     try {
       const data = await AdminAnalyticsService.getOverviewStats();
       ResponseHelper.success(res, 200, 'Overview fetched', data);
@@ -26,7 +26,7 @@ export class AdminController {
    * GET /api/admin/users
    * User list with subscription details
    */
-  async getUsers(req: Request, res: Response): Promise<void> {
+  async getUsers(_req: Request, res: Response): Promise<void> {
     try {
       const users = await AdminAnalyticsService.getUserList();
       ResponseHelper.success(res, 200, 'Users fetched', users);
@@ -55,7 +55,7 @@ export class AdminController {
    * GET /api/admin/feedback
    * All user feedback with votes
    */
-  async getFeedback(req: Request, res: Response): Promise<void> {
+  async getFeedback(_req: Request, res: Response): Promise<void> {
     try {
       console.log('[Admin] Fetching feedback...');
       const feedback = await AdminAnalyticsService.getAllFeedback();
@@ -73,7 +73,7 @@ export class AdminController {
    * GET /api/admin/usage-stats
    * Monthly usage statistics by tier
    */
-  async getUsageStats(req: Request, res: Response): Promise<void> {
+  async getUsageStats(_req: Request, res: Response): Promise<void> {
     try {
       const usageByTier = await AdminAnalyticsService.getUsageStatsByTier();
       ResponseHelper.success(res, 200, 'Tier credit usage stats fetched', usageByTier);
@@ -188,7 +188,7 @@ export class AdminController {
    * GET /api/admin/complimentary-subscribers
    * List all users with complimentary subscriptions
    */
-  async getComplimentarySubscribers(req: Request, res: Response): Promise<void> {
+  async getComplimentarySubscribers(_req: Request, res: Response): Promise<void> {
     try {
       const subscribers = await this.complimentaryService.getComplimentarySubscribers();
       ResponseHelper.success(res, 200, 'Complimentary subscribers fetched', subscribers, {

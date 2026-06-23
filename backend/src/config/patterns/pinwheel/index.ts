@@ -1,6 +1,7 @@
 import { PatternDefinition } from '../../../types/PatternDefinition';
 import { PINWHEEL_TEMPLATE } from './template';
 import { PINWHEEL_PROMPT } from './prompt';
+import { createStablePositional } from '../colorAssignmentStrategies';
 import buildPinwheelPlan from './plan';
 
 const Pinwheel: PatternDefinition = {
@@ -23,15 +24,11 @@ const Pinwheel: PatternDefinition = {
     'Blades (Accent)',
   ],
 
-   getColors: (fabricColors: string[]): string[] => {
-    const background = fabricColors[0];
-    const primary = fabricColors[1] ?? background;
-    const secondary = fabricColors[2] ?? primary;
-    const accent = fabricColors[3] ?? primary;
-
-    // Always return stable positions
-    return [background, primary, secondary, accent];
-  },
+  /**
+   * Pinwheel - position-based color assignment.
+   * Colors stay in their defined positions; no rotation across blocks.
+   */
+  getColors: createStablePositional,
 };
 
 export default Pinwheel;

@@ -74,7 +74,7 @@ export class AuthController {
   }
 
   // POST /api/auth/logout
-  async logout(req: Request, res: Response) {
+  async logout(_req: Request, res: Response) {
     try {
       CookieHelper.clearAuthCookie(res);
       return ResponseHelper.success(res, 200, 'Logged out');
