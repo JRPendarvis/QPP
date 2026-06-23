@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ROUTES } from '@/lib/constants';
+import { APP_CONFIG, ROUTES } from '@/lib/constants';
 import { useState, useRef, useEffect } from 'react';
 
 interface User {
@@ -64,6 +64,10 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
   const myPatternsLabel = 'Saved Patterns';
   const myBlockDesignsLabel = 'Saved Blocks';
   const profileLabel = 'Quilter Profile';
+  const userRole = String(user?.role || '').toLowerCase();
+  const userEmail = String(user?.email || '').toLowerCase().trim();
+  const adminEmail = APP_CONFIG.ADMIN_EMAIL.toLowerCase().trim();
+  const canAccessAdmin = userRole === 'staff' || userRole === 'admin' || (!!adminEmail && userEmail === adminEmail);
 
   const handleClick = () => {
     if (onLinkClick) onLinkClick();
@@ -114,7 +118,7 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
             <Link href="/feedback" onClick={handleClick} className={linkClass}>
               Feedback
             </Link>
-            {user.role === 'staff' && (
+            {canAccessAdmin && (
               <Link href="/admin" onClick={handleClick} className={linkClass}>
                 Admin
               </Link>
@@ -232,7 +236,7 @@ export default function NavigationLinks({ user, logout, isMobile = false, onLink
 
             {isAccountMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                {user.role === 'staff' && (
+                {canAccessAdmin && (
                   <>
                     <Link 
                       href="/admin" 

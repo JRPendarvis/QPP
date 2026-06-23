@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 import Navigation from '@/components/Navigation';
+import { APP_CONFIG } from '@/lib/constants';
 
 interface OverviewStats {
   totalUsers: number;
@@ -169,13 +170,20 @@ export default function AdminPage() {
 
     let isMounted = true;
 
-    // Check if user is staff
+    // Check if user is authorized for admin access.
     const checkAccess = async () => {
       try {
         const profileRes = await api.get('/api/user/profile');
         if (!isMounted) return;
-        
-        if (profileRes.data?.data?.role !== 'staff') {
+
+        const profile = profileRes.data?.data;
+        const role = String(profile?.role || '').toLowerCase();
+        const email = String(profile?.email || '').toLowerCase().trim();
+        const adminEmail = APP_CONFIG.ADMIN_EMAIL.toLowerCase().trim();
+        const isAdminRole = role === 'staff' || role === 'admin';
+        const isAdminEmail = Boolean(adminEmail) && email === adminEmail;
+
+        if (!isAdminRole && !isAdminEmail) {
           router.push('/dashboard');
           return;
         }

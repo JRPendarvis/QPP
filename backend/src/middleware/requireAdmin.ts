@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
  * Allows access if:
  * 1) x-admin-key header matches ADMIN_API_KEY, OR
  * 2) authenticated user email matches ADMIN_EMAIL, OR
- * 3) authenticated user has role='staff'
+ * 3) authenticated user has role='staff' or legacy role='admin'
  */
 export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   const adminKey = req.header("x-admin-key");
@@ -36,7 +36,7 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
         select: { role: true },
       });
 
-      if (user?.role === "staff") {
+      if (user?.role === "staff" || user?.role === "admin") {
         return next();
       }
     } catch (error) {
