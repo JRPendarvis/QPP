@@ -48,6 +48,21 @@ export class UserUsageRepository {
   }
 
   /**
+   * Increment monthly credit usage for a user.
+   */
+  async incrementCreditsUsed(userId: string, creditsUsed: number) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        generationsThisMonth: { increment: creditsUsed },
+      },
+      select: {
+        generationsThisMonth: true,
+      },
+    });
+  }
+
+  /**
    * Count users needing reset based on cutoff date
    */
   async countUsersNeedingReset(cutoffDate: Date): Promise<number> {

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { sanitizeWithSkipFields, sanitizeObject } from '../utils/sanitizer';
+import { sanitizeWithSkipFields } from '../utils/sanitizer';
 import { SKIP_SANITIZATION_FIELDS } from '../config/sanitizationConfig';
 
 /**
@@ -7,7 +7,7 @@ import { SKIP_SANITIZATION_FIELDS } from '../config/sanitizationConfig';
  * Responsible for applying sanitization to incoming HTTP requests
  * Protects against XSS attacks by sanitizing body, query, and params
  */
-export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
+export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) => {
   try {
     // Sanitize request body (with skip fields for raw data)
     if (req.body && typeof req.body === 'object') {

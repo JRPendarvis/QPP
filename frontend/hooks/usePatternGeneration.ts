@@ -42,6 +42,7 @@ export function usePatternGeneration(): UsePatternGenerationReturn {
   const [generating, setGenerating] = useState(false);
   const [pattern, setPattern] = useState<QuiltPattern | null>(null);
   const [error, setError] = useState('');
+  const [latestUsage, setLatestUsage] = useState<{ used: number; limit: number; remaining: number } | null>(null);
 
   /**
    * Clear all state (fabrics and pattern)
@@ -74,15 +75,15 @@ export function usePatternGeneration(): UsePatternGenerationReturn {
    * @param borders - Optional border configuration
    */
   const generatePattern = useCallback(
-    async (userSkillLevel: string, challengeMe: boolean, selectedPattern?: string, quiltSize?: string, borders?: any) => {
+    async (userSkillLevel: string, challengeMe: boolean, selectedPattern?: string, quiltSize?: string, borders?: any, fabricsOverride?: File[]) => {
       const callbacks = WorkflowCallbackFactory.createPatternCallbacks(
         setGenerating,
         setError,
         setPattern
       );
       
-      await PatternGenerationWorkflow.execute(
-        fabricState.fabrics,
+      const usage = await PatternGenerationWorkflow.execute(
+        fabricsOverride || fabricState.fabrics,
         userSkillLevel,
         challengeMe,
         selectedPattern,
@@ -90,6 +91,9 @@ export function usePatternGeneration(): UsePatternGenerationReturn {
         borders,
         callbacks
       );
+
+      setLatestUsage(usage);
+      return usage;
     },
     [fabricState.fabrics]
   );
@@ -107,6 +111,7 @@ export function usePatternGeneration(): UsePatternGenerationReturn {
     generating,
     pattern,
     error,
+    latestUsage,
     
     // Constants
     MAX_FABRICS,

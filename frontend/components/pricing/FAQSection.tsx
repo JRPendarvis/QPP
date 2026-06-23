@@ -18,7 +18,7 @@ export default function FAQSection() {
     },
     {
       question: 'Is there a free trial?',
-      answer: 'Yes! All paid plans include a 14-day free trial. No credit card required to start.'
+      answer: 'We offer a free tier instead of a trial. You can start without a credit card and get 3 monthly credits plus 1 monthly download.'
     }
   ];
 

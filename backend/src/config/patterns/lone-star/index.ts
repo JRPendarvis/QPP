@@ -55,7 +55,7 @@ const LoneStar: PatternDefinition = {
    */
   getColors: (
     fabricColors: string[],
-    opts: { blockIndex?: number; row?: number; col?: number } = {}
+    _opts: { blockIndex?: number; row?: number; col?: number } = {}
   ): string[] => {
     // UI selection order
     const background = fabricColors[0] ?? '#ffffff';

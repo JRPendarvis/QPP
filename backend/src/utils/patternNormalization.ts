@@ -12,6 +12,7 @@ import { getAllPatterns } from '../config/patterns';
  */
 export function normalizePatternId(input: string | undefined): string {
   if (!input || input === 'auto') return 'auto';
+  const normalizedInput = String(input).trim().toLowerCase();
 
   const validIds = ['auto', ...getAllPatterns().map((p) => p.id)];
 

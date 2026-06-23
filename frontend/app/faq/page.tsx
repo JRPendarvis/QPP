@@ -12,7 +12,7 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: 'How does Quilt Planner Pro work?',
-    answer: 'Simply upload 2-8 photos of your fabrics, select your skill level, and our AI analyzes the colors and patterns to generate a custom quilt design with step-by-step instructions.',
+    answer: 'Simply upload 2-8 photos of your fabrics, select your skill level, and our system generates a custom quilt design with step-by-step instructions.',
   },
   {
     question: 'What image formats are supported?',
@@ -24,7 +24,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'Can I choose a specific pattern type?',
-    answer: 'Yes! You can either let our AI choose the best pattern for your skill level and fabrics, or manually select from patterns appropriate for your skill level.',
+    answer: 'Yes! You can either let Quilt Planner Pro auto-select the best predefined pattern for your skill level and fabrics, or manually select from patterns appropriate for your skill level.',
   },
   {
     question: 'What skill levels do you support?',
@@ -32,19 +32,19 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'What are the subscription tiers and pricing?',
-    answer: 'We offer 4 tiers: Free ($0/month - 3 patterns, 1 download), Hobbyist ($5.99/month or $59.99/year - 5 patterns, 2 downloads), Enthusiast ($9.99/month or $94.99/year - 15 patterns, 10 downloads), and Pro ($19.99/month or $199.99/year - 50 patterns, 25 downloads). All paid plans include access to our full pattern library.'
+    answer: 'We offer 4 tiers: Free ($0/month - 3 credits, 1 download), Hobbyist ($5.99/month or $59.99/year - 15 credits, 2 downloads), Enthusiast ($9.99/month or $94.99/year - 40 credits, 10 downloads), and Pro ($19.99/month or $199.99/year - 75 credits, 25 downloads). Paid plans include Starter Fabric Hold (3 saved images), and larger Fabric Hold tiers are available as add-ons.'
   },
   {
     question: 'Is there a free trial or free tier?',
-    answer: 'Yes! Our Free tier lets you try Quilt Planner Pro with no credit card required. You get 3 pattern generations and 1 download to test our AI and see if it\'s right for you. Your generated patterns stay in your Library even if you don\'t download them right away.',
+    answer: 'Yes! Our Free tier lets you try Quilt Planner Pro with no credit card required. You get 3 credits and 1 download each month to test the app and see if it\'s right for you. Your generated quilts stay in your Library even if you don\'t download them right away.',
   },
   {
     question: 'Can I save money with annual billing?',
     answer: 'Yes! Annual subscriptions offer significant savings: Hobbyist saves ~17% ($59.99/year vs $71.88), Enthusiast saves ~21% ($94.99/year vs $119.88), and Pro saves ~17% ($199.99/year vs $239.88).',
   },
   {
-    question: 'How many patterns can I generate?',
-    answer: 'Pattern generation limits depend on your subscription tier: Free (3/month), Hobbyist (5/month), Enthusiast (15/month), or Pro (50/month).'
+    question: 'How many credits do I get?',
+    answer: 'Credit limits depend on your subscription tier: Free (3/month), Hobbyist (15/month), Enthusiast (40/month), or Pro (75/month). Credits reset monthly and do not roll over.'
   },
   {
     question: 'Can I download my patterns?',
@@ -52,7 +52,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'What is the Fabric Hold add-on?',
-    answer: 'Fabric Hold is an optional add-on that lets you save fabric photos to your library for easy reuse. Instead of uploading the same fabrics every time, save them once and quickly select from your library when creating new patterns. Options: 10 fabrics ($2.99/month or $29/year), 25 fabrics ($5.99/month or $59/year), or 50 fabrics ($9.99/month or $99/year).',
+    answer: 'Fabric Hold is an optional add-on that lets you save fabric photos to your library for easy reuse. Instead of uploading the same fabrics every time, save them once and quickly select from your stash when creating new quilts. Options: 10 fabrics ($2.99/month or $29/year), 25 fabrics ($5.99/month or $59/year), or 50 fabrics ($9.99/month or $99/year).',
   },
   {
     question: 'Why would I need Fabric Hold?',

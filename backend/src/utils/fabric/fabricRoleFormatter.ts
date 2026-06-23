@@ -22,7 +22,7 @@ export class FabricRoleFormatter {
     return this.ROLE_DESCRIPTIONS[role] || 'Pattern fabric';
   }
 
-  static formatColorName(color: string, type: 'printed' | 'solid', index: number): string {
+  static formatColorName(color: string, type: 'printed' | 'solid', _index: number): string {
     // Extract color name from hex or use as-is
     const colorName = this.getColorName(color);
     const typeLabel = type === 'printed' ? 'Print' : 'Solid';

@@ -83,7 +83,7 @@ export class SvgGenerator {
   /**
    * Validates input parameters
    */
-  private static validateInputs(patternType: string, fabrics: Fabric[]): void {
+  private static validateInputs(_patternType: string, fabrics: Fabric[]): void {
     if (!Array.isArray(fabrics) || fabrics.length === 0) {
       throw new Error('At least one fabric must be provided.');
     }

@@ -18,6 +18,13 @@ export class ErrorHandler {
    * Parse and format pattern generation errors
    */
   static parsePatternError(error: unknown): string {
+    if (error instanceof Error && error.message) {
+      const maybeAxios = error as AxiosError<ErrorResponse>;
+      if (!maybeAxios.response) {
+        return error.message;
+      }
+    }
+
     const axiosError = error as AxiosError<ErrorResponse>;
 
     if (!axiosError?.response) {

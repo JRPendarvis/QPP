@@ -5,7 +5,7 @@ export interface UserProfile {
     used: number;
     limit: number;
     remaining: number;
-    generations: {
+    credits: {
       used: number;
       limit: number;
       remaining: number;
@@ -23,6 +23,13 @@ export interface PatternDetails {
   name: string;
   minFabrics: number;
   maxFabrics: number;
+}
+
+export interface FabricYardageRef {
+  fabricId?: string;
+  name: string;
+  yardageAvailable: number | null;
+  isLibrary: boolean;
 }
 
 export type PatternChoice = 'auto' | 'manual';

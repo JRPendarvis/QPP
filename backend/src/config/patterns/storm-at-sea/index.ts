@@ -1,6 +1,7 @@
 import { PatternDefinition } from '../../../types/PatternDefinition';
 import { STORM_AT_SEA_TEMPLATE } from './template';
 import { STORM_AT_SEA_PROMPT } from './prompt';
+import { createStablePositional } from '../colorAssignmentStrategies';
 
 const StormAtSea: PatternDefinition = {
   id: 'storm-at-sea',
@@ -20,31 +21,10 @@ const StormAtSea: PatternDefinition = {
   ],
   
   /**
-   * Storm at Sea - creates optical illusion of turbulent waves
-   * fabricColors[0] = Background (large squares and background areas)
-   * fabricColors[1] = Primary (wave/diamond shapes)
-   * fabricColors[2] = Secondary (square-in-a-square centers)
-   * fabricColors[3] = Accent (optional - additional wave or center variety)
-   * 
-   * Colors must stay CONSISTENT across all blocks - the wave optical illusion
-   * only emerges when blocks are tiled with perfect color alignment
-   * 
-   * 3 fabrics: Traditional Storm at Sea (Background + Primary waves + Secondary centers)
-   * 4 fabrics: Adds Accent for additional variety
-   * 
-   * Returns: [background, waves, centers, accent]
+   * Storm at Sea - stable positional colors for optical wave illusion.
+   * Colors must stay consistent for wave pattern to emerge when blocks are tiled.
    */
-  getColors: (
-    fabricColors: string[],
-    opts: { blockIndex?: number; row?: number; col?: number } = {}
-  ): string[] => {
-    const background = fabricColors[0];
-    const primary = fabricColors[1] || background;
-    const secondary = fabricColors[2] || primary;
-    const accent = fabricColors[3] || secondary;
-    
-    return [background, primary, secondary, accent];
-  }
+  getColors: createStablePositional
 };
 
 export default StormAtSea;

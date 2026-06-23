@@ -1,6 +1,7 @@
 import { PatternDefinition } from '../../../types/PatternDefinition';
 import { HOURGLASS_TEMPLATE } from './template';
 import { HOURGLASS_PROMPT } from './prompt';
+import { createConditionalByCount } from '../colorAssignmentStrategies';
 
 const Hourglass: PatternDefinition = {
   id: 'hourglass',
@@ -19,36 +20,22 @@ const Hourglass: PatternDefinition = {
   ],
 
   /**
-   * Hourglass has 4 quarter-square triangles (QST) forming an hourglass shape
-   * fabricColors[0] = Background (top-left and bottom-right triangles)
-   * fabricColors[1] = Primary (top-right and bottom-left triangles - the hourglass)
-   * fabricColors[2] = Secondary (alternate hourglass color for scrappy look)
-   * fabricColors[3] = Accent (additional hourglass variation)
-   * 
-   * 2 fabrics: Traditional consistent hourglass (Background + Primary)
-   * 3-4 fabrics: Scrappy hourglasses - Background stays consistent, hourglass rotates
-   * 
-   * Returns: [background_triangles, hourglass_triangles]
+   * Hourglass - 4 quarter-square triangles forming an hourglass shape.
+   * Background stays consistent, hourglass color rotates for scrappy look.
    */
-  getColors: (
-    fabricColors: string[],
-    opts: { blockIndex?: number; row?: number; col?: number } = {}
-  ): string[] => {
-    const blockIndex = opts.blockIndex ?? 0;
-    const background = fabricColors[0];
-    const primary = fabricColors[1] || background;
-    
-    if (fabricColors.length < 3) {
-      // 2 fabrics: traditional consistent hourglass
-      return [background, primary];
-    }
-    
-    // 3-4 fabrics: Background consistent, rotate through Primary, Secondary, Accent
-    const hourglassOptions = fabricColors.slice(1); // Primary, Secondary, Accent
-    const hourglass = hourglassOptions[blockIndex % hourglassOptions.length];
-    
-    return [background, hourglass];
-  }
+  getColors: createConditionalByCount(
+    // 2 fabrics: traditional consistent hourglass
+    (colors) => [colors[0], colors[1] || colors[0]],
+    // 3-4 fabrics: background consistent, rotate through hourglass colors
+    (colors, opts) => {
+      const blockIndex = opts.blockIndex ?? 0;
+      const background = colors[0];
+      const hourglassOptions = colors.slice(1);
+      const hourglass = hourglassOptions[blockIndex % hourglassOptions.length];
+      return [background, hourglass];
+    },
+    2
+  )
 };
 
 export default Hourglass;

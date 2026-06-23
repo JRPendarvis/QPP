@@ -46,7 +46,7 @@ export class ImagePreparationService {
   /**
    * Logs compression statistics
    */
-  private static logCompressionResults(compressedImages: any[]): void {
+  private static logCompressionResults(_compressedImages: any[]): void {
     // Logging disabled for production
   }
 

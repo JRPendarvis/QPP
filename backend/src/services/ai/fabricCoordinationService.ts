@@ -85,11 +85,7 @@ export class FabricCoordinationService {
     const prompt = buildFabricCoordinationPrompt(fabrics.length);
     
     const response = await this.client.messages.create({
-<<<<<<< HEAD
       model: FabricCoordinationService.MODEL,
-=======
-        model: 'claude-sonnet-4-6',
->>>>>>> 0900b9d710fffae009884b2cf5b4a4a9b1480800
       max_tokens: 2000,
       messages: [{
         role: 'user',

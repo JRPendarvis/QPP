@@ -139,10 +139,13 @@ describe('AdminAnalyticsService', () => {
           subscriptionTier: true,
           subscriptionStatus: true,
           currentPeriodEnd: true,
+          stripeCustomerId: true,
+          stripeSubscriptionId: true,
           generationsThisMonth: true,
           downloadsThisMonth: true,
           badge: true,
           createdAt: true,
+          lastLogIn: true,
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -289,7 +292,7 @@ describe('AdminAnalyticsService', () => {
   });
 
   describe('getUsageStatsByTier', () => {
-    it('should return usage statistics grouped by subscription tier', async () => {
+    it('should return enriched usage statistics grouped by subscription tier', async () => {
       const mockStats = [
         {
           subscriptionTier: 'free',
@@ -321,7 +324,38 @@ describe('AdminAnalyticsService', () => {
 
       const result = await AdminAnalyticsService.getUsageStatsByTier();
 
-      expect(result).toEqual(mockStats);
+      expect(result).toEqual([
+        {
+          subscriptionTier: 'free',
+          tierName: 'Free',
+          users: 80,
+          creditsPerUser: 3,
+          creditsConsumedThisMonth: 15,
+          downloadsThisMonth: 8,
+          tierCreditCapacity: 240,
+          utilizationPercent: 6.3,
+        },
+        {
+          subscriptionTier: 'basic',
+          tierName: 'Hobbyist',
+          users: 40,
+          creditsPerUser: 15,
+          creditsConsumedThisMonth: 120,
+          downloadsThisMonth: 95,
+          tierCreditCapacity: 600,
+          utilizationPercent: 20,
+        },
+        {
+          subscriptionTier: 'intermediate',
+          tierName: 'Enthusiast',
+          users: 25,
+          creditsPerUser: 40,
+          creditsConsumedThisMonth: 280,
+          downloadsThisMonth: 210,
+          tierCreditCapacity: 1000,
+          utilizationPercent: 28,
+        },
+      ]);
       expect(prisma.user.groupBy).toHaveBeenCalledWith({
         by: ['subscriptionTier'],
         _count: { id: true },
@@ -350,6 +384,42 @@ describe('AdminAnalyticsService', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].subscriptionTier).toBe('free');
+      expect(result[0]).toMatchObject({
+        tierName: 'Free',
+        users: 10,
+        creditsPerUser: 3,
+        creditsConsumedThisMonth: 5,
+      });
+    });
+
+    it('should include unknown tiers without crashing', async () => {
+      const mockStats = [
+        {
+          subscriptionTier: 'enterprise',
+          _count: { id: 2 },
+          _sum: {
+            generationsThisMonth: 44,
+            downloadsThisMonth: 11,
+          },
+        },
+      ];
+
+      (prisma.user.groupBy as jest.Mock).mockResolvedValue(mockStats);
+
+      const result = await AdminAnalyticsService.getUsageStatsByTier();
+
+      expect(result).toEqual([
+        {
+          subscriptionTier: 'enterprise',
+          tierName: 'enterprise',
+          users: 2,
+          creditsPerUser: null,
+          creditsConsumedThisMonth: 44,
+          downloadsThisMonth: 11,
+          tierCreditCapacity: null,
+          utilizationPercent: null,
+        },
+      ]);
     });
 
     it('should handle empty results', async () => {

@@ -112,6 +112,7 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
         </div>
       </div>
     </label>
+
   </div>
 );
 

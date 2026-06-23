@@ -16,25 +16,4 @@ export class StringSanitizer {
       .replace(/on\w+\s*=/gi, '') // Remove event handlers like onclick=
       .trim();
   }
-
-  /**
-   * Remove HTML tags from input
-   */
-  private static removeHtmlTags(input: string): string {
-    return input.replace(/[<>]/g, '');
-  }
-
-  /**
-   * Remove JavaScript protocols from input
-   */
-  private static removeJavaScriptProtocol(input: string): string {
-    return input.replace(/javascript:/gi, '');
-  }
-
-  /**
-   * Remove event handlers from input
-   */
-  private static removeEventHandlers(input: string): string {
-    return input.replace(/on\w+\s*=/gi, '');
-  }
 }

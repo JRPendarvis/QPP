@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "0.2.00002",
+  "version": "0.3.00001",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec tsx src/index.ts",

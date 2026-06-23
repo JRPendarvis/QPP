@@ -1,36 +1,69 @@
 # QuiltPlannerPro Pricing Structure
 
-**Last Updated: March 21, 2026**
+**Last Updated: June 20, 2026**
 
 ## Official Pricing Tiers
 
 ### Free Tier
 - **Cost:** $0
 - **Billing:** None
-- **Pattern Generations:** 3 per month
+- **AI Credits:** 3 per month
+- **Pattern Generation:** Unlimited (procedural, no AI required)
 - **Pattern Downloads:** 1 per month
-- **Features:** Basic pattern generation
+- **Features:** Unlimited quilt generation, 3 AI fabric coordination uses/month
 
 ### Hobbyist Tier
 - **Monthly:** $5.99/month
 - **Annual:** $59.99/year (save $11.89 - ~16.5% discount)
-- **Pattern Generations:** 5 per month
+- **AI Credits:** 15 per month
+- **Pattern Generation:** Unlimited
 - **Pattern Downloads:** 2 per month
-- **Features:** All basic features + skill level matching
+- **Features:** All Free features + 15 AI fabric coordination uses/month
 
 ### Enthusiast Tier
 - **Monthly:** $9.99/month
 - **Annual:** $94.99/year (save $24.89 - ~20.8% discount)
-- **Pattern Generations:** 15 per month
+- **AI Credits:** 40 per month
+- **Pattern Generation:** Unlimited
 - **Pattern Downloads:** 10 per month
-- **Features:** All Hobbyist features + advanced patterns + priority support
+- **Features:** All Hobbyist features + 40 AI fabric coordination uses/month + priority support
 
 ### Pro Tier
 - **Monthly:** $19.99/month
 - **Annual:** $199.99/year (save $39.89 - ~16.6% discount)
-- **Pattern Generations:** 50 per month
+- **AI Credits:** 75 per month
+- **Pattern Generation:** Unlimited
 - **Pattern Downloads:** 25 per month
-- **Features:** Everything + commercial use rights + API access (future)
+- **Features:** Everything + 75 AI fabric coordination uses/month + commercial use rights + API access (future)
+
+## Credit Model
+
+### Rule: No AI = No Credits
+Credits are consumed only by AI-powered actions. Procedural/deterministic actions are always free.
+
+| Action | Credits | Notes |
+|---|---|---|
+| Pattern generation (standard) | 0 | Procedural — no AI |
+| Pattern generation (unique quilt) | 0 | Procedural — no AI |
+| Fabric image upload / storage | 0 | Not AI |
+| Pattern selection / lookup | 0 | Not AI |
+| **Fabric coordination** (AI role assign) | **1** | Claude assigns background/primary/secondary/accent |
+
+### Monthly Credit Allotments
+| Tier | Credits/Month |
+|---|---|
+| Free | 3 |
+| Hobbyist | 15 |
+| Enthusiast | 40 |
+| Pro | 75 |
+
+Credits **do not roll over** — they reset at the start of each billing period.
+
+### Fabric Hold (Saved Fabric Images)
+All tiers include 3 free saved fabric image slots. Additional storage is available as a paid add-on:
+- Fabric Hold 10: $2.99/month or $29.00/year
+- Fabric Hold 25: $5.99/month or $59.00/year
+- Fabric Hold 50: $9.99/month or $99.00/year
 
 ## Pricing Logic
 

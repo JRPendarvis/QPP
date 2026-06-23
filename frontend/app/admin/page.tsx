@@ -70,6 +70,17 @@ interface FeedbackData {
   votes: FeedbackVote[];
 }
 
+interface UsageByTierRow {
+  subscriptionTier: string;
+  tierName: string;
+  users: number;
+  creditsPerUser: number | null;
+  creditsConsumedThisMonth: number;
+  downloadsThisMonth: number;
+  tierCreditCapacity: number | null;
+  utilizationPercent: number | null;
+}
+
 export default function AdminPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -78,6 +89,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [patterns, setPatterns] = useState<PatternData[]>([]);
   const [feedback, setFeedback] = useState<FeedbackData[]>([]);
+  const [usageByTier, setUsageByTier] = useState<UsageByTierRow[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'patterns' | 'feedback'>('overview');
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -86,9 +98,17 @@ export default function AdminPage() {
   const loadOverview = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get('/api/admin/overview');
-      if (res.data?.success) {
-        setOverview(res.data.data);
+      const [overviewRes, usageRes] = await Promise.all([
+        api.get('/api/admin/overview'),
+        api.get('/api/admin/usage-stats'),
+      ]);
+
+      if (overviewRes.data?.success) {
+        setOverview(overviewRes.data.data);
+      }
+
+      if (usageRes.data?.success) {
+        setUsageByTier(usageRes.data.data || []);
       }
     } catch {
       setError('Failed to load overview');
@@ -304,13 +324,65 @@ export default function AdminPage() {
 
         {/* Overview Tab */}
         {activeTab === 'overview' && overview && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <StatCard title="Total Users" value={overview.totalUsers} />
-            <StatCard title="Active Subscribers" value={overview.activeSubscribers} />
-            <StatCard title="Total Patterns" value={overview.totalPatterns} />
-            <StatCard title="Generations This Month" value={overview.totalGenerationsThisMonth} />
-            <StatCard title="Downloads This Month" value={overview.totalDownloadsThisMonth} />
-            <StatCard title="Total Feedback" value={overview.totalFeedback} />
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <StatCard title="Total Users" value={overview.totalUsers} />
+              <StatCard title="Active Subscribers" value={overview.activeSubscribers} />
+              <StatCard title="Total Patterns" value={overview.totalPatterns} />
+              <StatCard title="Generations This Month" value={overview.totalGenerationsThisMonth} />
+              <StatCard title="Downloads This Month" value={overview.totalDownloadsThisMonth} />
+              <StatCard title="Total Feedback" value={overview.totalFeedback} />
+            </div>
+
+            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-base font-semibold text-gray-900">Monthly credits consumed by tier</h2>
+                <p className="text-sm text-gray-600 mt-1">Tracks this month's credit usage and per-tier utilization against available monthly credits.</p>
+              </div>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tier</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Users</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Credits/User</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Credits Used</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tier Capacity</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Utilization</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Downloads</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {usageByTier.map((row) => (
+                    <tr key={row.subscriptionTier}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{row.tierName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.users.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {typeof row.creditsPerUser === 'number' && Number.isFinite(row.creditsPerUser)
+                          ? row.creditsPerUser.toLocaleString()
+                          : 'Unlimited'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.creditsConsumedThisMonth.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {typeof row.tierCreditCapacity === 'number'
+                          ? row.tierCreditCapacity.toLocaleString()
+                          : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {typeof row.utilizationPercent === 'number' ? `${row.utilizationPercent}%` : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.downloadsThisMonth.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                  {usageByTier.length === 0 && (
+                    <tr>
+                      <td className="px-6 py-4 text-sm text-gray-500" colSpan={7}>
+                        No usage data available yet for this billing cycle.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

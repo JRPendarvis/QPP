@@ -35,7 +35,7 @@ export class ImageTypeDetector {
   /**
    * Detect or validate image type with logging
    */
-  static detectOrValidate(base64Data: string, providedType?: string, index: number = 0): 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' {
+  static detectOrValidate(base64Data: string, providedType?: string, _index: number = 0): 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' {
     let mimeType = providedType;
     
     if (!mimeType) {

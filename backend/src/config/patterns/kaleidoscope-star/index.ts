@@ -1,6 +1,7 @@
 import { PatternDefinition } from '../../../types/PatternDefinition';
 import { KALEIDOSCOPE_STAR_TEMPLATE } from './template';
 import { KALEIDOSCOPE_STAR_PROMPT } from './prompt';
+import { createStablePositional } from '../colorAssignmentStrategies';
 
 const KaleidoscopeStar: PatternDefinition = {
   id: 'kaleidoscope-star',
@@ -20,31 +21,10 @@ const KaleidoscopeStar: PatternDefinition = {
   ],
   
   /**
-   * Kaleidoscope Star - classic 8-pointed star made from quarter-square triangles
-   * fabricColors[0] = Background (4 corner squares)
-   * fabricColors[1] = Primary (8 star points from QSTs)
-   * fabricColors[2] = Secondary (center square)
-   * fabricColors[3] = Accent (alternate star points - optional)
-   * fabricColors[4] = Additional accent (optional)
-   * 
-   * 3 fabrics: Background corners + Primary star + Secondary center
-   * 4 fabrics: Background corners + Primary/Accent alternating star points + Secondary center
-   * 5 fabrics: Background corners + Primary/Accent alternating star points + Secondary center + Additional accent
-   * 
-   * Returns: [background, star_points, center, accent, additional_accent]
+   * Kaleidoscope Star - classic 8-pointed star with stable positional colors.
+   * All positions (background, star, center, accents) stay consistent.
    */
-  getColors: (
-    fabricColors: string[],
-    opts: { blockIndex?: number; row?: number; col?: number } = {}
-  ): string[] => {
-    const background = fabricColors[0];
-    const primary = fabricColors[1];
-    const secondary = fabricColors[2];
-    const accent = fabricColors[3] || primary;
-    const additionalAccent = fabricColors[4] || accent;
-    
-    return [background, primary, secondary, accent, additionalAccent];
-  }
+  getColors: createStablePositional
 };
 
 export default KaleidoscopeStar;

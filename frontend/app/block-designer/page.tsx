@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { Suspense, useMemo } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import BlockDesignerCanvas, { BlockRegion, FabricOption } from '@/components/block-designer/BlockDesignerCanvas';
@@ -794,6 +794,15 @@ function getBaseRegions(patternId: string): BlockRegion[] {
 
 function BlockDesignerPageContent() {
   const router = useRouter();
+  const [canUseCameraCapture, setCanUseCameraCapture] = useState(false);
+  const cameraInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  useEffect(() => {
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const hasTouch = navigator.maxTouchPoints > 0;
+    setCanUseCameraCapture(coarsePointer || hasTouch);
+  }, []);
+
   const patterns = useMemo(() => getAllPatterns(), []);
   const {
     currentDesignId,
@@ -1039,8 +1048,20 @@ function BlockDesignerPageContent() {
                           onClick={() => fileInputRefs.current[index]?.click()}
                           className="text-xs text-indigo-600 hover:text-indigo-800 text-left truncate"
                         >
-                          {fabricPreviews[index] ? '↑ Replace photo' : '+ Upload photo'}
+                          {fabricPreviews[index] ? '↑ Replace from library' : '+ Choose from library'}
                         </button>
+                        {canUseCameraCapture && (
+                          <button
+                            type="button"
+                            onClick={() => cameraInputRefs.current[index]?.click()}
+                            className="text-xs text-teal-600 hover:text-teal-800 text-left truncate"
+                          >
+                            + Open camera
+                          </button>
+                        )}
+                        {canUseCameraCapture && (
+                          <p className="text-[11px] text-gray-500">Tip: Open camera to quickly capture this fabric from your tablet.</p>
+                        )}
                         <input
                           ref={(el) => { fileInputRefs.current[index] = el; }}
                           type="file"
@@ -1053,6 +1074,21 @@ function BlockDesignerPageContent() {
                             event.target.value = '';
                           }}
                         />
+                        {canUseCameraCapture && (
+                          <input
+                            ref={(el) => { cameraInputRefs.current[index] = el; }}
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            aria-label={`Take photo for fabric ${index + 1}`}
+                            onChange={(event) => {
+                              const file = event.target.files?.[0];
+                              if (file) handleFabricPhotoUpload(index, file);
+                              event.target.value = '';
+                            }}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>

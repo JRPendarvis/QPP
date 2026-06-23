@@ -9,7 +9,7 @@ export interface UserProfile {
     used: number;
     limit: number;
     remaining: number;
-    generations: {
+    credits: {
       used: number;
       limit: number;
       remaining: number;

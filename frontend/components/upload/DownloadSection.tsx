@@ -2,6 +2,7 @@ interface DownloadSectionProps {
   onDownload: () => void;
   downloading: boolean;
   patternId?: string;
+  isLocalFallback?: boolean;
   userTier?: string;
   downloadsRemaining?: number;
 }
@@ -10,11 +11,21 @@ export default function DownloadSection({
   onDownload,
   downloading,
   patternId,
+  isLocalFallback,
   userTier,
   downloadsRemaining,
 }: DownloadSectionProps) {
   // Don't show download button if no downloads remaining
   const canDownload = downloadsRemaining === undefined || downloadsRemaining > 0;
+
+  if (isLocalFallback) {
+    return (
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+        <p className="text-blue-700 font-medium">Preview-only unique fallback</p>
+        <p className="text-sm text-blue-600 mt-1">This pattern was generated locally because the server was unavailable. Regenerate to enable PDF download.</p>
+      </div>
+    );
+  }
 
   if (!patternId) {
     return (

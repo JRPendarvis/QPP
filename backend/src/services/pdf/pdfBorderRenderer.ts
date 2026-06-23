@@ -68,7 +68,7 @@ export class PDFBorderRenderer {
 
     const sortedBorders = [...borderConfiguration.borders].sort((a, b) => a.order - b.order);
     
-    sortedBorders.forEach((border, index) => {
+    sortedBorders.forEach((border, _index) => {
       const fabricRequirement = pattern.fabricRequirements?.find(
         req => req.role === `Border ${border.order}`
       );

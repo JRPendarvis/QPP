@@ -13,8 +13,8 @@ export class BorderSizeCalculator {
     borders: Border[],
     quiltTopWidth: number,
     quiltTopHeight: number,
-    targetWidth?: number,
-    targetHeight?: number
+    _targetWidth?: number,
+    _targetHeight?: number
   ): BorderDimensions {
     const totalBorderWidth = borders.reduce((sum, b) => sum + b.width, 0);
     

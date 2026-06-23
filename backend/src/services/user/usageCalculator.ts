@@ -3,7 +3,7 @@
 import { SUBSCRIPTION_TIERS } from '../../config/stripe.config';
 
 export interface UsageStats {
-  generations: {
+  credits: {
     used: number;
     limit: number;
     remaining: number;
@@ -41,10 +41,10 @@ export class UsageCalculator {
     const daysUntilReset = this.calculateDaysUntilReset(nextResetDate);
 
     return {
-      generations: {
+      credits: {
         used: generationsUsed,
-        limit: tierConfig.generationsPerMonth,
-        remaining: Math.max(0, tierConfig.generationsPerMonth - generationsUsed),
+        limit: tierConfig.creditsPerMonth,
+        remaining: Math.max(0, tierConfig.creditsPerMonth - generationsUsed),
       },
       downloads: {
         used: downloadsUsed,

@@ -148,7 +148,7 @@ export default function ProfilePage() {
 
   // Compute display values
   const usage = profile.usage || {
-    generations: { used: 0, limit: 0, remaining: 0 },
+    credits: { used: 0, limit: 0, remaining: 0 },
     downloads: { used: 0, limit: 0, remaining: 0 },
     daysUntilReset: 0,
   };

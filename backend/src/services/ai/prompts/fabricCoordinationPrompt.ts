@@ -5,17 +5,13 @@
 
 export const buildFabricCoordinationPrompt = (fabricCount: number): string => {
   // Determine required roles based on fabric count
-  let requiredRoles: string;
   let rulesExplanation: string;
   
   if (fabricCount === 1) {
-    requiredRoles = 'primary';
     rulesExplanation = '- Assign the fabric to the primary role\n- This single fabric will be the main feature';
   } else if (fabricCount === 2) {
-    requiredRoles = 'primary and secondary';
     rulesExplanation = '- primary and secondary are REQUIRED\n- Assign one fabric as the primary (main feature) and one as secondary (support)';
   } else {
-    requiredRoles = 'background, primary, and secondary';
     rulesExplanation = '- background, primary, and secondary are REQUIRED\n- accent is OPTIONAL (only if truly beneficial)\n- Assign EXACTLY ONE fabric per role';
   }
   

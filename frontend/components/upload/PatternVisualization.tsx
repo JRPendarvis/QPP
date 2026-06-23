@@ -51,6 +51,7 @@ export default function PatternVisualization({ visualSvg, patternName }: Pattern
 
     return DOMPurify.sanitize(ensured, {
       USE_PROFILES: { svg: true },
+      ADD_DATA_URI_TAGS: ['image'],
       ADD_TAGS: [
         'filter', 'feGaussianBlur', 'feOffset', 'feComponentTransfer', 'feFuncA', 'feMerge', 'feMergeNode',
         'pattern', 'circle', 'image', 'defs'

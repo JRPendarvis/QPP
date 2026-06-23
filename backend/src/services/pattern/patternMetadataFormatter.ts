@@ -1,5 +1,4 @@
 import { PatternFormatter } from '../../utils/patternFormatter';
-import { BorderConfiguration } from '../../types/Border';
 
 /**
  * Formats pattern metadata for display
@@ -28,7 +27,7 @@ export class PatternMetadataFormatter {
   static getBorderFabricName(
     index: number,
     totalBorders: number,
-    fabric: any
+    _fabric: any
   ): string {
     if (totalBorders === 1) {
       return 'Border';

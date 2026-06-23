@@ -110,8 +110,6 @@ export class CustomBlockPatternService {
       const quiltRow: any[] = [];
       for (let col = 0; col < totalCols; col++) {
         // Determine which block and which cell within that block
-        const blockRow = Math.floor(row / gridSize);
-        const blockCol = Math.floor(col / gridSize);
         const cellRow = row % gridSize;
         const cellCol = col % gridSize;
 

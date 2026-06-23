@@ -209,7 +209,7 @@ export const checkBlockLimit = async (req: Request, res: Response) => {
  * Get supported grid sizes configuration
  * GET /api/blocks/grid-sizes
  */
-export const getGridSizes = async (req: Request, res: Response) => {
+export const getGridSizes = async (_req: Request, res: Response) => {
   try {
     return res.json({
       success: true,
