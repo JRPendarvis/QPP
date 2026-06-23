@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 import Navigation from '@/components/Navigation';
-import { APP_CONFIG } from '@/lib/constants';
 
 interface OverviewStats {
   totalUsers: number;
@@ -82,6 +81,38 @@ interface UsageByTierRow {
   utilizationPercent: number | null;
 }
 
+function normalizeUsageByTierRows(input: unknown): UsageByTierRow[] {
+  if (!Array.isArray(input)) return [];
+
+  return input
+    .filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === 'object')
+    .map((row) => ({
+      subscriptionTier: String(row.subscriptionTier ?? 'unknown'),
+      tierName: String(row.tierName ?? row.subscriptionTier ?? 'Unknown'),
+      users: typeof row.users === 'number' && Number.isFinite(row.users) ? row.users : 0,
+      creditsPerUser:
+        typeof row.creditsPerUser === 'number' && Number.isFinite(row.creditsPerUser)
+          ? row.creditsPerUser
+          : null,
+      creditsConsumedThisMonth:
+        typeof row.creditsConsumedThisMonth === 'number' && Number.isFinite(row.creditsConsumedThisMonth)
+          ? row.creditsConsumedThisMonth
+          : 0,
+      downloadsThisMonth:
+        typeof row.downloadsThisMonth === 'number' && Number.isFinite(row.downloadsThisMonth)
+          ? row.downloadsThisMonth
+          : 0,
+      tierCreditCapacity:
+        typeof row.tierCreditCapacity === 'number' && Number.isFinite(row.tierCreditCapacity)
+          ? row.tierCreditCapacity
+          : null,
+      utilizationPercent:
+        typeof row.utilizationPercent === 'number' && Number.isFinite(row.utilizationPercent)
+          ? row.utilizationPercent
+          : null,
+    }));
+}
+
 export default function AdminPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -109,14 +140,20 @@ export default function AdminPage() {
       }
 
       if (usageRes.data?.success) {
-        setUsageByTier(usageRes.data.data || []);
+        setUsageByTier(normalizeUsageByTierRows(usageRes.data.data));
       }
-    } catch {
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 401 || status === 403) {
+        setError('Admin access required');
+        router.push('/dashboard');
+        return;
+      }
       setError('Failed to load overview');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   const loadUsers = useCallback(async () => {
     try {
@@ -168,40 +205,8 @@ export default function AdminPage() {
       return;
     }
 
-    let isMounted = true;
-
-    // Check if user is authorized for admin access.
-    const checkAccess = async () => {
-      try {
-        const profileRes = await api.get('/api/user/profile');
-        if (!isMounted) return;
-
-        const profile = profileRes.data?.data;
-        const role = String(profile?.role || '').toLowerCase();
-        const email = String(profile?.email || '').toLowerCase().trim();
-        const adminEmail = APP_CONFIG.ADMIN_EMAIL.toLowerCase().trim();
-        const isAdminRole = role === 'staff' || role === 'admin';
-        const isAdminEmail = Boolean(adminEmail) && email === adminEmail;
-
-        if (!isAdminRole && !isAdminEmail) {
-          router.push('/dashboard');
-          return;
-        }
-        
-        // Load initial data
-        await loadOverview();
-      } catch {
-        if (!isMounted) return;
-        setError('Access denied');
-        router.push('/dashboard');
-      }
-    };
-
-    checkAccess();
-    
-    return () => {
-      isMounted = false;
-    };
+    // Backend middleware is the source of truth for admin authorization.
+    void loadOverview();
   }, [user, router, loadOverview]);
 
   const handleTabChange = async (tab: typeof activeTab) => {
@@ -360,16 +365,16 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {usageByTier.map((row) => (
-                    <tr key={row.subscriptionTier}>
+                  {usageByTier.map((row, index) => (
+                    <tr key={`${row.subscriptionTier}-${index}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{row.tierName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.users.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{Number(row.users ?? 0).toLocaleString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {typeof row.creditsPerUser === 'number' && Number.isFinite(row.creditsPerUser)
                           ? row.creditsPerUser.toLocaleString()
                           : 'Unlimited'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.creditsConsumedThisMonth.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{Number(row.creditsConsumedThisMonth ?? 0).toLocaleString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {typeof row.tierCreditCapacity === 'number'
                           ? row.tierCreditCapacity.toLocaleString()
@@ -378,7 +383,7 @@ export default function AdminPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {typeof row.utilizationPercent === 'number' ? `${row.utilizationPercent}%` : 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.downloadsThisMonth.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{Number(row.downloadsThisMonth ?? 0).toLocaleString()}</td>
                     </tr>
                   ))}
                   {usageByTier.length === 0 && (
