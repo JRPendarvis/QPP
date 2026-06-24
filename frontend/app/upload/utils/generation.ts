@@ -22,7 +22,9 @@ export function prepareGenerationRequest({
 }: PrepareGenerationRequestOptions): PreparedGenerationRequest {
   const patternOverride = patternChoice === 'manual'
     ? selectedPattern
-    : undefined;
+    : patternChoice === 'unique'
+      ? 'unique'
+      : undefined;
 
   return {
     patternOverride,

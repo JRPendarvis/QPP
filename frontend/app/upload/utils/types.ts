@@ -32,4 +32,4 @@ export interface FabricYardageRef {
   isLibrary: boolean;
 }
 
-export type PatternChoice = 'auto' | 'manual';
+export type PatternChoice = 'auto' | 'manual' | 'unique';

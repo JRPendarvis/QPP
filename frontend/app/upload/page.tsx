@@ -223,6 +223,12 @@ export default function UploadPage() {
     }
   };
 
+  useEffect(() => {
+    if (currentSkill === 'expert' && challengeMe) {
+      setChallengeMe(false);
+    }
+  }, [currentSkill, challengeMe]);
+
   const handleSelectedPatternChange = (id: string) => {
     setSelectedPattern(id);
     if (!id) {

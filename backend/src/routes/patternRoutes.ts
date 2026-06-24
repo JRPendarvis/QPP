@@ -27,6 +27,11 @@ router.post('/generate', authenticate, patternLimiter, (req, res) =>
   patternController.generatePattern(req, res)
 );
 
+// POST /api/patterns/generate-unique - Protected route (explicit unique mode)
+router.post('/generate-unique', authenticate, patternLimiter, (req, res) =>
+  patternController.generatePattern(req, res)
+);
+
 // GET /api/patterns/:id/download - Download pattern as PDF
 router.get('/:id/download', authenticate, (req, res) => 
   patternController.downloadPattern(req, res)
