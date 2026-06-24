@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
@@ -123,6 +123,7 @@ export default function AdminPage() {
   const [feedback, setFeedback] = useState<FeedbackData[]>([]);
   const [usageByTier, setUsageByTier] = useState<UsageByTierRow[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'patterns' | 'feedback'>('overview');
+  const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [grantingUserId, setGrantingUserId] = useState<string | null>(null);
@@ -211,6 +212,7 @@ export default function AdminPage() {
 
   const handleTabChange = async (tab: typeof activeTab) => {
     setActiveTab(tab);
+    setSearchQuery('');
     setError(null);
     setSuccessMessage(null);
 
@@ -272,6 +274,57 @@ export default function AdminPage() {
 
     return { canGrant: true, reason: '' };
   };
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+
+  const filteredUsageByTier = useMemo(() => {
+    if (!normalizedSearch) return usageByTier;
+    return usageByTier.filter((row) => {
+      const haystack = [row.tierName, row.subscriptionTier].join(' ').toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+  }, [usageByTier, normalizedSearch]);
+
+  const filteredUsers = useMemo(() => {
+    if (!normalizedSearch) return users;
+    return users.filter((userRow) => {
+      const haystack = [
+        userRow.email,
+        userRow.name || '',
+        userRow.role,
+        userRow.subscriptionTier,
+        userRow.skillLevel,
+      ].join(' ').toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+  }, [users, normalizedSearch]);
+
+  const filteredPatterns = useMemo(() => {
+    if (!normalizedSearch) return patterns;
+    return patterns.filter((patternRow) => {
+      const haystack = [
+        patternRow.patternData?.patternName || '',
+        patternRow.patternData?.patternId || '',
+        patternRow.user?.email || '',
+        patternRow.user?.subscriptionTier || '',
+      ].join(' ').toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+  }, [patterns, normalizedSearch]);
+
+  const filteredFeedback = useMemo(() => {
+    if (!normalizedSearch) return feedback;
+    return feedback.filter((item) => {
+      const haystack = [
+        item.title,
+        item.description || '',
+        item.author?.email || '',
+        item.author?.name || '',
+        item.resolved ? 'resolved' : 'open',
+      ].join(' ').toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+  }, [feedback, normalizedSearch]);
 
   if (loading && !overview) {
     return (
@@ -335,6 +388,24 @@ export default function AdminPage() {
           </nav>
         </div>
 
+        <div className="mb-6">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={
+              activeTab === 'overview'
+                ? 'Search tiers...'
+                : activeTab === 'users'
+                  ? 'Search users by email, name, role, tier, skill...'
+                  : activeTab === 'patterns'
+                    ? 'Search patterns by name, id, user, tier...'
+                    : 'Search feedback by title, author, status...'
+            }
+            className="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-700 focus:border-red-700"
+          />
+        </div>
+
         {/* Overview Tab */}
         {activeTab === 'overview' && overview && (
           <div className="space-y-8">
@@ -365,7 +436,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {usageByTier.map((row, index) => (
+                  {filteredUsageByTier.map((row, index) => (
                     <tr key={`${row.subscriptionTier}-${index}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{row.tierName}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{Number(row.users ?? 0).toLocaleString()}</td>
@@ -386,10 +457,10 @@ export default function AdminPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{Number(row.downloadsThisMonth ?? 0).toLocaleString()}</td>
                     </tr>
                   ))}
-                  {usageByTier.length === 0 && (
+                  {filteredUsageByTier.length === 0 && (
                     <tr>
                       <td className="px-6 py-4 text-sm text-gray-500" colSpan={7}>
-                        No usage data available yet for this billing cycle.
+                        {normalizedSearch ? 'No tiers match your search.' : 'No usage data available yet for this billing cycle.'}
                       </td>
                     </tr>
                   )}
@@ -416,7 +487,7 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => {
+                {filteredUsers.map((user) => {
                   const { canGrant, reason } = canGrantProAccess(user);
                   return (
                   <tr key={user.id}>
@@ -451,6 +522,13 @@ export default function AdminPage() {
                   </tr>
                   );
                 })}
+                {filteredUsers.length === 0 && (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-500" colSpan={8}>
+                      {normalizedSearch ? 'No users match your search.' : 'No users found.'}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -470,7 +548,7 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {patterns.map((pattern) => (
+                {filteredPatterns.map((pattern) => (
                   <tr key={pattern.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {pattern.patternData?.patternName || pattern.patternData?.patternId || 'Unknown'}
@@ -489,6 +567,13 @@ export default function AdminPage() {
                     </td>
                   </tr>
                 ))}
+                {filteredPatterns.length === 0 && (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-500" colSpan={5}>
+                      {normalizedSearch ? 'No patterns match your search.' : 'No patterns found.'}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -508,7 +593,7 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {feedback.map((item) => (
+                {filteredFeedback.map((item) => (
                   <tr key={item.id}>
                     <td className="px-6 py-4 text-sm text-gray-900">{item.title}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -529,6 +614,13 @@ export default function AdminPage() {
                     </td>
                   </tr>
                 ))}
+                {filteredFeedback.length === 0 && (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-500" colSpan={5}>
+                      {normalizedSearch ? 'No feedback items match your search.' : 'No feedback items found.'}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

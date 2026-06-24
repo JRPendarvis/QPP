@@ -8,8 +8,8 @@ interface PatternOption {
 }
 
 export interface PatternSelectionSectionProps {
-  patternChoice: 'auto' | 'manual';
-  setPatternChoice: (choice: 'auto' | 'manual') => void;
+  patternChoice: 'auto' | 'manual' | 'unique';
+  setPatternChoice: (choice: 'auto' | 'manual' | 'unique') => void;
   selectedPattern: string;
   setSelectedPattern: (id: string) => void;
   availablePatterns: PatternOption[];
@@ -60,6 +60,7 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
           </div>
         </div>
       </label>
+      {/* Unique Quilt option intentionally hidden from UI for now */}
       <label className="flex items-start cursor-pointer">
         <input
           type="radio"
@@ -93,21 +94,27 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
       </label>
     </div>
     {/* Challenge Me Checkbox */}
-    <label className="flex items-center cursor-pointer p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+    <label className={`flex items-center p-4 bg-indigo-50 border border-indigo-200 rounded-lg ${currentSkill === 'expert' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
       <input
         type="checkbox"
         checked={challengeMe}
-        onChange={(e) => setChallengeMe(e.target.checked)}
-        className="mr-3 h-5 w-5 text-indigo-600"
+        onChange={(e) => {
+          if (currentSkill === 'expert') return;
+          setChallengeMe(e.target.checked);
+        }}
+        disabled={currentSkill === 'expert'}
+        className="mr-3 h-5 w-5 text-indigo-600 disabled:cursor-not-allowed"
       />
       <div>
         <div className="font-medium text-indigo-900">
           🚀 Challenge Me
         </div>
         <div className="text-sm text-indigo-700">
-          Use {SKILL_LEVELS[targetSkill]} level complexity
-          {challengeMe && currentSkill !== 'expert' && (
-            <span className="ml-1 font-semibold">(one level up!)</span>
+          {currentSkill === 'expert' ? 'Unavailable at Expert level' : (
+            <>
+              Use {SKILL_LEVELS[targetSkill]} level complexity
+              {challengeMe && <span className="ml-1 font-semibold">(one level up!)</span>}
+            </>
           )}
         </div>
       </div>

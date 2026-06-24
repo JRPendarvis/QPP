@@ -12,7 +12,7 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: 'How does Quilt Planner Pro work?',
-    answer: 'Upload 2-8 photos of your fabrics, choose your skill level, and generate a quilt pattern with step-by-step instructions. Pattern generation is procedural and does not consume AI credits.',
+    answer: 'Upload 2-8 photos of your fabrics, choose your skill level, and generate a quilt pattern with step-by-step instructions. Standard manual pattern generation does not use AI credits, while AI-assisted options do.',
   },
   {
     question: 'What image formats are supported?',
@@ -48,7 +48,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'What actions use AI credits?',
-    answer: 'Only AI-powered actions consume credits. Fabric coordination (auto-assigning background/primary/secondary/accent roles) uses credits. Pattern generation, uploads, and standard pattern selection do not use AI credits.'
+    answer: 'Only AI-powered actions consume credits. AI Coordinate Colors uses 1 credit, AI Choose the Quilt uses 2 credits, and AI Generate Quilt uses 3 credits. Uploads and standard manual pattern selection do not use AI credits.'
   },
   {
     question: 'Can I download my patterns?',

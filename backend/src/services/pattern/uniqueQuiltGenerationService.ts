@@ -1,5 +1,6 @@
 import { BorderConfiguration } from '../../types/Border';
 import { QuiltSizeCatalog } from './quiltSizeCatalog';
+import { getPatternDisplayName, getPatternsForSkillLevel } from '../../config/skill-levels';
 import sharp from 'sharp';
 
 /**
@@ -10,6 +11,11 @@ export class UniqueQuiltGenerationService {
   private static readonly DEFAULT_COLORS = ['#E5E7EB', '#C084FC', '#34D399', '#F59E0B', '#60A5FA', '#F87171'];
   private static readonly ROLE_NAMES = ['Background', 'Primary', 'Secondary', 'Accent'];
   private static readonly SEAM_ALLOWANCE_IN = 0.25;
+  private static readonly PREFERRED_BLOCKS_BY_SKILL: Record<'beginner' | 'intermediate' | 'advanced', string[]> = {
+    beginner: ['simple-squares', 'four-patch', 'rail-fence', 'strip-quilt'],
+    intermediate: ['four-patch', 'nine-patch', 'half-square-triangles', 'pinwheel', 'flying-geese', 'log-cabin'],
+    advanced: ['churn-dash', 'sawtooth-star', 'ohio-star', 'lone-star', 'kaleidoscope-star', 'mosaic-star'],
+  };
 
   async generateUniqueQuiltPattern(
     fabricImages: string[],
@@ -29,7 +35,8 @@ export class UniqueQuiltGenerationService {
     const normalizedSkill = this.normalizeSkillLevel(skillLevel);
     const grid = this.getGridForSkill(normalizedSkill);
     const seed = this.randomInt(1_000_000, 9_999_999);
-    const variantCounts = this.calculateVariantCounts(seed, grid.rows, grid.cols);
+    const selectedBlockIds = this.selectUniqueBlockIds(this.getCandidateBlockIds(normalizedSkill), seed);
+    const blockUsageCounts = this.calculateBlockUsageCounts(seed, grid.rows, grid.cols, selectedBlockIds);
 
     const visualSvg = this.buildUniqueSvg(
       patternFabricImages,
@@ -37,7 +44,8 @@ export class UniqueQuiltGenerationService {
       normalizedSkill,
       borderConfiguration,
       allColors,
-      seed
+      seed,
+      selectedBlockIds
     );
 
     const fabricRequirements = this.buildFabricRequirements(
@@ -54,8 +62,9 @@ export class UniqueQuiltGenerationService {
       fabricLayout: 'Unique layout generated from your fabrics and skill level without choosing a predefined quilt pattern.',
       selectionRationale: {
         mode: 'unique',
-        reason: `Generated a non-catalog quilt composition by combining your fabric color values and ${normalizedSkill} complexity targets.`,
+        reason: `Generated a non-catalog quilt composition by combining ${selectedBlockIds.length} block families selected for ${normalizedSkill} level.`,
         targetSkillLevel: normalizedSkill,
+        selectedBlocks: selectedBlockIds.map((id) => getPatternDisplayName(id)),
       },
       difficulty: this.capitalize(normalizedSkill),
       estimatedSize,
@@ -66,7 +75,8 @@ export class UniqueQuiltGenerationService {
         grid.cols,
         grid.rows,
         borderConfiguration,
-        variantCounts
+        selectedBlockIds,
+        blockUsageCounts
       ),
       visualSvg,
       requestedQuiltSize: quiltSize,
@@ -75,7 +85,7 @@ export class UniqueQuiltGenerationService {
       ...(borderConfiguration ? { borderConfiguration } : {}),
       meta: {
         isUnique: true,
-        uniqueVersion: 'v2',
+        uniqueVersion: 'v3-block-composition',
       },
     };
   }
@@ -98,6 +108,8 @@ export class UniqueQuiltGenerationService {
     borderConfiguration?: BorderConfiguration,
     allColors?: string[],
     seed?: number
+    ,
+    selectedBlockIds: string[] = ['simple-squares']
   ): string {
     const width = 300;
     const height = 400;
@@ -124,20 +136,20 @@ export class UniqueQuiltGenerationService {
         const fabricRefA = hasFabricDefs ? `url(#uq-fabric-${(row + col) % fabricImages.length})` : c1;
         const fabricRefB = hasFabricDefs ? `url(#uq-fabric-${(row * 2 + col + 1) % fabricImages.length})` : c2;
         const fabricRefC = hasFabricDefs ? `url(#uq-fabric-${(row + col * 3 + 2) % fabricImages.length})` : c3;
+        const blockId = selectedBlockIds[tileSeed % selectedBlockIds.length] || 'simple-squares';
+        const rotation = (tileSeed % 4) * 90;
 
-        if (variant === 0) {
-          bodySvg += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${fabricRefA}"/>`;
-          bodySvg += `<rect x="${(x + cellW * 0.2).toFixed(2)}" y="${(y + cellH * 0.2).toFixed(2)}" width="${(cellW * 0.6).toFixed(2)}" height="${(cellH * 0.6).toFixed(2)}" fill="${fabricRefB}" opacity="0.8"/>`;
-        } else if (variant === 1) {
-          bodySvg += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${fabricRefA}"/>`;
-          bodySvg += `<polygon points="${x.toFixed(2)},${y.toFixed(2)} ${(x + cellW).toFixed(2)},${y.toFixed(2)} ${(x + cellW).toFixed(2)},${(y + cellH).toFixed(2)}" fill="${fabricRefB}" opacity="0.85"/>`;
-          bodySvg += `<polygon points="${x.toFixed(2)},${y.toFixed(2)} ${x.toFixed(2)},${(y + cellH).toFixed(2)} ${(x + cellW).toFixed(2)},${(y + cellH).toFixed(2)}" fill="${fabricRefC}" opacity="0.75"/>`;
-        } else {
-          const cx = x + cellW / 2;
-          const cy = y + cellH / 2;
-          bodySvg += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${fabricRefA}"/>`;
-          bodySvg += `<polygon points="${cx.toFixed(2)},${(y + cellH * 0.1).toFixed(2)} ${(x + cellW * 0.9).toFixed(2)},${cy.toFixed(2)} ${cx.toFixed(2)},${(y + cellH * 0.9).toFixed(2)} ${(x + cellW * 0.1).toFixed(2)},${cy.toFixed(2)}" fill="${fabricRefB}" opacity="0.8"/>`;
-        }
+        bodySvg += this.renderBlockCell(
+          blockId,
+          x,
+          y,
+          cellW,
+          cellH,
+          [fabricRefA, fabricRefB, fabricRefC],
+          tileSeed,
+          rotation,
+          variant
+        );
       }
     }
 
@@ -150,6 +162,78 @@ export class UniqueQuiltGenerationService {
   ${bodySvg}
   ${borderSvg}
 </svg>`;
+  }
+
+  private renderBlockCell(
+    blockId: string,
+    x: number,
+    y: number,
+    cellW: number,
+    cellH: number,
+    fills: string[],
+    tileSeed: number,
+    rotation: number,
+    variant: number
+  ): string {
+    const [a, b, c] = fills;
+    const centerX = x + cellW / 2;
+    const centerY = y + cellH / 2;
+    const groupStart = `<g transform="rotate(${rotation}, ${centerX.toFixed(2)}, ${centerY.toFixed(2)})">`;
+    const groupEnd = '</g>';
+
+    if (blockId === 'simple-squares') {
+      return `${groupStart}<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${a}"/>${groupEnd}`;
+    }
+
+    if (blockId === 'four-patch' || blockId === 'checkerboard') {
+      const halfW = cellW / 2;
+      const halfH = cellH / 2;
+      return `${groupStart}
+        <rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${halfW.toFixed(2)}" height="${halfH.toFixed(2)}" fill="${a}"/>
+        <rect x="${(x + halfW).toFixed(2)}" y="${y.toFixed(2)}" width="${halfW.toFixed(2)}" height="${halfH.toFixed(2)}" fill="${b}"/>
+        <rect x="${x.toFixed(2)}" y="${(y + halfH).toFixed(2)}" width="${halfW.toFixed(2)}" height="${halfH.toFixed(2)}" fill="${b}"/>
+        <rect x="${(x + halfW).toFixed(2)}" y="${(y + halfH).toFixed(2)}" width="${halfW.toFixed(2)}" height="${halfH.toFixed(2)}" fill="${a}"/>
+      ${groupEnd}`;
+    }
+
+    if (blockId === 'nine-patch') {
+      const thirdW = cellW / 3;
+      const thirdH = cellH / 3;
+      let svg = groupStart;
+      for (let r = 0; r < 3; r += 1) {
+        for (let col = 0; col < 3; col += 1) {
+          const fill = (r + col + variant) % 2 === 0 ? a : b;
+          svg += `<rect x="${(x + col * thirdW).toFixed(2)}" y="${(y + r * thirdH).toFixed(2)}" width="${thirdW.toFixed(2)}" height="${thirdH.toFixed(2)}" fill="${fill}"/>`;
+        }
+      }
+      svg += groupEnd;
+      return svg;
+    }
+
+    if (blockId === 'rail-fence' || blockId === 'strip-quilt' || blockId === 'log-cabin') {
+      const stripes = blockId === 'log-cabin' ? 5 : 4;
+      const stripeH = cellH / stripes;
+      let svg = groupStart;
+      for (let i = 0; i < stripes; i += 1) {
+        const fill = [a, b, c][i % 3];
+        svg += `<rect x="${x.toFixed(2)}" y="${(y + i * stripeH).toFixed(2)}" width="${cellW.toFixed(2)}" height="${stripeH.toFixed(2)}" fill="${fill}"/>`;
+      }
+      svg += groupEnd;
+      return svg;
+    }
+
+    if (blockId === 'half-square-triangles' || blockId === 'flying-geese' || blockId === 'pinwheel' || blockId === 'churn-dash' || blockId === 'sawtooth-star' || blockId === 'ohio-star') {
+      return `${groupStart}
+        <rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${a}"/>
+        <polygon points="${x.toFixed(2)},${y.toFixed(2)} ${(x + cellW).toFixed(2)},${y.toFixed(2)} ${(x + cellW).toFixed(2)},${(y + cellH).toFixed(2)}" fill="${b}" opacity="0.88"/>
+        <polygon points="${x.toFixed(2)},${y.toFixed(2)} ${x.toFixed(2)},${(y + cellH).toFixed(2)} ${(x + cellW).toFixed(2)},${(y + cellH).toFixed(2)}" fill="${c}" opacity="0.72"/>
+      ${groupEnd}`;
+    }
+
+    return `${groupStart}
+      <rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${a}"/>
+      <polygon points="${centerX.toFixed(2)},${(y + cellH * 0.08).toFixed(2)} ${(x + cellW * 0.92).toFixed(2)},${centerY.toFixed(2)} ${centerX.toFixed(2)},${(y + cellH * 0.92).toFixed(2)} ${(x + cellW * 0.08).toFixed(2)},${centerY.toFixed(2)}" fill="${b}" opacity="0.82"/>
+    ${groupEnd}`;
   }
 
   private buildFabricDefs(fabricImages: string[]): string {
@@ -244,7 +328,8 @@ export class UniqueQuiltGenerationService {
     cols: number,
     rows: number,
     borderConfiguration: BorderConfiguration | undefined,
-    variantCounts: { simpleSquares: number; halfSquareTriangles: number; diamondPoints: number }
+    selectedBlockIds: string[],
+    blockUsageCounts: Record<string, number>
   ): string[] {
     const complexityNotes: Record<'beginner' | 'intermediate' | 'advanced', string> = {
       beginner: 'Use chain piecing in short rows to keep assembly simple and organized.',
@@ -272,10 +357,12 @@ export class UniqueQuiltGenerationService {
       `Cutting plan: Cut ${totalBlocks} base rectangles and sort into Background/Primary/Secondary/Accent groups using the fabric requirements yardage table.`,
       'Sort fabrics by value (light, medium, dark) before cutting to preserve contrast in the unique layout.',
       '',
-      'PATTERN TYPES USED',
-      `Simple Squares (${variantCounts.simpleSquares} blocks): Piece as full square units and keep seam direction consistent within each row.`,
-      `Half-Square Triangles (${variantCounts.halfSquareTriangles} blocks): Pair two fabrics and stitch on the diagonal seam line so triangles stay mirrored where possible.`,
-      `Diamond Points (${variantCounts.diamondPoints} blocks): Center the diamond motif in each block and trim/square the unit before row assembly.`,
+      'PATTERN BLOCKS USED',
+      `This unique quilt combines ${selectedBlockIds.length} block families: ${selectedBlockIds.map((id) => getPatternDisplayName(id)).join(', ')}.`,
+      ...selectedBlockIds.map((id) => {
+        const count = blockUsageCounts[id] || 0;
+        return `${getPatternDisplayName(id)} (${count} blocks): Piece units with consistent seam allowance and press before row assembly.`;
+      }),
       '',
       'PIECING',
       `Piece ${rows} rows with ${cols} blocks per row. Press seams in alternating directions for adjacent rows so intersections nest cleanly.`,
@@ -299,35 +386,52 @@ export class UniqueQuiltGenerationService {
 
   private getGridForSkill(skillLevel: 'beginner' | 'intermediate' | 'advanced'): { cols: number; rows: number } {
     const complexityBySkill: Record<'beginner' | 'intermediate' | 'advanced', { cols: number; rows: number }> = {
-      beginner: { cols: 6, rows: 8 },
-      intermediate: { cols: 8, rows: 10 },
-      advanced: { cols: 10, rows: 12 },
+      beginner: { cols: 4, rows: 6 },
+      intermediate: { cols: 5, rows: 7 },
+      advanced: { cols: 6, rows: 8 },
     };
 
     return complexityBySkill[skillLevel];
   }
 
-  private calculateVariantCounts(seed: number, rows: number, cols: number): { simpleSquares: number; halfSquareTriangles: number; diamondPoints: number } {
-    let simpleSquares = 0;
-    let halfSquareTriangles = 0;
-    let diamondPoints = 0;
+  private getCandidateBlockIds(skillLevel: 'beginner' | 'intermediate' | 'advanced'): string[] {
+    const preferred = UniqueQuiltGenerationService.PREFERRED_BLOCKS_BY_SKILL[skillLevel];
+    const configured = getPatternsForSkillLevel(skillLevel);
+    const merged = [...preferred, ...configured];
+    return Array.from(new Set(merged));
+  }
+
+  private selectUniqueBlockIds(candidates: string[], seed: number): string[] {
+    const pool = candidates.length > 0 ? candidates : ['simple-squares', 'four-patch', 'rail-fence', 'strip-quilt'];
+    const selectedCount = Math.max(2, Math.min(4, pool.length, (seed % 3) + 2));
+    const ranked = [...pool]
+      .map((id) => ({ id, rank: this.hashString(`${id}-${seed}`) }))
+      .sort((a, b) => a.rank - b.rank)
+      .slice(0, selectedCount)
+      .map((entry) => entry.id);
+    return ranked;
+  }
+
+  private calculateBlockUsageCounts(
+    seed: number,
+    rows: number,
+    cols: number,
+    selectedBlockIds: string[]
+  ): Record<string, number> {
+    const counts: Record<string, number> = {};
+    selectedBlockIds.forEach((id) => {
+      counts[id] = 0;
+    });
 
     for (let row = 0; row < rows; row += 1) {
       for (let col = 0; col < cols; col += 1) {
         const tileSeed = seed + row * 997 + col * 383;
-        const variant = tileSeed % 3;
-
-        if (variant === 0) {
-          simpleSquares += 1;
-        } else if (variant === 1) {
-          halfSquareTriangles += 1;
-        } else {
-          diamondPoints += 1;
-        }
+        const blockId = selectedBlockIds[tileSeed % selectedBlockIds.length] || selectedBlockIds[0];
+        counts[blockId] = (counts[blockId] || 0) + 1;
       }
     }
 
-    return { simpleSquares, halfSquareTriangles, diamondPoints };
+    return counts;
   }
 
   private roundToQuarter(value: number): number {
@@ -380,6 +484,15 @@ export class UniqueQuiltGenerationService {
 
   private randomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  private hashString(value: string): number {
+    let hash = 0;
+    for (let i = 0; i < value.length; i += 1) {
+      hash = ((hash << 5) - hash) + value.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
   }
 
   private capitalize(value: string): string {

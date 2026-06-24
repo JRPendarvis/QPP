@@ -58,10 +58,15 @@ export class PatternGenerationService {
 
   async generate(request: GeneratePatternRequest): Promise<GeneratePatternResult> {
     const { userId, images, skillLevel, challengeMe, selectedPattern, roleAssignments, quiltSize, borderConfiguration } = request;
-    const creditsRequired = getCreditCost('patternGeneration');
 
     const patternToUse = normalizePatternId(selectedPattern);
     console.log(`📋 Pattern to use: "${patternToUse}" (from: "${selectedPattern}")`);
+
+    const creditsRequired = patternToUse === 'unique'
+      ? getCreditCost('aiGenerateQuilt')
+      : patternToUse === 'auto'
+        ? getCreditCost('aiChooseQuilt')
+        : getCreditCost('patternGeneration');
 
     // Check feedback requirement for complimentary subscribers
     const feedbackStatus = await FeedbackRequirementService.checkFeedbackRequirement(userId);
@@ -99,12 +104,27 @@ export class PatternGenerationService {
     let pattern: any;
 
     if (isUniqueMode) {
-      pattern = await this.uniqueQuiltGenerationService.generateUniqueQuiltPattern(
-        images,
-        targetSkillLevel,
-        quiltSize,
-        borderConfiguration
-      );
+      try {
+        pattern = await this.uniqueQuiltGenerationService.generateUniqueQuiltPattern(
+          images,
+          targetSkillLevel,
+          quiltSize,
+          borderConfiguration
+        );
+      } catch (error) {
+        console.error('[PatternGenerationService] Unique generation failed, using forced unique fallback.', {
+          targetSkillLevel,
+          imageCount: images.length,
+          error: error instanceof Error ? error.message : String(error),
+        });
+
+        pattern = this.buildForcedUniqueFallbackPattern(
+          images,
+          targetSkillLevel,
+          quiltSize,
+          borderConfiguration
+        );
+      }
 
       const catalogIds = new Set(getAllPatterns().map((p) => p.id));
       const catalogNameSet = new Set(getAllPatterns().map((p) => p.name.toLowerCase()));

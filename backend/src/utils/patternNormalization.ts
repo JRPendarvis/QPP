@@ -14,7 +14,12 @@ export function normalizePatternId(input: string | undefined): string {
   if (!input || input === 'auto') return 'auto';
   const normalizedInput = String(input).trim().toLowerCase();
 
-  const validIds = ['auto', ...getAllPatterns().map((p) => p.id)];
+  // Keep explicit unique mode requests intact.
+  if (normalizedInput === 'unique' || normalizedInput.includes('unique')) {
+    return 'unique';
+  }
+
+  const validIds = ['auto', 'unique', ...getAllPatterns().map((p) => p.id)];
 
   // Already in ID format?
   if (validIds.includes(input)) return input;

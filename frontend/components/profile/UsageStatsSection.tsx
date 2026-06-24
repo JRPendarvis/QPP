@@ -1,17 +1,17 @@
 import { useRouter } from 'next/navigation';
 
 interface UsageData {
-  credits: {
+  credits?: {
     used: number;
     limit: number;
     remaining: number;
   };
-  downloads: {
+  downloads?: {
     used: number;
     limit: number;
     remaining: number;
   };
-  daysUntilReset: number;
+  daysUntilReset?: number;
 }
 
 interface UsageStatsSectionProps {
@@ -22,11 +22,17 @@ interface UsageStatsSectionProps {
 export default function UsageStatsSection({ usage, subscriptionTier }: UsageStatsSectionProps) {
   const router = useRouter();
 
-  const creditsPercent = usage.credits.limit > 0 
-    ? (usage.credits.used / usage.credits.limit) * 100 
+  const normalizedUsage = {
+    credits: usage.credits || { used: 0, limit: 0, remaining: 0 },
+    downloads: usage.downloads || { used: 0, limit: 0, remaining: 0 },
+    daysUntilReset: usage.daysUntilReset ?? 0,
+  };
+
+  const creditsPercent = normalizedUsage.credits.limit > 0 
+    ? (normalizedUsage.credits.used / normalizedUsage.credits.limit) * 100 
     : 0;
-  const downloadsPercent = usage.downloads.limit > 0 
-    ? (usage.downloads.used / usage.downloads.limit) * 100 
+  const downloadsPercent = normalizedUsage.downloads.limit > 0 
+    ? (normalizedUsage.downloads.used / normalizedUsage.downloads.limit) * 100 
     : 0;
 
   return (
@@ -34,7 +40,7 @@ export default function UsageStatsSection({ usage, subscriptionTier }: UsageStat
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Usage This Month</h2>
         <span className="text-sm text-gray-500">
-          Resets in {usage.daysUntilReset} {usage.daysUntilReset === 1 ? 'day' : 'days'}
+          Resets in {normalizedUsage.daysUntilReset} {normalizedUsage.daysUntilReset === 1 ? 'day' : 'days'}
         </span>
       </div>
 
@@ -44,10 +50,10 @@ export default function UsageStatsSection({ usage, subscriptionTier }: UsageStat
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-700">Credits</span>
             <span className="text-sm text-gray-600">
-              {usage.credits.used} / {usage.credits.limit} used
-              {usage.credits.remaining > 0 && (
+              {normalizedUsage.credits.used} / {normalizedUsage.credits.limit} used
+              {normalizedUsage.credits.remaining > 0 && (
                 <span className="text-green-600 ml-2">
-                  ({usage.credits.remaining} remaining)
+                  ({normalizedUsage.credits.remaining} remaining)
                 </span>
               )}
             </span>
@@ -69,10 +75,10 @@ export default function UsageStatsSection({ usage, subscriptionTier }: UsageStat
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-700">PDF Downloads</span>
             <span className="text-sm text-gray-600">
-              {usage.downloads.used} / {usage.downloads.limit} used
-              {usage.downloads.remaining > 0 && (
+              {normalizedUsage.downloads.used} / {normalizedUsage.downloads.limit} used
+              {normalizedUsage.downloads.remaining > 0 && (
                 <span className="text-green-600 ml-2">
-                  ({usage.downloads.remaining} remaining)
+                  ({normalizedUsage.downloads.remaining} remaining)
                 </span>
               )}
             </span>
