@@ -60,7 +60,24 @@ const PatternSelectionSection: React.FC<PatternSelectionSectionProps> = ({
           </div>
         </div>
       </label>
-      {/* Unique Quilt option intentionally hidden from UI for now */}
+      <label className="flex items-start cursor-pointer">
+        <input
+          type="radio"
+          name="patternChoice"
+          value="unique"
+          checked={patternChoice === 'unique'}
+          onChange={() => setPatternChoice('unique')}
+          className="mt-1 mr-3"
+        />
+        <div>
+          <div className="font-medium text-gray-900">
+            Generate Unique Quilt
+          </div>
+          <div className="text-sm text-gray-600">
+            AI will create a one-of-a-kind quilt from your fabrics using your profile skill level
+          </div>
+        </div>
+      </label>
       <label className="flex items-start cursor-pointer">
         <input
           type="radio"

@@ -1,6 +1,7 @@
 import { BorderConfiguration } from '../../types/Border';
 import { QuiltSizeCatalog } from './quiltSizeCatalog';
-import { getPatternDisplayName, getPatternsForSkillLevel } from '../../config/skill-levels';
+import { getPatternDisplayName, PATTERNS_BY_SKILL } from '../../config/skill-levels';
+import { getSkillHierarchy } from '../../utils/skillLevelHelper';
 import sharp from 'sharp';
 
 /**
@@ -11,11 +12,13 @@ export class UniqueQuiltGenerationService {
   private static readonly DEFAULT_COLORS = ['#E5E7EB', '#C084FC', '#34D399', '#F59E0B', '#60A5FA', '#F87171'];
   private static readonly ROLE_NAMES = ['Background', 'Primary', 'Secondary', 'Accent'];
   private static readonly SEAM_ALLOWANCE_IN = 0.25;
-  private static readonly PREFERRED_BLOCKS_BY_SKILL: Record<'beginner' | 'intermediate' | 'advanced', string[]> = {
+  private static readonly SKILL_HIERARCHY = getSkillHierarchy();
+  private static readonly SKILL_ANCHOR_BLOCKS_BY_SKILL: Record<'beginner' | 'intermediate' | 'advanced', string[]> = {
     beginner: ['simple-squares', 'four-patch', 'rail-fence', 'strip-quilt'],
-    intermediate: ['four-patch', 'nine-patch', 'half-square-triangles', 'pinwheel', 'flying-geese', 'log-cabin'],
+    intermediate: ['nine-patch', 'half-square-triangles', 'flying-geese', 'pinwheel', 'log-cabin'],
     advanced: ['churn-dash', 'sawtooth-star', 'ohio-star', 'lone-star', 'kaleidoscope-star', 'mosaic-star'],
   };
+  private static readonly BASIC_BLOCK_IDS = new Set(['simple-squares', 'four-patch', 'rail-fence', 'strip-quilt']);
 
   async generateUniqueQuiltPattern(
     fabricImages: string[],
@@ -32,11 +35,13 @@ export class UniqueQuiltGenerationService {
     const allColors = await this.extractDominantColors(fabricImages);
     const dimensions = QuiltSizeCatalog.resolveDimensions(quiltSize);
     const estimatedSize = QuiltSizeCatalog.formatDisplaySize(dimensions);
+    const selectionSkillLevel = this.normalizeSelectionSkillLevel(skillLevel);
     const normalizedSkill = this.normalizeSkillLevel(skillLevel);
     const grid = this.getGridForSkill(normalizedSkill);
     const seed = this.randomInt(1_000_000, 9_999_999);
-    const selectedBlockIds = this.selectUniqueBlockIds(this.getCandidateBlockIds(normalizedSkill), seed);
+    const selectedBlockIds = this.selectUniqueBlockIds(selectionSkillLevel, seed);
     const blockUsageCounts = this.calculateBlockUsageCounts(seed, grid.rows, grid.cols, selectedBlockIds);
+    const renderedFamilyCounts = this.calculateRenderedFamilyCounts(blockUsageCounts);
 
     const visualSvg = this.buildUniqueSvg(
       patternFabricImages,
@@ -62,9 +67,13 @@ export class UniqueQuiltGenerationService {
       fabricLayout: 'Unique layout generated from your fabrics and skill level without choosing a predefined quilt pattern.',
       selectionRationale: {
         mode: 'unique',
-        reason: `Generated a non-catalog quilt composition by combining ${selectedBlockIds.length} block families selected for ${normalizedSkill} level.`,
-        targetSkillLevel: normalizedSkill,
+        reason: `Generated a non-catalog quilt composition by combining ${selectedBlockIds.length} block families selected for ${this.toDisplaySkillLevel(selectionSkillLevel)} level.`,
+        targetSkillLevel: selectionSkillLevel,
         selectedBlocks: selectedBlockIds.map((id) => getPatternDisplayName(id)),
+        renderedBlockFamilies: Object.entries(renderedFamilyCounts)
+          .filter(([, count]) => count > 0)
+          .sort((a, b) => b[1] - a[1])
+          .map(([family]) => family),
       },
       difficulty: this.capitalize(normalizedSkill),
       estimatedSize,
@@ -76,7 +85,8 @@ export class UniqueQuiltGenerationService {
         grid.rows,
         borderConfiguration,
         selectedBlockIds,
-        blockUsageCounts
+        blockUsageCounts,
+        renderedFamilyCounts
       ),
       visualSvg,
       requestedQuiltSize: quiltSize,
@@ -85,19 +95,38 @@ export class UniqueQuiltGenerationService {
       ...(borderConfiguration ? { borderConfiguration } : {}),
       meta: {
         isUnique: true,
-        uniqueVersion: 'v3-block-composition',
+        uniqueVersion: 'v4-skill-anchored-block-mix',
       },
     };
   }
 
   private normalizeSkillLevel(skillLevel?: string): 'beginner' | 'intermediate' | 'advanced' {
     const level = (skillLevel || 'beginner').toLowerCase();
+    if (level === 'expert') {
+      return 'advanced';
+    }
     if (level === 'advanced') {
       return 'advanced';
+    }
+    if (level === 'advanced_beginner') {
+      return 'intermediate';
     }
     if (level === 'intermediate') {
       return 'intermediate';
     }
+    return 'beginner';
+  }
+
+  private normalizeSelectionSkillLevel(skillLevel?: string): string {
+    const normalized = String(skillLevel || 'beginner').toLowerCase();
+    if (UniqueQuiltGenerationService.SKILL_HIERARCHY.includes(normalized)) {
+      return normalized;
+    }
+
+    if (normalized === 'expert') {
+      return 'expert';
+    }
+
     return 'beginner';
   }
 
@@ -329,7 +358,8 @@ export class UniqueQuiltGenerationService {
     rows: number,
     borderConfiguration: BorderConfiguration | undefined,
     selectedBlockIds: string[],
-    blockUsageCounts: Record<string, number>
+    blockUsageCounts: Record<string, number>,
+    renderedFamilyCounts: Record<string, number>
   ): string[] {
     const complexityNotes: Record<'beginner' | 'intermediate' | 'advanced', string> = {
       beginner: 'Use chain piecing in short rows to keep assembly simple and organized.',
@@ -347,6 +377,14 @@ export class UniqueQuiltGenerationService {
       ? `Add ${borderConfiguration.borders.length} border${borderConfiguration.borders.length === 1 ? '' : 's'} after the quilt center is assembled.`
       : 'No borders configured for this layout.';
 
+    const renderedFamilies = Object.entries(renderedFamilyCounts)
+      .filter(([, count]) => count > 0)
+      .sort((a, b) => b[1] - a[1]);
+
+    const renderedFamilySummary = renderedFamilies.length > 0
+      ? renderedFamilies.map(([family]) => family).join(', ')
+      : selectedBlockIds.map((id) => getPatternDisplayName(id)).join(', ');
+
     return [
       'OVERVIEW',
       `Finished quilt size: ${this.formatNumber(quiltWidthIn)}" x ${this.formatNumber(quiltHeightIn)}" with a ${rows} x ${cols} block grid (${totalBlocks} total blocks).`,
@@ -358,11 +396,10 @@ export class UniqueQuiltGenerationService {
       'Sort fabrics by value (light, medium, dark) before cutting to preserve contrast in the unique layout.',
       '',
       'PATTERN BLOCKS USED',
-      `This unique quilt combines ${selectedBlockIds.length} block families: ${selectedBlockIds.map((id) => getPatternDisplayName(id)).join(', ')}.`,
-      ...selectedBlockIds.map((id) => {
-        const count = blockUsageCounts[id] || 0;
-        return `${getPatternDisplayName(id)} (${count} blocks): Piece units with consistent seam allowance and press before row assembly.`;
-      }),
+      `This unique quilt uses these rendered block families: ${renderedFamilySummary}.`,
+      ...renderedFamilies.map(([family, count]) =>
+        `${family} (${count} blocks): Piece units with consistent seam allowance and press before row assembly.`
+      ),
       '',
       'PIECING',
       `Piece ${rows} rows with ${cols} blocks per row. Press seams in alternating directions for adjacent rows so intersections nest cleanly.`,
@@ -394,22 +431,91 @@ export class UniqueQuiltGenerationService {
     return complexityBySkill[skillLevel];
   }
 
-  private getCandidateBlockIds(skillLevel: 'beginner' | 'intermediate' | 'advanced'): string[] {
-    const preferred = UniqueQuiltGenerationService.PREFERRED_BLOCKS_BY_SKILL[skillLevel];
-    const configured = getPatternsForSkillLevel(skillLevel);
-    const merged = [...preferred, ...configured];
-    return Array.from(new Set(merged));
+  private getCandidateBlockIds(skillLevel: string): string[] {
+    const hierarchy = UniqueQuiltGenerationService.SKILL_HIERARCHY;
+    const skillIndex = hierarchy.indexOf(skillLevel);
+    const cappedIndex = skillIndex === -1 ? 0 : skillIndex;
+
+    const pool: string[] = [];
+    for (let i = 0; i <= cappedIndex; i += 1) {
+      pool.push(...(PATTERNS_BY_SKILL[hierarchy[i]] || []));
+    }
+
+    return Array.from(new Set(pool));
   }
 
-  private selectUniqueBlockIds(candidates: string[], seed: number): string[] {
-    const pool = candidates.length > 0 ? candidates : ['simple-squares', 'four-patch', 'rail-fence', 'strip-quilt'];
+  private selectUniqueBlockIds(skillLevel: string, seed: number): string[] {
+    const pool = this.getCandidateBlockIds(skillLevel);
+    const exactSkillPool = (PATTERNS_BY_SKILL[skillLevel] || []).filter((id) => pool.includes(id));
+    const fallbackPool = pool.length > 0 ? pool : ['simple-squares', 'four-patch', 'rail-fence', 'strip-quilt'];
     const selectedCount = Math.max(2, Math.min(4, pool.length, (seed % 3) + 2));
-    const ranked = [...pool]
+    const selectedBlocks: string[] = [];
+
+    const anchorCandidates = exactSkillPool.length > 0 ? exactSkillPool : fallbackPool;
+    const anchor = [...anchorCandidates]
+      .map((id) => ({ id, rank: this.hashString(`${id}-anchor-${seed}`) }))
+      .sort((a, b) => a.rank - b.rank)[0]?.id;
+
+    if (anchor) {
+      selectedBlocks.push(anchor);
+    }
+
+    const remainingRanked = [...fallbackPool]
+      .filter((id) => !selectedBlocks.includes(id))
       .map((id) => ({ id, rank: this.hashString(`${id}-${seed}`) }))
       .sort((a, b) => a.rank - b.rank)
-      .slice(0, selectedCount)
       .map((entry) => entry.id);
+
+    for (const blockId of remainingRanked) {
+      if (selectedBlocks.length >= selectedCount) {
+        break;
+      }
+      selectedBlocks.push(blockId);
+    }
+
+    let ranked = selectedBlocks;
+
+    if (ranked.length === 0) {
+      ranked = fallbackPool.slice(0, selectedCount);
+    }
+
+    if (skillLevel !== 'beginner') {
+      ranked = this.limitBasicBlocks(ranked, fallbackPool, 1);
+    }
+
     return ranked;
+  }
+
+  private toDisplaySkillLevel(skillLevel: string): string {
+    return skillLevel.replace(/_/g, ' ');
+  }
+
+  private limitBasicBlocks(selected: string[], pool: string[], maxBasicBlocks: number): string[] {
+    const basicSelected = selected.filter((id) => UniqueQuiltGenerationService.BASIC_BLOCK_IDS.has(id));
+    if (basicSelected.length <= maxBasicBlocks) {
+      return selected;
+    }
+
+    const nonBasicPool = pool.filter((id) => !UniqueQuiltGenerationService.BASIC_BLOCK_IDS.has(id));
+    let adjusted = [...selected];
+    let basicCount = basicSelected.length;
+
+    for (let i = adjusted.length - 1; i >= 0 && basicCount > maxBasicBlocks; i -= 1) {
+      const current = adjusted[i];
+      if (!UniqueQuiltGenerationService.BASIC_BLOCK_IDS.has(current)) {
+        continue;
+      }
+
+      const replacement = nonBasicPool.find((id) => !adjusted.includes(id));
+      if (!replacement) {
+        break;
+      }
+
+      adjusted[i] = replacement;
+      basicCount -= 1;
+    }
+
+    return Array.from(new Set(adjusted)).slice(0, selected.length);
   }
 
   private calculateBlockUsageCounts(
@@ -430,6 +536,36 @@ export class UniqueQuiltGenerationService {
         counts[blockId] = (counts[blockId] || 0) + 1;
       }
     }
+
+    return counts;
+  }
+
+  private getRenderedFamilyLabel(blockId: string): string {
+    if (blockId === 'simple-squares') return 'Simple Squares';
+    if (blockId === 'four-patch' || blockId === 'checkerboard') return 'Four Patch';
+    if (blockId === 'nine-patch') return 'Nine Patch';
+    if (blockId === 'rail-fence' || blockId === 'strip-quilt' || blockId === 'log-cabin') return 'Rail/Strip Piecing';
+    if (
+      blockId === 'half-square-triangles' ||
+      blockId === 'flying-geese' ||
+      blockId === 'pinwheel' ||
+      blockId === 'churn-dash' ||
+      blockId === 'sawtooth-star' ||
+      blockId === 'ohio-star'
+    ) {
+      return 'Half-Square Triangles';
+    }
+
+    return getPatternDisplayName(blockId);
+  }
+
+  private calculateRenderedFamilyCounts(blockUsageCounts: Record<string, number>): Record<string, number> {
+    const counts: Record<string, number> = {};
+
+    Object.entries(blockUsageCounts).forEach(([blockId, count]) => {
+      const family = this.getRenderedFamilyLabel(blockId);
+      counts[family] = (counts[family] || 0) + count;
+    });
 
     return counts;
   }

@@ -33,9 +33,9 @@ export default function PatternInstructions({
       {/* Debug view in development */}
       {process.env.NODE_ENV === 'development' && (
         <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg relative z-10">
-          <h3 className="font-bold text-yellow-900 mb-2">🔍 DEBUG: PDF Instructions Preview</h3>
+          <h3 className="font-bold text-yellow-900 mb-2">🔍 DEBUG: Instruction Payload Preview</h3>
           <p className="text-xs text-yellow-700 mb-3">
-            This shows exactly how instructions will appear in the PDF (with numbering):
+            This shows the current instruction payload used for preview and PDF generation requests:
           </p>
           <ol className="list-decimal list-inside space-y-2 text-sm text-yellow-900">
             {instructions.map((instruction, index) => {

@@ -38,6 +38,12 @@ export class PatternGenerationWorkflow {
     'pickle dish',
     'complex medallion',
   ]);
+  private static readonly BASIC_FALLBACK_BLOCKS = new Set([
+    'Simple Square',
+    'Four Patch',
+    'Rail Fence',
+    'Strip Quilt',
+  ]);
 
   private static isUniqueRequest(selectedPattern: string | undefined): boolean {
     return (selectedPattern || '').toLowerCase().includes('unique');
@@ -90,9 +96,9 @@ export class PatternGenerationWorkflow {
       rngState = (rngState * 1664525 + 1013904223) >>> 0;
       return rngState / 4294967296;
     };
-    const normalizedTier = normalizedSkill === 'expert'
-      ? 'advanced'
-      : (normalizedSkill === 'intermediate' || normalizedSkill === 'advanced')
+    const normalizedTier = (normalizedSkill === 'advanced_beginner')
+      ? 'intermediate'
+      : (normalizedSkill === 'beginner' || normalizedSkill === 'intermediate' || normalizedSkill === 'advanced' || normalizedSkill === 'expert')
         ? normalizedSkill
         : 'beginner';
 
@@ -100,23 +106,88 @@ export class PatternGenerationWorkflow {
       beginner: { cols: 4, rows: 6 },
       intermediate: { cols: 5, rows: 7 },
       advanced: { cols: 6, rows: 8 },
+      expert: { cols: 6, rows: 8 },
     };
+
+    const skillHierarchy = ['beginner', 'intermediate', 'advanced', 'expert'];
 
     const blockPoolByTier: Record<string, string[]> = {
       beginner: ['Simple Square', 'Four Patch', 'Rail Fence', 'Strip Quilt'],
       intermediate: ['Four Patch', 'Nine Patch', 'Half-Square Triangles', 'Flying Geese', 'Log Cabin'],
-      // Keep advanced fallback aligned to motifs the SVG renderer actually draws.
-      advanced: ['Nine Patch', 'Log Cabin', 'Rail Fence', 'Four Patch', 'Half-Square Triangles', 'Flying Geese'],
+      advanced: ['Churn Dash', 'Sawtooth Star', 'Ohio Star', 'Lone Star', 'Mosaic Star', 'Half-Square Triangles', 'Flying Geese'],
+      expert: ['Mariners Compass', 'New York Beauty', 'Storm At Sea', 'Double Wedding Ring', 'Drunkards Path', 'Pickle Dish', 'Complex Medallion'],
+    };
+
+    const skillAnchorBlocksByTier: Record<string, string[]> = {
+      beginner: ['Simple Square', 'Four Patch', 'Rail Fence', 'Strip Quilt'],
+      intermediate: ['Nine Patch', 'Half-Square Triangles', 'Flying Geese', 'Log Cabin'],
+      advanced: ['Churn Dash', 'Sawtooth Star', 'Ohio Star', 'Lone Star', 'Mosaic Star'],
+      expert: ['Mariners Compass', 'New York Beauty', 'Storm At Sea', 'Double Wedding Ring', 'Drunkards Path', 'Pickle Dish', 'Complex Medallion'],
     };
 
     const selectedGrid = gridByTier[normalizedTier] || gridByTier.beginner;
-    const pool = blockPoolByTier[normalizedTier] || blockPoolByTier.beginner;
-    const selectedCount = Math.max(2, Math.min(4, pool.length, (hashSeed % 3) + 2));
-    const selectedBlocks = [...pool]
+    const skillIndex = Math.max(0, skillHierarchy.indexOf(normalizedTier));
+    const exactSkillPool = blockPoolByTier[normalizedTier] || blockPoolByTier.beginner;
+    const pool = Array.from(new Set(
+      skillHierarchy
+        .slice(0, skillIndex + 1)
+        .flatMap((skill) => blockPoolByTier[skill] || [])
+    ));
+    const fallbackPool = pool.length > 0 ? pool : (blockPoolByTier.beginner || ['Simple Square', 'Four Patch']);
+    const selectedCount = Math.max(2, Math.min(4, fallbackPool.length, (hashSeed % 3) + 2));
+    const selectedBlocks: string[] = [];
+
+    const skillAnchors = (skillAnchorBlocksByTier[normalizedTier] || []).filter((name) => exactSkillPool.includes(name));
+    const selectedAnchor = skillAnchors
+      .map((name) => ({
+        name,
+        rank: name.split('').reduce((acc, ch) => ((acc * 31) ^ ch.charCodeAt(0)) >>> 0, hashSeed + 17),
+      }))
+      .sort((a, b) => a.rank - b.rank)[0]?.name || exactSkillPool[0];
+
+    if (selectedAnchor) {
+      selectedBlocks.push(selectedAnchor);
+    }
+
+    const remainingRanked = [...fallbackPool]
+      .filter((name) => !selectedBlocks.includes(name))
       .map((name) => ({ name, rank: name.split('').reduce((acc, ch) => ((acc * 31) ^ ch.charCodeAt(0)) >>> 0, hashSeed) }))
       .sort((a, b) => a.rank - b.rank)
-      .slice(0, selectedCount)
       .map((entry) => entry.name);
+
+    for (const blockName of remainingRanked) {
+      if (selectedBlocks.length >= selectedCount) {
+        break;
+      }
+      selectedBlocks.push(blockName);
+    }
+
+    if (normalizedTier !== 'beginner') {
+      const basicBlocks = selectedBlocks.filter((block) => this.BASIC_FALLBACK_BLOCKS.has(block));
+      if (basicBlocks.length > 1) {
+        const nonBasicPool = pool.filter((block) => !this.BASIC_FALLBACK_BLOCKS.has(block));
+        let basicCount = basicBlocks.length;
+        for (let i = selectedBlocks.length - 1; i >= 0 && basicCount > 1; i -= 1) {
+          if (!this.BASIC_FALLBACK_BLOCKS.has(selectedBlocks[i])) {
+            continue;
+          }
+          const replacement = nonBasicPool.find((block) => !selectedBlocks.includes(block));
+          if (!replacement) {
+            break;
+          }
+          selectedBlocks[i] = replacement;
+          basicCount -= 1;
+        }
+      }
+    }
+
+    if (normalizedTier === 'expert') {
+      const expertPool = blockPoolByTier.expert || [];
+      const hasExpertBlock = selectedBlocks.some((block) => expertPool.includes(block));
+      if (!hasExpertBlock && expertPool.length > 0) {
+        selectedBlocks[selectedBlocks.length - 1] = expertPool[hashSeed % expertPool.length];
+      }
+    }
 
     const cols = selectedGrid.cols;
     const rows = selectedGrid.rows;
@@ -131,6 +202,10 @@ export class PatternGenerationWorkflow {
     const fabricDefs = validFabricUrls
       .map((url, index) => `<pattern id="client-fabric-${index}" patternUnits="userSpaceOnUse" width="40" height="40"><image href="${url}" x="0" y="0" width="40" height="40" preserveAspectRatio="xMidYMid slice"/></pattern>`)
       .join('');
+    const renderedBlockCounts = new Map<string, number>();
+    const trackRenderedBlock = (family: string) => {
+      renderedBlockCounts.set(family, (renderedBlockCounts.get(family) || 0) + 1);
+    };
 
     let cells = '';
     for (let r = 0; r < rows; r += 1) {
@@ -140,9 +215,15 @@ export class PatternGenerationWorkflow {
         const colorA = palette[(r + c) % palette.length];
         const colorB = palette[(r * 2 + c + 1) % palette.length];
         const colorC = palette[(r + c * 3 + 2) % palette.length];
-        const fabricFillA = hasFabricDefs ? `url(#client-fabric-${(r + c) % validFabricUrls.length})` : colorA;
-        const fabricFillB = hasFabricDefs ? `url(#client-fabric-${(r * 2 + c + 1) % validFabricUrls.length})` : colorB;
-        const fabricFillC = hasFabricDefs ? `url(#client-fabric-${(r + c * 3 + 2) % validFabricUrls.length})` : colorC;
+        const fillCount = hasFabricDefs ? validFabricUrls.length : palette.length;
+        const indexA = (r + c) % fillCount;
+        const indexB = fillCount > 1 ? (indexA + 1 + ((r + c) % (fillCount - 1))) % fillCount : indexA;
+        const indexC = fillCount > 2
+          ? (indexA + 2 + ((r * 3 + c) % (fillCount - 2))) % fillCount
+          : (fillCount > 1 ? (indexB + 1) % fillCount : indexA);
+        const fabricFillA = hasFabricDefs ? `url(#client-fabric-${indexA})` : palette[indexA] || colorA;
+        const fabricFillB = hasFabricDefs ? `url(#client-fabric-${indexB})` : palette[indexB] || colorB;
+        const fabricFillC = hasFabricDefs ? `url(#client-fabric-${indexC})` : palette[indexC] || colorC;
         const blockName = selectedBlocks[(r * cols + c) % selectedBlocks.length] || 'Simple Square';
         const variant = Math.floor(seededRandom() * 4);
         const cx = x + cellW / 2;
@@ -152,8 +233,10 @@ export class PatternGenerationWorkflow {
         const end = '</g>';
 
         if (blockName === 'Simple Square') {
+          trackRenderedBlock('Simple Squares');
           cells += `${start}<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${fabricFillA}"/>${end}`;
         } else if (blockName === 'Four Patch') {
+          trackRenderedBlock('Four Patch');
           const hw = cellW / 2;
           const hh = cellH / 2;
           cells += `${start}
@@ -163,6 +246,7 @@ export class PatternGenerationWorkflow {
             <rect x="${(x + hw).toFixed(2)}" y="${(y + hh).toFixed(2)}" width="${hw.toFixed(2)}" height="${hh.toFixed(2)}" fill="${fabricFillA}"/>
           ${end}`;
         } else if (blockName === 'Rail Fence' || blockName === 'Strip Quilt' || blockName === 'Log Cabin') {
+          trackRenderedBlock('Rail/Strip Piecing');
           const stripeCount = blockName === 'Log Cabin' ? 5 : 4;
           const stripeH = cellH / stripeCount;
           let stripes = start;
@@ -173,6 +257,7 @@ export class PatternGenerationWorkflow {
           stripes += end;
           cells += stripes;
         } else if (blockName === 'Nine Patch') {
+          trackRenderedBlock('Nine Patch');
           const tw = cellW / 3;
           const th = cellH / 3;
           let nine = start;
@@ -184,15 +269,67 @@ export class PatternGenerationWorkflow {
           }
           nine += end;
           cells += nine;
-        } else {
+        } else if (
+          blockName === 'Half-Square Triangles' ||
+          blockName === 'Flying Geese' ||
+          blockName === 'Pinwheel' ||
+          blockName === 'Churn Dash' ||
+          blockName === 'Sawtooth Star' ||
+          blockName === 'Ohio Star' ||
+          blockName === 'Lone Star' ||
+          blockName === 'Mosaic Star'
+        ) {
+          trackRenderedBlock('Half-Square Triangles');
           cells += `${start}
             <rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${fabricFillA}"/>
             <polygon points="${x.toFixed(2)},${y.toFixed(2)} ${(x + cellW).toFixed(2)},${y.toFixed(2)} ${(x + cellW).toFixed(2)},${(y + cellH).toFixed(2)}" fill="${fabricFillB}" opacity="0.86"/>
             <polygon points="${x.toFixed(2)},${y.toFixed(2)} ${x.toFixed(2)},${(y + cellH).toFixed(2)} ${(x + cellW).toFixed(2)},${(y + cellH).toFixed(2)}" fill="${fabricFillC}" opacity="0.72"/>
           ${end}`;
+        } else if (
+          blockName === 'Mariners Compass' ||
+          blockName === 'New York Beauty' ||
+          blockName === 'Complex Medallion'
+        ) {
+          trackRenderedBlock('Compass/Medallion');
+          cells += `${start}
+            <rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${fabricFillA}"/>
+            <polygon points="${cx.toFixed(2)},${(y + cellH * 0.06).toFixed(2)} ${(x + cellW * 0.94).toFixed(2)},${cy.toFixed(2)} ${cx.toFixed(2)},${(y + cellH * 0.94).toFixed(2)} ${(x + cellW * 0.06).toFixed(2)},${cy.toFixed(2)}" fill="${fabricFillB}" opacity="0.84"/>
+            <polygon points="${cx.toFixed(2)},${(y + cellH * 0.2).toFixed(2)} ${(x + cellW * 0.8).toFixed(2)},${cy.toFixed(2)} ${cx.toFixed(2)},${(y + cellH * 0.8).toFixed(2)} ${(x + cellW * 0.2).toFixed(2)},${cy.toFixed(2)}" fill="${fabricFillC}" opacity="0.76"/>
+          ${end}`;
+        } else if (
+          blockName === 'Double Wedding Ring' ||
+          blockName === 'Drunkards Path' ||
+          blockName === 'Pickle Dish'
+        ) {
+          trackRenderedBlock('Curved Piecing');
+          cells += `${start}
+            <rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${fabricFillA}"/>
+            <path d="M ${x.toFixed(2)} ${cy.toFixed(2)} A ${(cellW / 2).toFixed(2)} ${(cellH / 2).toFixed(2)} 0 0 1 ${cx.toFixed(2)} ${y.toFixed(2)} L ${cx.toFixed(2)} ${cy.toFixed(2)} Z" fill="${fabricFillB}" opacity="0.8"/>
+            <path d="M ${(x + cellW).toFixed(2)} ${cy.toFixed(2)} A ${(cellW / 2).toFixed(2)} ${(cellH / 2).toFixed(2)} 0 0 0 ${cx.toFixed(2)} ${(y + cellH).toFixed(2)} L ${cx.toFixed(2)} ${cy.toFixed(2)} Z" fill="${fabricFillC}" opacity="0.72"/>
+          ${end}`;
+        } else if (blockName === 'Storm At Sea') {
+          trackRenderedBlock('Diamond Geometry');
+          cells += `${start}
+            <rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${fabricFillA}"/>
+            <polygon points="${cx.toFixed(2)},${(y + cellH * 0.1).toFixed(2)} ${(x + cellW * 0.9).toFixed(2)},${cy.toFixed(2)} ${cx.toFixed(2)},${(y + cellH * 0.9).toFixed(2)} ${(x + cellW * 0.1).toFixed(2)},${cy.toFixed(2)}" fill="${fabricFillB}" opacity="0.82"/>
+          ${end}`;
+        } else {
+          trackRenderedBlock('Simple Squares');
+          cells += `${start}<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellW.toFixed(2)}" height="${cellH.toFixed(2)}" fill="${fabricFillA}"/>${end}`;
         }
       }
     }
+
+    const renderedBlockFamilies = Array.from(renderedBlockCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([family]) => family);
+    const renderedBlockSummary = renderedBlockFamilies.length > 0
+      ? renderedBlockFamilies.join(', ')
+      : 'Simple Squares';
+    const renderedCountSummary = Array.from(renderedBlockCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([family, count]) => `${family} (${count})`)
+      .join(', ');
 
     const visualSvg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" height="100%" role="img" aria-label="Unique quilt preview">\n  <defs>${fabricDefs}</defs>\n  <rect x="0" y="0" width="${width}" height="${height}" fill="#ffffff"/>\n  ${cells}\n</svg>`;
     const roleNames = ['Background', 'Primary', 'Secondary', 'Accent'];
@@ -216,11 +353,12 @@ export class PatternGenerationWorkflow {
       patternName: `Unique ${userSkillLevel} Quilt`,
       patternId: 'unique',
       description: `A one-of-a-kind quilt composition generated at ${userSkillLevel} level from your uploaded fabrics.`,
-      fabricLayout: `Client fallback unique layout composed from ${selectedBlocks.length} block motifs: ${selectedBlocks.join(', ')}.`,
+      fabricLayout: `Client fallback unique layout composed from rendered block families: ${renderedBlockSummary}.`,
       difficulty: userSkillLevel,
       estimatedSize: sizeEstimate.estimatedSize,
       instructions: [
-        `Selected block motifs used in this layout: ${selectedBlocks.join(', ')}.`,
+        `Rendered block families used in this layout: ${renderedBlockSummary}.`,
+        `Plan cutting by family before piecing: ${renderedCountSummary}.`,
         'Sort fabrics by value and contrast before cutting.',
         'Cut and piece each block family in small batches.',
         'Lay out blocks on a design wall and confirm visual flow before stitching rows.',
@@ -234,10 +372,11 @@ export class PatternGenerationWorkflow {
         reason: 'Catalog output was detected, so a non-catalog unique fallback was generated on the client using selected block families.',
         targetSkillLevel: userSkillLevel,
         selectedBlocks,
+        renderedBlockFamilies,
       },
       meta: {
         isUnique: true,
-        uniqueVersion: 'client-fallback-v1',
+        uniqueVersion: 'client-fallback-v2',
         localOnly: true,
       },
     } as QuiltPattern;
